@@ -1,0 +1,225 @@
+#!/usr/bin/env bun
+/**
+ * Parses openapi.json and generates src/commands.ts — a typed command registry
+ * with parameter metadata derived from the OpenAPI spec.
+ *
+ * Run: bun run scripts/build-commands.ts
+ */
+
+import { readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+
+const ROOT = join(import.meta.dir, '..');
+const SPEC_PATH = join(ROOT, 'openapi.json');
+const OUTPUT_PATH = join(ROOT, 'src', 'commands.ts');
+
+interface OpenAPISchema {
+  paths: Record<string, Record<string, OpenAPIOperation>>;
+  components: { schemas: Record<string, unknown> };
+}
+
+interface OpenAPIOperation {
+  operationId?: string;
+  summary?: string;
+  description?: string;
+  requestBody?: {
+    content?: {
+      'application/json'?: {
+        schema?: {
+          properties?: Record<string, OpenAPIProperty>;
+          required?: string[];
+        };
+      };
+    };
+  };
+}
+
+interface OpenAPIProperty {
+  type?: string;
+  description?: string;
+  enum?: string[];
+}
+
+// Positional argument order per tool group.
+// The OpenAPI spec defines params per-group, not per-action,
+// so we define which param names map to positional args and in what order.
+const POSITIONAL_ORDER: Record<string, string[]> = {
+  spacemolt: ['id', 'quantity', 'text'],
+  spacemolt_auth: ['username', 'password', 'empire', 'registration_code'],
+  spacemolt_battle: ['id'],
+  spacemolt_catalog: ['type', 'id', 'category', 'search'],
+  spacemolt_facility: ['id', 'quantity', 'text'],
+  spacemolt_faction: ['id', 'text'],
+  spacemolt_faction_admin: ['id', 'text'],
+  spacemolt_intel: ['id', 'text'],
+  spacemolt_market: ['item_id', 'quantity', 'price', 'order_id'],
+  spacemolt_salvage: ['id', 'quantity'],
+  spacemolt_ship: ['id'],
+  spacemolt_social: ['target', 'content', 'title'],
+  spacemolt_storage: ['target', 'item_id', 'quantity', 'message'],
+  spacemolt_transfer: ['id', 'text'],
+};
+
+function main() {
+  const spec: OpenAPISchema = JSON.parse(readFileSync(SPEC_PATH, 'utf-8'));
+  const commands: CommandEntry[] = [];
+  const actionCounts = new Map<string, number>();
+
+  // Count how many tool groups use each action name (for ambiguity detection)
+  for (const [path, methods] of Object.entries(spec.paths)) {
+    for (const [method, op] of Object.entries(methods)) {
+      if (method === 'get') continue;
+      const match = path.match(/^\/api\/v2\/([^/]+)\/([^/]+)$/);
+      if (!match) continue;
+      const action = match[2];
+      actionCounts.set(action, (actionCounts.get(action) || 0) + 1);
+    }
+  }
+
+  for (const [path, methods] of Object.entries(spec.paths)) {
+    for (const [method, op] of Object.entries(methods)) {
+      if (method === 'get') continue;
+
+      const match = path.match(/^\/api\/v2\/([^/]+)\/([^/]+)$/);
+      if (!match) continue;
+
+      const toolGroup = match[1];
+      const action = match[2];
+      const operationId = op.operationId || `${toolGroup}_${action}`;
+      const summary = op.summary || action;
+
+      // Extract params from request body schema
+      const bodySchema = op.requestBody?.content?.['application/json']?.schema;
+      const params: ParamEntry[] = [];
+      const required = new Set(bodySchema?.required || []);
+
+      if (bodySchema?.properties) {
+        const positionalOrder = POSITIONAL_ORDER[toolGroup] || [];
+        for (const [name, prop] of Object.entries(bodySchema.properties)) {
+          params.push({
+            name,
+            type: prop.type || 'string',
+            description: prop.description || '',
+            required: required.has(name),
+            positionalIndex: positionalOrder.indexOf(name),
+            enumValues: prop.enum,
+          });
+        }
+        // Sort by positional index (non-positional at the end)
+        params.sort((a, b) => {
+          const ai = a.positionalIndex === -1 ? 999 : a.positionalIndex;
+          const bi = b.positionalIndex === -1 ? 999 : b.positionalIndex;
+          return ai - bi;
+        });
+      }
+
+      const isAmbiguous = (actionCounts.get(action) || 0) > 1;
+
+      commands.push({
+        toolGroup,
+        action,
+        operationId,
+        summary,
+        params,
+        isAmbiguous,
+      });
+    }
+  }
+
+  // Sort for stable output
+  commands.sort((a, b) => {
+    if (a.toolGroup !== b.toolGroup) return a.toolGroup.localeCompare(b.toolGroup);
+    return a.action.localeCompare(b.action);
+  });
+
+  // Generate the output file
+  const output = generateOutput(commands);
+  writeFileSync(OUTPUT_PATH, output);
+  console.log(`Generated ${OUTPUT_PATH} with ${commands.length} commands`);
+}
+
+interface ParamEntry {
+  name: string;
+  type: string;
+  description: string;
+  required: boolean;
+  positionalIndex: number;
+  enumValues?: string[];
+}
+
+interface CommandEntry {
+  toolGroup: string;
+  action: string;
+  operationId: string;
+  summary: string;
+  params: ParamEntry[];
+  isAmbiguous: boolean;
+}
+
+function generateOutput(commands: CommandEntry[]): string {
+  const lines: string[] = [];
+
+  lines.push('// AUTO-GENERATED by scripts/build-commands.ts — DO NOT EDIT');
+  lines.push('// Regenerate with: bun run generate');
+  lines.push('');
+  lines.push('export interface ParamDef {');
+  lines.push('  name: string;');
+  lines.push("  type: 'string' | 'integer' | 'boolean' | 'object' | 'array' | 'number';");
+  lines.push('  description: string;');
+  lines.push('  required: boolean;');
+  lines.push('  /** Index in positional args, or -1 if key=value only */');
+  lines.push('  positionalIndex: number;');
+  lines.push('  enumValues?: string[];');
+  lines.push('}');
+  lines.push('');
+  lines.push('export interface CommandMeta {');
+  lines.push('  toolGroup: string;');
+  lines.push('  action: string;');
+  lines.push('  operationId: string;');
+  lines.push('  summary: string;');
+  lines.push('  params: ParamDef[];');
+  lines.push('  /** True if the same action name exists in multiple tool groups */');
+  lines.push('  isAmbiguous: boolean;');
+  lines.push('}');
+  lines.push('');
+
+  // Build the registry entries
+  lines.push('const entries: [string, CommandMeta][] = [');
+  for (const cmd of commands) {
+    const params = JSON.stringify(cmd.params);
+    lines.push(`  ["${cmd.toolGroup}/${cmd.action}", {`);
+    lines.push(`    toolGroup: "${cmd.toolGroup}",`);
+    lines.push(`    action: "${cmd.action}",`);
+    lines.push(`    operationId: "${cmd.operationId}",`);
+    lines.push(`    summary: ${JSON.stringify(cmd.summary)},`);
+    lines.push(`    params: ${params},`);
+    lines.push(`    isAmbiguous: ${cmd.isAmbiguous},`);
+    lines.push(`  }],`);
+  }
+  lines.push('];');
+  lines.push('');
+
+  lines.push('/** Full registry keyed by "toolGroup/action" */');
+  lines.push('export const COMMAND_REGISTRY = new Map<string, CommandMeta>(entries);');
+  lines.push('');
+
+  // Build the short-name index (action -> toolGroup/action, only for non-ambiguous)
+  lines.push('/** Short-name index: action -> "toolGroup/action" for non-ambiguous commands */');
+  lines.push('export const SHORT_NAMES = new Map<string, string>();');
+  lines.push('');
+  lines.push('for (const [key, meta] of COMMAND_REGISTRY) {');
+  lines.push('  if (!meta.isAmbiguous) {');
+  lines.push('    SHORT_NAMES.set(meta.action, key);');
+  lines.push('  }');
+  lines.push('}');
+  lines.push('');
+
+  // Helper to list all tool groups
+  const toolGroups = [...new Set(commands.map(c => c.toolGroup))].sort();
+  lines.push(`export const TOOL_GROUPS = ${JSON.stringify(toolGroups)} as const;`);
+  lines.push('');
+
+  return lines.join('\n');
+}
+
+main();

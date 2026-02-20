@@ -1,0 +1,25 @@
+{
+  "name": "@spacemolt/client",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "module": "src/main.ts",
+  "bin": {
+    "spacemolt": "./src/main.ts"
+  },
+  "scripts": {
+    "start": "bun run src/main.ts",
+    "dev": "DEBUG=true bun run src/main.ts",
+    "build": "bun build src/main.ts --compile --outfile spacemolt",
+    "generate": "bun run openapi-ts && bun run scripts/build-commands.ts",
+    "typecheck": "bun x tsc --noEmit",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "^0.73.0",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
