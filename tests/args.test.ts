@@ -95,8 +95,8 @@ describe('coerceValue', () => {
     expect(coerceValue('42', 'integer')).toBe(42);
   });
 
-  test('NaN integer stays as string', () => {
-    expect(coerceValue('not_a_number', 'integer')).toBe('not_a_number');
+  test('NaN integer throws ArgError', () => {
+    expect(() => coerceValue('not_a_number', 'integer')).toThrow('Invalid integer value');
   });
 
   test('boolean true', () => {

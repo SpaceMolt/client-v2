@@ -75,6 +75,71 @@ const formatters: Record<string, Formatter> = {
 
     return true;
   },
+
+  catalog: (data) => {
+    const type = data.type as string | undefined;
+    const items = data.items as Array<Record<string, unknown>> | undefined;
+    if (!type || !items) return false;
+
+    const page = data.page as number || 1;
+    const totalPages = data.total_pages as number || 1;
+    const total = data.total as number || items.length;
+
+    console.log(`${c.bright}Catalog: ${type}${c.reset} ${c.dim}(${total} total, page ${page}/${totalPages})${c.reset}\n`);
+
+    switch (type) {
+      case 'ships':
+        for (const ship of items) {
+          const tier = ship.tier !== undefined ? ` T${ship.tier}` : '';
+          const cat = ship.category ? ` ${c.dim}[${ship.category}]${c.reset}` : '';
+          console.log(`  ${c.bright}${ship.name}${c.reset}${tier}${cat} — ${c.yellow}${(ship.price as number)?.toLocaleString()} cr${c.reset}`);
+          console.log(`    ${c.dim}Hull: ${ship.base_hull} | Shield: ${ship.base_shield} | Cargo: ${ship.cargo_capacity} | Weapons: ${ship.weapon_slots} | Speed: ${ship.base_speed}${c.reset}`);
+        }
+        break;
+
+      case 'items':
+        for (const item of items) {
+          const cat = item.category || item.type || '';
+          const size = item.size !== undefined ? ` (size ${item.size})` : '';
+          console.log(`  ${c.bright}${item.name || item.id}${c.reset} ${c.dim}[${cat}]${c.reset}${size} — ${c.yellow}${(item.base_value as number || 0).toLocaleString()} cr${c.reset}`);
+          if (item.description) console.log(`    ${c.dim}${item.description}${c.reset}`);
+        }
+        break;
+
+      case 'skills':
+        for (const skill of items) {
+          const cat = skill.category ? ` ${c.dim}[${skill.category}]${c.reset}` : '';
+          const maxLvl = skill.max_level !== undefined ? ` (max ${skill.max_level})` : '';
+          console.log(`  ${c.bright}${skill.name}${c.reset}${cat}${maxLvl}`);
+          if (skill.description) console.log(`    ${c.dim}${skill.description}${c.reset}`);
+        }
+        break;
+
+      case 'recipes':
+        for (const recipe of items) {
+          const cat = recipe.category ? ` ${c.dim}[${recipe.category}]${c.reset}` : '';
+          const time = recipe.crafting_time !== undefined ? ` ${c.dim}(${recipe.crafting_time} ticks)${c.reset}` : '';
+          const inputs = recipe.inputs as Array<Record<string, unknown>> | undefined;
+          const outputs = recipe.outputs as Array<Record<string, unknown>> | undefined;
+          console.log(`  ${c.bright}${recipe.name}${c.reset}${cat}${time}`);
+          if (inputs?.length) {
+            const inputStr = inputs.map(i => `${i.quantity}x ${i.item_id}`).join(', ');
+            const outputStr = outputs?.length ? outputs.map(o => `${o.quantity}x ${o.item_id}`).join(', ') : '?';
+            console.log(`    ${c.dim}${inputStr} → ${outputStr}${c.reset}`);
+          }
+        }
+        break;
+
+      default:
+        return false;
+    }
+
+    if (totalPages > 1) {
+      console.log(`\n${c.dim}Use page=N to see more results${c.reset}`);
+    }
+
+    return true;
+  },
 };
 
 function colorHealth(current: number | undefined, max: number | undefined): string {
@@ -92,10 +157,15 @@ export function tryCustomFormatter(command: string, data?: Record<string, unknow
   if (!data) return false;
 
   // Try exact command match
-  const action = command.includes('/') ? command.split('/').pop()! : command;
+  const action = command.includes('/') ? command.split('/').pop() ?? command : command;
   const formatter = formatters[action];
   if (formatter) {
-    return formatter(data);
+    try {
+      return formatter(data);
+    } catch {
+      // Formatter crashed on malformed data — fall through to default display
+      return false;
+    }
   }
 
   return false;

@@ -192,7 +192,12 @@ export function displayNotifications(notifications?: Notification[]): void {
     const handler = handlers[type];
 
     if (handler) {
-      handler(data, time);
+      try {
+        handler(data, time);
+      } catch {
+        // Handler crashed on malformed data — show raw fallback
+        console.log(`${c.dim}[${time}]${c.reset} ${c.magenta}[${type.toUpperCase()}]${c.reset} ${JSON.stringify(data)}`);
+      }
     } else {
       const message = data.message;
       if (message) {

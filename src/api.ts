@@ -1,5 +1,5 @@
 import { API_BASE, DEBUG } from './config.ts';
-import { getValidSession, createSession, reAuthenticate, saveSession, storeCredentials, type SessionAdapter } from './session.ts';
+import { type SessionAdapter, type SessionData, loadSession as _load, saveSession as _save, createSession as _create, getValidSession as _getValid, reAuthenticate as _reAuth, storeCredentials as _storeCreds, clearSession as _clear } from './session.ts';
 import type { V2Response } from './generated/types.gen.ts';
 
 const MAX_RETRIES = 3;
@@ -46,6 +46,7 @@ export class ApiClient {
           'X-Session-Id': session.id,
         },
         body: body ? JSON.stringify(body) : undefined,
+        signal: AbortSignal.timeout(30_000),
       });
     } catch (err) {
       throw new Error(`Connection failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -60,7 +61,12 @@ export class ApiClient {
       throw new Error(`Unexpected response type: ${contentType} (HTTP ${response.status})`);
     }
 
-    const data = (await response.json()) as V2Response;
+    let data: V2Response;
+    try {
+      data = (await response.json()) as V2Response;
+    } catch {
+      throw new Error(`Invalid JSON response from server (HTTP ${response.status})`);
+    }
 
     // Update session from response
     if (data.session) {
@@ -75,10 +81,14 @@ export class ApiClient {
       if (retryCount >= MAX_RETRIES) return data;
 
       if (this.debug) console.error('[api] Session expired, refreshing...');
-      const newSession = await this.session.createSession();
-      const reauthed = await this.session.reAuthenticate(newSession);
-      if (reauthed) {
-        return this.call(path, body, retryCount + 1);
+      try {
+        const newSession = await this.session.createSession();
+        const reauthed = await this.session.reAuthenticate(newSession);
+        if (reauthed) {
+          return this.call(path, body, retryCount + 1);
+        }
+      } catch (err) {
+        if (this.debug) console.error('[api] Re-auth retry failed:', err);
       }
       return data;
     }
@@ -89,7 +99,8 @@ export class ApiClient {
 
       const waitSeconds = (data.error as Record<string, unknown>).wait_seconds;
       const waitMs = typeof waitSeconds === 'number' ? waitSeconds * 1000 : 10_000;
-      console.error(`\x1b[33mRate limited, waiting ${(waitMs / 1000).toFixed(1)}s...\x1b[0m`);
+      const { c } = await import('./output/colors.ts');
+      console.error(`${c.yellow}Rate limited, waiting ${(waitMs / 1000).toFixed(1)}s...${c.reset}`);
       await Bun.sleep(waitMs);
       return this.call(path, body, retryCount + 1);
     }
@@ -121,6 +132,7 @@ export class ApiClient {
       headers: {
         'X-Session-Id': session.id,
       },
+      signal: AbortSignal.timeout(30_000),
     });
 
     const contentType = response.headers.get('content-type') || '';
@@ -129,13 +141,15 @@ export class ApiClient {
       return { result: text } as V2Response;
     }
 
-    return (await response.json()) as V2Response;
+    try {
+      return (await response.json()) as V2Response;
+    } catch {
+      throw new Error(`Invalid JSON response from server (HTTP ${response.status})`);
+    }
   }
 }
 
 // Default instance using config values + default session manager
-import { loadSession as _load, saveSession as _save, createSession as _create, getValidSession as _getValid, reAuthenticate as _reAuth, storeCredentials as _storeCreds, clearSession as _clear, type SessionData } from './session.ts';
-
 // Adapter: wrap module-level functions as a SessionAdapter-like object
 const defaultSessionAdapter: SessionAdapter = {
   loadSession: _load,

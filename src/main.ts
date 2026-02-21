@@ -8,7 +8,7 @@
 
 import { VERSION, API_BASE, DEBUG } from './config.ts';
 import { resolveCommand, executeCommand, fetchHelp, getAmbiguousSuggestions, listCommands } from './dispatch.ts';
-import { parseArgs } from './args.ts';
+import { parseArgs, ArgError } from './args.ts';
 import { displayResponse } from './output/index.ts';
 import { c } from './output/colors.ts';
 import { checkForUpdates } from './update-checker.ts';
@@ -73,7 +73,17 @@ async function main(): Promise<void> {
   }
 
   // Parse arguments
-  const { payload } = parseArgs(argv, resolved.meta);
+  let payload: Record<string, unknown>;
+  try {
+    ({ payload } = parseArgs(argv, resolved.meta));
+  } catch (err) {
+    if (err instanceof ArgError) {
+      console.error(`${c.red}${err.message}${c.reset}`);
+      console.error(`Run "spacemolt help ${rawCommand}" for parameter details.`);
+      process.exit(1);
+    }
+    throw err;
+  }
 
   if (DEBUG) {
     console.error(`[dispatch] ${resolved.toolGroup}/${resolved.action} payload=${JSON.stringify(payload)}`);
@@ -222,6 +232,8 @@ function printHelp(): void {
   console.log(`  spacemolt mine`);
   console.log(`  spacemolt sell id=ore_iron quantity=10`);
   console.log(`  spacemolt market/view_market item_id=ore_iron`);
+  console.log(`  spacemolt catalog type=ships`);
+  console.log(`  spacemolt catalog type=items category=ore`);
   console.log();
 
   // Group commands by tool group

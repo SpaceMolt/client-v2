@@ -19,6 +19,13 @@ export function parseArgs(argv: string[], meta: CommandMeta | null): ParsedArgs 
   const rest = argv.slice(1);
 
   if (!meta || rest.length === 0) {
+    // Check for required params even with no args provided
+    if (meta) {
+      const missing = meta.params.filter(p => p.required).map(p => p.name);
+      if (missing.length > 0) {
+        throw new ArgError(`Missing required parameter${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}`);
+      }
+    }
     return { command, payload: {} };
   }
 
@@ -73,7 +80,21 @@ export function parseArgs(argv: string[], meta: CommandMeta | null): ParsedArgs 
     }
   }
 
+  // Validate required params are present
+  const missing = meta.params.filter(p => p.required && !(p.name in payload)).map(p => p.name);
+  if (missing.length > 0) {
+    throw new ArgError(`Missing required parameter${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}`);
+  }
+
   return { command, payload };
+}
+
+/** Error thrown for argument validation failures (missing required params, bad types) */
+export class ArgError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ArgError';
+  }
 }
 
 export function coerceValue(value: string, type: string): unknown {
@@ -81,7 +102,10 @@ export function coerceValue(value: string, type: string): unknown {
     case 'integer':
     case 'number': {
       const n = parseInt(value, 10);
-      return isNaN(n) ? value : n;
+      if (isNaN(n)) {
+        throw new ArgError(`Invalid ${type} value: "${value}"`);
+      }
+      return n;
     }
     case 'boolean':
       if (value === 'true') return true;

@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, mkdirSync, chmodSync, existsSync, unlinkSync } from 'fs';
-import { dirname } from 'path';
+import { readFileSync, writeFileSync, mkdirSync, chmodSync, existsSync, unlinkSync, renameSync, copyFileSync } from 'fs';
+import { dirname, join } from 'path';
 import { SESSION_PATH, API_BASE, DEBUG } from './config.ts';
 
 export interface SessionData {
@@ -69,6 +69,11 @@ export class SessionManager {
   private loadStore(): MultiSessionFile {
     if (this.store) return this.store;
 
+    if (!existsSync(this.sessionPath)) {
+      this.store = { version: 2, activeAccount: null, accounts: {} };
+      return this.store;
+    }
+
     try {
       const raw = readFileSync(this.sessionPath, 'utf-8');
       const parsed = JSON.parse(raw);
@@ -81,7 +86,12 @@ export class SessionManager {
         this.saveStore();
       }
     } catch {
-      // No file or corrupt — start fresh
+      // Corrupt file — back it up and start fresh
+      const backupPath = this.sessionPath + '.corrupt';
+      try { copyFileSync(this.sessionPath, backupPath); } catch { /* best effort */ }
+      if (this.debug) {
+        console.error(`[session] Corrupt session file backed up to ${backupPath}`);
+      }
       this.store = { version: 2, activeAccount: null, accounts: {} };
     }
 
@@ -94,13 +104,15 @@ export class SessionManager {
       mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(this.sessionPath, JSON.stringify(this.store, null, 2));
-
+    // Atomic write: write to temp file, then rename into place
+    const tmpPath = this.sessionPath + '.tmp';
+    writeFileSync(tmpPath, JSON.stringify(this.store, null, 2));
     try {
-      chmodSync(this.sessionPath, 0o600);
+      chmodSync(tmpPath, 0o600);
     } catch {
       // chmod may fail on some platforms (Windows)
     }
+    renameSync(tmpPath, this.sessionPath);
   }
 
   private migrateV1(old: SessionData): MultiSessionFile {
@@ -189,9 +201,7 @@ export class SessionManager {
 
     if ((session.username || session.password) && !this.credentialWarningShown) {
       this.credentialWarningShown = true;
-      if (this.debug) {
-        console.error(`[session] Credentials stored in ${this.sessionPath}`);
-      }
+      console.error(`Note: Credentials stored in plaintext at ${this.sessionPath}`);
     }
 
     this.saveStore();
@@ -203,6 +213,7 @@ export class SessionManager {
     const response = await fetch(`${this.apiBase}/session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(30_000),
     });
 
     if (!response.ok) {
@@ -262,6 +273,7 @@ export class SessionManager {
           username: session.username,
           password: session.password,
         }),
+        signal: AbortSignal.timeout(30_000),
       });
 
       const data = await response.json();
@@ -314,9 +326,7 @@ export class SessionManager {
 
     if (!this.credentialWarningShown) {
       this.credentialWarningShown = true;
-      if (this.debug) {
-        console.error(`[session] Credentials stored in ${this.sessionPath}`);
-      }
+      console.error(`Note: Credentials stored in plaintext at ${this.sessionPath}`);
     }
 
     this.saveStore();

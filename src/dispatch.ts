@@ -47,8 +47,8 @@ export function resolveCommand(input: string): ResolvedCommand | null {
   // Try short name (unambiguous actions)
   const shortKey = SHORT_NAMES.get(input);
   if (shortKey) {
-    const meta = COMMAND_REGISTRY.get(shortKey)!;
-    return { toolGroup: meta.toolGroup, action: meta.action, meta };
+    const meta = COMMAND_REGISTRY.get(shortKey);
+    if (meta) return { toolGroup: meta.toolGroup, action: meta.action, meta };
   }
 
   // Try default for ambiguous commands (e.g., "sell" -> "spacemolt/sell")
