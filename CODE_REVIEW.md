@@ -35,4 +35,4 @@
 19. ~~**Duplicate imports in `api.ts`** — Session functions imported twice (lines 2 and 137) with different names.~~ **FIXED** — Consolidated to single import.
 20. ~~**`coerceValue()` exported but never used externally** — Should be private.~~ **Kept exported** — Still used in tests directly.
 21. ~~**Non-null assertions (`!`)** in dispatch.ts:50, args.ts:95, formatters.ts:95 — should use proper null checks.~~ **FIXED** — Replaced with proper null checks / `??` operator.
-22. **SessionManager is 389 lines** mixing file I/O, lifecycle, credentials, and multi-account — could benefit from splitting. **DEFERRED** — Significant refactor, should be a separate discussion.
+22. ~~**SessionManager is 389 lines** mixing file I/O, lifecycle, credentials, and multi-account — could benefit from splitting.~~ **FIXED** — Extracted `SessionStore` class for file I/O, migration, and caching. `SessionManager` now focuses on session lifecycle and account management.

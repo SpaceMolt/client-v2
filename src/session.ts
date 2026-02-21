@@ -1,40 +1,9 @@
-import { readFileSync, writeFileSync, mkdirSync, chmodSync, existsSync, unlinkSync, renameSync, copyFileSync } from 'fs';
-import { dirname, join } from 'path';
 import { SESSION_PATH, API_BASE, DEBUG } from './config.ts';
+import { SessionStore } from './session-store.ts';
 
-export interface SessionData {
-  id: string;
-  created_at: string;
-  expires_at: string;
-  username?: string;
-  password?: string;
-  player_id?: string;
-}
-
-export interface AccountData {
-  username: string;
-  password?: string;
-  session: {
-    id: string;
-    created_at: string;
-    expires_at: string;
-    player_id?: string;
-  } | null;
-}
-
-export interface MultiSessionFile {
-  version: 2;
-  activeAccount: string | null;
-  accounts: Record<string, AccountData>;
-  pendingSession?: SessionData;
-}
-
-export interface AccountInfo {
-  username: string;
-  isActive: boolean;
-  hasValidSession: boolean;
-  playerId?: string;
-}
+// Re-export types from session-store so consumers don't need to change imports
+export type { SessionData, AccountData, MultiSessionFile, AccountInfo } from './session-store.ts';
+import type { SessionData, AccountData, AccountInfo } from './session-store.ts';
 
 /** Public interface for session management, used by ApiClient */
 export interface SessionAdapter {
@@ -54,95 +23,21 @@ export interface SessionManagerOptions {
 }
 
 export class SessionManager {
-  private store: MultiSessionFile | null = null;
+  private readonly store: SessionStore;
   private credentialWarningShown = false;
-  private readonly sessionPath: string;
   private readonly apiBase: string;
   private readonly debug: boolean;
 
   constructor(opts: SessionManagerOptions) {
-    this.sessionPath = opts.sessionPath;
+    this.store = new SessionStore(opts.sessionPath, opts.debug);
     this.apiBase = opts.apiBase;
     this.debug = opts.debug;
   }
 
-  private loadStore(): MultiSessionFile {
-    if (this.store) return this.store;
-
-    if (!existsSync(this.sessionPath)) {
-      this.store = { version: 2, activeAccount: null, accounts: {} };
-      return this.store;
-    }
-
-    try {
-      const raw = readFileSync(this.sessionPath, 'utf-8');
-      const parsed = JSON.parse(raw);
-
-      if (parsed.version === 2) {
-        this.store = parsed as MultiSessionFile;
-      } else {
-        // V1 format: plain SessionData object — migrate silently
-        this.store = this.migrateV1(parsed as SessionData);
-        this.saveStore();
-      }
-    } catch {
-      // Corrupt file — back it up and start fresh
-      const backupPath = this.sessionPath + '.corrupt';
-      try { copyFileSync(this.sessionPath, backupPath); } catch { /* best effort */ }
-      if (this.debug) {
-        console.error(`[session] Corrupt session file backed up to ${backupPath}`);
-      }
-      this.store = { version: 2, activeAccount: null, accounts: {} };
-    }
-
-    return this.store;
-  }
-
-  private saveStore(): void {
-    const dir = dirname(this.sessionPath);
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true });
-    }
-
-    // Atomic write: write to temp file, then rename into place
-    const tmpPath = this.sessionPath + '.tmp';
-    writeFileSync(tmpPath, JSON.stringify(this.store, null, 2));
-    try {
-      chmodSync(tmpPath, 0o600);
-    } catch {
-      // chmod may fail on some platforms (Windows)
-    }
-    renameSync(tmpPath, this.sessionPath);
-  }
-
-  private migrateV1(old: SessionData): MultiSessionFile {
-    const store: MultiSessionFile = { version: 2, activeAccount: null, accounts: {} };
-
-    if (old.username) {
-      const key = old.username.toLowerCase();
-      store.activeAccount = key;
-      store.accounts[key] = {
-        username: old.username,
-        password: old.password,
-        session: {
-          id: old.id,
-          created_at: old.created_at,
-          expires_at: old.expires_at,
-          player_id: old.player_id,
-        },
-      };
-    } else if (old.id) {
-      // Anonymous session with no username — store as pending
-      store.pendingSession = old;
-    }
-
-    return store;
-  }
-
   private getActiveAccount(): AccountData | null {
-    const store = this.loadStore();
-    if (!store.activeAccount) return null;
-    return store.accounts[store.activeAccount] || null;
+    const data = this.store.load();
+    if (!data.activeAccount) return null;
+    return data.accounts[data.activeAccount] || null;
   }
 
   private accountSessionToSessionData(account: AccountData): SessionData {
@@ -163,8 +58,17 @@ export class SessionManager {
     return Date.now() > expiresMs - bufferMs;
   }
 
+  private showCredentialWarning(): void {
+    if (!this.credentialWarningShown) {
+      this.credentialWarningShown = true;
+      console.error(`Note: Credentials stored in plaintext at ${this.store.path}`);
+    }
+  }
+
+  // --- Session lifecycle ---
+
   loadSession(): SessionData | null {
-    const store = this.loadStore();
+    const data = this.store.load();
 
     // Try active account first
     const account = this.getActiveAccount();
@@ -173,15 +77,15 @@ export class SessionManager {
     }
 
     // Fall back to pending session
-    if (store.pendingSession) {
-      return store.pendingSession;
+    if (data.pendingSession) {
+      return data.pendingSession;
     }
 
     return null;
   }
 
   saveSession(session: SessionData): void {
-    const store = this.loadStore();
+    const data = this.store.load();
 
     const account = this.getActiveAccount();
     if (account) {
@@ -196,15 +100,14 @@ export class SessionManager {
       if (session.password) account.password = session.password;
     } else {
       // No active account — store as pending
-      store.pendingSession = session;
+      data.pendingSession = session;
     }
 
-    if ((session.username || session.password) && !this.credentialWarningShown) {
-      this.credentialWarningShown = true;
-      console.error(`Note: Credentials stored in plaintext at ${this.sessionPath}`);
+    if (session.username || session.password) {
+      this.showCredentialWarning();
     }
 
-    this.saveStore();
+    this.store.save();
   }
 
   async createSession(): Promise<SessionData> {
@@ -220,16 +123,16 @@ export class SessionManager {
       throw new Error(`Failed to create session: HTTP ${response.status}`);
     }
 
-    const data = await response.json();
-    if (data.error) {
-      throw new Error(`Failed to create session: ${data.error.message || data.error.code}`);
+    const result = await response.json();
+    if (result.error) {
+      throw new Error(`Failed to create session: ${result.error.message || result.error.code}`);
     }
 
     const session: SessionData = {
-      id: data.session.id,
-      created_at: data.session.created_at,
-      expires_at: data.session.expires_at,
-      player_id: data.session.player_id,
+      id: result.session.id,
+      created_at: result.session.created_at,
+      expires_at: result.session.expires_at,
+      player_id: result.session.player_id,
     };
 
     // Preserve stored credentials from active account or pending session
@@ -238,9 +141,9 @@ export class SessionManager {
       session.username = account.username;
       session.password = account.password;
     } else {
-      const store = this.loadStore();
-      if (store.pendingSession?.username) session.username = store.pendingSession.username;
-      if (store.pendingSession?.password) session.password = store.pendingSession.password;
+      const data = this.store.load();
+      if (data.pendingSession?.username) session.username = data.pendingSession.username;
+      if (data.pendingSession?.password) session.password = data.pendingSession.password;
     }
 
     this.saveSession(session);
@@ -276,16 +179,16 @@ export class SessionManager {
         signal: AbortSignal.timeout(30_000),
       });
 
-      const data = await response.json();
-      if (data.error) {
-        if (this.debug) console.error(`[session] Re-auth failed: ${data.error.message}`);
+      const result = await response.json();
+      if (result.error) {
+        if (this.debug) console.error(`[session] Re-auth failed: ${result.error.message}`);
         return null;
       }
 
-      if (data.session) {
-        session.id = data.session.id || session.id;
-        session.expires_at = data.session.expires_at || session.expires_at;
-        session.player_id = data.session.player_id || session.player_id;
+      if (result.session) {
+        session.id = result.session.id || session.id;
+        session.expires_at = result.session.expires_at || session.expires_at;
+        session.player_id = result.session.player_id || session.player_id;
       }
 
       this.saveSession(session);
@@ -296,85 +199,78 @@ export class SessionManager {
     }
   }
 
+  // --- Account management ---
+
   storeCredentials(username: string, password: string): void {
-    const store = this.loadStore();
+    const data = this.store.load();
     const key = username.toLowerCase();
 
     // Get or create account entry
-    let account = store.accounts[key];
+    let account = data.accounts[key];
     if (!account) {
       account = { username, password, session: null };
-      store.accounts[key] = account;
+      data.accounts[key] = account;
     } else {
       account.username = username;
       account.password = password;
     }
 
     // Move pending session to this account if present
-    if (store.pendingSession) {
+    if (data.pendingSession) {
       account.session = {
-        id: store.pendingSession.id,
-        created_at: store.pendingSession.created_at,
-        expires_at: store.pendingSession.expires_at,
-        player_id: store.pendingSession.player_id,
+        id: data.pendingSession.id,
+        created_at: data.pendingSession.created_at,
+        expires_at: data.pendingSession.expires_at,
+        player_id: data.pendingSession.player_id,
       };
-      delete store.pendingSession;
+      delete data.pendingSession;
     }
 
     // Set as active account
-    store.activeAccount = key;
+    data.activeAccount = key;
 
-    if (!this.credentialWarningShown) {
-      this.credentialWarningShown = true;
-      console.error(`Note: Credentials stored in plaintext at ${this.sessionPath}`);
-    }
-
-    this.saveStore();
+    this.showCredentialWarning();
+    this.store.save();
   }
 
   switchAccount(username: string): boolean {
-    const store = this.loadStore();
+    const data = this.store.load();
     const key = username.toLowerCase();
 
-    if (!store.accounts[key]) return false;
+    if (!data.accounts[key]) return false;
 
-    store.activeAccount = key;
-    this.saveStore();
+    data.activeAccount = key;
+    this.store.save();
     return true;
   }
 
   getAccounts(): AccountInfo[] {
-    const store = this.loadStore();
-    return Object.entries(store.accounts).map(([key, account]) => ({
+    const data = this.store.load();
+    return Object.entries(data.accounts).map(([key, account]) => ({
       username: account.username,
-      isActive: store.activeAccount === key,
+      isActive: data.activeAccount === key,
       hasValidSession: account.session !== null && !this.isExpired(account.session.expires_at),
       playerId: account.session?.player_id,
     }));
   }
 
   getActiveUsername(): string | null {
-    const store = this.loadStore();
-    if (!store.activeAccount) return null;
-    const account = store.accounts[store.activeAccount];
+    const data = this.store.load();
+    if (!data.activeAccount) return null;
+    const account = data.accounts[data.activeAccount];
     return account?.username || null;
   }
 
   hasValidSession(username: string): boolean {
-    const store = this.loadStore();
+    const data = this.store.load();
     const key = username.toLowerCase();
-    const account = store.accounts[key];
+    const account = data.accounts[key];
     if (!account?.session) return false;
     return !this.isExpired(account.session.expires_at);
   }
 
   clearSession(): void {
-    this.store = null;
-    try {
-      unlinkSync(this.sessionPath);
-    } catch {
-      // File may not exist
-    }
+    this.store.destroy();
   }
 }
 
