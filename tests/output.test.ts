@@ -32,8 +32,8 @@ describe('tryCustomFormatter', () => {
   test('get_status formatter activates on player+ship data', () => {
     const handled = tryCustomFormatter('spacemolt/get_status', {
       player: { username: 'Test', empire: 'solarian', credits: 1000 },
-      ship: { ship_class: 'Prospector', hull: 100, max_hull: 100, shield: 50, max_shield: 50, fuel: 80, max_fuel: 100, cargo_used: 5, cargo_capacity: 50 },
-      location: { system_name: 'Sol', poi_name: 'Sol Station', docked: true, base_name: 'Main Station' },
+      ship: { name: 'Prospector', class_id: 'starter_mining', hull: 100, max_hull: 100, shield: 50, max_shield: 50, fuel: 80, max_fuel: 100, cargo_used: 5, cargo_capacity: 50 },
+      location: { system_name: 'Sol', poi_name: 'Sol Station', docked_at: 'Main Station' },
     });
     expect(handled).toBe(true);
     expect(logged.some(l => l.includes('Test'))).toBe(true);

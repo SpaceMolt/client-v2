@@ -80,11 +80,27 @@ function main() {
     for (const [method, op] of Object.entries(methods)) {
       if (method === 'get') continue;
 
-      const match = path.match(/^\/api\/v2\/([^/]+)\/([^/]+)$/);
-      if (!match) continue;
+      // Try two-segment pattern: /api/v2/{toolGroup}/{action}
+      let toolGroup: string;
+      let action: string;
+      let isDirect = false;
 
-      const toolGroup = match[1];
-      const action = match[2];
+      const twoSeg = path.match(/^\/api\/v2\/([^/]+)\/([^/]+)$/);
+      if (twoSeg) {
+        toolGroup = twoSeg[1];
+        action = twoSeg[2];
+      } else {
+        // Try single-segment pattern: /api/v2/{toolGroup} (direct endpoint, no action)
+        const oneSeg = path.match(/^\/api\/v2\/(spacemolt_[^/]+)$/);
+        if (!oneSeg) continue;
+        toolGroup = oneSeg[1];
+        // Use the short name (strip spacemolt_ prefix) as the action
+        action = toolGroup.replace(/^spacemolt_/, '');
+        isDirect = true;
+        // Also count for ambiguity
+        actionCounts.set(action, (actionCounts.get(action) || 0) + 1);
+      }
+
       const operationId = op.operationId || `${toolGroup}_${action}`;
       const summary = op.summary || action;
 
@@ -122,6 +138,7 @@ function main() {
         summary,
         params,
         isAmbiguous,
+        isDirect,
       });
     }
   }
@@ -154,6 +171,8 @@ interface CommandEntry {
   summary: string;
   params: ParamEntry[];
   isAmbiguous: boolean;
+  /** True if this is a direct endpoint (no action segment in URL) */
+  isDirect: boolean;
 }
 
 function generateOutput(commands: CommandEntry[]): string {
@@ -180,6 +199,8 @@ function generateOutput(commands: CommandEntry[]): string {
   lines.push('  params: ParamDef[];');
   lines.push('  /** True if the same action name exists in multiple tool groups */');
   lines.push('  isAmbiguous: boolean;');
+  lines.push('  /** True if this is a direct endpoint (no action segment in URL) */');
+  lines.push('  isDirect?: boolean;');
   lines.push('}');
   lines.push('');
 
@@ -194,6 +215,9 @@ function generateOutput(commands: CommandEntry[]): string {
     lines.push(`    summary: ${JSON.stringify(cmd.summary)},`);
     lines.push(`    params: ${params},`);
     lines.push(`    isAmbiguous: ${cmd.isAmbiguous},`);
+    if (cmd.isDirect) {
+      lines.push(`    isDirect: true,`);
+    }
     lines.push(`  }],`);
   }
   lines.push('];');

@@ -33,12 +33,19 @@ export type AnalyzeMarketResponse = {
     skill_level: number;
     stations_in_range?: number;
     top_insights?: Array<{
-        [key: string]: unknown;
+        category: string;
+        item?: string;
+        item_id?: string;
+        message: string;
+        priority?: number;
     }>;
     total_items?: number;
     total_pages?: number;
+    /**
+     * Skill XP earned, keyed by skill ID
+     */
     xp_gained?: {
-        [key: string]: unknown;
+        [key: string]: number;
     };
 };
 
@@ -62,7 +69,7 @@ export type Base = {
     public_access: boolean;
     services: BaseServices;
     /**
-     * Base type: outpost, station, or fortress
+     * Base type (currently only 'station')
      */
     type?: string;
 };
@@ -112,7 +119,18 @@ export type BrowseShipsResponse = {
      * Ships listed for sale at this base
      */
     listings: Array<{
-        [key: string]: unknown;
+        category?: string;
+        class_id: string;
+        hull?: number;
+        listed_at?: string;
+        listing_id: string;
+        max_hull?: number;
+        price: number;
+        scale?: string;
+        seller?: string;
+        ship_id: string;
+        ship_name?: string;
+        tier?: string;
     }>;
 };
 
@@ -138,7 +156,9 @@ export type BuyResponse = {
      * Auto-listed order details
      */
     auto_listed?: {
-        [key: string]: unknown;
+        order_id?: string;
+        price_each?: number;
+        quantity?: number;
     };
     delivered_to_cargo?: number;
     delivered_to_storage?: number;
@@ -146,7 +166,14 @@ export type BuyResponse = {
      * Fill details with price_each, quantity, subtotal, source
      */
     fills: Array<{
-        [key: string]: unknown;
+        counterparty?: string;
+        price_each: number;
+        quantity: number;
+        /**
+         * "player" or "station"
+         */
+        source?: string;
+        subtotal: number;
     }>;
     item: string;
     item_id: string;
@@ -181,10 +208,19 @@ export type CancelOrderResponse = {
     mode?: string;
     order_id?: string;
     results?: Array<{
-        [key: string]: unknown;
+        error?: string;
+        error_code?: string;
+        index: number;
+        item?: string;
+        item_id?: string;
+        message?: string;
+        order_id?: string;
+        success: boolean;
     }>;
     summary?: {
-        [key: string]: unknown;
+        failed: number;
+        succeeded: number;
+        total: number;
     };
 };
 
@@ -202,8 +238,10 @@ export type CaptainsLogGetResponse = {
 
 export type CaptainsLogListResponse = {
     entry?: {
-        [key: string]: unknown;
-    };
+        created_at?: string;
+        entry?: string;
+        index?: number;
+    } | null;
     has_next: boolean;
     has_prev: boolean;
     index: number;
@@ -221,10 +259,13 @@ export type CargoItem = {
 
 export type CatalogResponse = {
     /**
-     * Array of catalog entries (structure varies by type)
+     * Array of catalog entries (structure varies by type — ships, items, skills, or recipes)
      */
     items: Array<{
-        [key: string]: unknown;
+        category?: string;
+        description?: string;
+        id: string;
+        name: string;
     }>;
     message: string;
     page: number;
@@ -254,7 +295,11 @@ export type ClaimCommissionResponse = {
 export type ClaimInsuranceResponse = {
     message: string;
     policies: Array<{
-        [key: string]: unknown;
+        coverage?: number;
+        expires_at?: string;
+        policy_id: string;
+        premium?: number;
+        ship_class?: string;
     }>;
 };
 
@@ -276,7 +321,9 @@ export type CommissionQuoteResponse = {
      * Materials needed (item_id, name, quantity)
      */
     build_materials?: Array<{
-        [key: string]: unknown;
+        item_id: string;
+        name: string;
+        quantity: number;
     }>;
     /**
      * Build time in ticks
@@ -326,23 +373,40 @@ export type CommissionStatusResponse = {
      * Active commissions with status and progress
      */
     commissions: Array<{
-        [key: string]: unknown;
+        base_id?: string;
+        base_name?: string;
+        built_ship_id?: string;
+        commission_id: string;
+        created_at?: string;
+        credits_paid?: number;
+        materials_provided?: boolean;
+        ship_class_id: string;
+        ship_name?: string;
+        status: string;
+        ticks_remaining?: number;
     }>;
     count: number;
 };
 
 export type CompleteMissionResponse = {
-    chain_next?: {
-        [key: string]: unknown;
-    };
+    /**
+     * Template ID of next mission in chain
+     */
+    chain_next?: string;
     credits_earned: number;
-    items_received: Array<{
-        [key: string]: unknown;
-    }>;
+    /**
+     * Items received, keyed by item_id with quantity as value
+     */
+    items_received: {
+        [key: string]: number;
+    };
     message: string;
     mission_id: string;
+    /**
+     * Skill XP earned, keyed by skill ID
+     */
     skill_xp_gained: {
-        [key: string]: unknown;
+        [key: string]: number;
     };
     title: string;
 };
@@ -351,7 +415,9 @@ export type CraftResponse = {
     action: string;
     count: number;
     from_storage?: Array<{
-        [key: string]: unknown;
+        item_id: string;
+        name: string;
+        quantity: number;
     }>;
     level_up?: boolean;
     leveled_up_skills?: Array<string>;
@@ -360,13 +426,15 @@ export type CraftResponse = {
     recipe: string;
     skill_level: number;
     to_storage?: Array<{
-        [key: string]: unknown;
+        item_id: string;
+        name: string;
+        quantity: number;
     }>;
     /**
-     * Skill XP earned, keyed by skill name
+     * Skill XP earned, keyed by skill ID
      */
     xp_gained: {
-        [key: string]: unknown;
+        [key: string]: number;
     };
 };
 
@@ -376,7 +444,14 @@ export type CreateBuyOrderResponse = {
     delivered_to_storage?: number;
     escrow_refunded?: number;
     fills?: Array<{
-        [key: string]: unknown;
+        counterparty?: string;
+        price_each: number;
+        quantity: number;
+        /**
+         * "player" or "station"
+         */
+        source?: string;
+        subtotal: number;
     }>;
     item?: string;
     item_id?: string;
@@ -393,10 +468,19 @@ export type CreateBuyOrderResponse = {
     quantity_listed?: number;
     remaining_escrowed?: number;
     results?: Array<{
-        [key: string]: unknown;
+        error?: string;
+        error_code?: string;
+        index: number;
+        item?: string;
+        item_id?: string;
+        message?: string;
+        order_id?: string;
+        success: boolean;
     }>;
     summary?: {
-        [key: string]: unknown;
+        failed: number;
+        succeeded: number;
+        total: number;
     };
     total_escrowed?: number;
     total_spent?: number;
@@ -418,7 +502,14 @@ export type CreateNoteResponse = {
 export type CreateSellOrderResponse = {
     action: string;
     fills?: Array<{
-        [key: string]: unknown;
+        counterparty?: string;
+        price_each: number;
+        quantity: number;
+        /**
+         * "player" or "station"
+         */
+        source?: string;
+        subtotal: number;
     }>;
     from_cargo?: number;
     from_storage?: number;
@@ -439,13 +530,19 @@ export type CreateSellOrderResponse = {
      * Per-order results in bulk mode
      */
     results?: Array<{
-        [key: string]: unknown;
+        error?: string;
+        error_code?: string;
+        index: number;
+        item?: string;
+        item_id?: string;
+        message?: string;
+        order_id?: string;
+        success: boolean;
     }>;
-    /**
-     * Bulk summary: total, succeeded, failed
-     */
     summary?: {
-        [key: string]: unknown;
+        failed: number;
+        succeeded: number;
+        total: number;
     };
     total_earned?: number;
 };
@@ -461,7 +558,14 @@ export type EstimatePurchaseResponse = {
     action: string;
     available: number;
     fills: Array<{
-        [key: string]: unknown;
+        counterparty?: string;
+        price_each: number;
+        quantity: number;
+        /**
+         * "player" or "station"
+         */
+        source?: string;
+        subtotal: number;
     }>;
     item: string;
     message: string;
@@ -476,7 +580,8 @@ export type FacilityResponse = {
      */
     action?: string;
     actions?: Array<{
-        [key: string]: unknown;
+        description?: string;
+        name?: string;
     }>;
     base_id?: string;
     command?: string;
@@ -487,10 +592,30 @@ export type FacilityResponse = {
     hint?: string;
     message?: string;
     types?: Array<{
-        [key: string]: unknown;
+        build_cost?: number;
+        category?: string;
+        id?: string;
+        level?: number;
+        name?: string;
     }>;
     upgrades?: Array<{
-        [key: string]: unknown;
+        current_level?: number;
+        upgrade_to?: {
+            build_cost?: number;
+            build_time?: number;
+            category?: string;
+            description?: string;
+            faction_service?: string;
+            labor_cost?: number;
+            level?: number;
+            name?: string;
+            recipe_id?: string;
+            recipe_multiplier?: number;
+            rent_per_cycle?: number;
+            type_id?: string;
+        };
+        your_facility_id?: string;
+        your_facility_name?: string;
     }>;
 };
 
@@ -566,6 +691,9 @@ export type FactionEditResponse = {
 export type FactionEditRoleResponse = {
     message: string;
     role_id: string;
+    /**
+     * Fields that were updated (name, permissions)
+     */
     updates: {
         [key: string]: unknown;
     };
@@ -573,7 +701,11 @@ export type FactionEditRoleResponse = {
 
 export type FactionGetInvitesResponse = {
     invites: Array<{
-        [key: string]: unknown;
+        faction_id: string;
+        faction_name: string;
+        faction_tag: string;
+        invited_at?: string;
+        invited_by?: string;
     }>;
 };
 
@@ -588,7 +720,11 @@ export type FactionGiftResponse = {
 
 export type FactionInfoResponse = {
     allies: Array<{
-        [key: string]: unknown;
+        id: string;
+        leader_username?: string;
+        member_count?: number;
+        name: string;
+        tag: string;
     }>;
     at_war: boolean;
     charter?: string;
@@ -596,7 +732,11 @@ export type FactionInfoResponse = {
     description?: string;
     emblem?: string;
     enemies: Array<{
-        [key: string]: unknown;
+        id: string;
+        leader_username?: string;
+        member_count?: number;
+        name: string;
+        tag: string;
     }>;
     id: string;
     is_ally: boolean;
@@ -606,19 +746,34 @@ export type FactionInfoResponse = {
     leader_username: string;
     member_count: number;
     members?: Array<{
-        [key: string]: unknown;
+        is_online?: boolean;
+        joined_at?: string;
+        last_seen?: string;
+        player_id: string;
+        role: string;
+        username: string;
     }>;
     name: string;
     owned_bases: number;
     peace_proposals?: Array<{
-        [key: string]: unknown;
+        from_faction_id: string;
+        from_faction_name: string;
+        proposed_at?: string;
+        terms?: string;
     }>;
     primary_color?: string;
     secondary_color?: string;
     tag: string;
     treasury?: number;
     wars?: Array<{
-        [key: string]: unknown;
+        declared_by?: string;
+        our_kills?: number;
+        reason?: string;
+        started_at?: string;
+        target_faction_id: string;
+        target_faction_name: string;
+        target_faction_tag?: string;
+        their_kills?: number;
     }>;
 };
 
@@ -626,7 +781,8 @@ export type FactionIntelStatusResponse = {
     intel_level: number;
     reports_24h?: number;
     top_contributors?: Array<{
-        [key: string]: unknown;
+        reports: number;
+        username: string;
     }>;
     total_reports?: number;
     unique_players?: number;
@@ -648,13 +804,61 @@ export type FactionListMissionsResponse = {
     max_posted: number;
     message: string;
     missions: Array<{
-        [key: string]: unknown;
+        chain_next?: string;
+        description: string;
+        dialog?: {
+            offer?: string;
+        };
+        difficulty: number;
+        expires_in_ticks?: number;
+        faction_id?: string;
+        faction_name?: string;
+        giver?: {
+            name?: string;
+            title?: string;
+        };
+        issuing_base?: string;
+        mission_id: string;
+        repeatable?: boolean;
+        requirements?: {
+            deliver_item_id?: string;
+            deliver_item_name?: string;
+            deliver_quantity?: number;
+            deliver_to_base_id?: string;
+            deliver_to_base_name?: string;
+            kill_count?: number;
+            mine_item_id?: string;
+            mine_item_name?: string;
+            mine_quantity?: number;
+            target_player_id?: string;
+            visit_system_count?: number;
+        };
+        rewards?: {
+            credits?: number;
+            items?: {
+                [key: string]: number;
+            };
+            reputation?: number;
+            skill_xp?: {
+                [key: string]: number;
+            };
+        };
+        template_id?: string;
+        title: string;
+        type: string;
     }>;
 };
 
 export type FactionListResponse = {
     factions: Array<{
-        [key: string]: unknown;
+        id: string;
+        leader_username?: string;
+        member_count?: number;
+        name: string;
+        owned_bases?: number;
+        primary_color?: string;
+        secondary_color?: string;
+        tag: string;
     }>;
     limit: number;
     offset: number;
@@ -690,7 +894,12 @@ export type FactionProposePeaceResponse = {
 export type FactionQueryIntelResponse = {
     count: number;
     entries: Array<{
-        [key: string]: unknown;
+        player_id?: string;
+        ship_class?: string;
+        system_id?: string;
+        system_name?: string;
+        timestamp?: string;
+        username?: string;
     }>;
     intel_level: number;
     message: string;
@@ -699,7 +908,13 @@ export type FactionQueryIntelResponse = {
 
 export type FactionQueryTradeIntelResponse = {
     entries: Array<{
-        [key: string]: unknown;
+        buy_price?: number;
+        item_id?: string;
+        item_name?: string;
+        sell_price?: number;
+        station_id?: string;
+        station_name?: string;
+        timestamp?: string;
     }>;
     intel_level: number;
     showing: string;
@@ -712,7 +927,12 @@ export type FactionRoomsResponse = {
     max_rooms: number;
     message: string;
     rooms: Array<{
-        [key: string]: unknown;
+        access?: string;
+        author?: string;
+        created_at?: string;
+        description?: string;
+        name: string;
+        room_id: string;
     }>;
     station: string;
     tag: string;
@@ -746,7 +966,8 @@ export type FactionTradeIntelStatusResponse = {
     intel_level: number;
     reports_24h?: number;
     top_contributors?: Array<{
-        [key: string]: unknown;
+        reports: number;
+        username: string;
     }>;
     total_reports?: number;
     unique_items?: number;
@@ -797,7 +1018,9 @@ export type FindRouteResponse = {
      * Systems along the route
      */
     route?: Array<{
-        [key: string]: unknown;
+        jumps: number;
+        name: string;
+        system_id: string;
     }>;
     target_system: string;
     total_jumps: number;
@@ -821,10 +1044,33 @@ export type ForumDeleteThreadResponse = {
 
 export type ForumGetThreadResponse = {
     replies: Array<{
-        [key: string]: unknown;
+        author: string;
+        author_empire?: string;
+        author_faction_tag?: string;
+        author_id: string;
+        content: string;
+        created_at: string;
+        id: string;
+        is_dev_team?: boolean;
+        thread_id: string;
+        upvotes?: number;
     }>;
     thread: {
-        [key: string]: unknown;
+        author: string;
+        author_empire?: string;
+        author_faction_tag?: string;
+        author_id: string;
+        category?: string;
+        content: string;
+        created_at: string;
+        id: string;
+        is_dev_team?: boolean;
+        locked?: boolean;
+        pinned?: boolean;
+        reply_count?: number;
+        title: string;
+        updated_at?: string;
+        upvotes?: number;
     };
 };
 
@@ -833,7 +1079,21 @@ export type ForumListResponse = {
     page: number;
     per_page: number;
     threads: Array<{
-        [key: string]: unknown;
+        author: string;
+        author_empire?: string;
+        author_faction_tag?: string;
+        author_id: string;
+        category?: string;
+        content: string;
+        created_at: string;
+        id: string;
+        is_dev_team?: boolean;
+        locked?: boolean;
+        pinned?: boolean;
+        reply_count?: number;
+        title: string;
+        updated_at?: string;
+        upvotes?: number;
     }>;
     total: number;
 };
@@ -873,10 +1133,20 @@ export type GetBattleStatusResponse = {
     battle_id: string;
     is_participant: boolean;
     participants?: Array<{
-        [key: string]: unknown;
+        hull_pct?: number;
+        player_id: string;
+        shield_pct?: number;
+        ship_class?: string;
+        side_id: number;
+        username: string;
+        zone?: string;
     }>;
     sides?: Array<{
-        [key: string]: unknown;
+        faction_id?: string;
+        faction_name?: string;
+        faction_tag?: string;
+        player_count: number;
+        side_id: number;
     }>;
     system_id: string;
     tick_duration?: number;
@@ -889,7 +1159,14 @@ export type GetChatHistoryResponse = {
      * Chat messages
      */
     messages: Array<{
-        [key: string]: unknown;
+        channel: string;
+        content: string;
+        id: string;
+        sender: string;
+        sender_id: string;
+        target_id?: string;
+        target_name?: string;
+        timestamp_utc: string;
     }>;
     total_count: number;
 };
@@ -899,7 +1176,9 @@ export type GetCommandsResponse = {
      * All available commands with descriptions
      */
     commands: Array<{
-        [key: string]: unknown;
+        category?: string;
+        description: string;
+        name: string;
     }>;
 };
 
@@ -925,7 +1204,48 @@ export type GetMissionsResponse = {
     base_id: string;
     base_name: string;
     missions: Array<{
-        [key: string]: unknown;
+        chain_next?: string;
+        description: string;
+        dialog?: {
+            offer?: string;
+        };
+        difficulty: number;
+        expires_in_ticks?: number;
+        faction_id?: string;
+        faction_name?: string;
+        giver?: {
+            name?: string;
+            title?: string;
+        };
+        issuing_base?: string;
+        mission_id: string;
+        repeatable?: boolean;
+        requirements?: {
+            deliver_item_id?: string;
+            deliver_item_name?: string;
+            deliver_quantity?: number;
+            deliver_to_base_id?: string;
+            deliver_to_base_name?: string;
+            kill_count?: number;
+            mine_item_id?: string;
+            mine_item_name?: string;
+            mine_quantity?: number;
+            target_player_id?: string;
+            visit_system_count?: number;
+        };
+        rewards?: {
+            credits?: number;
+            items?: {
+                [key: string]: number;
+            };
+            reputation?: number;
+            skill_xp?: {
+                [key: string]: number;
+            };
+        };
+        template_id?: string;
+        title: string;
+        type: string;
     }>;
 };
 
@@ -940,14 +1260,26 @@ export type GetNearbyResponse = {
      * NPC pirates
      */
     pirates: Array<{
-        [key: string]: unknown;
+        hull?: number;
+        is_boss: boolean;
+        max_hull?: number;
+        max_shield?: number;
+        name: string;
+        pirate_id: string;
+        shield?: number;
+        status: string;
+        tier: string;
     }>;
     poi_id: string;
 };
 
 export type GetNotesResponse = {
     notes: Array<{
-        [key: string]: unknown;
+        created_at?: string;
+        note_id: string;
+        title: string;
+        updated_at?: string;
+        value?: number;
     }>;
     total_count: number;
 };
@@ -961,7 +1293,13 @@ export type GetPoiResponse = {
      * Minable resources
      */
     resources?: Array<{
-        [key: string]: unknown;
+        depletion_percent?: number;
+        max_remaining?: number;
+        name: string;
+        remaining: number;
+        remaining_display?: string;
+        resource_id: string;
+        richness: number;
     }>;
 };
 
@@ -986,13 +1324,21 @@ export type GetTradesResponse = {
      * Incoming trade offers
      */
     incoming: Array<{
-        [key: string]: unknown;
+        expires_at?: string;
+        offer_credits?: number;
+        offerer_name?: string;
+        request_credits?: number;
+        trade_id?: string;
     }>;
     /**
      * Outgoing trade offers
      */
     outgoing: Array<{
-        [key: string]: unknown;
+        expires_at?: string;
+        offer_credits?: number;
+        request_credits?: number;
+        target_name?: string;
+        trade_id?: string;
     }>;
 };
 
@@ -1008,7 +1354,9 @@ export type GetVersionResponse = {
     total_pages?: number;
     version: string;
     versions?: Array<{
-        [key: string]: unknown;
+        notes?: Array<string>;
+        release_date?: string;
+        version: string;
     }>;
 };
 
@@ -1018,7 +1366,13 @@ export type GetWrecksResponse = {
      * Wrecks at current POI
      */
     wrecks: Array<{
-        [key: string]: unknown;
+        cargo_count?: number;
+        insured?: boolean;
+        module_count?: number;
+        owner_id?: string;
+        salvage_value?: number;
+        ship_class: string;
+        wreck_id: string;
     }>;
 };
 
@@ -1059,17 +1413,31 @@ export type ListShipsResponse = {
      * Player's owned ships with location and status
      */
     ships: Array<{
-        [key: string]: unknown;
+        cargo_used?: number;
+        class_id: string;
+        class_name?: string;
+        fuel?: string;
+        hull?: string;
+        is_active: boolean;
+        location?: string;
+        location_base_id?: string;
+        modules?: number;
+        ship_id: string;
     }>;
 };
 
 export type LoginResponse = {
     captains_log: Array<{
-        [key: string]: unknown;
+        created_at: string;
+        entry: string;
+        index: number;
     }>;
     message: string;
     pending_trades: Array<{
-        [key: string]: unknown;
+        offer_credits?: number;
+        offerer_name?: string;
+        request_credits?: number;
+        trade_id?: string;
     }>;
     player: Player;
     poi: Poi;
@@ -1137,10 +1505,19 @@ export type ModifyOrderResponse = {
     old_price?: number;
     order_id?: string;
     results?: Array<{
-        [key: string]: unknown;
+        error?: string;
+        error_code?: string;
+        index: number;
+        item?: string;
+        item_id?: string;
+        message?: string;
+        order_id?: string;
+        success: boolean;
     }>;
     summary?: {
-        [key: string]: unknown;
+        failed: number;
+        succeeded: number;
+        total: number;
     };
 };
 
@@ -1390,7 +1767,9 @@ export type ScrapWreckResponse = {
      * Salvage materials recovered
      */
     materials: Array<{
-        [key: string]: unknown;
+        item_id: string;
+        name: string;
+        quantity: number;
     }>;
     message: string;
     ship_class?: string;
@@ -1408,10 +1787,19 @@ export type SearchSystemsResponse = {
 export type SellResponse = {
     action: string;
     auto_listed?: {
-        [key: string]: unknown;
+        order_id?: string;
+        price_each?: number;
+        quantity?: number;
     };
     fills: Array<{
-        [key: string]: unknown;
+        counterparty?: string;
+        price_each: number;
+        quantity: number;
+        /**
+         * "player" or "station"
+         */
+        source?: string;
+        subtotal: number;
     }>;
     item: string;
     item_id: string;
@@ -1427,7 +1815,9 @@ export type SellResponse = {
 export type SellShipResponse = {
     cargo_note?: string;
     cargo_to_storage?: Array<{
-        [key: string]: unknown;
+        item_id: string;
+        name: string;
+        quantity: number;
     }>;
     credits_earned: number;
     credits_total: number;
@@ -1435,7 +1825,9 @@ export type SellShipResponse = {
     message: string;
     modules_note?: string;
     modules_to_storage?: Array<{
-        [key: string]: unknown;
+        item_id: string;
+        name: string;
+        quantity: number;
     }>;
 };
 
@@ -1621,27 +2013,45 @@ export type ShipyardShowroomResponse = {
     /**
      * Ships available for immediate purchase
      */
-    ships: Array<{
-        [key: string]: unknown;
-    }>;
+    ships: Array<ShipClass>;
 };
 
 export type SurveySystemResponse = {
     already_revealed: Array<{
-        [key: string]: unknown;
+        description?: string;
+        id: string;
+        name: string;
+        type: string;
     }>;
     faint_signatures: Array<{
-        [key: string]: unknown;
+        difficulty?: string;
+        hint: string;
+        type: string;
     }>;
     message: string;
     newly_revealed: Array<{
-        [key: string]: unknown;
+        description?: string;
+        id: string;
+        name: string;
+        resources?: Array<{
+            depletion_percent?: number;
+            max_remaining?: number;
+            name: string;
+            remaining: number;
+            remaining_display?: string;
+            resource_id: string;
+            richness: number;
+        }>;
+        type: string;
     }>;
     survey_power: number;
     system_id: string;
     system_name: string;
+    /**
+     * Skill XP earned, keyed by skill ID
+     */
     xp_gained: {
-        [key: string]: unknown;
+        [key: string]: number;
     };
 };
 
@@ -1650,7 +2060,9 @@ export type SwitchShipResponse = {
     active_ship_id: string;
     cargo_note?: string;
     cargo_to_storage?: Array<{
-        [key: string]: unknown;
+        item_id: string;
+        name: string;
+        quantity: number;
     }>;
     message: string;
     stored_ship_class: string;
@@ -1799,16 +2211,28 @@ export type V2GameState = {
         docked_at?: string | null;
         empire?: string;
         nearby_pirates?: Array<{
-            [key: string]: unknown;
+            hull?: number;
+            is_boss: boolean;
+            max_hull?: number;
+            max_shield?: number;
+            name: string;
+            pirate_id: string;
+            shield?: number;
+            status: string;
+            tier: string;
         }>;
-        nearby_players?: Array<{
-            [key: string]: unknown;
-        }>;
+        nearby_players?: Array<NearbyPlayer>;
         poi_id?: string;
         poi_name?: string;
         poi_type?: string;
         resources?: Array<{
-            [key: string]: unknown;
+            depletion_percent?: number;
+            max_remaining?: number;
+            name: string;
+            remaining: number;
+            remaining_display?: string;
+            resource_id: string;
+            richness: number;
         }>;
         security_status?: string;
         system_id?: string;
@@ -1817,7 +2241,56 @@ export type V2GameState = {
     message?: string;
     missions?: {
         active?: Array<{
-            [key: string]: unknown;
+            accepted_at: string;
+            description: string;
+            difficulty: number;
+            expires_in_ticks?: number;
+            giver?: {
+                name?: string;
+                title?: string;
+            };
+            issuing_base?: string;
+            mission_id: string;
+            objectives?: Array<{
+                completed?: boolean;
+                current?: number;
+                description?: string;
+                required?: number;
+                type?: string;
+            }>;
+            progress: {
+                items_delivered?: number;
+                items_mined?: number;
+                kills_achieved?: number;
+                percent_complete?: number;
+                systems_visited?: number;
+            };
+            requirements?: {
+                deliver_item_id?: string;
+                deliver_item_name?: string;
+                deliver_quantity?: number;
+                deliver_to_base_id?: string;
+                deliver_to_base_name?: string;
+                kill_count?: number;
+                mine_item_id?: string;
+                mine_item_name?: string;
+                mine_quantity?: number;
+                target_player_id?: string;
+                visit_system_count?: number;
+            };
+            rewards?: {
+                credits?: number;
+                items?: {
+                    [key: string]: number;
+                };
+                reputation?: number;
+                skill_xp?: {
+                    [key: string]: number;
+                };
+            };
+            template_id?: string;
+            title: string;
+            type: string;
         }>;
         max_missions?: number;
     };
@@ -1851,9 +2324,7 @@ export type V2GameState = {
         is_cloaked?: boolean;
         primary_color?: string;
         secondary_color?: string;
-        stats?: {
-            [key: string]: unknown;
-        };
+        stats?: PlayerStats;
         status_message?: string;
         username?: string;
     };
@@ -1962,10 +2433,17 @@ export type ViewFactionStorageResponse = {
     faction_name: string;
     faction_tag: string;
     items: Array<{
-        [key: string]: unknown;
+        item_id: string;
+        name: string;
+        quantity: number;
     }>;
     recent_activity: Array<{
-        [key: string]: unknown;
+        action: string;
+        credits?: number;
+        item?: string;
+        player: string;
+        quantity?: number;
+        timestamp: string;
     }>;
 };
 
@@ -1976,7 +2454,30 @@ export type ViewMarketResponse = {
      * Market items with sell/buy orders
      */
     items: Array<{
-        [key: string]: unknown;
+        best_buy?: number;
+        best_sell?: number;
+        buy_orders?: Array<{
+            price_each: number;
+            quantity: number;
+            /**
+             * "station" if NPC/station manager order
+             */
+            source?: string;
+        }>;
+        buy_quantity?: number;
+        category?: string;
+        item_id: string;
+        item_name: string;
+        sell_orders?: Array<{
+            price_each: number;
+            quantity: number;
+            /**
+             * "station" if NPC/station manager order
+             */
+            source?: string;
+        }>;
+        sell_quantity?: number;
+        spread?: number;
     }>;
 };
 
@@ -1987,13 +2488,37 @@ export type ViewOrdersResponse = {
      * Faction orders
      */
     faction_orders: Array<{
-        [key: string]: unknown;
+        created_at?: string;
+        created_by?: string;
+        faction_order?: boolean;
+        filled_quantity?: number;
+        item_id: string;
+        item_name: string;
+        listing_fee?: number;
+        order_id: string;
+        order_type?: string;
+        price_each: number;
+        quantity: number;
+        remaining?: number;
+        side: string;
     }>;
     /**
      * Player's orders
      */
     orders: Array<{
-        [key: string]: unknown;
+        created_at?: string;
+        created_by?: string;
+        faction_order?: boolean;
+        filled_quantity?: number;
+        item_id: string;
+        item_name: string;
+        listing_fee?: number;
+        order_id: string;
+        order_type?: string;
+        price_each: number;
+        quantity: number;
+        remaining?: number;
+        side: string;
     }>;
 };
 
@@ -2079,9 +2604,11 @@ export type SpacemoltAbandonMissionErrors = {
 
 export type SpacemoltAbandonMissionResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: AbandonMissionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: AbandonMissionResponse;
+    };
 };
 
 export type SpacemoltAbandonMissionResponse = SpacemoltAbandonMissionResponses[keyof SpacemoltAbandonMissionResponses];
@@ -2123,9 +2650,11 @@ export type SpacemoltAcceptMissionErrors = {
 
 export type SpacemoltAcceptMissionResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: AcceptMissionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: AcceptMissionResponse;
+    };
 };
 
 export type SpacemoltAcceptMissionResponse = SpacemoltAcceptMissionResponses[keyof SpacemoltAcceptMissionResponses];
@@ -2167,9 +2696,11 @@ export type SpacemoltAttackErrors = {
 
 export type SpacemoltAttackResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: PendingActionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: PendingActionResponse;
+    };
 };
 
 export type SpacemoltAttackResponse = SpacemoltAttackResponses[keyof SpacemoltAttackResponses];
@@ -2211,9 +2742,11 @@ export type SpacemoltBuyErrors = {
 
 export type SpacemoltBuyResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: BuyResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: BuyResponse;
+    };
 };
 
 export type SpacemoltBuyResponse = SpacemoltBuyResponses[keyof SpacemoltBuyResponses];
@@ -2255,9 +2788,11 @@ export type SpacemoltCloakErrors = {
 
 export type SpacemoltCloakResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: CloakResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CloakResponse;
+    };
 };
 
 export type SpacemoltCloakResponse = SpacemoltCloakResponses[keyof SpacemoltCloakResponses];
@@ -2299,9 +2834,11 @@ export type SpacemoltCompleteMissionErrors = {
 
 export type SpacemoltCompleteMissionResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: CompleteMissionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CompleteMissionResponse;
+    };
 };
 
 export type SpacemoltCompleteMissionResponse = SpacemoltCompleteMissionResponses[keyof SpacemoltCompleteMissionResponses];
@@ -2343,9 +2880,11 @@ export type SpacemoltCraftErrors = {
 
 export type SpacemoltCraftResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: CraftResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CraftResponse;
+    };
 };
 
 export type SpacemoltCraftResponse = SpacemoltCraftResponses[keyof SpacemoltCraftResponses];
@@ -2387,9 +2926,11 @@ export type SpacemoltDeclineMissionErrors = {
 
 export type SpacemoltDeclineMissionResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: DeclineMissionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: DeclineMissionResponse;
+    };
 };
 
 export type SpacemoltDeclineMissionResponse = SpacemoltDeclineMissionResponses[keyof SpacemoltDeclineMissionResponses];
@@ -2431,9 +2972,11 @@ export type SpacemoltDockErrors = {
 
 export type SpacemoltDockResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: PendingActionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: PendingActionResponse;
+    };
 };
 
 export type SpacemoltDockResponse = SpacemoltDockResponses[keyof SpacemoltDockResponses];
@@ -2475,9 +3018,11 @@ export type SpacemoltFindRouteErrors = {
 
 export type SpacemoltFindRouteResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: FindRouteResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FindRouteResponse;
+    };
 };
 
 export type SpacemoltFindRouteResponse = SpacemoltFindRouteResponses[keyof SpacemoltFindRouteResponses];
@@ -2519,9 +3064,11 @@ export type SpacemoltGetActiveMissionsErrors = {
 
 export type SpacemoltGetActiveMissionsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: V2GameState
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: V2GameState;
+    };
 };
 
 export type SpacemoltGetActiveMissionsResponse = SpacemoltGetActiveMissionsResponses[keyof SpacemoltGetActiveMissionsResponses];
@@ -2563,9 +3110,11 @@ export type SpacemoltGetBaseErrors = {
 
 export type SpacemoltGetBaseResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: GetBaseResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetBaseResponse;
+    };
 };
 
 export type SpacemoltGetBaseResponse = SpacemoltGetBaseResponses[keyof SpacemoltGetBaseResponses];
@@ -2607,9 +3156,11 @@ export type SpacemoltGetCargoErrors = {
 
 export type SpacemoltGetCargoResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: V2GameState
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: V2GameState;
+    };
 };
 
 export type SpacemoltGetCargoResponse = SpacemoltGetCargoResponses[keyof SpacemoltGetCargoResponses];
@@ -2651,9 +3202,11 @@ export type SpacemoltGetCommandsErrors = {
 
 export type SpacemoltGetCommandsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: GetCommandsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetCommandsResponse;
+    };
 };
 
 export type SpacemoltGetCommandsResponse = SpacemoltGetCommandsResponses[keyof SpacemoltGetCommandsResponses];
@@ -2695,9 +3248,11 @@ export type SpacemoltGetLocationErrors = {
 
 export type SpacemoltGetLocationResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: V2GameState
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: V2GameState;
+    };
 };
 
 export type SpacemoltGetLocationResponse = SpacemoltGetLocationResponses[keyof SpacemoltGetLocationResponses];
@@ -2739,9 +3294,11 @@ export type SpacemoltGetMapErrors = {
 
 export type SpacemoltGetMapResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: GetMapResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetMapResponse;
+    };
 };
 
 export type SpacemoltGetMapResponse = SpacemoltGetMapResponses[keyof SpacemoltGetMapResponses];
@@ -2783,9 +3340,11 @@ export type SpacemoltGetMissionsErrors = {
 
 export type SpacemoltGetMissionsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: GetMissionsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetMissionsResponse;
+    };
 };
 
 export type SpacemoltGetMissionsResponse = SpacemoltGetMissionsResponses[keyof SpacemoltGetMissionsResponses];
@@ -2827,9 +3386,11 @@ export type SpacemoltGetNearbyErrors = {
 
 export type SpacemoltGetNearbyResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: GetNearbyResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetNearbyResponse;
+    };
 };
 
 export type SpacemoltGetNearbyResponse = SpacemoltGetNearbyResponses[keyof SpacemoltGetNearbyResponses];
@@ -2871,7 +3432,7 @@ export type SpacemoltGetNotificationsErrors = {
 
 export type SpacemoltGetNotificationsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Command result with rendered text and structured data
      */
     200: V2Response;
 };
@@ -2915,9 +3476,11 @@ export type SpacemoltGetPlayerErrors = {
 
 export type SpacemoltGetPlayerResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: V2GameState
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: V2GameState;
+    };
 };
 
 export type SpacemoltGetPlayerResponse = SpacemoltGetPlayerResponses[keyof SpacemoltGetPlayerResponses];
@@ -2959,9 +3522,11 @@ export type SpacemoltGetPoiErrors = {
 
 export type SpacemoltGetPoiResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: GetPoiResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetPoiResponse;
+    };
 };
 
 export type SpacemoltGetPoiResponse = SpacemoltGetPoiResponses[keyof SpacemoltGetPoiResponses];
@@ -3003,9 +3568,11 @@ export type SpacemoltGetQueueErrors = {
 
 export type SpacemoltGetQueueResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: V2GameState
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: V2GameState;
+    };
 };
 
 export type SpacemoltGetQueueResponse = SpacemoltGetQueueResponses[keyof SpacemoltGetQueueResponses];
@@ -3047,9 +3614,11 @@ export type SpacemoltGetShipErrors = {
 
 export type SpacemoltGetShipResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: V2GameState
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: V2GameState;
+    };
 };
 
 export type SpacemoltGetShipResponse = SpacemoltGetShipResponses[keyof SpacemoltGetShipResponses];
@@ -3091,9 +3660,11 @@ export type SpacemoltGetShipsErrors = {
 
 export type SpacemoltGetShipsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: GetShipsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetShipsResponse;
+    };
 };
 
 export type SpacemoltGetShipsResponse = SpacemoltGetShipsResponses[keyof SpacemoltGetShipsResponses];
@@ -3135,9 +3706,11 @@ export type SpacemoltGetSkillsErrors = {
 
 export type SpacemoltGetSkillsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: V2GameState
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: V2GameState;
+    };
 };
 
 export type SpacemoltGetSkillsResponse = SpacemoltGetSkillsResponses[keyof SpacemoltGetSkillsResponses];
@@ -3179,9 +3752,11 @@ export type SpacemoltGetStateErrors = {
 
 export type SpacemoltGetStateResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: V2GameState
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: V2GameState;
+    };
 };
 
 export type SpacemoltGetStateResponse = SpacemoltGetStateResponses[keyof SpacemoltGetStateResponses];
@@ -3223,9 +3798,11 @@ export type SpacemoltGetStatusErrors = {
 
 export type SpacemoltGetStatusResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: V2GameState
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: V2GameState;
+    };
 };
 
 export type SpacemoltGetStatusResponse = SpacemoltGetStatusResponses[keyof SpacemoltGetStatusResponses];
@@ -3267,9 +3844,11 @@ export type SpacemoltGetSystemErrors = {
 
 export type SpacemoltGetSystemResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: GetSystemResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetSystemResponse;
+    };
 };
 
 export type SpacemoltGetSystemResponse = SpacemoltGetSystemResponses[keyof SpacemoltGetSystemResponses];
@@ -3311,9 +3890,11 @@ export type SpacemoltGetVersionErrors = {
 
 export type SpacemoltGetVersionResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: GetVersionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetVersionResponse;
+    };
 };
 
 export type SpacemoltGetVersionResponse = SpacemoltGetVersionResponses[keyof SpacemoltGetVersionResponses];
@@ -3371,9 +3952,11 @@ export type SpacemoltInstallModErrors = {
 
 export type SpacemoltInstallModResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: InstallModResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: InstallModResponse;
+    };
 };
 
 export type SpacemoltInstallModResponse = SpacemoltInstallModResponses[keyof SpacemoltInstallModResponses];
@@ -3415,9 +3998,11 @@ export type SpacemoltJettisonErrors = {
 
 export type SpacemoltJettisonResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: JettisonResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: JettisonResponse;
+    };
 };
 
 export type SpacemoltJettisonResponse = SpacemoltJettisonResponses[keyof SpacemoltJettisonResponses];
@@ -3459,9 +4044,11 @@ export type SpacemoltJumpErrors = {
 
 export type SpacemoltJumpResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: PendingActionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: PendingActionResponse;
+    };
 };
 
 export type SpacemoltJumpResponse = SpacemoltJumpResponses[keyof SpacemoltJumpResponses];
@@ -3503,9 +4090,11 @@ export type SpacemoltMineErrors = {
 
 export type SpacemoltMineResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: PendingActionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: PendingActionResponse;
+    };
 };
 
 export type SpacemoltMineResponse = SpacemoltMineResponses[keyof SpacemoltMineResponses];
@@ -3547,9 +4136,11 @@ export type SpacemoltRefuelErrors = {
 
 export type SpacemoltRefuelResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: RefuelResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: RefuelResponse;
+    };
 };
 
 export type SpacemoltRefuelResponse = SpacemoltRefuelResponses[keyof SpacemoltRefuelResponses];
@@ -3591,9 +4182,11 @@ export type SpacemoltRepairErrors = {
 
 export type SpacemoltRepairResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: RepairResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: RepairResponse;
+    };
 };
 
 export type SpacemoltRepairResponse = SpacemoltRepairResponses[keyof SpacemoltRepairResponses];
@@ -3635,9 +4228,11 @@ export type SpacemoltScanErrors = {
 
 export type SpacemoltScanResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: ScanResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ScanResponse;
+    };
 };
 
 export type SpacemoltScanResponse = SpacemoltScanResponses[keyof SpacemoltScanResponses];
@@ -3679,9 +4274,11 @@ export type SpacemoltSearchSystemsErrors = {
 
 export type SpacemoltSearchSystemsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: SearchSystemsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SearchSystemsResponse;
+    };
 };
 
 export type SpacemoltSearchSystemsResponse = SpacemoltSearchSystemsResponses[keyof SpacemoltSearchSystemsResponses];
@@ -3723,9 +4320,11 @@ export type SpacemoltSelfDestructErrors = {
 
 export type SpacemoltSelfDestructResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: PendingActionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: PendingActionResponse;
+    };
 };
 
 export type SpacemoltSelfDestructResponse = SpacemoltSelfDestructResponses[keyof SpacemoltSelfDestructResponses];
@@ -3767,9 +4366,11 @@ export type SpacemoltSellErrors = {
 
 export type SpacemoltSellResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: SellResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SellResponse;
+    };
 };
 
 export type SpacemoltSellResponse = SpacemoltSellResponses[keyof SpacemoltSellResponses];
@@ -3811,9 +4412,11 @@ export type SpacemoltSurveySystemErrors = {
 
 export type SpacemoltSurveySystemResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: SurveySystemResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SurveySystemResponse;
+    };
 };
 
 export type SpacemoltSurveySystemResponse = SpacemoltSurveySystemResponses[keyof SpacemoltSurveySystemResponses];
@@ -3855,9 +4458,11 @@ export type SpacemoltTravelErrors = {
 
 export type SpacemoltTravelResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: TravelResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: TravelResponse;
+    };
 };
 
 export type SpacemoltTravelResponse = SpacemoltTravelResponses[keyof SpacemoltTravelResponses];
@@ -3899,9 +4504,11 @@ export type SpacemoltUndockErrors = {
 
 export type SpacemoltUndockResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: UndockResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: UndockResponse;
+    };
 };
 
 export type SpacemoltUndockResponse = SpacemoltUndockResponses[keyof SpacemoltUndockResponses];
@@ -3943,9 +4550,11 @@ export type SpacemoltUninstallModErrors = {
 
 export type SpacemoltUninstallModResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: UninstallModResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: UninstallModResponse;
+    };
 };
 
 export type SpacemoltUninstallModResponse = SpacemoltUninstallModResponses[keyof SpacemoltUninstallModResponses];
@@ -3987,9 +4596,11 @@ export type SpacemoltUseItemErrors = {
 
 export type SpacemoltUseItemResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AbandonMissionResponse, AcceptMissionResponse, BuyResponse, CloakResponse, CompleteMissionResponse, CraftResponse, DeclineMissionResponse, FindRouteResponse, GetBaseResponse, GetCommandsResponse, GetMapResponse, GetMissionsResponse, GetNearbyResponse, GetPoiResponse, GetShipsResponse, GetSystemResponse, GetVersionResponse, InstallModResponse, JettisonResponse, PendingActionResponse, RefuelResponse, RepairResponse, ScanResponse, SearchSystemsResponse, SellResponse, SurveySystemResponse, TravelResponse, UndockResponse, UninstallModResponse, UseItemResponse, V2GameState
+     * Result. structuredContent type: UseItemResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: UseItemResponse;
+    };
 };
 
 export type SpacemoltUseItemResponse = SpacemoltUseItemResponses[keyof SpacemoltUseItemResponses];
@@ -4035,9 +4646,11 @@ export type SpacemoltAuthClaimErrors = {
 
 export type SpacemoltAuthClaimResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: LoginResponse, MessageResponse, RegisterResponse
+     * Result. structuredContent type: MessageResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: MessageResponse;
+    };
 };
 
 export type SpacemoltAuthClaimResponse = SpacemoltAuthClaimResponses[keyof SpacemoltAuthClaimResponses];
@@ -4099,9 +4712,11 @@ export type SpacemoltAuthLoginErrors = {
 
 export type SpacemoltAuthLoginResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: LoginResponse, MessageResponse, RegisterResponse
+     * Result. structuredContent type: LoginResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: LoginResponse;
+    };
 };
 
 export type SpacemoltAuthLoginResponse = SpacemoltAuthLoginResponses[keyof SpacemoltAuthLoginResponses];
@@ -4147,9 +4762,11 @@ export type SpacemoltAuthLogoutErrors = {
 
 export type SpacemoltAuthLogoutResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: LoginResponse, MessageResponse, RegisterResponse
+     * Result. structuredContent type: MessageResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: MessageResponse;
+    };
 };
 
 export type SpacemoltAuthLogoutResponse = SpacemoltAuthLogoutResponses[keyof SpacemoltAuthLogoutResponses];
@@ -4195,9 +4812,11 @@ export type SpacemoltAuthRegisterErrors = {
 
 export type SpacemoltAuthRegisterResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: LoginResponse, MessageResponse, RegisterResponse
+     * Result. structuredContent type: RegisterResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: RegisterResponse;
+    };
 };
 
 export type SpacemoltAuthRegisterResponse = SpacemoltAuthRegisterResponses[keyof SpacemoltAuthRegisterResponses];
@@ -4239,9 +4858,11 @@ export type SpacemoltBattleAdvanceErrors = {
 
 export type SpacemoltBattleAdvanceResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BattleResponse, GetBattleStatusResponse, ReloadResponse
+     * Result. structuredContent type: BattleResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: BattleResponse;
+    };
 };
 
 export type SpacemoltBattleAdvanceResponse = SpacemoltBattleAdvanceResponses[keyof SpacemoltBattleAdvanceResponses];
@@ -4283,9 +4904,11 @@ export type SpacemoltBattleEngageErrors = {
 
 export type SpacemoltBattleEngageResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BattleResponse, GetBattleStatusResponse, ReloadResponse
+     * Result. structuredContent type: BattleResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: BattleResponse;
+    };
 };
 
 export type SpacemoltBattleEngageResponse = SpacemoltBattleEngageResponses[keyof SpacemoltBattleEngageResponses];
@@ -4343,9 +4966,11 @@ export type SpacemoltBattleReloadErrors = {
 
 export type SpacemoltBattleReloadResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BattleResponse, GetBattleStatusResponse, ReloadResponse
+     * Result. structuredContent type: ReloadResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ReloadResponse;
+    };
 };
 
 export type SpacemoltBattleReloadResponse = SpacemoltBattleReloadResponses[keyof SpacemoltBattleReloadResponses];
@@ -4387,9 +5012,11 @@ export type SpacemoltBattleRetreatErrors = {
 
 export type SpacemoltBattleRetreatResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BattleResponse, GetBattleStatusResponse, ReloadResponse
+     * Result. structuredContent type: BattleResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: BattleResponse;
+    };
 };
 
 export type SpacemoltBattleRetreatResponse = SpacemoltBattleRetreatResponses[keyof SpacemoltBattleRetreatResponses];
@@ -4431,9 +5058,11 @@ export type SpacemoltBattleStanceErrors = {
 
 export type SpacemoltBattleStanceResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BattleResponse, GetBattleStatusResponse, ReloadResponse
+     * Result. structuredContent type: BattleResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: BattleResponse;
+    };
 };
 
 export type SpacemoltBattleStanceResponse = SpacemoltBattleStanceResponses[keyof SpacemoltBattleStanceResponses];
@@ -4475,9 +5104,11 @@ export type SpacemoltBattleStatusErrors = {
 
 export type SpacemoltBattleStatusResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BattleResponse, GetBattleStatusResponse, ReloadResponse
+     * Result. structuredContent type: GetBattleStatusResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetBattleStatusResponse;
+    };
 };
 
 export type SpacemoltBattleStatusResponse = SpacemoltBattleStatusResponses[keyof SpacemoltBattleStatusResponses];
@@ -4519,9 +5150,11 @@ export type SpacemoltBattleTargetErrors = {
 
 export type SpacemoltBattleTargetResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BattleResponse, GetBattleStatusResponse, ReloadResponse
+     * Result. structuredContent type: BattleResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: BattleResponse;
+    };
 };
 
 export type SpacemoltBattleTargetResponse = SpacemoltBattleTargetResponses[keyof SpacemoltBattleTargetResponses];
@@ -4577,7 +5210,9 @@ export type SpacemoltCatalogResponses = {
     /**
      * Result. structuredContent type: CatalogResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CatalogResponse;
+    };
 };
 
 export type SpacemoltCatalogResponse = SpacemoltCatalogResponses[keyof SpacemoltCatalogResponses];
@@ -4633,7 +5268,9 @@ export type SpacemoltFacilityBuildResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityBuildResponse = SpacemoltFacilityBuildResponses[keyof SpacemoltFacilityBuildResponses];
@@ -4673,7 +5310,9 @@ export type SpacemoltFacilityFactionBuildResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityFactionBuildResponse = SpacemoltFacilityFactionBuildResponses[keyof SpacemoltFacilityFactionBuildResponses];
@@ -4713,7 +5352,9 @@ export type SpacemoltFacilityFactionListResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityFactionListResponse = SpacemoltFacilityFactionListResponses[keyof SpacemoltFacilityFactionListResponses];
@@ -4769,7 +5410,9 @@ export type SpacemoltFacilityListResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityListResponse = SpacemoltFacilityListResponses[keyof SpacemoltFacilityListResponses];
@@ -4809,7 +5452,9 @@ export type SpacemoltFacilityPersonalBuildResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityPersonalBuildResponse = SpacemoltFacilityPersonalBuildResponses[keyof SpacemoltFacilityPersonalBuildResponses];
@@ -4849,7 +5494,9 @@ export type SpacemoltFacilityPersonalDecorateResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityPersonalDecorateResponse = SpacemoltFacilityPersonalDecorateResponses[keyof SpacemoltFacilityPersonalDecorateResponses];
@@ -4889,7 +5536,9 @@ export type SpacemoltFacilityPersonalVisitResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityPersonalVisitResponse = SpacemoltFacilityPersonalVisitResponses[keyof SpacemoltFacilityPersonalVisitResponses];
@@ -4929,7 +5578,9 @@ export type SpacemoltFacilityToggleResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityToggleResponse = SpacemoltFacilityToggleResponses[keyof SpacemoltFacilityToggleResponses];
@@ -4969,7 +5620,9 @@ export type SpacemoltFacilityTransferResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityTransferResponse = SpacemoltFacilityTransferResponses[keyof SpacemoltFacilityTransferResponses];
@@ -5009,7 +5662,9 @@ export type SpacemoltFacilityTypesResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityTypesResponse = SpacemoltFacilityTypesResponses[keyof SpacemoltFacilityTypesResponses];
@@ -5049,7 +5704,9 @@ export type SpacemoltFacilityUpgradeResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityUpgradeResponse = SpacemoltFacilityUpgradeResponses[keyof SpacemoltFacilityUpgradeResponses];
@@ -5089,7 +5746,9 @@ export type SpacemoltFacilityUpgradesResponses = {
     /**
      * Result. structuredContent type: FacilityResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
 };
 
 export type SpacemoltFacilityUpgradesResponse = SpacemoltFacilityUpgradesResponses[keyof SpacemoltFacilityUpgradesResponses];
@@ -5127,9 +5786,11 @@ export type SpacemoltFactionAcceptPeaceErrors = {
 
 export type SpacemoltFactionAcceptPeaceResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionAcceptPeaceResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionAcceptPeaceResponse;
+    };
 };
 
 export type SpacemoltFactionAcceptPeaceResponse = SpacemoltFactionAcceptPeaceResponses[keyof SpacemoltFactionAcceptPeaceResponses];
@@ -5167,9 +5828,11 @@ export type SpacemoltFactionCancelMissionErrors = {
 
 export type SpacemoltFactionCancelMissionResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionCancelMissionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionCancelMissionResponse;
+    };
 };
 
 export type SpacemoltFactionCancelMissionResponse = SpacemoltFactionCancelMissionResponses[keyof SpacemoltFactionCancelMissionResponses];
@@ -5207,92 +5870,14 @@ export type SpacemoltFactionCreateErrors = {
 
 export type SpacemoltFactionCreateResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: CreateFactionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CreateFactionResponse;
+    };
 };
 
 export type SpacemoltFactionCreateResponse = SpacemoltFactionCreateResponses[keyof SpacemoltFactionCreateResponses];
-
-export type SpacemoltFactionCreateBuyOrderData = {
-    body?: {
-        /**
-         * Target: faction ID, player ID, role ID, room ID, item ID, etc.
-         */
-        id?: string;
-        /**
-         * Text: faction name, war reason, peace terms, etc.
-         */
-        text?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v2/spacemolt_faction/create_buy_order';
-};
-
-export type SpacemoltFactionCreateBuyOrderErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
-export type SpacemoltFactionCreateBuyOrderResponses = {
-    /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
-     */
-    200: V2Response;
-};
-
-export type SpacemoltFactionCreateBuyOrderResponse = SpacemoltFactionCreateBuyOrderResponses[keyof SpacemoltFactionCreateBuyOrderResponses];
-
-export type SpacemoltFactionCreateSellOrderData = {
-    body?: {
-        /**
-         * Target: faction ID, player ID, role ID, room ID, item ID, etc.
-         */
-        id?: string;
-        /**
-         * Text: faction name, war reason, peace terms, etc.
-         */
-        text?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v2/spacemolt_faction/create_sell_order';
-};
-
-export type SpacemoltFactionCreateSellOrderErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
-export type SpacemoltFactionCreateSellOrderResponses = {
-    /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
-     */
-    200: V2Response;
-};
-
-export type SpacemoltFactionCreateSellOrderResponse = SpacemoltFactionCreateSellOrderResponses[keyof SpacemoltFactionCreateSellOrderResponses];
 
 export type SpacemoltFactionDeclareWarData = {
     body?: {
@@ -5327,9 +5912,11 @@ export type SpacemoltFactionDeclareWarErrors = {
 
 export type SpacemoltFactionDeclareWarResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionDeclareWarResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionDeclareWarResponse;
+    };
 };
 
 export type SpacemoltFactionDeclareWarResponse = SpacemoltFactionDeclareWarResponses[keyof SpacemoltFactionDeclareWarResponses];
@@ -5367,9 +5954,11 @@ export type SpacemoltFactionDeclineInviteErrors = {
 
 export type SpacemoltFactionDeclineInviteResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionDeclineInviteResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionDeclineInviteResponse;
+    };
 };
 
 export type SpacemoltFactionDeclineInviteResponse = SpacemoltFactionDeclineInviteResponses[keyof SpacemoltFactionDeclineInviteResponses];
@@ -5407,9 +5996,11 @@ export type SpacemoltFactionDeleteRoleErrors = {
 
 export type SpacemoltFactionDeleteRoleResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionDeleteRoleResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionDeleteRoleResponse;
+    };
 };
 
 export type SpacemoltFactionDeleteRoleResponse = SpacemoltFactionDeleteRoleResponses[keyof SpacemoltFactionDeleteRoleResponses];
@@ -5447,52 +6038,14 @@ export type SpacemoltFactionDeleteRoomErrors = {
 
 export type SpacemoltFactionDeleteRoomResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionDeleteRoomResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionDeleteRoomResponse;
+    };
 };
 
 export type SpacemoltFactionDeleteRoomResponse = SpacemoltFactionDeleteRoomResponses[keyof SpacemoltFactionDeleteRoomResponses];
-
-export type SpacemoltFactionDepositCreditsData = {
-    body?: {
-        /**
-         * Target: faction ID, player ID, role ID, room ID, item ID, etc.
-         */
-        id?: string;
-        /**
-         * Text: faction name, war reason, peace terms, etc.
-         */
-        text?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v2/spacemolt_faction/deposit_credits';
-};
-
-export type SpacemoltFactionDepositCreditsErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
-export type SpacemoltFactionDepositCreditsResponses = {
-    /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
-     */
-    200: V2Response;
-};
-
-export type SpacemoltFactionDepositCreditsResponse = SpacemoltFactionDepositCreditsResponses[keyof SpacemoltFactionDepositCreditsResponses];
 
 export type SpacemoltFactionDepositItemsData = {
     body?: {
@@ -5527,9 +6080,11 @@ export type SpacemoltFactionDepositItemsErrors = {
 
 export type SpacemoltFactionDepositItemsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionDepositItemsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionDepositItemsResponse;
+    };
 };
 
 export type SpacemoltFactionDepositItemsResponse = SpacemoltFactionDepositItemsResponses[keyof SpacemoltFactionDepositItemsResponses];
@@ -5567,52 +6122,14 @@ export type SpacemoltFactionGetInvitesErrors = {
 
 export type SpacemoltFactionGetInvitesResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionGetInvitesResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionGetInvitesResponse;
+    };
 };
 
 export type SpacemoltFactionGetInvitesResponse = SpacemoltFactionGetInvitesResponses[keyof SpacemoltFactionGetInvitesResponses];
-
-export type SpacemoltFactionGiftData = {
-    body?: {
-        /**
-         * Target: faction ID, player ID, role ID, room ID, item ID, etc.
-         */
-        id?: string;
-        /**
-         * Text: faction name, war reason, peace terms, etc.
-         */
-        text?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v2/spacemolt_faction/gift';
-};
-
-export type SpacemoltFactionGiftErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
-export type SpacemoltFactionGiftResponses = {
-    /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
-     */
-    200: V2Response;
-};
-
-export type SpacemoltFactionGiftResponse = SpacemoltFactionGiftResponses[keyof SpacemoltFactionGiftResponses];
 
 export type SpacemoltFactionHelpData = {
     body?: never;
@@ -5663,9 +6180,11 @@ export type SpacemoltFactionInfoErrors = {
 
 export type SpacemoltFactionInfoResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionInfoResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionInfoResponse;
+    };
 };
 
 export type SpacemoltFactionInfoResponse = SpacemoltFactionInfoResponses[keyof SpacemoltFactionInfoResponses];
@@ -5703,9 +6222,11 @@ export type SpacemoltFactionInviteErrors = {
 
 export type SpacemoltFactionInviteResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionInviteResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionInviteResponse;
+    };
 };
 
 export type SpacemoltFactionInviteResponse = SpacemoltFactionInviteResponses[keyof SpacemoltFactionInviteResponses];
@@ -5743,9 +6264,11 @@ export type SpacemoltFactionJoinErrors = {
 
 export type SpacemoltFactionJoinResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: JoinFactionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: JoinFactionResponse;
+    };
 };
 
 export type SpacemoltFactionJoinResponse = SpacemoltFactionJoinResponses[keyof SpacemoltFactionJoinResponses];
@@ -5783,9 +6306,11 @@ export type SpacemoltFactionKickErrors = {
 
 export type SpacemoltFactionKickResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionKickResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionKickResponse;
+    };
 };
 
 export type SpacemoltFactionKickResponse = SpacemoltFactionKickResponses[keyof SpacemoltFactionKickResponses];
@@ -5823,9 +6348,11 @@ export type SpacemoltFactionLeaveErrors = {
 
 export type SpacemoltFactionLeaveResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: MessageResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: MessageResponse;
+    };
 };
 
 export type SpacemoltFactionLeaveResponse = SpacemoltFactionLeaveResponses[keyof SpacemoltFactionLeaveResponses];
@@ -5863,9 +6390,11 @@ export type SpacemoltFactionListErrors = {
 
 export type SpacemoltFactionListResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionListResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionListResponse;
+    };
 };
 
 export type SpacemoltFactionListResponse = SpacemoltFactionListResponses[keyof SpacemoltFactionListResponses];
@@ -5903,9 +6432,11 @@ export type SpacemoltFactionListMissionsErrors = {
 
 export type SpacemoltFactionListMissionsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionListMissionsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionListMissionsResponse;
+    };
 };
 
 export type SpacemoltFactionListMissionsResponse = SpacemoltFactionListMissionsResponses[keyof SpacemoltFactionListMissionsResponses];
@@ -5943,9 +6474,11 @@ export type SpacemoltFactionProposePeaceErrors = {
 
 export type SpacemoltFactionProposePeaceResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionProposePeaceResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionProposePeaceResponse;
+    };
 };
 
 export type SpacemoltFactionProposePeaceResponse = SpacemoltFactionProposePeaceResponses[keyof SpacemoltFactionProposePeaceResponses];
@@ -5983,9 +6516,11 @@ export type SpacemoltFactionRoomsErrors = {
 
 export type SpacemoltFactionRoomsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionRoomsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionRoomsResponse;
+    };
 };
 
 export type SpacemoltFactionRoomsResponse = SpacemoltFactionRoomsResponses[keyof SpacemoltFactionRoomsResponses];
@@ -6023,9 +6558,11 @@ export type SpacemoltFactionSetAllyErrors = {
 
 export type SpacemoltFactionSetAllyResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionSetAllyResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionSetAllyResponse;
+    };
 };
 
 export type SpacemoltFactionSetAllyResponse = SpacemoltFactionSetAllyResponses[keyof SpacemoltFactionSetAllyResponses];
@@ -6063,9 +6600,11 @@ export type SpacemoltFactionSetEnemyErrors = {
 
 export type SpacemoltFactionSetEnemyResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionSetEnemyResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionSetEnemyResponse;
+    };
 };
 
 export type SpacemoltFactionSetEnemyResponse = SpacemoltFactionSetEnemyResponses[keyof SpacemoltFactionSetEnemyResponses];
@@ -6103,9 +6642,11 @@ export type SpacemoltFactionViewStorageErrors = {
 
 export type SpacemoltFactionViewStorageResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: ViewFactionStorageResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ViewFactionStorageResponse;
+    };
 };
 
 export type SpacemoltFactionViewStorageResponse = SpacemoltFactionViewStorageResponses[keyof SpacemoltFactionViewStorageResponses];
@@ -6143,52 +6684,14 @@ export type SpacemoltFactionVisitRoomErrors = {
 
 export type SpacemoltFactionVisitRoomResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionVisitRoomResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionVisitRoomResponse;
+    };
 };
 
 export type SpacemoltFactionVisitRoomResponse = SpacemoltFactionVisitRoomResponses[keyof SpacemoltFactionVisitRoomResponses];
-
-export type SpacemoltFactionWithdrawCreditsData = {
-    body?: {
-        /**
-         * Target: faction ID, player ID, role ID, room ID, item ID, etc.
-         */
-        id?: string;
-        /**
-         * Text: faction name, war reason, peace terms, etc.
-         */
-        text?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v2/spacemolt_faction/withdraw_credits';
-};
-
-export type SpacemoltFactionWithdrawCreditsErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
-export type SpacemoltFactionWithdrawCreditsResponses = {
-    /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
-     */
-    200: V2Response;
-};
-
-export type SpacemoltFactionWithdrawCreditsResponse = SpacemoltFactionWithdrawCreditsResponses[keyof SpacemoltFactionWithdrawCreditsResponses];
 
 export type SpacemoltFactionWithdrawItemsData = {
     body?: {
@@ -6223,9 +6726,11 @@ export type SpacemoltFactionWithdrawItemsErrors = {
 
 export type SpacemoltFactionWithdrawItemsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CreateBuyOrderResponse, CreateFactionResponse, CreateSellOrderResponse, FactionAcceptPeaceResponse, FactionCancelMissionResponse, FactionDeclareWarResponse, FactionDeclineInviteResponse, FactionDeleteRoleResponse, FactionDeleteRoomResponse, FactionDepositCreditsResponse, FactionDepositItemsResponse, FactionGetInvitesResponse, FactionGiftResponse, FactionInfoResponse, FactionInviteResponse, FactionKickResponse, FactionListMissionsResponse, FactionListResponse, FactionProposePeaceResponse, FactionRoomsResponse, FactionSetAllyResponse, FactionSetEnemyResponse, FactionVisitRoomResponse, FactionWithdrawCreditsResponse, FactionWithdrawItemsResponse, JoinFactionResponse, MessageResponse, ViewFactionStorageResponse
+     * Result. structuredContent type: FactionWithdrawItemsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionWithdrawItemsResponse;
+    };
 };
 
 export type SpacemoltFactionWithdrawItemsResponse = SpacemoltFactionWithdrawItemsResponses[keyof SpacemoltFactionWithdrawItemsResponses];
@@ -6263,9 +6768,11 @@ export type SpacemoltFactionAdminCreateRoleErrors = {
 
 export type SpacemoltFactionAdminCreateRoleResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionCreateRoleResponse, FactionEditResponse, FactionEditRoleResponse, FactionPostMissionResponse, FactionPromoteResponse, FactionWriteRoomResponse
+     * Result. structuredContent type: FactionCreateRoleResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionCreateRoleResponse;
+    };
 };
 
 export type SpacemoltFactionAdminCreateRoleResponse = SpacemoltFactionAdminCreateRoleResponses[keyof SpacemoltFactionAdminCreateRoleResponses];
@@ -6303,9 +6810,11 @@ export type SpacemoltFactionAdminEditErrors = {
 
 export type SpacemoltFactionAdminEditResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionCreateRoleResponse, FactionEditResponse, FactionEditRoleResponse, FactionPostMissionResponse, FactionPromoteResponse, FactionWriteRoomResponse
+     * Result. structuredContent type: FactionEditResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionEditResponse;
+    };
 };
 
 export type SpacemoltFactionAdminEditResponse = SpacemoltFactionAdminEditResponses[keyof SpacemoltFactionAdminEditResponses];
@@ -6343,9 +6852,11 @@ export type SpacemoltFactionAdminEditRoleErrors = {
 
 export type SpacemoltFactionAdminEditRoleResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionCreateRoleResponse, FactionEditResponse, FactionEditRoleResponse, FactionPostMissionResponse, FactionPromoteResponse, FactionWriteRoomResponse
+     * Result. structuredContent type: FactionEditRoleResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionEditRoleResponse;
+    };
 };
 
 export type SpacemoltFactionAdminEditRoleResponse = SpacemoltFactionAdminEditRoleResponses[keyof SpacemoltFactionAdminEditRoleResponses];
@@ -6399,9 +6910,11 @@ export type SpacemoltFactionAdminPostMissionErrors = {
 
 export type SpacemoltFactionAdminPostMissionResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionCreateRoleResponse, FactionEditResponse, FactionEditRoleResponse, FactionPostMissionResponse, FactionPromoteResponse, FactionWriteRoomResponse
+     * Result. structuredContent type: FactionPostMissionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionPostMissionResponse;
+    };
 };
 
 export type SpacemoltFactionAdminPostMissionResponse = SpacemoltFactionAdminPostMissionResponses[keyof SpacemoltFactionAdminPostMissionResponses];
@@ -6439,9 +6952,11 @@ export type SpacemoltFactionAdminPromoteErrors = {
 
 export type SpacemoltFactionAdminPromoteResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionCreateRoleResponse, FactionEditResponse, FactionEditRoleResponse, FactionPostMissionResponse, FactionPromoteResponse, FactionWriteRoomResponse
+     * Result. structuredContent type: FactionPromoteResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionPromoteResponse;
+    };
 };
 
 export type SpacemoltFactionAdminPromoteResponse = SpacemoltFactionAdminPromoteResponses[keyof SpacemoltFactionAdminPromoteResponses];
@@ -6479,12 +6994,350 @@ export type SpacemoltFactionAdminWriteRoomErrors = {
 
 export type SpacemoltFactionAdminWriteRoomResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionCreateRoleResponse, FactionEditResponse, FactionEditRoleResponse, FactionPostMissionResponse, FactionPromoteResponse, FactionWriteRoomResponse
+     * Result. structuredContent type: FactionWriteRoomResponse
+     */
+    200: V2Response & {
+        structuredContent?: FactionWriteRoomResponse;
+    };
+};
+
+export type SpacemoltFactionAdminWriteRoomResponse = SpacemoltFactionAdminWriteRoomResponses[keyof SpacemoltFactionAdminWriteRoomResponses];
+
+export type SpacemoltFactionCommerceCreateBuyOrderData = {
+    body?: {
+        /**
+         * Credits to include in gift
+         */
+        credits?: number;
+        /**
+         * Target faction ID (for gift)
+         */
+        id?: string;
+        /**
+         * Item ID for exchange orders
+         */
+        item_id?: string;
+        /**
+         * Items to gift: {"ore_iron": 50, "fuel_cell": 10}
+         */
+        items?: {
+            [key: string]: unknown;
+        };
+        /**
+         * Gift message
+         */
+        message?: string;
+        /**
+         * Price per item in credits for exchange orders
+         */
+        price?: number;
+        /**
+         * Amount: credits to deposit/withdraw, or item quantity for exchange orders
+         */
+        quantity?: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction_commerce/create_buy_order';
+};
+
+export type SpacemoltFactionCommerceCreateBuyOrderErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFactionCommerceCreateBuyOrderResponses = {
+    /**
+     * Result. structuredContent type: CreateBuyOrderResponse
+     */
+    200: V2Response & {
+        structuredContent?: CreateBuyOrderResponse;
+    };
+};
+
+export type SpacemoltFactionCommerceCreateBuyOrderResponse = SpacemoltFactionCommerceCreateBuyOrderResponses[keyof SpacemoltFactionCommerceCreateBuyOrderResponses];
+
+export type SpacemoltFactionCommerceCreateSellOrderData = {
+    body?: {
+        /**
+         * Credits to include in gift
+         */
+        credits?: number;
+        /**
+         * Target faction ID (for gift)
+         */
+        id?: string;
+        /**
+         * Item ID for exchange orders
+         */
+        item_id?: string;
+        /**
+         * Items to gift: {"ore_iron": 50, "fuel_cell": 10}
+         */
+        items?: {
+            [key: string]: unknown;
+        };
+        /**
+         * Gift message
+         */
+        message?: string;
+        /**
+         * Price per item in credits for exchange orders
+         */
+        price?: number;
+        /**
+         * Amount: credits to deposit/withdraw, or item quantity for exchange orders
+         */
+        quantity?: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction_commerce/create_sell_order';
+};
+
+export type SpacemoltFactionCommerceCreateSellOrderErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFactionCommerceCreateSellOrderResponses = {
+    /**
+     * Result. structuredContent type: CreateSellOrderResponse
+     */
+    200: V2Response & {
+        structuredContent?: CreateSellOrderResponse;
+    };
+};
+
+export type SpacemoltFactionCommerceCreateSellOrderResponse = SpacemoltFactionCommerceCreateSellOrderResponses[keyof SpacemoltFactionCommerceCreateSellOrderResponses];
+
+export type SpacemoltFactionCommerceDepositCreditsData = {
+    body?: {
+        /**
+         * Credits to include in gift
+         */
+        credits?: number;
+        /**
+         * Target faction ID (for gift)
+         */
+        id?: string;
+        /**
+         * Item ID for exchange orders
+         */
+        item_id?: string;
+        /**
+         * Items to gift: {"ore_iron": 50, "fuel_cell": 10}
+         */
+        items?: {
+            [key: string]: unknown;
+        };
+        /**
+         * Gift message
+         */
+        message?: string;
+        /**
+         * Price per item in credits for exchange orders
+         */
+        price?: number;
+        /**
+         * Amount: credits to deposit/withdraw, or item quantity for exchange orders
+         */
+        quantity?: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction_commerce/deposit_credits';
+};
+
+export type SpacemoltFactionCommerceDepositCreditsErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFactionCommerceDepositCreditsResponses = {
+    /**
+     * Result. structuredContent type: FactionDepositCreditsResponse
+     */
+    200: V2Response & {
+        structuredContent?: FactionDepositCreditsResponse;
+    };
+};
+
+export type SpacemoltFactionCommerceDepositCreditsResponse = SpacemoltFactionCommerceDepositCreditsResponses[keyof SpacemoltFactionCommerceDepositCreditsResponses];
+
+export type SpacemoltFactionCommerceGiftData = {
+    body?: {
+        /**
+         * Credits to include in gift
+         */
+        credits?: number;
+        /**
+         * Target faction ID (for gift)
+         */
+        id?: string;
+        /**
+         * Item ID for exchange orders
+         */
+        item_id?: string;
+        /**
+         * Items to gift: {"ore_iron": 50, "fuel_cell": 10}
+         */
+        items?: {
+            [key: string]: unknown;
+        };
+        /**
+         * Gift message
+         */
+        message?: string;
+        /**
+         * Price per item in credits for exchange orders
+         */
+        price?: number;
+        /**
+         * Amount: credits to deposit/withdraw, or item quantity for exchange orders
+         */
+        quantity?: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction_commerce/gift';
+};
+
+export type SpacemoltFactionCommerceGiftErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFactionCommerceGiftResponses = {
+    /**
+     * Result. structuredContent type: FactionGiftResponse
+     */
+    200: V2Response & {
+        structuredContent?: FactionGiftResponse;
+    };
+};
+
+export type SpacemoltFactionCommerceGiftResponse = SpacemoltFactionCommerceGiftResponses[keyof SpacemoltFactionCommerceGiftResponses];
+
+export type SpacemoltFactionCommerceHelpData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction_commerce/help';
+};
+
+export type SpacemoltFactionCommerceHelpResponses = {
+    /**
+     * Help text
      */
     200: V2Response;
 };
 
-export type SpacemoltFactionAdminWriteRoomResponse = SpacemoltFactionAdminWriteRoomResponses[keyof SpacemoltFactionAdminWriteRoomResponses];
+export type SpacemoltFactionCommerceHelpResponse = SpacemoltFactionCommerceHelpResponses[keyof SpacemoltFactionCommerceHelpResponses];
+
+export type SpacemoltFactionCommerceWithdrawCreditsData = {
+    body?: {
+        /**
+         * Credits to include in gift
+         */
+        credits?: number;
+        /**
+         * Target faction ID (for gift)
+         */
+        id?: string;
+        /**
+         * Item ID for exchange orders
+         */
+        item_id?: string;
+        /**
+         * Items to gift: {"ore_iron": 50, "fuel_cell": 10}
+         */
+        items?: {
+            [key: string]: unknown;
+        };
+        /**
+         * Gift message
+         */
+        message?: string;
+        /**
+         * Price per item in credits for exchange orders
+         */
+        price?: number;
+        /**
+         * Amount: credits to deposit/withdraw, or item quantity for exchange orders
+         */
+        quantity?: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction_commerce/withdraw_credits';
+};
+
+export type SpacemoltFactionCommerceWithdrawCreditsErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFactionCommerceWithdrawCreditsResponses = {
+    /**
+     * Result. structuredContent type: FactionWithdrawCreditsResponse
+     */
+    200: V2Response & {
+        structuredContent?: FactionWithdrawCreditsResponse;
+    };
+};
+
+export type SpacemoltFactionCommerceWithdrawCreditsResponse = SpacemoltFactionCommerceWithdrawCreditsResponses[keyof SpacemoltFactionCommerceWithdrawCreditsResponses];
 
 export type SpacemoltIntelHelpData = {
     body?: never;
@@ -6551,9 +7404,11 @@ export type SpacemoltIntelIntelStatusErrors = {
 
 export type SpacemoltIntelIntelStatusResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionIntelStatusResponse, FactionQueryIntelResponse, FactionQueryTradeIntelResponse, FactionSubmitIntelResponse, FactionSubmitTradeIntelResponse, FactionTradeIntelStatusResponse
+     * Result. structuredContent type: FactionIntelStatusResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionIntelStatusResponse;
+    };
 };
 
 export type SpacemoltIntelIntelStatusResponse = SpacemoltIntelIntelStatusResponses[keyof SpacemoltIntelIntelStatusResponses];
@@ -6607,9 +7462,11 @@ export type SpacemoltIntelQueryIntelErrors = {
 
 export type SpacemoltIntelQueryIntelResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionIntelStatusResponse, FactionQueryIntelResponse, FactionQueryTradeIntelResponse, FactionSubmitIntelResponse, FactionSubmitTradeIntelResponse, FactionTradeIntelStatusResponse
+     * Result. structuredContent type: FactionQueryIntelResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionQueryIntelResponse;
+    };
 };
 
 export type SpacemoltIntelQueryIntelResponse = SpacemoltIntelQueryIntelResponses[keyof SpacemoltIntelQueryIntelResponses];
@@ -6663,9 +7520,11 @@ export type SpacemoltIntelQueryTradeIntelErrors = {
 
 export type SpacemoltIntelQueryTradeIntelResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionIntelStatusResponse, FactionQueryIntelResponse, FactionQueryTradeIntelResponse, FactionSubmitIntelResponse, FactionSubmitTradeIntelResponse, FactionTradeIntelStatusResponse
+     * Result. structuredContent type: FactionQueryTradeIntelResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionQueryTradeIntelResponse;
+    };
 };
 
 export type SpacemoltIntelQueryTradeIntelResponse = SpacemoltIntelQueryTradeIntelResponses[keyof SpacemoltIntelQueryTradeIntelResponses];
@@ -6719,9 +7578,11 @@ export type SpacemoltIntelSubmitIntelErrors = {
 
 export type SpacemoltIntelSubmitIntelResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionIntelStatusResponse, FactionQueryIntelResponse, FactionQueryTradeIntelResponse, FactionSubmitIntelResponse, FactionSubmitTradeIntelResponse, FactionTradeIntelStatusResponse
+     * Result. structuredContent type: FactionSubmitIntelResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionSubmitIntelResponse;
+    };
 };
 
 export type SpacemoltIntelSubmitIntelResponse = SpacemoltIntelSubmitIntelResponses[keyof SpacemoltIntelSubmitIntelResponses];
@@ -6775,9 +7636,11 @@ export type SpacemoltIntelSubmitTradeIntelErrors = {
 
 export type SpacemoltIntelSubmitTradeIntelResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionIntelStatusResponse, FactionQueryIntelResponse, FactionQueryTradeIntelResponse, FactionSubmitIntelResponse, FactionSubmitTradeIntelResponse, FactionTradeIntelStatusResponse
+     * Result. structuredContent type: FactionSubmitTradeIntelResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionSubmitTradeIntelResponse;
+    };
 };
 
 export type SpacemoltIntelSubmitTradeIntelResponse = SpacemoltIntelSubmitTradeIntelResponses[keyof SpacemoltIntelSubmitTradeIntelResponses];
@@ -6831,9 +7694,11 @@ export type SpacemoltIntelTradeIntelStatusErrors = {
 
 export type SpacemoltIntelTradeIntelStatusResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: FactionIntelStatusResponse, FactionQueryIntelResponse, FactionQueryTradeIntelResponse, FactionSubmitIntelResponse, FactionSubmitTradeIntelResponse, FactionTradeIntelStatusResponse
+     * Result. structuredContent type: FactionTradeIntelStatusResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: FactionTradeIntelStatusResponse;
+    };
 };
 
 export type SpacemoltIntelTradeIntelStatusResponse = SpacemoltIntelTradeIntelStatusResponses[keyof SpacemoltIntelTradeIntelStatusResponses];
@@ -6879,9 +7744,11 @@ export type SpacemoltMarketAnalyzeMarketErrors = {
 
 export type SpacemoltMarketAnalyzeMarketResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AnalyzeMarketResponse, CancelOrderResponse, CreateBuyOrderResponse, CreateSellOrderResponse, EstimatePurchaseResponse, ModifyOrderResponse, ViewMarketResponse, ViewOrdersResponse
+     * Result. structuredContent type: AnalyzeMarketResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: AnalyzeMarketResponse;
+    };
 };
 
 export type SpacemoltMarketAnalyzeMarketResponse = SpacemoltMarketAnalyzeMarketResponses[keyof SpacemoltMarketAnalyzeMarketResponses];
@@ -6927,9 +7794,11 @@ export type SpacemoltMarketCancelOrderErrors = {
 
 export type SpacemoltMarketCancelOrderResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AnalyzeMarketResponse, CancelOrderResponse, CreateBuyOrderResponse, CreateSellOrderResponse, EstimatePurchaseResponse, ModifyOrderResponse, ViewMarketResponse, ViewOrdersResponse
+     * Result. structuredContent type: CancelOrderResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CancelOrderResponse;
+    };
 };
 
 export type SpacemoltMarketCancelOrderResponse = SpacemoltMarketCancelOrderResponses[keyof SpacemoltMarketCancelOrderResponses];
@@ -6975,9 +7844,11 @@ export type SpacemoltMarketCreateBuyOrderErrors = {
 
 export type SpacemoltMarketCreateBuyOrderResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AnalyzeMarketResponse, CancelOrderResponse, CreateBuyOrderResponse, CreateSellOrderResponse, EstimatePurchaseResponse, ModifyOrderResponse, ViewMarketResponse, ViewOrdersResponse
+     * Result. structuredContent type: CreateBuyOrderResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CreateBuyOrderResponse;
+    };
 };
 
 export type SpacemoltMarketCreateBuyOrderResponse = SpacemoltMarketCreateBuyOrderResponses[keyof SpacemoltMarketCreateBuyOrderResponses];
@@ -7023,9 +7894,11 @@ export type SpacemoltMarketCreateSellOrderErrors = {
 
 export type SpacemoltMarketCreateSellOrderResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AnalyzeMarketResponse, CancelOrderResponse, CreateBuyOrderResponse, CreateSellOrderResponse, EstimatePurchaseResponse, ModifyOrderResponse, ViewMarketResponse, ViewOrdersResponse
+     * Result. structuredContent type: CreateSellOrderResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CreateSellOrderResponse;
+    };
 };
 
 export type SpacemoltMarketCreateSellOrderResponse = SpacemoltMarketCreateSellOrderResponses[keyof SpacemoltMarketCreateSellOrderResponses];
@@ -7071,9 +7944,11 @@ export type SpacemoltMarketEstimatePurchaseErrors = {
 
 export type SpacemoltMarketEstimatePurchaseResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AnalyzeMarketResponse, CancelOrderResponse, CreateBuyOrderResponse, CreateSellOrderResponse, EstimatePurchaseResponse, ModifyOrderResponse, ViewMarketResponse, ViewOrdersResponse
+     * Result. structuredContent type: EstimatePurchaseResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: EstimatePurchaseResponse;
+    };
 };
 
 export type SpacemoltMarketEstimatePurchaseResponse = SpacemoltMarketEstimatePurchaseResponses[keyof SpacemoltMarketEstimatePurchaseResponses];
@@ -7135,9 +8010,11 @@ export type SpacemoltMarketModifyOrderErrors = {
 
 export type SpacemoltMarketModifyOrderResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AnalyzeMarketResponse, CancelOrderResponse, CreateBuyOrderResponse, CreateSellOrderResponse, EstimatePurchaseResponse, ModifyOrderResponse, ViewMarketResponse, ViewOrdersResponse
+     * Result. structuredContent type: ModifyOrderResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ModifyOrderResponse;
+    };
 };
 
 export type SpacemoltMarketModifyOrderResponse = SpacemoltMarketModifyOrderResponses[keyof SpacemoltMarketModifyOrderResponses];
@@ -7183,9 +8060,11 @@ export type SpacemoltMarketViewMarketErrors = {
 
 export type SpacemoltMarketViewMarketResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AnalyzeMarketResponse, CancelOrderResponse, CreateBuyOrderResponse, CreateSellOrderResponse, EstimatePurchaseResponse, ModifyOrderResponse, ViewMarketResponse, ViewOrdersResponse
+     * Result. structuredContent type: ViewMarketResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ViewMarketResponse;
+    };
 };
 
 export type SpacemoltMarketViewMarketResponse = SpacemoltMarketViewMarketResponses[keyof SpacemoltMarketViewMarketResponses];
@@ -7231,9 +8110,11 @@ export type SpacemoltMarketViewOrdersErrors = {
 
 export type SpacemoltMarketViewOrdersResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: AnalyzeMarketResponse, CancelOrderResponse, CreateBuyOrderResponse, CreateSellOrderResponse, EstimatePurchaseResponse, ModifyOrderResponse, ViewMarketResponse, ViewOrdersResponse
+     * Result. structuredContent type: ViewOrdersResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ViewOrdersResponse;
+    };
 };
 
 export type SpacemoltMarketViewOrdersResponse = SpacemoltMarketViewOrdersResponses[keyof SpacemoltMarketViewOrdersResponses];
@@ -7283,9 +8164,11 @@ export type SpacemoltSalvageInsureErrors = {
 
 export type SpacemoltSalvageInsureResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: BuyInsuranceResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: BuyInsuranceResponse;
+    };
 };
 
 export type SpacemoltSalvageInsureResponse = SpacemoltSalvageInsureResponses[keyof SpacemoltSalvageInsureResponses];
@@ -7319,9 +8202,11 @@ export type SpacemoltSalvageLootErrors = {
 
 export type SpacemoltSalvageLootResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: LootWreckResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: LootWreckResponse;
+    };
 };
 
 export type SpacemoltSalvageLootResponse = SpacemoltSalvageLootResponses[keyof SpacemoltSalvageLootResponses];
@@ -7355,9 +8240,11 @@ export type SpacemoltSalvagePoliciesErrors = {
 
 export type SpacemoltSalvagePoliciesResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: ClaimInsuranceResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ClaimInsuranceResponse;
+    };
 };
 
 export type SpacemoltSalvagePoliciesResponse = SpacemoltSalvagePoliciesResponses[keyof SpacemoltSalvagePoliciesResponses];
@@ -7391,9 +8278,11 @@ export type SpacemoltSalvageQuoteErrors = {
 
 export type SpacemoltSalvageQuoteResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: GetInsuranceQuoteResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetInsuranceQuoteResponse;
+    };
 };
 
 export type SpacemoltSalvageQuoteResponse = SpacemoltSalvageQuoteResponses[keyof SpacemoltSalvageQuoteResponses];
@@ -7427,9 +8316,11 @@ export type SpacemoltSalvageReleaseErrors = {
 
 export type SpacemoltSalvageReleaseResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: ReleaseTowResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ReleaseTowResponse;
+    };
 };
 
 export type SpacemoltSalvageReleaseResponse = SpacemoltSalvageReleaseResponses[keyof SpacemoltSalvageReleaseResponses];
@@ -7463,9 +8354,11 @@ export type SpacemoltSalvageSalvageErrors = {
 
 export type SpacemoltSalvageSalvageResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: SalvageWreckResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SalvageWreckResponse;
+    };
 };
 
 export type SpacemoltSalvageSalvageResponse = SpacemoltSalvageSalvageResponses[keyof SpacemoltSalvageSalvageResponses];
@@ -7499,9 +8392,11 @@ export type SpacemoltSalvageScrapErrors = {
 
 export type SpacemoltSalvageScrapResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: ScrapWreckResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ScrapWreckResponse;
+    };
 };
 
 export type SpacemoltSalvageScrapResponse = SpacemoltSalvageScrapResponses[keyof SpacemoltSalvageScrapResponses];
@@ -7535,9 +8430,11 @@ export type SpacemoltSalvageSellErrors = {
 
 export type SpacemoltSalvageSellResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: SellWreckResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SellWreckResponse;
+    };
 };
 
 export type SpacemoltSalvageSellResponse = SpacemoltSalvageSellResponses[keyof SpacemoltSalvageSellResponses];
@@ -7571,9 +8468,11 @@ export type SpacemoltSalvageSetHomeErrors = {
 
 export type SpacemoltSalvageSetHomeResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: SetHomeBaseResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SetHomeBaseResponse;
+    };
 };
 
 export type SpacemoltSalvageSetHomeResponse = SpacemoltSalvageSetHomeResponses[keyof SpacemoltSalvageSetHomeResponses];
@@ -7607,9 +8506,11 @@ export type SpacemoltSalvageTowErrors = {
 
 export type SpacemoltSalvageTowResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: TowWreckResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: TowWreckResponse;
+    };
 };
 
 export type SpacemoltSalvageTowResponse = SpacemoltSalvageTowResponses[keyof SpacemoltSalvageTowResponses];
@@ -7643,9 +8544,11 @@ export type SpacemoltSalvageWrecksErrors = {
 
 export type SpacemoltSalvageWrecksResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BuyInsuranceResponse, ClaimInsuranceResponse, GetInsuranceQuoteResponse, GetWrecksResponse, LootWreckResponse, ReleaseTowResponse, SalvageWreckResponse, ScrapWreckResponse, SellWreckResponse, SetHomeBaseResponse, TowWreckResponse
+     * Result. structuredContent type: GetWrecksResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetWrecksResponse;
+    };
 };
 
 export type SpacemoltSalvageWrecksResponse = SpacemoltSalvageWrecksResponses[keyof SpacemoltSalvageWrecksResponses];
@@ -7687,9 +8590,11 @@ export type SpacemoltShipBrowseShipsErrors = {
 
 export type SpacemoltShipBrowseShipsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: BrowseShipsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: BrowseShipsResponse;
+    };
 };
 
 export type SpacemoltShipBrowseShipsResponse = SpacemoltShipBrowseShipsResponses[keyof SpacemoltShipBrowseShipsResponses];
@@ -7731,9 +8636,11 @@ export type SpacemoltShipBuyListedShipErrors = {
 
 export type SpacemoltShipBuyListedShipResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: BuyListedShipResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: BuyListedShipResponse;
+    };
 };
 
 export type SpacemoltShipBuyListedShipResponse = SpacemoltShipBuyListedShipResponses[keyof SpacemoltShipBuyListedShipResponses];
@@ -7775,9 +8682,11 @@ export type SpacemoltShipBuyShipErrors = {
 
 export type SpacemoltShipBuyShipResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: BuyShipResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: BuyShipResponse;
+    };
 };
 
 export type SpacemoltShipBuyShipResponse = SpacemoltShipBuyShipResponses[keyof SpacemoltShipBuyShipResponses];
@@ -7819,9 +8728,11 @@ export type SpacemoltShipCancelCommissionErrors = {
 
 export type SpacemoltShipCancelCommissionResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: CancelCommissionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CancelCommissionResponse;
+    };
 };
 
 export type SpacemoltShipCancelCommissionResponse = SpacemoltShipCancelCommissionResponses[keyof SpacemoltShipCancelCommissionResponses];
@@ -7863,9 +8774,11 @@ export type SpacemoltShipCancelShipListingErrors = {
 
 export type SpacemoltShipCancelShipListingResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: MessageResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: MessageResponse;
+    };
 };
 
 export type SpacemoltShipCancelShipListingResponse = SpacemoltShipCancelShipListingResponses[keyof SpacemoltShipCancelShipListingResponses];
@@ -7907,9 +8820,11 @@ export type SpacemoltShipClaimCommissionErrors = {
 
 export type SpacemoltShipClaimCommissionResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: ClaimCommissionResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ClaimCommissionResponse;
+    };
 };
 
 export type SpacemoltShipClaimCommissionResponse = SpacemoltShipClaimCommissionResponses[keyof SpacemoltShipClaimCommissionResponses];
@@ -7951,9 +8866,11 @@ export type SpacemoltShipCommissionQuoteErrors = {
 
 export type SpacemoltShipCommissionQuoteResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: CommissionQuoteResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CommissionQuoteResponse;
+    };
 };
 
 export type SpacemoltShipCommissionQuoteResponse = SpacemoltShipCommissionQuoteResponses[keyof SpacemoltShipCommissionQuoteResponses];
@@ -7995,9 +8912,11 @@ export type SpacemoltShipCommissionShipErrors = {
 
 export type SpacemoltShipCommissionShipResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: CommissionShipResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CommissionShipResponse;
+    };
 };
 
 export type SpacemoltShipCommissionShipResponse = SpacemoltShipCommissionShipResponses[keyof SpacemoltShipCommissionShipResponses];
@@ -8039,9 +8958,11 @@ export type SpacemoltShipCommissionStatusErrors = {
 
 export type SpacemoltShipCommissionStatusResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: CommissionStatusResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CommissionStatusResponse;
+    };
 };
 
 export type SpacemoltShipCommissionStatusResponse = SpacemoltShipCommissionStatusResponses[keyof SpacemoltShipCommissionStatusResponses];
@@ -8099,9 +9020,11 @@ export type SpacemoltShipListShipForSaleErrors = {
 
 export type SpacemoltShipListShipForSaleResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: ListShipForSaleResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ListShipForSaleResponse;
+    };
 };
 
 export type SpacemoltShipListShipForSaleResponse = SpacemoltShipListShipForSaleResponses[keyof SpacemoltShipListShipForSaleResponses];
@@ -8143,9 +9066,11 @@ export type SpacemoltShipListShipsErrors = {
 
 export type SpacemoltShipListShipsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: ListShipsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ListShipsResponse;
+    };
 };
 
 export type SpacemoltShipListShipsResponse = SpacemoltShipListShipsResponses[keyof SpacemoltShipListShipsResponses];
@@ -8187,9 +9112,11 @@ export type SpacemoltShipSellShipErrors = {
 
 export type SpacemoltShipSellShipResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: SellShipResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SellShipResponse;
+    };
 };
 
 export type SpacemoltShipSellShipResponse = SpacemoltShipSellShipResponses[keyof SpacemoltShipSellShipResponses];
@@ -8231,9 +9158,11 @@ export type SpacemoltShipShipyardShowroomErrors = {
 
 export type SpacemoltShipShipyardShowroomResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: ShipyardShowroomResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ShipyardShowroomResponse;
+    };
 };
 
 export type SpacemoltShipShipyardShowroomResponse = SpacemoltShipShipyardShowroomResponses[keyof SpacemoltShipShipyardShowroomResponses];
@@ -8275,9 +9204,11 @@ export type SpacemoltShipSwitchShipErrors = {
 
 export type SpacemoltShipSwitchShipResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: BrowseShipsResponse, BuyListedShipResponse, BuyShipResponse, CancelCommissionResponse, ClaimCommissionResponse, CommissionQuoteResponse, CommissionShipResponse, CommissionStatusResponse, ListShipForSaleResponse, ListShipsResponse, MessageResponse, SellShipResponse, ShipyardShowroomResponse, SwitchShipResponse
+     * Result. structuredContent type: SwitchShipResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SwitchShipResponse;
+    };
 };
 
 export type SpacemoltShipSwitchShipResponse = SpacemoltShipSwitchShipResponses[keyof SpacemoltShipSwitchShipResponses];
@@ -8288,6 +9219,10 @@ export type SpacemoltSocialCaptainsLogAddData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8319,9 +9254,11 @@ export type SpacemoltSocialCaptainsLogAddErrors = {
 
 export type SpacemoltSocialCaptainsLogAddResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: CaptainsLogAddResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CaptainsLogAddResponse;
+    };
 };
 
 export type SpacemoltSocialCaptainsLogAddResponse = SpacemoltSocialCaptainsLogAddResponses[keyof SpacemoltSocialCaptainsLogAddResponses];
@@ -8332,6 +9269,10 @@ export type SpacemoltSocialCaptainsLogGetData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8363,9 +9304,11 @@ export type SpacemoltSocialCaptainsLogGetErrors = {
 
 export type SpacemoltSocialCaptainsLogGetResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: CaptainsLogGetResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CaptainsLogGetResponse;
+    };
 };
 
 export type SpacemoltSocialCaptainsLogGetResponse = SpacemoltSocialCaptainsLogGetResponses[keyof SpacemoltSocialCaptainsLogGetResponses];
@@ -8376,6 +9319,10 @@ export type SpacemoltSocialCaptainsLogListData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8407,9 +9354,11 @@ export type SpacemoltSocialCaptainsLogListErrors = {
 
 export type SpacemoltSocialCaptainsLogListResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: CaptainsLogListResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CaptainsLogListResponse;
+    };
 };
 
 export type SpacemoltSocialCaptainsLogListResponse = SpacemoltSocialCaptainsLogListResponses[keyof SpacemoltSocialCaptainsLogListResponses];
@@ -8420,6 +9369,10 @@ export type SpacemoltSocialChatData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8451,9 +9404,11 @@ export type SpacemoltSocialChatErrors = {
 
 export type SpacemoltSocialChatResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: ChatResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ChatResponse;
+    };
 };
 
 export type SpacemoltSocialChatResponse = SpacemoltSocialChatResponses[keyof SpacemoltSocialChatResponses];
@@ -8464,6 +9419,10 @@ export type SpacemoltSocialCreateNoteData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8495,9 +9454,11 @@ export type SpacemoltSocialCreateNoteErrors = {
 
 export type SpacemoltSocialCreateNoteResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: CreateNoteResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: CreateNoteResponse;
+    };
 };
 
 export type SpacemoltSocialCreateNoteResponse = SpacemoltSocialCreateNoteResponses[keyof SpacemoltSocialCreateNoteResponses];
@@ -8508,6 +9469,10 @@ export type SpacemoltSocialForumCreateThreadData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8539,9 +9504,11 @@ export type SpacemoltSocialForumCreateThreadErrors = {
 
 export type SpacemoltSocialForumCreateThreadResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: ForumCreateThreadResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ForumCreateThreadResponse;
+    };
 };
 
 export type SpacemoltSocialForumCreateThreadResponse = SpacemoltSocialForumCreateThreadResponses[keyof SpacemoltSocialForumCreateThreadResponses];
@@ -8552,6 +9519,10 @@ export type SpacemoltSocialForumDeleteReplyData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8583,9 +9554,11 @@ export type SpacemoltSocialForumDeleteReplyErrors = {
 
 export type SpacemoltSocialForumDeleteReplyResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: ForumDeleteReplyResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ForumDeleteReplyResponse;
+    };
 };
 
 export type SpacemoltSocialForumDeleteReplyResponse = SpacemoltSocialForumDeleteReplyResponses[keyof SpacemoltSocialForumDeleteReplyResponses];
@@ -8596,6 +9569,10 @@ export type SpacemoltSocialForumDeleteThreadData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8627,9 +9604,11 @@ export type SpacemoltSocialForumDeleteThreadErrors = {
 
 export type SpacemoltSocialForumDeleteThreadResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: ForumDeleteThreadResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ForumDeleteThreadResponse;
+    };
 };
 
 export type SpacemoltSocialForumDeleteThreadResponse = SpacemoltSocialForumDeleteThreadResponses[keyof SpacemoltSocialForumDeleteThreadResponses];
@@ -8640,6 +9619,10 @@ export type SpacemoltSocialForumGetThreadData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8671,9 +9654,11 @@ export type SpacemoltSocialForumGetThreadErrors = {
 
 export type SpacemoltSocialForumGetThreadResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: ForumGetThreadResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ForumGetThreadResponse;
+    };
 };
 
 export type SpacemoltSocialForumGetThreadResponse = SpacemoltSocialForumGetThreadResponses[keyof SpacemoltSocialForumGetThreadResponses];
@@ -8684,6 +9669,10 @@ export type SpacemoltSocialForumListData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8715,9 +9704,11 @@ export type SpacemoltSocialForumListErrors = {
 
 export type SpacemoltSocialForumListResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: ForumListResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ForumListResponse;
+    };
 };
 
 export type SpacemoltSocialForumListResponse = SpacemoltSocialForumListResponses[keyof SpacemoltSocialForumListResponses];
@@ -8728,6 +9719,10 @@ export type SpacemoltSocialForumReplyData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8759,9 +9754,11 @@ export type SpacemoltSocialForumReplyErrors = {
 
 export type SpacemoltSocialForumReplyResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: ForumReplyResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ForumReplyResponse;
+    };
 };
 
 export type SpacemoltSocialForumReplyResponse = SpacemoltSocialForumReplyResponses[keyof SpacemoltSocialForumReplyResponses];
@@ -8772,6 +9769,10 @@ export type SpacemoltSocialForumUpvoteData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8803,9 +9804,11 @@ export type SpacemoltSocialForumUpvoteErrors = {
 
 export type SpacemoltSocialForumUpvoteResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: ForumUpvoteResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ForumUpvoteResponse;
+    };
 };
 
 export type SpacemoltSocialForumUpvoteResponse = SpacemoltSocialForumUpvoteResponses[keyof SpacemoltSocialForumUpvoteResponses];
@@ -8816,6 +9819,10 @@ export type SpacemoltSocialGetChatHistoryData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8847,9 +9854,11 @@ export type SpacemoltSocialGetChatHistoryErrors = {
 
 export type SpacemoltSocialGetChatHistoryResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: GetChatHistoryResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetChatHistoryResponse;
+    };
 };
 
 export type SpacemoltSocialGetChatHistoryResponse = SpacemoltSocialGetChatHistoryResponses[keyof SpacemoltSocialGetChatHistoryResponses];
@@ -8860,6 +9869,10 @@ export type SpacemoltSocialGetNotesData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8891,9 +9904,11 @@ export type SpacemoltSocialGetNotesErrors = {
 
 export type SpacemoltSocialGetNotesResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: GetNotesResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetNotesResponse;
+    };
 };
 
 export type SpacemoltSocialGetNotesResponse = SpacemoltSocialGetNotesResponses[keyof SpacemoltSocialGetNotesResponses];
@@ -8920,6 +9935,10 @@ export type SpacemoltSocialReadNoteData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8951,9 +9970,11 @@ export type SpacemoltSocialReadNoteErrors = {
 
 export type SpacemoltSocialReadNoteResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: ReadNoteResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: ReadNoteResponse;
+    };
 };
 
 export type SpacemoltSocialReadNoteResponse = SpacemoltSocialReadNoteResponses[keyof SpacemoltSocialReadNoteResponses];
@@ -8964,6 +9985,10 @@ export type SpacemoltSocialSetAnonymousData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -8995,9 +10020,11 @@ export type SpacemoltSocialSetAnonymousErrors = {
 
 export type SpacemoltSocialSetAnonymousResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: SetAnonymousResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SetAnonymousResponse;
+    };
 };
 
 export type SpacemoltSocialSetAnonymousResponse = SpacemoltSocialSetAnonymousResponses[keyof SpacemoltSocialSetAnonymousResponses];
@@ -9008,6 +10035,10 @@ export type SpacemoltSocialSetColorsData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -9039,9 +10070,11 @@ export type SpacemoltSocialSetColorsErrors = {
 
 export type SpacemoltSocialSetColorsResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: SetColorsResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SetColorsResponse;
+    };
 };
 
 export type SpacemoltSocialSetColorsResponse = SpacemoltSocialSetColorsResponses[keyof SpacemoltSocialSetColorsResponses];
@@ -9052,6 +10085,10 @@ export type SpacemoltSocialSetStatusData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -9083,9 +10120,11 @@ export type SpacemoltSocialSetStatusErrors = {
 
 export type SpacemoltSocialSetStatusResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: SetStatusResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: SetStatusResponse;
+    };
 };
 
 export type SpacemoltSocialSetStatusResponse = SpacemoltSocialSetStatusResponses[keyof SpacemoltSocialSetStatusResponses];
@@ -9096,6 +10135,10 @@ export type SpacemoltSocialWriteNoteData = {
          * Message text, journal entry, note body, reply content, status, or colors JSON
          */
         content?: string;
+        /**
+         * Entry index for captains_log_get (0 = newest)
+         */
+        index?: number;
         /**
          * Channel name (local/system/faction), thread ID, note ID, or reply ID
          */
@@ -9127,9 +10170,11 @@ export type SpacemoltSocialWriteNoteErrors = {
 
 export type SpacemoltSocialWriteNoteResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: CaptainsLogAddResponse, CaptainsLogGetResponse, CaptainsLogListResponse, ChatResponse, CreateNoteResponse, ForumCreateThreadResponse, ForumDeleteReplyResponse, ForumDeleteThreadResponse, ForumGetThreadResponse, ForumListResponse, ForumReplyResponse, ForumUpvoteResponse, GetChatHistoryResponse, GetNotesResponse, ReadNoteResponse, SetAnonymousResponse, SetColorsResponse, SetStatusResponse, WriteNoteResponse
+     * Result. structuredContent type: WriteNoteResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: WriteNoteResponse;
+    };
 };
 
 export type SpacemoltSocialWriteNoteResponse = SpacemoltSocialWriteNoteResponses[keyof SpacemoltSocialWriteNoteResponses];
@@ -9177,7 +10222,9 @@ export type SpacemoltStorageDepositResponses = {
     /**
      * Result. structuredContent type: GenericObjectResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GenericObjectResponse;
+    };
 };
 
 export type SpacemoltStorageDepositResponse = SpacemoltStorageDepositResponses[keyof SpacemoltStorageDepositResponses];
@@ -9241,7 +10288,9 @@ export type SpacemoltStorageViewResponses = {
     /**
      * Result. structuredContent type: GenericObjectResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GenericObjectResponse;
+    };
 };
 
 export type SpacemoltStorageViewResponse = SpacemoltStorageViewResponses[keyof SpacemoltStorageViewResponses];
@@ -9289,7 +10338,9 @@ export type SpacemoltStorageWithdrawResponses = {
     /**
      * Result. structuredContent type: GenericObjectResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GenericObjectResponse;
+    };
 };
 
 export type SpacemoltStorageWithdrawResponse = SpacemoltStorageWithdrawResponses[keyof SpacemoltStorageWithdrawResponses];
@@ -9337,9 +10388,11 @@ export type SpacemoltTransferGetTradesErrors = {
 
 export type SpacemoltTransferGetTradesResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: GetTradesResponse, MessageResponse, TradeAcceptResponse, TradeOfferResponse
+     * Result. structuredContent type: GetTradesResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetTradesResponse;
+    };
 };
 
 export type SpacemoltTransferGetTradesResponse = SpacemoltTransferGetTradesResponses[keyof SpacemoltTransferGetTradesResponses];
@@ -9403,9 +10456,11 @@ export type SpacemoltTransferTradeAcceptErrors = {
 
 export type SpacemoltTransferTradeAcceptResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: GetTradesResponse, MessageResponse, TradeAcceptResponse, TradeOfferResponse
+     * Result. structuredContent type: TradeAcceptResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: TradeAcceptResponse;
+    };
 };
 
 export type SpacemoltTransferTradeAcceptResponse = SpacemoltTransferTradeAcceptResponses[keyof SpacemoltTransferTradeAcceptResponses];
@@ -9453,9 +10508,11 @@ export type SpacemoltTransferTradeCancelErrors = {
 
 export type SpacemoltTransferTradeCancelResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: GetTradesResponse, MessageResponse, TradeAcceptResponse, TradeOfferResponse
+     * Result. structuredContent type: MessageResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: MessageResponse;
+    };
 };
 
 export type SpacemoltTransferTradeCancelResponse = SpacemoltTransferTradeCancelResponses[keyof SpacemoltTransferTradeCancelResponses];
@@ -9503,9 +10560,11 @@ export type SpacemoltTransferTradeDeclineErrors = {
 
 export type SpacemoltTransferTradeDeclineResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: GetTradesResponse, MessageResponse, TradeAcceptResponse, TradeOfferResponse
+     * Result. structuredContent type: MessageResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: MessageResponse;
+    };
 };
 
 export type SpacemoltTransferTradeDeclineResponse = SpacemoltTransferTradeDeclineResponses[keyof SpacemoltTransferTradeDeclineResponses];
@@ -9553,9 +10612,11 @@ export type SpacemoltTransferTradeOfferErrors = {
 
 export type SpacemoltTransferTradeOfferResponses = {
     /**
-     * Result. structuredContent varies by action — possible types: GetTradesResponse, MessageResponse, TradeAcceptResponse, TradeOfferResponse
+     * Result. structuredContent type: TradeOfferResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: TradeOfferResponse;
+    };
 };
 
 export type SpacemoltTransferTradeOfferResponse = SpacemoltTransferTradeOfferResponses[keyof SpacemoltTransferTradeOfferResponses];

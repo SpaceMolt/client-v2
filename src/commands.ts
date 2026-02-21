@@ -19,6 +19,8 @@ export interface CommandMeta {
   params: ParamDef[];
   /** True if the same action name exists in multiple tool groups */
   isAmbiguous: boolean;
+  /** True if this is a direct endpoint (no action segment in URL) */
+  isDirect?: boolean;
 }
 
 const entries: [string, CommandMeta][] = [
@@ -462,6 +464,15 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"Stance name (fire/evade/brace/flee), target player ID, or weapon instance ID (for reload)","required":false,"positionalIndex":0},{"name":"side_id","type":"integer","description":"Battle side to join (for engage). Omit for auto-assignment by faction.","required":false,"positionalIndex":-1},{"name":"target","type":"string","description":"Ammo item ID (for reload only)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
+  ["spacemolt_catalog/catalog", {
+    toolGroup: "spacemolt_catalog",
+    action: "catalog",
+    operationId: "spacemolt_catalog",
+    summary: "Browse game reference data",
+    params: [{"name":"type","type":"string","description":"Data type to browse","required":true,"positionalIndex":0,"enumValues":["ships","skills","recipes","items"]},{"name":"id","type":"string","description":"Look up a specific entry by ID","required":false,"positionalIndex":1},{"name":"category","type":"string","description":"Filter by category (e.g. \"ore\", \"Mining\", \"weapon\")","required":false,"positionalIndex":2},{"name":"search","type":"string","description":"Text search across names and descriptions","required":false,"positionalIndex":3},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"Results per page (default 20, max 50)","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+    isDirect: true,
+  }],
   ["spacemolt_facility/build", {
     toolGroup: "spacemolt_facility",
     action: "build",
@@ -582,22 +593,6 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, item ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
     isAmbiguous: false,
   }],
-  ["spacemolt_faction/create_buy_order", {
-    toolGroup: "spacemolt_faction",
-    action: "create_buy_order",
-    operationId: "spacemolt_faction_create_buy_order",
-    summary: "create_buy_order",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, item ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
-    isAmbiguous: true,
-  }],
-  ["spacemolt_faction/create_sell_order", {
-    toolGroup: "spacemolt_faction",
-    action: "create_sell_order",
-    operationId: "spacemolt_faction_create_sell_order",
-    summary: "create_sell_order",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, item ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
-    isAmbiguous: true,
-  }],
   ["spacemolt_faction/declare_war", {
     toolGroup: "spacemolt_faction",
     action: "declare_war",
@@ -630,14 +625,6 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, item ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
     isAmbiguous: false,
   }],
-  ["spacemolt_faction/deposit_credits", {
-    toolGroup: "spacemolt_faction",
-    action: "deposit_credits",
-    operationId: "spacemolt_faction_deposit_credits",
-    summary: "deposit_credits",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, item ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
-    isAmbiguous: false,
-  }],
   ["spacemolt_faction/deposit_items", {
     toolGroup: "spacemolt_faction",
     action: "deposit_items",
@@ -651,14 +638,6 @@ const entries: [string, CommandMeta][] = [
     action: "get_invites",
     operationId: "spacemolt_faction_get_invites",
     summary: "get_invites",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, item ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
-    isAmbiguous: false,
-  }],
-  ["spacemolt_faction/gift", {
-    toolGroup: "spacemolt_faction",
-    action: "gift",
-    operationId: "spacemolt_faction_gift",
-    summary: "gift",
     params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, item ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
     isAmbiguous: false,
   }],
@@ -766,14 +745,6 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, item ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
     isAmbiguous: false,
   }],
-  ["spacemolt_faction/withdraw_credits", {
-    toolGroup: "spacemolt_faction",
-    action: "withdraw_credits",
-    operationId: "spacemolt_faction_withdraw_credits",
-    summary: "withdraw_credits",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, item ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
-    isAmbiguous: false,
-  }],
   ["spacemolt_faction/withdraw_items", {
     toolGroup: "spacemolt_faction",
     action: "withdraw_items",
@@ -828,6 +799,46 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_faction_admin_write_room",
     summary: "write_room",
     params: [{"name":"id","type":"string","description":"Player ID (for promote) or role ID (for edit_role)","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Role ID (for promote)","required":false,"positionalIndex":1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_faction_commerce/create_buy_order", {
+    toolGroup: "spacemolt_faction_commerce",
+    action: "create_buy_order",
+    operationId: "spacemolt_faction_commerce_create_buy_order",
+    summary: "create_buy_order",
+    params: [{"name":"credits","type":"integer","description":"Credits to include in gift","required":false,"positionalIndex":-1},{"name":"id","type":"string","description":"Target faction ID (for gift)","required":false,"positionalIndex":-1},{"name":"item_id","type":"string","description":"Item ID for exchange orders","required":false,"positionalIndex":-1},{"name":"items","type":"object","description":"Items to gift: {\"ore_iron\": 50, \"fuel_cell\": 10}","required":false,"positionalIndex":-1},{"name":"message","type":"string","description":"Gift message","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Price per item in credits for exchange orders","required":false,"positionalIndex":-1},{"name":"quantity","type":"integer","description":"Amount: credits to deposit/withdraw, or item quantity for exchange orders","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_faction_commerce/create_sell_order", {
+    toolGroup: "spacemolt_faction_commerce",
+    action: "create_sell_order",
+    operationId: "spacemolt_faction_commerce_create_sell_order",
+    summary: "create_sell_order",
+    params: [{"name":"credits","type":"integer","description":"Credits to include in gift","required":false,"positionalIndex":-1},{"name":"id","type":"string","description":"Target faction ID (for gift)","required":false,"positionalIndex":-1},{"name":"item_id","type":"string","description":"Item ID for exchange orders","required":false,"positionalIndex":-1},{"name":"items","type":"object","description":"Items to gift: {\"ore_iron\": 50, \"fuel_cell\": 10}","required":false,"positionalIndex":-1},{"name":"message","type":"string","description":"Gift message","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Price per item in credits for exchange orders","required":false,"positionalIndex":-1},{"name":"quantity","type":"integer","description":"Amount: credits to deposit/withdraw, or item quantity for exchange orders","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_faction_commerce/deposit_credits", {
+    toolGroup: "spacemolt_faction_commerce",
+    action: "deposit_credits",
+    operationId: "spacemolt_faction_commerce_deposit_credits",
+    summary: "deposit_credits",
+    params: [{"name":"credits","type":"integer","description":"Credits to include in gift","required":false,"positionalIndex":-1},{"name":"id","type":"string","description":"Target faction ID (for gift)","required":false,"positionalIndex":-1},{"name":"item_id","type":"string","description":"Item ID for exchange orders","required":false,"positionalIndex":-1},{"name":"items","type":"object","description":"Items to gift: {\"ore_iron\": 50, \"fuel_cell\": 10}","required":false,"positionalIndex":-1},{"name":"message","type":"string","description":"Gift message","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Price per item in credits for exchange orders","required":false,"positionalIndex":-1},{"name":"quantity","type":"integer","description":"Amount: credits to deposit/withdraw, or item quantity for exchange orders","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_faction_commerce/gift", {
+    toolGroup: "spacemolt_faction_commerce",
+    action: "gift",
+    operationId: "spacemolt_faction_commerce_gift",
+    summary: "gift",
+    params: [{"name":"credits","type":"integer","description":"Credits to include in gift","required":false,"positionalIndex":-1},{"name":"id","type":"string","description":"Target faction ID (for gift)","required":false,"positionalIndex":-1},{"name":"item_id","type":"string","description":"Item ID for exchange orders","required":false,"positionalIndex":-1},{"name":"items","type":"object","description":"Items to gift: {\"ore_iron\": 50, \"fuel_cell\": 10}","required":false,"positionalIndex":-1},{"name":"message","type":"string","description":"Gift message","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Price per item in credits for exchange orders","required":false,"positionalIndex":-1},{"name":"quantity","type":"integer","description":"Amount: credits to deposit/withdraw, or item quantity for exchange orders","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_faction_commerce/withdraw_credits", {
+    toolGroup: "spacemolt_faction_commerce",
+    action: "withdraw_credits",
+    operationId: "spacemolt_faction_commerce_withdraw_credits",
+    summary: "withdraw_credits",
+    params: [{"name":"credits","type":"integer","description":"Credits to include in gift","required":false,"positionalIndex":-1},{"name":"id","type":"string","description":"Target faction ID (for gift)","required":false,"positionalIndex":-1},{"name":"item_id","type":"string","description":"Item ID for exchange orders","required":false,"positionalIndex":-1},{"name":"items","type":"object","description":"Items to gift: {\"ore_iron\": 50, \"fuel_cell\": 10}","required":false,"positionalIndex":-1},{"name":"message","type":"string","description":"Gift message","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Price per item in credits for exchange orders","required":false,"positionalIndex":-1},{"name":"quantity","type":"integer","description":"Amount: credits to deposit/withdraw, or item quantity for exchange orders","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_intel/intel_status", {
@@ -1147,7 +1158,7 @@ const entries: [string, CommandMeta][] = [
     action: "captains_log_add",
     operationId: "spacemolt_social_captains_log_add",
     summary: "captains_log_add",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/captains_log_get", {
@@ -1155,7 +1166,7 @@ const entries: [string, CommandMeta][] = [
     action: "captains_log_get",
     operationId: "spacemolt_social_captains_log_get",
     summary: "captains_log_get",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/captains_log_list", {
@@ -1163,7 +1174,7 @@ const entries: [string, CommandMeta][] = [
     action: "captains_log_list",
     operationId: "spacemolt_social_captains_log_list",
     summary: "captains_log_list",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/chat", {
@@ -1171,7 +1182,7 @@ const entries: [string, CommandMeta][] = [
     action: "chat",
     operationId: "spacemolt_social_chat",
     summary: "chat",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/create_note", {
@@ -1179,7 +1190,7 @@ const entries: [string, CommandMeta][] = [
     action: "create_note",
     operationId: "spacemolt_social_create_note",
     summary: "create_note",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_create_thread", {
@@ -1187,7 +1198,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_create_thread",
     operationId: "spacemolt_social_forum_create_thread",
     summary: "forum_create_thread",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_delete_reply", {
@@ -1195,7 +1206,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_delete_reply",
     operationId: "spacemolt_social_forum_delete_reply",
     summary: "forum_delete_reply",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_delete_thread", {
@@ -1203,7 +1214,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_delete_thread",
     operationId: "spacemolt_social_forum_delete_thread",
     summary: "forum_delete_thread",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_get_thread", {
@@ -1211,7 +1222,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_get_thread",
     operationId: "spacemolt_social_forum_get_thread",
     summary: "forum_get_thread",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_list", {
@@ -1219,7 +1230,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_list",
     operationId: "spacemolt_social_forum_list",
     summary: "forum_list",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_reply", {
@@ -1227,7 +1238,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_reply",
     operationId: "spacemolt_social_forum_reply",
     summary: "forum_reply",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_upvote", {
@@ -1235,7 +1246,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_upvote",
     operationId: "spacemolt_social_forum_upvote",
     summary: "forum_upvote",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/get_chat_history", {
@@ -1243,7 +1254,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_chat_history",
     operationId: "spacemolt_social_get_chat_history",
     summary: "get_chat_history",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/get_notes", {
@@ -1251,7 +1262,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_notes",
     operationId: "spacemolt_social_get_notes",
     summary: "get_notes",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/read_note", {
@@ -1259,7 +1270,7 @@ const entries: [string, CommandMeta][] = [
     action: "read_note",
     operationId: "spacemolt_social_read_note",
     summary: "read_note",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/set_anonymous", {
@@ -1267,7 +1278,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_anonymous",
     operationId: "spacemolt_social_set_anonymous",
     summary: "set_anonymous",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/set_colors", {
@@ -1275,7 +1286,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_colors",
     operationId: "spacemolt_social_set_colors",
     summary: "set_colors",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/set_status", {
@@ -1283,7 +1294,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_status",
     operationId: "spacemolt_social_set_status",
     summary: "set_status",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/write_note", {
@@ -1291,7 +1302,7 @@ const entries: [string, CommandMeta][] = [
     action: "write_note",
     operationId: "spacemolt_social_write_note",
     summary: "write_note",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2}],
+    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_storage/deposit", {
@@ -1372,4 +1383,4 @@ for (const [key, meta] of COMMAND_REGISTRY) {
   }
 }
 
-export const TOOL_GROUPS = ["spacemolt","spacemolt_auth","spacemolt_battle","spacemolt_facility","spacemolt_faction","spacemolt_faction_admin","spacemolt_intel","spacemolt_market","spacemolt_salvage","spacemolt_ship","spacemolt_social","spacemolt_storage","spacemolt_transfer"] as const;
+export const TOOL_GROUPS = ["spacemolt","spacemolt_auth","spacemolt_battle","spacemolt_catalog","spacemolt_facility","spacemolt_faction","spacemolt_faction_admin","spacemolt_faction_commerce","spacemolt_intel","spacemolt_market","spacemolt_salvage","spacemolt_ship","spacemolt_social","spacemolt_storage","spacemolt_transfer"] as const;

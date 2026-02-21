@@ -16,6 +16,18 @@ export interface ResolvedCommand {
  * 2. Short name: "travel" (only if unambiguous across tool groups)
  * 3. Returns null if not found
  */
+/**
+ * Default tool group for ambiguous action names.
+ * When a user types "sell", they almost always mean spacemolt/sell (trading),
+ * not spacemolt_salvage/sell (selling wrecks). Same for market vs faction commerce orders.
+ */
+const AMBIGUOUS_DEFAULTS: Record<string, string> = {
+  sell: 'spacemolt/sell',
+  list: 'spacemolt_faction/list',
+  create_buy_order: 'spacemolt_market/create_buy_order',
+  create_sell_order: 'spacemolt_market/create_sell_order',
+};
+
 export function resolveCommand(input: string): ResolvedCommand | null {
   // Try qualified name first (e.g., "spacemolt_market/create_sell_order" or "market/create_sell_order")
   if (input.includes('/')) {
@@ -37,6 +49,13 @@ export function resolveCommand(input: string): ResolvedCommand | null {
   if (shortKey) {
     const meta = COMMAND_REGISTRY.get(shortKey)!;
     return { toolGroup: meta.toolGroup, action: meta.action, meta };
+  }
+
+  // Try default for ambiguous commands (e.g., "sell" -> "spacemolt/sell")
+  const defaultKey = AMBIGUOUS_DEFAULTS[input];
+  if (defaultKey) {
+    const meta = COMMAND_REGISTRY.get(defaultKey);
+    if (meta) return { toolGroup: meta.toolGroup, action: meta.action, meta };
   }
 
   // Try as qualified with dot separator (e.g., "market.view_market")
@@ -64,8 +83,11 @@ export async function executeCommand(
   toolGroup: string,
   action: string,
   payload: Record<string, unknown>,
+  isDirect?: boolean,
 ): Promise<V2Response> {
-  return apiCall(`/${toolGroup}/${action}`, Object.keys(payload).length > 0 ? payload : undefined);
+  // Direct endpoints have no action segment in the URL (e.g., /spacemolt_catalog)
+  const path = isDirect ? `/${toolGroup}` : `/${toolGroup}/${action}`;
+  return apiCall(path, Object.keys(payload).length > 0 ? payload : undefined);
 }
 
 /**

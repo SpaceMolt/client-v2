@@ -30,12 +30,12 @@ const formatters: Record<string, Formatter> = {
     if (p) {
       console.log(`${c.bright}--- Player ---${c.reset}`);
       console.log(`  ${c.bright}${p.username}${c.reset} (${p.empire}) | Credits: ${c.yellow}${p.credits}${c.reset}`);
-      if (p.faction_tag) console.log(`  Faction: [${p.faction_tag}] ${p.faction_name || ''}`);
+      if (p.faction_id) console.log(`  Faction: ${p.clan_tag ? `[${p.clan_tag}] ` : ''}${p.faction_id} (${p.faction_rank || 'member'})`);
     }
 
     if (s) {
       console.log(`${c.bright}--- Ship ---${c.reset}`);
-      console.log(`  ${s.name || s.ship_class} (${s.ship_class})`);
+      console.log(`  ${s.name || s.class_name} (${s.class_id})`);
       console.log(`  Hull: ${colorHealth(s.hull as number, s.max_hull as number)} | Shield: ${colorHealth(s.shield as number, s.max_shield as number)}`);
       console.log(`  Fuel: ${s.fuel}/${s.max_fuel} | Cargo: ${s.cargo_used}/${s.cargo_capacity}`);
     }
@@ -43,7 +43,7 @@ const formatters: Record<string, Formatter> = {
     if (loc) {
       console.log(`${c.bright}--- Location ---${c.reset}`);
       console.log(`  System: ${loc.system_name || loc.system_id} | POI: ${loc.poi_name || loc.poi_id}`);
-      if (loc.docked) console.log(`  ${c.green}Docked${c.reset} at ${loc.base_name || 'station'}`);
+      if (loc.docked_at) console.log(`  ${c.green}Docked${c.reset} at ${loc.docked_at}`);
     }
 
     return true;
