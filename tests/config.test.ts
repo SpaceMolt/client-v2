@@ -28,4 +28,12 @@ describe('config', () => {
     const { GITHUB_REPO } = await import('../src/config.ts');
     expect(GITHUB_REPO).toBe('SpaceMolt/client');
   });
+
+  test('enableDebug activates debug mode', async () => {
+    const { DEBUG, enableDebug } = await import('../src/config.ts');
+    const wasBefore = DEBUG;
+    enableDebug();
+    const { DEBUG: after } = await import('../src/config.ts');
+    expect(after).toBe(true);
+  });
 });

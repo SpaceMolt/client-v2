@@ -73,7 +73,7 @@ const handlers: Record<string, NotificationHandler> = {
   },
 
   police_warning: (d, t) => {
-    console.log(`${c.dim}[${t}]${c.reset} ${c.red}${c.bright}[POLICE]${c.reset} ${d.message}`);
+    console.log(`${c.dim}[${t}]${c.reset} ${c.red}${c.bright}[POLICE]${c.reset} ${d.message || 'Warning from system police'}`);
     console.log(`  Security level: ${d.police_level || 0}, Response in: ${d.response_ticks || 0} tick(s)`);
   },
 
@@ -104,7 +104,7 @@ const handlers: Record<string, NotificationHandler> = {
   },
 
   reconnected: (d, t) => {
-    console.log(`${c.dim}[${t}]${c.reset} ${c.green}[RECONNECTED]${c.reset} ${d.message}`);
+    console.log(`${c.dim}[${t}]${c.reset} ${c.green}[RECONNECTED]${c.reset} ${d.message || 'Session reconnected'}`);
     if (d.was_pilotless) console.log(`  Ship was pilotless - recovered with ${d.ticks_remaining || 0} ticks to spare`);
   },
 
@@ -139,7 +139,7 @@ const handlers: Record<string, NotificationHandler> = {
 
   system: (d, t) => {
     if (d.type === 'gameplay_tip') {
-      console.log(`${c.dim}[${t}]${c.reset} ${c.yellow}[TIP]${c.reset} ${d.message}`);
+      console.log(`${c.dim}[${t}]${c.reset} ${c.yellow}[TIP]${c.reset} ${d.message || 'Tip'}`);
     } else {
       console.log(`${c.dim}[${t}]${c.reset} ${c.magenta}[SYSTEM]${c.reset} ${d.message || JSON.stringify(d)}`);
     }

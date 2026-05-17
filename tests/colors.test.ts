@@ -21,12 +21,10 @@ describe('colors', () => {
     }
   });
 
-  // When running in test (non-TTY), colors should be empty strings
-  test('colors are empty when stdout is not a TTY', () => {
-    // bun test runs without a TTY, so NO_COLOR behavior kicks in
-    if (!process.stdout.isTTY) {
-      expect(c.red).toBe('');
-      expect(c.reset).toBe('');
-    }
+  // Color is off by default (agent-friendly) — no --color flag or COLOR=true in test env
+  test('colors are empty by default (no --color flag)', () => {
+    expect(c.red).toBe('');
+    expect(c.reset).toBe('');
+    expect(c.bright).toBe('');
   });
 });

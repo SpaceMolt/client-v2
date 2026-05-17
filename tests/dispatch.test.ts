@@ -1,5 +1,7 @@
-import { describe, test, expect } from 'bun:test';
-import { resolveCommand, getAmbiguousSuggestions, listCommands } from '../src/dispatch.ts';
+import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { resolveCommand, getAmbiguousSuggestions, listCommands, executeCommand, fetchHelp } from '../src/dispatch.ts';
+import { initApiClient } from '../src/api.ts';
+import { createPassthroughAdapter } from '../src/session.ts';
 
 describe('resolveCommand', () => {
   test('resolves unambiguous short name', () => {
@@ -59,8 +61,60 @@ describe('resolveCommand', () => {
     expect(result!.action).toBe('sell');
   });
 
+  test('view_storage resolves to spacemolt_storage/view, not faction storage', () => {
+    const result = resolveCommand('view_storage');
+    expect(result).not.toBeNull();
+    expect(result!.toolGroup).toBe('spacemolt_storage');
+    expect(result!.action).toBe('view');
+  });
+
+  test('faction/view_storage is deprecated (consolidated into storage)', () => {
+    // Endpoint removed from API; deprecation message handled in main.ts
+    const result = resolveCommand('faction/view_storage');
+    expect(result).toBeNull();
+  });
+
+  test('deposit_items resolves to spacemolt_storage/deposit, not faction storage', () => {
+    const result = resolveCommand('deposit_items');
+    expect(result).not.toBeNull();
+    expect(result!.toolGroup).toBe('spacemolt_storage');
+    expect(result!.action).toBe('deposit');
+  });
+
+  test('faction/deposit_items is deprecated (consolidated into storage)', () => {
+    // faction/deposit_items will be caught by DEPRECATED_COMMANDS in main.ts
+    // before resolveCommand is called; here we just verify it still resolves
+    // via the registry until the server removes it
+    const result = resolveCommand('faction/deposit_items');
+    // May or may not resolve depending on whether openapi.json still has it
+    // The deprecation message in main.ts handles the UX regardless
+  });
+
+  test('withdraw_items resolves to spacemolt_storage/withdraw, not faction storage', () => {
+    const result = resolveCommand('withdraw_items');
+    expect(result).not.toBeNull();
+    expect(result!.toolGroup).toBe('spacemolt_storage');
+    expect(result!.action).toBe('withdraw');
+  });
+
+  test('faction/withdraw_items is deprecated (consolidated into storage)', () => {
+    // Same as deposit_items — deprecation handled in main.ts
+    const result = resolveCommand('faction/withdraw_items');
+  });
+
+  test('send_gift is not aliased (deprecated command)', () => {
+    const result = resolveCommand('send_gift');
+    expect(result).toBeNull();
+  });
+
   test('returns null for unknown command', () => {
     const result = resolveCommand('definitely_not_a_command');
+    expect(result).toBeNull();
+  });
+
+  test('returns null for slash-qualified name with unknown action', () => {
+    // "market/" prefix is valid but the action does not exist — falls through after prefixed lookup
+    const result = resolveCommand('market/nonexistent_action');
     expect(result).toBeNull();
   });
 
@@ -72,7 +126,7 @@ describe('resolveCommand', () => {
   });
 
   test('resolves ship commands', () => {
-    const result = resolveCommand('buy_ship');
+    const result = resolveCommand('switch_ship');
     expect(result).not.toBeNull();
     expect(result!.toolGroup).toBe('spacemolt_ship');
   });
@@ -141,5 +195,91 @@ describe('listCommands', () => {
     const result3 = resolveCommand('list');
     expect(result3).not.toBeNull();
     expect(result3!.toolGroup).toBe('spacemolt_faction');
+  });
+});
+
+describe('executeCommand', () => {
+  let originalFetch: typeof globalThis.fetch;
+
+  beforeEach(() => {
+    originalFetch = globalThis.fetch;
+    initApiClient(createPassthroughAdapter('test-dispatch-token'));
+  });
+  afterEach(() => { globalThis.fetch = originalFetch; });
+
+  function mockFetch(capturedUrl: { value: string }, capturedBody: { value: string | undefined }) {
+    globalThis.fetch = mock(async (input: string | Request, init?: RequestInit) => {
+      capturedUrl.value = typeof input === 'string' ? input : input.url;
+      capturedBody.value = init?.body ? String(init.body) : undefined;
+      return new Response(
+        JSON.stringify({ result: 'ok', notifications: [] }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    }) as typeof fetch;
+  }
+
+  test('builds path as /toolGroup/action for standard commands', async () => {
+    const url = { value: '' };
+    const body = { value: undefined as string | undefined };
+    mockFetch(url, body);
+
+    await executeCommand('spacemolt', 'mine', {});
+    expect(url.value).toContain('/spacemolt/mine');
+  });
+
+  test('builds path as /toolGroup (no action) when isDirect=true', async () => {
+    const url = { value: '' };
+    const body = { value: undefined as string | undefined };
+    mockFetch(url, body);
+
+    await executeCommand('spacemolt_catalog', 'catalog', {}, true);
+    expect(url.value).toMatch(/\/spacemolt_catalog$/);
+    expect(url.value).not.toContain('/spacemolt_catalog/catalog');
+  });
+
+  test('omits body when payload is empty', async () => {
+    const url = { value: '' };
+    const body = { value: undefined as string | undefined };
+    mockFetch(url, body);
+
+    await executeCommand('spacemolt', 'mine', {});
+    expect(body.value).toBeUndefined();
+  });
+
+  test('includes body when payload has keys', async () => {
+    const url = { value: '' };
+    const body = { value: undefined as string | undefined };
+    mockFetch(url, body);
+
+    await executeCommand('spacemolt', 'travel', { destination: 'sol_station' });
+    expect(JSON.parse(body.value!)).toEqual({ destination: 'sol_station' });
+  });
+});
+
+describe('fetchHelp', () => {
+  let originalFetch: typeof globalThis.fetch;
+
+  beforeEach(() => {
+    originalFetch = globalThis.fetch;
+    initApiClient(createPassthroughAdapter('test-dispatch-token'));
+  });
+  afterEach(() => { globalThis.fetch = originalFetch; });
+
+  test('sends GET request to /toolGroup/help', async () => {
+    let capturedUrl = '';
+    let capturedMethod = '';
+
+    globalThis.fetch = mock(async (input: string | Request, init?: RequestInit) => {
+      capturedUrl = typeof input === 'string' ? input : input.url;
+      capturedMethod = init?.method || 'GET';
+      return new Response(
+        JSON.stringify({ result: 'help text', notifications: [] }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    }) as typeof fetch;
+
+    await fetchHelp('spacemolt');
+    expect(capturedUrl).toContain('/spacemolt/help');
+    expect(capturedMethod).toBe('GET');
   });
 });

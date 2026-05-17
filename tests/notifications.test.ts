@@ -404,6 +404,37 @@ describe('displayNotifications', () => {
     expect(lines.some(l => l.includes('val1'))).toBe(true);
   });
 
+  test('handles player_died with clone_cost and insurance_payout', () => {
+    const lines = captureOutput(() =>
+      displayNotifications([
+        {
+          type: 'player_died',
+          data: {
+            cause: 'combat',
+            killer_name: 'Pirate',
+            respawn_base: 'home',
+            clone_cost: 500,
+            insurance_payout: 200,
+          },
+        },
+      ]),
+    );
+    expect(lines.some(l => l.includes('Clone cost'))).toBe(true);
+    expect(lines.some(l => l.includes('500'))).toBe(true);
+    expect(lines.some(l => l.includes('Insurance payout'))).toBe(true);
+    expect(lines.some(l => l.includes('200'))).toBe(true);
+  });
+
+  test('handler crash falls back to raw JSON output', () => {
+    // scan_result handler calls revealed_info.join() — passing a number makes it throw
+    const lines = captureOutput(() =>
+      displayNotifications([
+        { type: 'scan_result', data: { success: true, revealed_info: 42 } },
+      ]),
+    );
+    expect(lines[0]).toContain('SCAN_RESULT');
+  });
+
   test('handles msg_type field as fallback for type', () => {
     const lines = captureOutput(() =>
       displayNotifications([

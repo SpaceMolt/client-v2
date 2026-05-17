@@ -247,3 +247,178 @@ describe('parseArgs error handling via subprocess', () => {
     expect(stderr).toContain('Invalid integer value');
   });
 });
+
+describe('Global flags via subprocess', () => {
+  const CLI = join(import.meta.dir, '..', 'src', 'main.ts');
+
+  test('--help on a command shows help for that command', async () => {
+    const proc = Bun.spawn(['bun', 'run', CLI, 'sell', '--help'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: { ...process.env, SPACEMOLT_NO_UPDATE_CHECK: 'true' },
+    });
+    const stdout = await new Response(proc.stdout).text();
+    await proc.exited;
+    expect(proc.exitCode).toBe(0);
+    expect(stdout).toContain('spacemolt/sell');
+    expect(stdout).toContain('Parameters:');
+  });
+
+  test('--help before command also works', async () => {
+    const proc = Bun.spawn(['bun', 'run', CLI, '--help', 'sell'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: { ...process.env, SPACEMOLT_NO_UPDATE_CHECK: 'true' },
+    });
+    const stdout = await new Response(proc.stdout).text();
+    await proc.exited;
+    expect(proc.exitCode).toBe(0);
+    expect(stdout).toContain('spacemolt/sell');
+    expect(stdout).toContain('Parameters:');
+  });
+
+  test('--debug enables debug output on stderr', async () => {
+    const proc = Bun.spawn(['bun', 'run', CLI, '--debug', 'get_status'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: {
+        ...process.env,
+        SPACEMOLT_NO_UPDATE_CHECK: 'true',
+        SPACEMOLT_URL: 'http://localhost:1',
+      },
+    });
+    const stderr = await new Response(proc.stderr).text();
+    await proc.exited;
+    // Command will fail at network, but debug output should appear first
+    expect(stderr).toContain('[dispatch]');
+  });
+
+  test('output has no ANSI codes by default', async () => {
+    const proc = Bun.spawn(['bun', 'run', CLI, '--help'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: { ...process.env, SPACEMOLT_NO_UPDATE_CHECK: 'true' },
+    });
+    const stdout = await new Response(proc.stdout).text();
+    await proc.exited;
+    expect(proc.exitCode).toBe(0);
+    // No ANSI escape codes
+    expect(stdout).not.toContain('\x1b[');
+  });
+
+  test('flags are stripped from command args', async () => {
+    // --debug should not be passed as an arg to the command
+    const proc = Bun.spawn(['bun', 'run', CLI, 'help', 'sell', '--debug'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: { ...process.env, SPACEMOLT_NO_UPDATE_CHECK: 'true' },
+    });
+    const stdout = await new Response(proc.stdout).text();
+    await proc.exited;
+    expect(proc.exitCode).toBe(0);
+    expect(stdout).toContain('spacemolt/sell');
+  });
+
+  test('help text shows flags section', async () => {
+    const proc = Bun.spawn(['bun', 'run', CLI, '--help'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: { ...process.env, SPACEMOLT_NO_UPDATE_CHECK: 'true' },
+    });
+    const stdout = await new Response(proc.stdout).text();
+    await proc.exited;
+    expect(stdout).toContain('Flags:');
+    expect(stdout).toContain('--json');
+    expect(stdout).toContain('--debug');
+    expect(stdout).toContain('--session');
+    expect(stdout).toContain('-h');
+  });
+
+  test('--version works from any position', async () => {
+    const proc = Bun.spawn(['bun', 'run', CLI, '--debug', '--version'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: { ...process.env, SPACEMOLT_NO_UPDATE_CHECK: 'true' },
+    });
+    const stdout = await new Response(proc.stdout).text();
+    await proc.exited;
+    expect(proc.exitCode).toBe(0);
+    expect(stdout).toContain('SpaceMolt CLI v');
+  });
+
+  test('-- stops flag processing', async () => {
+    // "spacemolt help -- --help" should try to look up "--help" as a topic, not show help
+    const proc = Bun.spawn(['bun', 'run', CLI, 'help', '--', '--help'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: { ...process.env, SPACEMOLT_NO_UPDATE_CHECK: 'true' },
+    });
+    const stderr = await new Response(proc.stderr).text();
+    await proc.exited;
+    // Should try to resolve "--help" as a command/topic, not show general help
+    expect(stderr).toContain('Unknown help topic');
+  });
+
+  test('--help on unknown command shows error', async () => {
+    const proc = Bun.spawn(['bun', 'run', CLI, 'totally_fake', '--help'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: { ...process.env, SPACEMOLT_NO_UPDATE_CHECK: 'true' },
+    });
+    const stderr = await new Response(proc.stderr).text();
+    await proc.exited;
+    expect(stderr).toContain('Unknown help topic');
+  });
+
+  test('--session without value shows error', async () => {
+    const proc = Bun.spawn(['bun', 'run', CLI, '--session'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: { ...process.env, SPACEMOLT_NO_UPDATE_CHECK: 'true' },
+    });
+    const stderr = await new Response(proc.stderr).text();
+    await proc.exited;
+    expect(proc.exitCode).toBe(1);
+    expect(stderr).toContain('--session requires a session token');
+  });
+
+  test('--session sends provided token and skips session file', async () => {
+    const dir = join(TEST_DIR, 'session-flag');
+    mkdirSync(dir, { recursive: true });
+    const sessionPath = join(dir, 'session.json');
+
+    const proc = Bun.spawn(
+      ['bun', 'run', CLI, '--session', 'explicit-token-abc', '--debug', 'get_status'],
+      {
+        stdout: 'pipe',
+        stderr: 'pipe',
+        env: {
+          ...process.env,
+          SPACEMOLT_NO_UPDATE_CHECK: 'true',
+          SPACEMOLT_URL: 'http://localhost:1',  // unreachable — will fail at fetch
+          SPACEMOLT_SESSION: sessionPath,        // session file path (should not be created)
+        },
+      },
+    );
+    const stderr = await new Response(proc.stderr).text();
+    await proc.exited;
+
+    // Debug output should show the explicit token being used (truncated to 8 chars in debug log)
+    expect(stderr).toContain('session=explicit');
+
+    // No session file should be created
+    const { existsSync } = await import('fs');
+    expect(existsSync(sessionPath)).toBe(false);
+  });
+
+  test('help text mentions --session flag', async () => {
+    const proc = Bun.spawn(['bun', 'run', CLI, '--help'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: { ...process.env, SPACEMOLT_NO_UPDATE_CHECK: 'true' },
+    });
+    const stdout = await new Response(proc.stdout).text();
+    await proc.exited;
+    expect(stdout).toContain('--session');
+  });
+});

@@ -107,11 +107,50 @@ describe('coerceValue', () => {
     expect(coerceValue('false', 'boolean')).toBe(false);
   });
 
-  test('non-boolean string stays as string', () => {
-    expect(coerceValue('yes', 'boolean')).toBe('yes');
+  test('non-boolean string throws ArgError', () => {
+    expect(() => coerceValue('yes', 'boolean')).toThrow('Invalid boolean value');
   });
 
   test('string type passes through', () => {
     expect(coerceValue('hello', 'string')).toBe('hello');
+  });
+
+  test('number type uses parseFloat', () => {
+    expect(coerceValue('3.14', 'number')).toBe(3.14);
+  });
+
+  test('number type handles integers', () => {
+    expect(coerceValue('42', 'number')).toBe(42);
+  });
+
+  test('NaN number throws ArgError', () => {
+    expect(() => coerceValue('abc', 'number')).toThrow('Invalid number value');
+  });
+});
+
+describe('parseArgs required param validation', () => {
+  const requiredMeta: CommandMeta = {
+    toolGroup: 'spacemolt',
+    action: 'sell',
+    operationId: 'spacemolt_sell',
+    summary: 'sell',
+    params: [
+      { name: 'id', type: 'string', description: '', required: true, positionalIndex: 0 },
+      { name: 'quantity', type: 'integer', description: '', required: true, positionalIndex: 1 },
+    ],
+    isAmbiguous: false,
+  };
+
+  test('throws on missing required params with no args', () => {
+    expect(() => parseArgs(['sell'], requiredMeta)).toThrow('Missing required parameter');
+  });
+
+  test('throws on partially missing required params', () => {
+    expect(() => parseArgs(['sell', 'ore_iron'], requiredMeta)).toThrow('Missing required parameter');
+  });
+
+  test('passes when all required params provided', () => {
+    const result = parseArgs(['sell', 'ore_iron', '10'], requiredMeta);
+    expect(result.payload).toEqual({ id: 'ore_iron', quantity: 10 });
   });
 });

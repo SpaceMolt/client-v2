@@ -315,6 +315,37 @@ describe('UpdateChecker.check', () => {
     expect(existsSync(cachePath)).toBe(true);
   });
 
+  test('fireAndForget runs check without blocking', async () => {
+    const { checker } = makeChecker('fire-forget', { currentVersion: '1.0.0' });
+
+    globalThis.fetch = mock(async () =>
+      new Response(
+        JSON.stringify({ tag_name: 'v2.0.0' }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+    ) as typeof fetch;
+
+    const origError = console.error;
+    console.error = mock(() => {}) as typeof console.error;
+
+    checker.fireAndForget(); // returns void immediately
+    await Bun.sleep(50);     // let the async check complete
+
+    console.error = origError;
+  });
+
+  test('fireAndForget swallows errors from check', async () => {
+    const { checker } = makeChecker('fire-forget-err', { currentVersion: '1.0.0' });
+
+    globalThis.fetch = mock(async () => {
+      throw new Error('Network down');
+    }) as typeof fetch;
+
+    // Should not propagate any rejection
+    checker.fireAndForget();
+    await Bun.sleep(10);
+  });
+
   test('handles empty tag_name gracefully', async () => {
     const { checker } = makeChecker('empty-tag', { currentVersion: '1.0.0' });
 

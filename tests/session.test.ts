@@ -1,8 +1,9 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
-import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync, chmodSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { SessionManager, type MultiSessionFile } from '../src/session.ts';
+import { SessionStore } from '../src/session-store.ts';
 
 const TEST_DIR = join(tmpdir(), `spacemolt-sess-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
 
@@ -556,5 +557,110 @@ describe('SessionManager - getValidSession', () => {
 
     const session = await manager.getValidSession();
     expect(session.id).toBe('fresh-sess');
+  });
+});
+
+describe('SessionManager - credential warning', () => {
+  test('warning fires for new account but not on re-login', () => {
+    const { manager } = makeManager('cred-warn');
+
+    manager.saveSession({ id: 's1', created_at: '2026-01-01T00:00:00Z', expires_at: '2099-12-31T23:59:59Z' });
+
+    const warnings: string[] = [];
+    const origError = console.error;
+    console.error = mock((...args: unknown[]) => {
+      const msg = args.map(String).join(' ');
+      if (msg.includes('Credentials stored in plaintext')) warnings.push(msg);
+    }) as typeof console.error;
+
+    // First login with User1 — new account, warning should fire
+    manager.storeCredentials('User1', 'pass1');
+    expect(warnings).toHaveLength(1);
+
+    // Re-login with User1 — existing account, no second warning
+    manager.storeCredentials('User1', 'newpass');
+    expect(warnings).toHaveLength(1);
+
+    console.error = origError;
+  });
+});
+
+describe('SessionStore - save error handling', () => {
+  test('throws descriptive error when directory is not writable', () => {
+    const dir = join(TEST_DIR, 'save-fail');
+    mkdirSync(dir, { recursive: true });
+    const store = new SessionStore(join(dir, 'session.json'), false);
+    store.load(); // initialize in-memory cache
+
+    // Make directory read-only so writeFileSync fails
+    chmodSync(dir, 0o555);
+    try {
+      expect(() => store.save()).toThrow('Session file write failed');
+    } finally {
+      chmodSync(dir, 0o755); // restore for cleanup
+    }
+  });
+});
+
+describe('SessionStore - gitignore detection', () => {
+  test('creates .gitignore when .git exists and no .gitignore present', () => {
+    const root = join(TEST_DIR, 'git-create');
+    mkdirSync(join(root, '.git'), { recursive: true });
+    const store = new SessionStore(join(root, '.spacemolt-session.json'), false);
+    store.load();
+    store.save();
+
+    const gitignorePath = join(root, '.gitignore');
+    expect(existsSync(gitignorePath)).toBe(true);
+    expect(readFileSync(gitignorePath, 'utf-8')).toContain('.spacemolt-session.json');
+  });
+
+  test('appends to existing .gitignore when entry is missing', () => {
+    const root = join(TEST_DIR, 'git-append');
+    mkdirSync(join(root, '.git'), { recursive: true });
+    writeFileSync(join(root, '.gitignore'), 'node_modules\n.env\n');
+    const store = new SessionStore(join(root, '.spacemolt-session.json'), false);
+    store.load();
+    store.save();
+
+    const content = readFileSync(join(root, '.gitignore'), 'utf-8');
+    expect(content).toContain('node_modules');
+    expect(content).toContain('.spacemolt-session.json');
+  });
+
+  test('does not duplicate entry when already present in .gitignore', () => {
+    const root = join(TEST_DIR, 'git-no-dup');
+    mkdirSync(join(root, '.git'), { recursive: true });
+    writeFileSync(join(root, '.gitignore'), '.spacemolt-session.json\n');
+    const store = new SessionStore(join(root, '.spacemolt-session.json'), false);
+    store.load();
+    store.save();
+
+    const content = readFileSync(join(root, '.gitignore'), 'utf-8');
+    const matches = content.split('\n').filter(l => l.trim() === '.spacemolt-session.json');
+    expect(matches).toHaveLength(1);
+  });
+
+  test('does nothing when no .git directory exists', () => {
+    const dir = join(TEST_DIR, 'git-none');
+    mkdirSync(dir, { recursive: true });
+    const store = new SessionStore(join(dir, '.spacemolt-session.json'), false);
+    store.load();
+    store.save();
+
+    expect(existsSync(join(dir, '.gitignore'))).toBe(false);
+  });
+
+  test('gitignore check only runs on the first save', () => {
+    const root = join(TEST_DIR, 'git-once');
+    mkdirSync(join(root, '.git'), { recursive: true });
+    const store = new SessionStore(join(root, '.spacemolt-session.json'), false);
+    store.load();
+    store.save(); // first save — creates .gitignore
+
+    // Remove .gitignore to verify a second save does not re-create it
+    unlinkSync(join(root, '.gitignore'));
+    store.save(); // second save — gitignoreChecked is true, no-ops
+    expect(existsSync(join(root, '.gitignore'))).toBe(false);
   });
 });

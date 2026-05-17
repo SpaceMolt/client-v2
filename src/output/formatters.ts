@@ -85,28 +85,31 @@ const formatters: Record<string, Formatter> = {
     const totalPages = data.total_pages as number || 1;
     const total = data.total as number || items.length;
 
-    console.log(`${c.bright}Catalog: ${type}${c.reset} ${c.dim}(${total} total, page ${page}/${totalPages})${c.reset}\n`);
+    const header = `${c.bright}Catalog: ${type}${c.reset} ${c.dim}(${total} total, page ${page}/${totalPages})${c.reset}\n`;
 
     switch (type) {
       case 'ships':
+        console.log(header);
         for (const ship of items) {
           const tier = ship.tier !== undefined ? ` T${ship.tier}` : '';
           const cat = ship.category ? ` ${c.dim}[${ship.category}]${c.reset}` : '';
-          console.log(`  ${c.bright}${ship.name}${c.reset}${tier}${cat} — ${c.yellow}${(ship.price as number)?.toLocaleString()} cr${c.reset}`);
+          console.log(`  ${c.bright}${ship.name}${c.reset}${tier}${cat} — ${c.yellow}${(ship.price as number ?? 0).toLocaleString()} cr${c.reset}`);
           console.log(`    ${c.dim}Hull: ${ship.base_hull} | Shield: ${ship.base_shield} | Cargo: ${ship.cargo_capacity} | Weapons: ${ship.weapon_slots} | Speed: ${ship.base_speed}${c.reset}`);
         }
         break;
 
       case 'items':
+        console.log(header);
         for (const item of items) {
           const cat = item.category || item.type || '';
           const size = item.size !== undefined ? ` (size ${item.size})` : '';
-          console.log(`  ${c.bright}${item.name || item.id}${c.reset} ${c.dim}[${cat}]${c.reset}${size} — ${c.yellow}${(item.base_value as number || 0).toLocaleString()} cr${c.reset}`);
+          console.log(`  ${c.bright}${item.name || item.id}${c.reset} ${c.dim}[${cat}]${c.reset}${size} — ${c.yellow}${(item.base_value as number ?? 0).toLocaleString()} cr${c.reset}`);
           if (item.description) console.log(`    ${c.dim}${item.description}${c.reset}`);
         }
         break;
 
       case 'skills':
+        console.log(header);
         for (const skill of items) {
           const cat = skill.category ? ` ${c.dim}[${skill.category}]${c.reset}` : '';
           const maxLvl = skill.max_level !== undefined ? ` (max ${skill.max_level})` : '';
@@ -116,6 +119,7 @@ const formatters: Record<string, Formatter> = {
         break;
 
       case 'recipes':
+        console.log(header);
         for (const recipe of items) {
           const cat = recipe.category ? ` ${c.dim}[${recipe.category}]${c.reset}` : '';
           const time = recipe.crafting_time !== undefined ? ` ${c.dim}(${recipe.crafting_time} ticks)${c.reset}` : '';
@@ -131,7 +135,12 @@ const formatters: Record<string, Formatter> = {
         break;
 
       default:
-        return false;
+        // Unknown catalog type — show header + generic list of item names/ids
+        console.log(header);
+        for (const item of items) {
+          console.log(`  ${c.bright}${item.name || item.id || JSON.stringify(item)}${c.reset}`);
+        }
+        break;
     }
 
     if (totalPages > 1) {

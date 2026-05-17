@@ -6,19 +6,23 @@ const MAX_RETRIES = 3;
 
 export interface ApiClientOptions {
   apiBase: string;
-  debug: boolean;
+  debug: boolean | (() => boolean);
   session: SessionAdapter;
 }
 
 export class ApiClient {
   private readonly apiBase: string;
-  private readonly debug: boolean;
+  private readonly _debug: boolean | (() => boolean);
   private readonly session: SessionAdapter;
 
   constructor(opts: ApiClientOptions) {
     this.apiBase = opts.apiBase;
-    this.debug = opts.debug;
+    this._debug = opts.debug;
     this.session = opts.session;
+  }
+
+  private get debug(): boolean {
+    return typeof this._debug === 'function' ? this._debug() : this._debug;
   }
 
   async call(
@@ -46,7 +50,7 @@ export class ApiClient {
           'X-Session-Id': session.id,
         },
         body: body ? JSON.stringify(body) : undefined,
-        signal: AbortSignal.timeout(30_000),
+        signal: AbortSignal.timeout(300_000),
       });
     } catch (err) {
       throw new Error(`Connection failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -77,7 +81,7 @@ export class ApiClient {
     }
 
     // Handle session expiry — create new session and re-auth
-    if (data.error?.code === 'session_invalid' || data.error?.code === 'session_expired') {
+    if (data.error?.code === 'session_invalid' || data.error?.code === 'session_expired' || data.error?.code === 'not_authenticated') {
       if (retryCount >= MAX_RETRIES) return data;
 
       if (this.debug) console.error('[api] Session expired, refreshing...');
@@ -97,8 +101,8 @@ export class ApiClient {
     if (data.error?.code === 'rate_limited') {
       if (retryCount >= MAX_RETRIES) return data;
 
-      const waitSeconds = (data.error as Record<string, unknown>).wait_seconds;
-      const waitMs = typeof waitSeconds === 'number' ? waitSeconds * 1000 : 10_000;
+      const retryAfter = (data.error as Record<string, unknown>).retry_after;
+      const waitMs = typeof retryAfter === 'number' ? retryAfter * 1000 : 10_000;
       const { c } = await import('./output/colors.ts');
       console.error(`${c.yellow}Rate limited, waiting ${(waitMs / 1000).toFixed(1)}s...${c.reset}`);
       await Bun.sleep(waitMs);
@@ -132,7 +136,7 @@ export class ApiClient {
       headers: {
         'X-Session-Id': session.id,
       },
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(300_000),
     });
 
     const contentType = response.headers.get('content-type') || '';
@@ -161,13 +165,22 @@ const defaultSessionAdapter: SessionAdapter = {
   clearSession: _clear,
 };
 
-const defaultClient = new ApiClient({
+let activeClient = new ApiClient({
   apiBase: API_BASE,
-  debug: DEBUG,
+  debug: () => DEBUG,
   session: defaultSessionAdapter,
 });
 
+/** Replace the active API client (e.g., to use a passthrough session adapter). */
+export function initApiClient(session: SessionAdapter): void {
+  activeClient = new ApiClient({
+    apiBase: API_BASE,
+    debug: () => DEBUG,
+    session,
+  });
+}
+
 // Module-level exports for backwards compatibility
 export const apiCall = (path: string, body?: Record<string, unknown>, retryCount?: number) =>
-  defaultClient.call(path, body, retryCount);
-export const apiGet = (path: string) => defaultClient.get(path);
+  activeClient.call(path, body, retryCount);
+export const apiGet = (path: string) => activeClient.get(path);

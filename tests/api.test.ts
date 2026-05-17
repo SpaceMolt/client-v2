@@ -1,8 +1,8 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
-import { mkdirSync, rmSync, readFileSync } from 'fs';
+import { mkdirSync, rmSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { SessionManager, type MultiSessionFile } from '../src/session.ts';
+import { SessionManager, createPassthroughAdapter, type MultiSessionFile } from '../src/session.ts';
 import { ApiClient } from '../src/api.ts';
 
 const TEST_DIR = join(tmpdir(), `spacemolt-api-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
@@ -175,6 +175,54 @@ describe('ApiClient.call', () => {
     expect(apiCallCount).toBe(2);
   });
 
+  test('retries on not_authenticated with credentials', async () => {
+    const { client, session } = makeClient('retry-not-auth');
+    session.saveSession({
+      id: 'old-sess',
+      created_at: '2026-01-01T00:00:00Z',
+      expires_at: '2099-12-31T23:59:59Z',
+      username: 'RetryUser',
+      password: 'RetryPass',
+    });
+
+    let apiCallCount = 0;
+
+    globalThis.fetch = mock(async (input: string | Request, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : input.url;
+
+      if (url.endsWith('/session') && init?.method === 'POST') {
+        return new Response(
+          JSON.stringify({ session: { id: 'new-s', created_at: '2026-01-01T00:00:00Z', expires_at: '2099-12-31T23:59:59Z' } }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+
+      if (url.includes('/login')) {
+        return new Response(
+          JSON.stringify({ session: { id: 'reauth-s', expires_at: '2099-12-31T23:59:59Z', player_id: 'p1' } }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+
+      apiCallCount++;
+      if (apiCallCount === 1) {
+        return new Response(
+          JSON.stringify({ error: { code: 'not_authenticated', message: 'Session expired server-side' } }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ result: 'success after retry', notifications: [] }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    }) as typeof fetch;
+
+    const result = await client.call('/spacemolt/get_status');
+    expect(result.result).toBe('success after retry');
+    expect(apiCallCount).toBe(2);
+  });
+
   test('gives up after max retries', async () => {
     const { client, session } = makeClient('maxretry');
     session.saveSession({
@@ -314,5 +362,70 @@ describe('ApiClient.get', () => {
 
     const result = await client.get('/spacemolt/help');
     expect(result.result).toBe('Plain help text');
+  });
+});
+
+describe('ApiClient with passthrough session adapter', () => {
+  let originalFetch: typeof globalThis.fetch;
+
+  beforeEach(() => { originalFetch = globalThis.fetch; });
+  afterEach(() => { globalThis.fetch = originalFetch; });
+
+  test('sends the provided token as X-Session-Id', async () => {
+    const adapter = createPassthroughAdapter('my-explicit-token-123');
+    const client = new ApiClient({ apiBase: API_BASE, debug: false, session: adapter });
+
+    let capturedHeaders: Record<string, string> = {};
+
+    globalThis.fetch = mock(async (_input: string | Request, init?: RequestInit) => {
+      capturedHeaders = Object.fromEntries(new Headers(init?.headers).entries());
+      return new Response(
+        JSON.stringify({ result: 'ok', notifications: [] }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    }) as typeof fetch;
+
+    await client.call('/spacemolt/get_status');
+    expect(capturedHeaders['x-session-id']).toBe('my-explicit-token-123');
+  });
+
+  test('saveSession is a no-op (no file created)', async () => {
+    const adapter = createPassthroughAdapter('token-abc');
+    const client = new ApiClient({ apiBase: API_BASE, debug: false, session: adapter });
+
+    const sessionDir = join(TEST_DIR, 'passthrough-noop');
+    mkdirSync(sessionDir, { recursive: true });
+    const sessionPath = join(sessionDir, 'session.json');
+
+    globalThis.fetch = mock(async () =>
+      new Response(
+        JSON.stringify({
+          result: 'ok',
+          session: { expires_at: '2028-01-01T00:00:00Z', player_id: 'p1' },
+          notifications: [],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+    ) as typeof fetch;
+
+    await client.call('/spacemolt/get_status');
+
+    // No session file should exist — the adapter doesn't write anything
+    expect(existsSync(sessionPath)).toBe(false);
+  });
+
+  test('reAuthenticate returns null', async () => {
+    const adapter = createPassthroughAdapter('token-xyz');
+    const session = await adapter.getValidSession();
+    const result = await adapter.reAuthenticate(session);
+    expect(result).toBeNull();
+  });
+
+  test('getValidSession always returns the same token', async () => {
+    const adapter = createPassthroughAdapter('stable-token');
+    const s1 = await adapter.getValidSession();
+    const s2 = await adapter.getValidSession();
+    expect(s1.id).toBe('stable-token');
+    expect(s2.id).toBe('stable-token');
   });
 });

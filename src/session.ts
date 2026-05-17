@@ -19,19 +19,23 @@ export interface SessionAdapter {
 export interface SessionManagerOptions {
   sessionPath: string;
   apiBase: string;
-  debug: boolean;
+  debug: boolean | (() => boolean);
 }
 
 export class SessionManager {
   private readonly store: SessionStore;
   private credentialWarningShown = false;
   private readonly apiBase: string;
-  private readonly debug: boolean;
+  private readonly _debug: boolean | (() => boolean);
+
+  private get debug(): boolean {
+    return typeof this._debug === 'function' ? this._debug() : this._debug;
+  }
 
   constructor(opts: SessionManagerOptions) {
     this.store = new SessionStore(opts.sessionPath, opts.debug);
     this.apiBase = opts.apiBase;
-    this.debug = opts.debug;
+    this._debug = opts.debug;
   }
 
   private getActiveAccount(): AccountData | null {
@@ -103,10 +107,6 @@ export class SessionManager {
       data.pendingSession = session;
     }
 
-    if (session.username || session.password) {
-      this.showCredentialWarning();
-    }
-
     this.store.save();
   }
 
@@ -116,7 +116,7 @@ export class SessionManager {
     const response = await fetch(`${this.apiBase}/session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(300_000),
     });
 
     if (!response.ok) {
@@ -176,7 +176,7 @@ export class SessionManager {
           username: session.username,
           password: session.password,
         }),
-        signal: AbortSignal.timeout(30_000),
+        signal: AbortSignal.timeout(300_000),
       });
 
       const result = await response.json();
@@ -207,6 +207,7 @@ export class SessionManager {
 
     // Get or create account entry
     let account = data.accounts[key];
+    const isNew = !account;
     if (!account) {
       account = { username, password, session: null };
       data.accounts[key] = account;
@@ -229,8 +230,11 @@ export class SessionManager {
     // Set as active account
     data.activeAccount = key;
 
-    this.showCredentialWarning();
     this.store.save();
+    // Only warn when storing credentials for the first time — not on every re-login
+    if (isNew) {
+      this.showCredentialWarning();
+    }
   }
 
   switchAccount(username: string): boolean {
@@ -274,11 +278,33 @@ export class SessionManager {
   }
 }
 
+/**
+ * Create a SessionAdapter that uses a fixed token and performs no file I/O.
+ * Used when --session <token> is passed on the command line.
+ */
+export function createPassthroughAdapter(token: string): SessionAdapter {
+  const staticSession: SessionData = {
+    id: token,
+    created_at: '',
+    expires_at: '2099-12-31T23:59:59Z',
+  };
+
+  return {
+    loadSession: () => ({ ...staticSession }),
+    saveSession: () => {},
+    createSession: async () => ({ ...staticSession }),
+    getValidSession: async () => ({ ...staticSession }),
+    reAuthenticate: async () => null,
+    storeCredentials: () => {},
+    clearSession: () => {},
+  };
+}
+
 // Default instance using config values
 const defaultManager = new SessionManager({
   sessionPath: SESSION_PATH,
   apiBase: API_BASE,
-  debug: DEBUG,
+  debug: () => DEBUG,
 });
 
 // Module-level exports delegate to the default instance for backwards compatibility

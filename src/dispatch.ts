@@ -17,9 +17,20 @@ export interface ResolvedCommand {
  * 3. Returns null if not found
  */
 /**
+ * Explicit aliases: user-facing names that map to a specific qualified command.
+ * Checked before the short-name index so intent takes priority over action name.
+ */
+const COMMAND_ALIASES: Record<string, string> = {
+  // view_storage / deposit_items / withdraw_items: convenience aliases to personal storage
+  view_storage:    'spacemolt_storage/view',
+  deposit_items:   'spacemolt_storage/deposit',
+  withdraw_items:  'spacemolt_storage/withdraw',
+};
+
+/**
  * Default tool group for ambiguous action names.
  * When a user types "sell", they almost always mean spacemolt/sell (trading),
- * not spacemolt_salvage/sell (selling wrecks). Same for market vs faction commerce orders.
+ * not spacemolt_salvage/sell (selling wrecks).
  */
 const AMBIGUOUS_DEFAULTS: Record<string, string> = {
   sell: 'spacemolt/sell',
@@ -42,6 +53,13 @@ export function resolveCommand(input: string): ResolvedCommand | null {
       const match = COMMAND_REGISTRY.get(prefixed);
       if (match) return { toolGroup: match.toolGroup, action: match.action, meta: match };
     }
+  }
+
+  // Try explicit alias (overrides short-name index for user-intent mismatches)
+  const aliasKey = COMMAND_ALIASES[input];
+  if (aliasKey) {
+    const meta = COMMAND_REGISTRY.get(aliasKey);
+    if (meta) return { toolGroup: meta.toolGroup, action: meta.action, meta };
   }
 
   // Try short name (unambiguous actions)

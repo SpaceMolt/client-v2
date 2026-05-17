@@ -105,4 +105,153 @@ describe('tryCustomFormatter', () => {
     );
     expect(result).toBe(true);
   });
+
+  test('catalog formatter handles ships', () => {
+    const { result, output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt_catalog/catalog', {
+        type: 'ships',
+        items: [
+          { name: 'Hawk', tier: 2, category: 'combat', price: 5000, base_hull: 200, base_shield: 100, cargo_capacity: 20, weapon_slots: 3, base_speed: 8 },
+        ],
+        page: 1,
+        total_pages: 1,
+        total: 1,
+      }),
+    );
+    expect(result).toBe(true);
+    expect(output.some(l => l.includes('Catalog: ships'))).toBe(true);
+    expect(output.some(l => l.includes('Hawk'))).toBe(true);
+    expect(output.some(l => l.includes('5,000'))).toBe(true);
+  });
+
+  test('catalog formatter handles items', () => {
+    const { result, output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt_catalog/catalog', {
+        type: 'items',
+        items: [
+          { name: 'Iron Ore', id: 'ore_iron', category: 'ore', base_value: 10, description: 'Common ore' },
+        ],
+        page: 1,
+        total_pages: 1,
+        total: 1,
+      }),
+    );
+    expect(result).toBe(true);
+    expect(output.some(l => l.includes('Iron Ore'))).toBe(true);
+    expect(output.some(l => l.includes('Common ore'))).toBe(true);
+  });
+
+  test('catalog formatter handles unknown type with generic list', () => {
+    const { result, output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt_catalog/catalog', {
+        type: 'modules',
+        items: [
+          { name: 'Laser Mk1', id: 'laser_1' },
+          { name: 'Shield Mk1', id: 'shield_1' },
+        ],
+        page: 1,
+        total_pages: 1,
+        total: 2,
+      }),
+    );
+    expect(result).toBe(true);
+    expect(output.some(l => l.includes('Catalog: modules'))).toBe(true);
+    expect(output.some(l => l.includes('Laser Mk1'))).toBe(true);
+    expect(output.some(l => l.includes('Shield Mk1'))).toBe(true);
+  });
+
+  test('catalog formatter returns false without type or items', () => {
+    expect(tryCustomFormatter('catalog', { type: 'ships' })).toBe(false);
+    expect(tryCustomFormatter('catalog', { items: [] })).toBe(false);
+  });
+
+  test('catalog formatter handles skills', () => {
+    const { result, output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt_catalog/catalog', {
+        type: 'skills',
+        items: [
+          { name: 'Mining', category: 'industry', max_level: 10, description: 'Improves mining yield' },
+          { name: 'Combat', max_level: 5 },
+        ],
+        page: 1,
+        total_pages: 1,
+        total: 2,
+      }),
+    );
+    expect(result).toBe(true);
+    expect(output.some(l => l.includes('Mining'))).toBe(true);
+    expect(output.some(l => l.includes('industry'))).toBe(true);
+    expect(output.some(l => l.includes('max 10'))).toBe(true);
+    expect(output.some(l => l.includes('Improves mining yield'))).toBe(true);
+    expect(output.some(l => l.includes('Combat'))).toBe(true);
+  });
+
+  test('catalog formatter handles recipes', () => {
+    const { result, output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt_catalog/catalog', {
+        type: 'recipes',
+        items: [
+          {
+            name: 'Iron Plate',
+            category: 'materials',
+            crafting_time: 5,
+            inputs: [{ quantity: 2, item_id: 'ore_iron' }],
+            outputs: [{ quantity: 1, item_id: 'iron_plate' }],
+          },
+          { name: 'Simple Gadget', crafting_time: 2, inputs: [], outputs: [] },
+        ],
+        page: 1,
+        total_pages: 1,
+        total: 2,
+      }),
+    );
+    expect(result).toBe(true);
+    expect(output.some(l => l.includes('Iron Plate'))).toBe(true);
+    expect(output.some(l => l.includes('5 ticks'))).toBe(true);
+    expect(output.some(l => l.includes('ore_iron'))).toBe(true);
+    expect(output.some(l => l.includes('iron_plate'))).toBe(true);
+    expect(output.some(l => l.includes('Simple Gadget'))).toBe(true);
+  });
+
+  test('formatter crash returns false rather than throwing', () => {
+    // Pass a truthy non-iterable as items — passes the !items guard but throws on for...of
+    const result = tryCustomFormatter('spacemolt_catalog/catalog', {
+      type: 'ships',
+      items: 42, // truthy but not iterable — triggers the catch handler
+      page: 1,
+      total_pages: 1,
+      total: 0,
+    });
+    expect(result).toBe(false);
+  });
+
+  test('catalog formatter shows pagination hint for multi-page results', () => {
+    const { result, output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt_catalog/catalog', {
+        type: 'items',
+        items: [{ name: 'Test', id: 'test', category: 'misc', base_value: 1 }],
+        page: 1,
+        total_pages: 3,
+        total: 30,
+      }),
+    );
+    expect(result).toBe(true);
+    expect(output.some(l => l.includes('page=N'))).toBe(true);
+  });
+
+  test('catalog ship price handles undefined gracefully', () => {
+    const { result, output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt_catalog/catalog', {
+        type: 'ships',
+        items: [{ name: 'FreeShip', base_hull: 50, base_shield: 0, cargo_capacity: 10, weapon_slots: 1, base_speed: 5 }],
+        page: 1,
+        total_pages: 1,
+        total: 1,
+      }),
+    );
+    expect(result).toBe(true);
+    // Should not contain 'undefined', should show '0 cr'
+    expect(output.some(l => l.includes('undefined'))).toBe(false);
+    expect(output.some(l => l.includes('0 cr'))).toBe(true);
+  });
 });

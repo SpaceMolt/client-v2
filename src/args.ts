@@ -99,18 +99,24 @@ export class ArgError extends Error {
 
 export function coerceValue(value: string, type: string): unknown {
   switch (type) {
-    case 'integer':
-    case 'number': {
+    case 'integer': {
       const n = parseInt(value, 10);
       if (isNaN(n)) {
-        throw new ArgError(`Invalid ${type} value: "${value}"`);
+        throw new ArgError(`Invalid integer value: "${value}"`);
+      }
+      return n;
+    }
+    case 'number': {
+      const n = parseFloat(value);
+      if (isNaN(n)) {
+        throw new ArgError(`Invalid number value: "${value}"`);
       }
       return n;
     }
     case 'boolean':
       if (value === 'true') return true;
       if (value === 'false') return false;
-      return value;
+      throw new ArgError(`Invalid boolean value: "${value}" (use "true" or "false")`);
     default:
       return value;
   }

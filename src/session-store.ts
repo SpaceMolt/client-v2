@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, mkdirSync, chmodSync, existsSync, unlinkSync, renameSync, copyFileSync } from 'fs';
-import { dirname } from 'path';
+import { readFileSync, writeFileSync, mkdirSync, chmodSync, existsSync, unlinkSync, renameSync, copyFileSync, appendFileSync } from 'fs';
+import { dirname, basename, join } from 'path';
 
 export interface SessionData {
   id: string;
@@ -41,12 +41,17 @@ export interface AccountInfo {
  */
 export class SessionStore {
   private cache: MultiSessionFile | null = null;
+  private gitignoreChecked = false;
   readonly path: string;
-  private readonly debug: boolean;
+  private readonly _debug: boolean | (() => boolean);
 
-  constructor(path: string, debug: boolean) {
+  private get debug(): boolean {
+    return typeof this._debug === 'function' ? this._debug() : this._debug;
+  }
+
+  constructor(path: string, debug: boolean | (() => boolean)) {
     this.path = path;
-    this.debug = debug;
+    this._debug = debug;
   }
 
   /** Load store from disk (with caching). Returns cached copy on subsequent calls. */
@@ -85,19 +90,29 @@ export class SessionStore {
   /** Atomically write the store to disk. */
   save(): void {
     const dir = dirname(this.path);
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true });
+
+    try {
+      if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+      }
+
+      // Atomic write: write to temp file, then rename into place
+      const tmpPath = this.path + '.tmp';
+      writeFileSync(tmpPath, JSON.stringify(this.cache, null, 2));
+      try {
+        chmodSync(tmpPath, 0o600);
+      } catch {
+        // chmod may fail on some platforms (Windows)
+      }
+      renameSync(tmpPath, this.path);
+    } catch (err) {
+      throw new Error(`Session file write failed (${this.path}): ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    // Atomic write: write to temp file, then rename into place
-    const tmpPath = this.path + '.tmp';
-    writeFileSync(tmpPath, JSON.stringify(this.cache, null, 2));
-    try {
-      chmodSync(tmpPath, 0o600);
-    } catch {
-      // chmod may fail on some platforms (Windows)
+    if (!this.gitignoreChecked) {
+      this.gitignoreChecked = true;
+      this.ensureGitignored();
     }
-    renameSync(tmpPath, this.path);
   }
 
   /** Delete the session file and clear the cache. */
@@ -113,6 +128,40 @@ export class SessionStore {
   /** Reset the in-memory cache (forces reload on next load()). */
   invalidate(): void {
     this.cache = null;
+  }
+
+  /**
+   * Walk up from the session file's directory to find a .git root,
+   * then ensure the session filename is listed in .gitignore there.
+   */
+  private ensureGitignored(): void {
+    try {
+      const filename = basename(this.path);
+      let current = dirname(this.path);
+
+      while (true) {
+        if (existsSync(join(current, '.git'))) {
+          const gitignorePath = join(current, '.gitignore');
+          if (existsSync(gitignorePath)) {
+            const content = readFileSync(gitignorePath, 'utf-8');
+            const lines = content.split('\n').map(l => l.trim());
+            if (lines.some(l => l === filename || l === `/${filename}`)) {
+              return; // already ignored
+            }
+            appendFileSync(gitignorePath, `\n${filename}\n`);
+          } else {
+            writeFileSync(gitignorePath, `${filename}\n`);
+          }
+          console.error(`Note: Added ${filename} to .gitignore`);
+          return;
+        }
+        const parent = dirname(current);
+        if (parent === current) break; // reached filesystem root
+        current = parent;
+      }
+    } catch {
+      // Best effort — don't fail session write if gitignore update fails
+    }
   }
 
   private migrateV1(old: SessionData): MultiSessionFile {
