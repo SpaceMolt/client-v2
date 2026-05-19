@@ -1,0 +1,174 @@
+name: Sync OpenAPI spec
+
+# Polls the live SpaceMolt v2 OpenAPI spec every 30 minutes. When the spec
+# changes, regenerates types + command registry, runs tests, bumps the
+# client patch version, commits to main, and tags a new release (which
+# triggers release.yml to build and publish platform binaries).
+#
+# Manual override: trigger via the Actions tab (`workflow_dispatch`).
+#
+# Cost when nothing changed: ~10s (curl + diff + exit). Cost when a change
+# is detected: ~2 minutes (full test suite + commit/push).
+
+on:
+  schedule:
+    # Every 30 minutes. GitHub Actions cron is best-effort; expect ~5min jitter.
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  # Never let two sync runs race; a queued run waits, doesn't pile up.
+  group: sync-spec
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Use the default GITHUB_TOKEN; the workflow has contents:write.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Fetch live spec
+        run: bun run fetch-spec
+
+      - name: Diff against tracked spec
+        id: diff
+        run: |
+          if git diff --quiet -- openapi.json; then
+            echo "Spec is unchanged."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Spec changed."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Summarize spec diff
+        if: steps.diff.outputs.changed == 'true'
+        id: summary
+        run: |
+          # Compare the OLD tracked spec (HEAD) with the NEW just-fetched one.
+          # Produces lists of added/removed paths and the new info.version.
+          git show HEAD:openapi.json > /tmp/old-spec.json
+          bun -e "
+            const oldSpec = JSON.parse(require('fs').readFileSync('/tmp/old-spec.json','utf-8'));
+            const newSpec = JSON.parse(require('fs').readFileSync('openapi.json','utf-8'));
+            const oldPaths = new Set(Object.keys(oldSpec.paths));
+            const newPaths = new Set(Object.keys(newSpec.paths));
+            const added = [...newPaths].filter(p => !oldPaths.has(p)).sort();
+            const removed = [...oldPaths].filter(p => !newPaths.has(p)).sort();
+            const fs = require('fs');
+            let body = '';
+            body += 'Old spec version: ' + (oldSpec.info?.version || 'unknown') + '\n';
+            body += 'New spec version: ' + (newSpec.info?.version || 'unknown') + '\n';
+            body += 'Paths: ' + oldPaths.size + ' -> ' + newPaths.size + '\n';
+            if (added.length) body += '\nAdded paths (' + added.length + '):\n' + added.map(p => '  + ' + p).join('\n') + '\n';
+            if (removed.length) body += '\nRemoved paths (' + removed.length + '):\n' + removed.map(p => '  - ' + p).join('\n') + '\n';
+            if (!added.length && !removed.length) body += '\n(Schema-only change; no paths added or removed.)\n';
+            fs.writeFileSync('/tmp/spec-summary.txt', body);
+          "
+          cat /tmp/spec-summary.txt
+          # Stash for the commit message step.
+          {
+            echo 'summary<<SPEC_SUMMARY_EOF'
+            cat /tmp/spec-summary.txt
+            echo 'SPEC_SUMMARY_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Regenerate types and command registry
+        if: steps.diff.outputs.changed == 'true'
+        run: bun run generate
+
+      - name: Typecheck
+        if: steps.diff.outputs.changed == 'true'
+        run: bun run typecheck
+
+      - name: Test
+        if: steps.diff.outputs.changed == 'true'
+        run: bun test
+
+      - name: Bump patch version
+        if: steps.diff.outputs.changed == 'true'
+        id: version
+        run: |
+          OLD=$(node -p "require('./package.json').version")
+          # Bump only the patch component; refuse to touch major/minor automatically.
+          NEW=$(node -e "
+            const v = require('./package.json').version.split('.');
+            v[2] = String(parseInt(v[2], 10) + 1);
+            console.log(v.join('.'));
+          ")
+          echo "Bumping $OLD -> $NEW"
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json','utf-8'));
+            pkg.version = '$NEW';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          echo "OLD=$OLD" >> "$GITHUB_OUTPUT"
+          echo "NEW=$NEW" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and tag
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.NEW }}
+          SPEC_SUMMARY: ${{ steps.summary.outputs.summary }}
+        run: |
+          git config user.name "SpaceMolt DevTeam"
+          git config user.email "devteam@spacemolt.com"
+
+          git add openapi.json src/generated/types.gen.ts src/commands.ts package.json
+
+          # If only auto-generated files would change but git add staged
+          # nothing (shouldn't happen given we already saw a diff, but
+          # belt-and-suspenders), bail out without an empty commit.
+          if git diff --staged --quiet; then
+            echo "No staged changes after regen. Skipping commit."
+            exit 0
+          fi
+
+          # Heredoc keeps the multi-line summary intact in the commit body.
+          git commit -m "chore: sync OpenAPI spec (v${NEW_VERSION})" -m "$SPEC_SUMMARY" -m "Auto-generated by .github/workflows/sync-spec.yml.
+
+          Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+
+          git push origin main
+
+          git tag -a "v${NEW_VERSION}" -m "v${NEW_VERSION}"
+          git push origin "v${NEW_VERSION}"
+
+      - name: Trigger release workflow
+        if: steps.diff.outputs.changed == 'true'
+        # Tags pushed using GITHUB_TOKEN do NOT trigger other workflows
+        # (GitHub anti-recursion safeguard). Dispatch release.yml explicitly.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_VERSION: ${{ steps.version.outputs.NEW }}
+        run: |
+          gh workflow run release.yml --ref main -f tag="v${NEW_VERSION}"
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ steps.diff.outputs.changed }}" = "true" ]; then
+            echo "### Spec sync: v${{ steps.version.outputs.OLD }} -> v${{ steps.version.outputs.NEW }}" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat /tmp/spec-summary.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Spec unchanged; no action taken." >> $GITHUB_STEP_SUMMARY
+          fi
