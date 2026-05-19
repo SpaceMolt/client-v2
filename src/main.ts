@@ -36,6 +36,11 @@ const DEPRECATED_COMMANDS: Record<string, string> = {
   // Credits now live in wallet — deposit/withdraw commands removed
   deposit_credits:  `"deposit_credits" has been removed. Credits now live in your wallet and are available everywhere.\n  There is no need to deposit or withdraw credits.`,
   withdraw_credits: `"withdraw_credits" has been removed. Credits now live in your wallet and are available everywhere.\n  There is no need to deposit or withdraw credits.`,
+  // inspect_cargo removed — scan is the replacement for inspecting another player's ship
+  inspect_cargo: `"inspect_cargo" has been removed. Use "scan" to inspect another player's ship and cargo:\n  spacemolt scan <player_id>`,
+  // set_ally split into propose/accept/remove
+  'faction/set_ally':           `"faction/set_ally" has been replaced. Use:\n  spacemolt faction/propose_ally <faction_id>\n  spacemolt faction/accept_ally <faction_id>\n  spacemolt faction/remove_ally <faction_id>`,
+  'spacemolt_faction/set_ally': `"faction/set_ally" has been replaced. Use:\n  spacemolt faction/propose_ally <faction_id>\n  spacemolt faction/accept_ally <faction_id>\n  spacemolt faction/remove_ally <faction_id>`,
 };
 
 interface GlobalFlags {

@@ -6,7 +6,7 @@
       "name": "@spacemolt/client",
       "devDependencies": {
         "@hey-api/openapi-ts": "^0.73.0",
-        "@types/bun": "latest",
+        "@types/bun": "^1.3.9",
       },
       "peerDependencies": {
         "typescript": "^5",

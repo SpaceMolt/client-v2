@@ -149,7 +149,86 @@ const formatters: Record<string, Formatter> = {
 
     return true;
   },
+
+  list: (data) => {
+    // spacemolt_drone/list — handle the drones bay+bandwidth view; fall through
+    // to server text for spacemolt_citizenship/list etc. (server has a richer table).
+    if (Array.isArray(data.drones)) return formatDroneList(data);
+    return false;
+  },
+
+  status: (data) => {
+    // spacemolt_fleet/status — handle in-fleet shape with members; let the
+    // server's "Not in a fleet." text render the not-in-fleet case.
+    const members = data.members as unknown[] | undefined;
+    if (!Array.isArray(members) || members.length === 0) return false;
+    return formatFleetStatus(data);
+  },
+
+  get_guide: (data) => {
+    const guides = data.guides as Array<Record<string, unknown>> | undefined;
+    // Listing mode: show available guides
+    if (Array.isArray(guides) && guides.length > 0 && !data.content) {
+      console.log(`${c.bright}Available guides:${c.reset}`);
+      for (const g of guides) {
+        console.log(`  ${c.cyan}${g.id}${c.reset} — ${g.title || ''}`);
+        if (g.description) console.log(`    ${c.dim}${g.description}${c.reset}`);
+      }
+      if (data.hint) console.log(`\n${c.dim}${data.hint}${c.reset}`);
+      return true;
+    }
+    // Single-guide content mode: let the server-rendered result string handle it
+    return false;
+  },
 };
+
+function formatDroneList(data: Record<string, unknown>): boolean {
+  const drones = data.drones as Array<Record<string, unknown>> | undefined;
+  if (!Array.isArray(drones)) return false;
+  const bandUsed = data.bandwidth_used as number | undefined;
+  const bandTotal = data.bandwidth_total as number | undefined;
+  const bayUsed = data.bay_count as number | undefined;
+  const bayCap = data.bay_capacity as number | undefined;
+  const deployed = data.deployed_count as number | undefined;
+
+  console.log(`${c.bright}Drones${c.reset}`);
+  if (bandTotal !== undefined) console.log(`  Bandwidth: ${bandUsed ?? 0}/${bandTotal}`);
+  if (bayCap !== undefined) console.log(`  Bay: ${bayUsed ?? 0}/${bayCap}${deployed ? ` (${deployed} deployed)` : ''}`);
+
+  if (drones.length === 0) {
+    console.log(`  ${c.dim}(none)${c.reset}`);
+    return true;
+  }
+
+  for (const d of drones) {
+    const hull = colorHealth(d.hull as number, d.max_hull as number);
+    const status = d.status ? ` ${c.dim}[${d.status}]${c.reset}` : '';
+    const loc = d.poi_id ? ` at ${d.poi_id}` : '';
+    const travel = d.travel_to ? ` ${c.yellow}→ ${d.travel_to} (${d.travel_ticks}t)${c.reset}` : '';
+    const cargoPct = d.cargo_pct as number | undefined;
+    const cargo = cargoPct !== undefined ? ` cargo ${cargoPct}%` : '';
+    const script = d.has_script ? ` ${c.cyan}[script]${c.reset}` : '';
+    console.log(`  ${c.bright}${d.id}${c.reset}${status} Hull ${hull}${cargo}${loc}${travel}${script}`);
+  }
+  return true;
+}
+
+function formatFleetStatus(data: Record<string, unknown>): boolean {
+  const members = data.members as Array<Record<string, unknown>>;
+  const max = data.max_size as number | undefined;
+  console.log(`${c.bright}Fleet ${data.fleet_id}${c.reset} ${c.dim}(${members.length}${max ? `/${max}` : ''} members)${c.reset}`);
+  if (data.leader) console.log(`  Leader: ${c.bright}${data.leader}${c.reset}${data.is_leader ? ` ${c.green}(you)${c.reset}` : ''}`);
+  if (data.system_id) console.log(`  At: ${data.poi_id || data.system_id}`);
+
+  console.log(`${c.bright}  Members:${c.reset}`);
+  for (const m of members) {
+    const tag = m.clan_tag ? `[${m.clan_tag}] ` : '';
+    const ship = m.ship_class ? ` — ${m.ship_class}` : '';
+    const here = m.same_poi ? '' : ` ${c.dim}(elsewhere)${c.reset}`;
+    console.log(`    ${tag}${c.bright}${m.username || m.player_id}${c.reset}${ship}${here}`);
+  }
+  return true;
+}
 
 function colorHealth(current: number | undefined, max: number | undefined): string {
   if (current === undefined || max === undefined) return '?/?';

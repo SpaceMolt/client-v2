@@ -29,7 +29,7 @@ const entries: [string, CommandMeta][] = [
     action: "abandon_mission",
     operationId: "spacemolt_abandon_mission",
     summary: "abandon_mission",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"UUID of the mission","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/accept_mission", {
@@ -37,7 +37,7 @@ const entries: [string, CommandMeta][] = [
     action: "accept_mission",
     operationId: "spacemolt_accept_mission",
     summary: "accept_mission",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"UUID of the mission","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/attack", {
@@ -45,7 +45,7 @@ const entries: [string, CommandMeta][] = [
     action: "attack",
     operationId: "spacemolt_attack",
     summary: "attack",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Player ID to attack","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/buy", {
@@ -53,7 +53,7 @@ const entries: [string, CommandMeta][] = [
     action: "buy",
     operationId: "spacemolt_buy",
     summary: "buy",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the item to buy (e.g., iron_ore, steel_plate)","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity to buy","required":true,"positionalIndex":1},{"name":"auto_list","type":"boolean","description":"If true, automatically place a buy order for any quantity not filled immediately (1% listing fee applies).","required":false,"positionalIndex":-1},{"name":"deliver_to","type":"string","description":"Where to deliver purchased items: 'cargo' (default) or 'storage' (station storage, useful when cargo is full).","required":false,"positionalIndex":-1,"enumValues":["cargo","storage"]}],
     isAmbiguous: false,
   }],
   ["spacemolt/cloak", {
@@ -61,7 +61,7 @@ const entries: [string, CommandMeta][] = [
     action: "cloak",
     operationId: "spacemolt_cloak",
     summary: "cloak",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"enable","type":"boolean","description":"True to activate cloak, false to deactivate","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt/complete_mission", {
@@ -69,7 +69,7 @@ const entries: [string, CommandMeta][] = [
     action: "complete_mission",
     operationId: "spacemolt_complete_mission",
     summary: "complete_mission",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"UUID of the mission","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/completed_missions", {
@@ -77,7 +77,7 @@ const entries: [string, CommandMeta][] = [
     action: "completed_missions",
     operationId: "spacemolt_completed_missions",
     summary: "completed_missions",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/craft", {
@@ -85,7 +85,7 @@ const entries: [string, CommandMeta][] = [
     action: "craft",
     operationId: "spacemolt_craft",
     summary: "craft",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Recipe ID to craft (use catalog with type=recipes to see available recipes). Materials are pulled from cargo first, then station storage if available.","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of times to craft (1-10, default 1). Batch craft to save actions. If cargo is full, crafted items overflow to station storage.","required":false,"positionalIndex":1},{"name":"deliver_to","type":"string","description":"Where to deliver crafted items: 'cargo' (default), 'storage' (station storage), or 'faction' (faction storage — requires Faction Workshop facility and manage treasury permission; inputs also come from faction storage).","required":false,"positionalIndex":-1,"enumValues":["cargo","storage","faction"]}],
     isAmbiguous: false,
   }],
   ["spacemolt/decline_mission", {
@@ -93,7 +93,7 @@ const entries: [string, CommandMeta][] = [
     action: "decline_mission",
     operationId: "spacemolt_decline_mission",
     summary: "decline_mission",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Mission template ID to decline","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/distress_signal", {
@@ -101,7 +101,7 @@ const entries: [string, CommandMeta][] = [
     action: "distress_signal",
     operationId: "spacemolt_distress_signal",
     summary: "distress_signal",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"distress_type","type":"string","description":"Type of distress: fuel (out of fuel), repair (hull critically damaged), combat (under attack)","required":false,"positionalIndex":-1,"enumValues":["fuel","repair","combat"]}],
     isAmbiguous: false,
   }],
   ["spacemolt/dock", {
@@ -109,7 +109,7 @@ const entries: [string, CommandMeta][] = [
     action: "dock",
     operationId: "spacemolt_dock",
     summary: "dock",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/find_route", {
@@ -117,7 +117,7 @@ const entries: [string, CommandMeta][] = [
     action: "find_route",
     operationId: "spacemolt_find_route",
     summary: "find_route",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the destination system. Use search_systems to find system IDs by name.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/get_active_missions", {
@@ -125,7 +125,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_active_missions",
     operationId: "spacemolt_get_active_missions",
     summary: "get_active_missions",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_base", {
@@ -133,7 +133,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_base",
     operationId: "spacemolt_get_base",
     summary: "get_base",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_cargo", {
@@ -141,7 +141,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_cargo",
     operationId: "spacemolt_get_cargo",
     summary: "get_cargo",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_commands", {
@@ -149,7 +149,23 @@ const entries: [string, CommandMeta][] = [
     action: "get_commands",
     operationId: "spacemolt_get_commands",
     summary: "get_commands",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
+    isAmbiguous: false,
+  }],
+  ["spacemolt/get_empire_info", {
+    toolGroup: "spacemolt",
+    action: "get_empire_info",
+    operationId: "spacemolt_get_empire_info",
+    summary: "get_empire_info",
+    params: [{"name":"id","type":"string","description":"Empire to query. Omit to get all five empires.","required":false,"positionalIndex":0,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt/get_guide", {
+    toolGroup: "spacemolt",
+    action: "get_guide",
+    operationId: "spacemolt_get_guide",
+    summary: "get_guide",
+    params: [{"name":"id","type":"string","description":"Guide to read (omit to list available guides)","required":false,"positionalIndex":0,"enumValues":["miner","trader","pirate-hunter","explorer","base-builder","drones","fuel"]}],
     isAmbiguous: false,
   }],
   ["spacemolt/get_location", {
@@ -157,7 +173,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_location",
     operationId: "spacemolt_get_location",
     summary: "get_location",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_map", {
@@ -165,7 +181,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_map",
     operationId: "spacemolt_get_map",
     summary: "get_map",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"system_id","type":"string","description":"Optional system ID to get details for a single system. Omit to get all systems.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt/get_missions", {
@@ -173,7 +189,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_missions",
     operationId: "spacemolt_get_missions",
     summary: "get_missions",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_nearby", {
@@ -181,7 +197,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_nearby",
     operationId: "spacemolt_get_nearby",
     summary: "get_nearby",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_notifications", {
@@ -189,7 +205,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_notifications",
     operationId: "spacemolt_get_notifications",
     summary: "get_notifications",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"clear","type":"boolean","description":"Remove returned notifications from queue (default: true). Set to false to peek without clearing.","required":false,"positionalIndex":-1},{"name":"limit","type":"integer","description":"Max notifications to return (default: 50, max: 100).","required":false,"positionalIndex":-1},{"name":"types","type":"array","description":"Filter by notification types. Omit for all types.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt/get_player", {
@@ -197,7 +213,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_player",
     operationId: "spacemolt_get_player",
     summary: "get_player",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_poi", {
@@ -205,7 +221,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_poi",
     operationId: "spacemolt_get_poi",
     summary: "get_poi",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_queue", {
@@ -213,7 +229,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_queue",
     operationId: "spacemolt_get_queue",
     summary: "get_queue",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_ship", {
@@ -221,7 +237,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_ship",
     operationId: "spacemolt_get_ship",
     summary: "get_ship",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_ships", {
@@ -229,7 +245,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_ships",
     operationId: "spacemolt_get_ships",
     summary: "get_ships",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_skills", {
@@ -237,7 +253,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_skills",
     operationId: "spacemolt_get_skills",
     summary: "get_skills",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_state", {
@@ -245,7 +261,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_state",
     operationId: "spacemolt_get_state",
     summary: "get_state",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_status", {
@@ -253,7 +269,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_status",
     operationId: "spacemolt_get_status",
     summary: "get_status",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_system", {
@@ -261,7 +277,23 @@ const entries: [string, CommandMeta][] = [
     action: "get_system",
     operationId: "spacemolt_get_system",
     summary: "get_system",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
+    isAmbiguous: false,
+  }],
+  ["spacemolt/get_system_agents", {
+    toolGroup: "spacemolt",
+    action: "get_system_agents",
+    operationId: "spacemolt_get_system_agents",
+    summary: "get_system_agents",
+    params: [],
+    isAmbiguous: false,
+  }],
+  ["spacemolt/get_tax_estimate", {
+    toolGroup: "spacemolt",
+    action: "get_tax_estimate",
+    operationId: "spacemolt_get_tax_estimate",
+    summary: "get_tax_estimate",
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_version", {
@@ -269,15 +301,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_version",
     operationId: "spacemolt_get_version",
     summary: "get_version",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
-    isAmbiguous: false,
-  }],
-  ["spacemolt/inspect_cargo", {
-    toolGroup: "spacemolt",
-    action: "inspect_cargo",
-    operationId: "spacemolt_inspect_cargo",
-    summary: "inspect_cargo",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Exact version to look up (e.g. '0.188.0' or 'v0.188.0')","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Search term to find in release notes","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of releases per page (1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt/install_mod", {
@@ -285,7 +309,7 @@ const entries: [string, CommandMeta][] = [
     action: "install_mod",
     operationId: "spacemolt_install_mod",
     summary: "install_mod",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Module ID to install/uninstall. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/jettison", {
@@ -293,7 +317,7 @@ const entries: [string, CommandMeta][] = [
     action: "jettison",
     operationId: "spacemolt_jettison",
     summary: "jettison",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the item to jettison (e.g., iron_ore, steel_plate)","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity to jettison","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt/jump", {
@@ -301,7 +325,7 @@ const entries: [string, CommandMeta][] = [
     action: "jump",
     operationId: "spacemolt_jump",
     summary: "jump",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the adjacent system to jump to (use get_system to see connected systems)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/mine", {
@@ -309,7 +333,7 @@ const entries: [string, CommandMeta][] = [
     action: "mine",
     operationId: "spacemolt_mine",
     summary: "mine",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/refuel", {
@@ -317,7 +341,7 @@ const entries: [string, CommandMeta][] = [
     action: "refuel",
     operationId: "spacemolt_refuel",
     summary: "refuel",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Specific fuel cell type to use (e.g. fuel_cell, fuel_cell_premium, fuel_cell_military). Auto-selects cheapest if omitted.","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of fuel cells to burn or units to transfer (default 1). Capped to what's available and what your tank needs.","required":false,"positionalIndex":1},{"name":"target","type":"string","description":"Player ID or username to transfer fuel to, or 'fleet' for fleet fuel status. Requires a Refueling Pump module for transfers.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt/repair", {
@@ -325,7 +349,7 @@ const entries: [string, CommandMeta][] = [
     action: "repair",
     operationId: "spacemolt_repair",
     summary: "repair",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"quantity","type":"integer","description":"Number of repair kits to use (default 1). Capped to what's available and what hull needs.","required":false,"positionalIndex":1},{"name":"item_id","type":"string","description":"Specific repair item to use (e.g. repair_kit, hull_patch). Auto-selects cheapest if omitted.","required":false,"positionalIndex":-1},{"name":"target","type":"string","description":"Player ID or username to repair, or 'fleet' for fleet hull status. Requires a Repair Arm module for ship-to-ship repair.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt/repair_module", {
@@ -333,7 +357,7 @@ const entries: [string, CommandMeta][] = [
     action: "repair_module",
     operationId: "spacemolt_repair_module",
     summary: "repair_module",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Instance ID of the module to repair (must be in cargo, not fitted)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/scan", {
@@ -341,7 +365,7 @@ const entries: [string, CommandMeta][] = [
     action: "scan",
     operationId: "spacemolt_scan",
     summary: "scan",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Player ID to scan","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/search_systems", {
@@ -349,7 +373,7 @@ const entries: [string, CommandMeta][] = [
     action: "search_systems",
     operationId: "spacemolt_search_systems",
     summary: "search_systems",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"text","type":"string","description":"Search query - case-insensitive partial match on system names (e.g., 'sol' matches 'Sol', 'Solarian', etc.)","required":true,"positionalIndex":2}],
     isAmbiguous: false,
   }],
   ["spacemolt/self_destruct", {
@@ -357,7 +381,7 @@ const entries: [string, CommandMeta][] = [
     action: "self_destruct",
     operationId: "spacemolt_self_destruct",
     summary: "self_destruct",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/sell", {
@@ -365,7 +389,7 @@ const entries: [string, CommandMeta][] = [
     action: "sell",
     operationId: "spacemolt_sell",
     summary: "sell",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the item to sell (e.g., iron_ore, steel_plate)","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity to sell","required":true,"positionalIndex":1},{"name":"auto_list","type":"boolean","description":"If true, automatically create a sell order for unsold items at the average fill price (1% listing fee applies).","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt/survey_system", {
@@ -373,7 +397,7 @@ const entries: [string, CommandMeta][] = [
     action: "survey_system",
     operationId: "spacemolt_survey_system",
     summary: "survey_system",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/travel", {
@@ -381,7 +405,7 @@ const entries: [string, CommandMeta][] = [
     action: "travel",
     operationId: "spacemolt_travel",
     summary: "travel",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"UUID of the POI to travel to (use get_system to see available POIs)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/undock", {
@@ -389,7 +413,7 @@ const entries: [string, CommandMeta][] = [
     action: "undock",
     operationId: "spacemolt_undock",
     summary: "undock",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/uninstall_mod", {
@@ -397,7 +421,7 @@ const entries: [string, CommandMeta][] = [
     action: "uninstall_mod",
     operationId: "spacemolt_uninstall_mod",
     summary: "uninstall_mod",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Module ID to install/uninstall. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/use_item", {
@@ -405,7 +429,7 @@ const entries: [string, CommandMeta][] = [
     action: "use_item",
     operationId: "spacemolt_use_item",
     summary: "use_item",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the consumable item to use (e.g., repair_kit, shield_cell, emergency_warp)","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number to consume (default 1). For repair/shield items, using more restores more. For buffs, only 1 is consumed.","required":false,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt/view_completed_mission", {
@@ -413,7 +437,7 @@ const entries: [string, CommandMeta][] = [
     action: "view_completed_mission",
     operationId: "spacemolt_view_completed_mission",
     summary: "view_completed_mission",
-    params: [{"name":"id","type":"string","description":"Target: POI ID, system ID, item ID, player ID, etc. (depends on action)","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Amount: items to buy/sell/jettison/craft, fuel cells, etc.","required":false,"positionalIndex":1},{"name":"text","type":"string","description":"Text input: search query, comma-separated values, etc.","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of results per page (get_version: 1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Template ID of the completed mission to view","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_auth/claim", {
@@ -421,7 +445,7 @@ const entries: [string, CommandMeta][] = [
     action: "claim",
     operationId: "spacemolt_auth_claim",
     summary: "claim",
-    params: [{"name":"username","type":"string","description":"Username (register/login). 3-24 chars: letters, digits, spaces, underscores, hyphens, emoji.","required":false,"positionalIndex":0},{"name":"empire","type":"string","description":"Starting empire (register only)","required":false,"positionalIndex":1,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]},{"name":"password","type":"string","description":"Password (login only). Register returns a generated password.","required":false,"positionalIndex":2},{"name":"registration_code","type":"string","description":"Registration code from spacemolt.com/dashboard","required":false,"positionalIndex":3}],
+    params: [{"name":"registration_code","type":"string","description":"Your registration code from https://spacemolt.com/dashboard","required":true,"positionalIndex":3}],
     isAmbiguous: false,
   }],
   ["spacemolt_auth/login", {
@@ -429,7 +453,15 @@ const entries: [string, CommandMeta][] = [
     action: "login",
     operationId: "spacemolt_auth_login",
     summary: "login",
-    params: [{"name":"username","type":"string","description":"Username (register/login). 3-24 chars: letters, digits, spaces, underscores, hyphens, emoji.","required":false,"positionalIndex":0},{"name":"empire","type":"string","description":"Starting empire (register only)","required":false,"positionalIndex":1,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]},{"name":"password","type":"string","description":"Password (login only). Register returns a generated password.","required":false,"positionalIndex":2},{"name":"registration_code","type":"string","description":"Registration code from spacemolt.com/dashboard","required":false,"positionalIndex":3}],
+    params: [{"name":"username","type":"string","description":"Your username","required":true,"positionalIndex":0},{"name":"password","type":"string","description":"Your random authentication password from registration","required":true,"positionalIndex":2}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_auth/login_token", {
+    toolGroup: "spacemolt_auth",
+    action: "login_token",
+    operationId: "spacemolt_auth_login_token",
+    summary: "login_token",
+    params: [{"name":"token","type":"string","description":"Short-lived login token from /api/player/{id}/ws-token (Clerk-authenticated). Single-use, expires in 5 minutes.","required":true,"positionalIndex":4}],
     isAmbiguous: false,
   }],
   ["spacemolt_auth/logout", {
@@ -437,7 +469,7 @@ const entries: [string, CommandMeta][] = [
     action: "logout",
     operationId: "spacemolt_auth_logout",
     summary: "logout",
-    params: [{"name":"username","type":"string","description":"Username (register/login). 3-24 chars: letters, digits, spaces, underscores, hyphens, emoji.","required":false,"positionalIndex":0},{"name":"empire","type":"string","description":"Starting empire (register only)","required":false,"positionalIndex":1,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]},{"name":"password","type":"string","description":"Password (login only). Register returns a generated password.","required":false,"positionalIndex":2},{"name":"registration_code","type":"string","description":"Registration code from spacemolt.com/dashboard","required":false,"positionalIndex":3}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_auth/register", {
@@ -445,7 +477,7 @@ const entries: [string, CommandMeta][] = [
     action: "register",
     operationId: "spacemolt_auth_register",
     summary: "register",
-    params: [{"name":"username","type":"string","description":"Username (register/login). 3-24 chars: letters, digits, spaces, underscores, hyphens, emoji.","required":false,"positionalIndex":0},{"name":"empire","type":"string","description":"Starting empire (register only)","required":false,"positionalIndex":1,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]},{"name":"password","type":"string","description":"Password (login only). Register returns a generated password.","required":false,"positionalIndex":2},{"name":"registration_code","type":"string","description":"Registration code from spacemolt.com/dashboard","required":false,"positionalIndex":3}],
+    params: [{"name":"username","type":"string","description":"Your unique username (3-24 chars: letters, digits, spaces, underscores, hyphens, apostrophes, periods, exclamation marks, emoji)","required":true,"positionalIndex":0},{"name":"empire","type":"string","description":"Your starting empire (solarian, voidborn, crimson, nebula, outerrim)","required":true,"positionalIndex":1,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]},{"name":"registration_code","type":"string","description":"Your registration code from https://spacemolt.com/dashboard","required":true,"positionalIndex":3}],
     isAmbiguous: false,
   }],
   ["spacemolt_battle/advance", {
@@ -453,7 +485,7 @@ const entries: [string, CommandMeta][] = [
     action: "advance",
     operationId: "spacemolt_battle_advance",
     summary: "advance",
-    params: [{"name":"id","type":"string","description":"Stance name (fire/evade/brace/flee), target player ID, or weapon instance ID (for reload)","required":false,"positionalIndex":0},{"name":"target","type":"string","description":"Ammo item ID (for reload only)","required":false,"positionalIndex":1},{"name":"side_id","type":"integer","description":"Battle side to join (for engage). Omit for auto-assignment by faction.","required":false,"positionalIndex":-1}],
+    params: [{"name":"side_id","type":"integer","description":"Side to join (optional for action=engage — auto-assigned by faction if omitted)","required":false,"positionalIndex":-1},{"name":"stance","type":"string","description":"Battle stance (required for action=stance): fire (100% dmg dealt/taken), evade (0% dealt, 50% taken, costs fuel), brace (0% dealt, 25% taken, shields regen 2x), flee (0% dealt, 100% taken, auto-retreats, 3 ticks from outer to escape)","required":false,"positionalIndex":-1,"enumValues":["fire","evade","brace","flee"]},{"name":"target_id","type":"string","description":"Player ID or username of enemy to target (required for action=target)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_battle/engage", {
@@ -461,15 +493,23 @@ const entries: [string, CommandMeta][] = [
     action: "engage",
     operationId: "spacemolt_battle_engage",
     summary: "engage",
-    params: [{"name":"id","type":"string","description":"Stance name (fire/evade/brace/flee), target player ID, or weapon instance ID (for reload)","required":false,"positionalIndex":0},{"name":"target","type":"string","description":"Ammo item ID (for reload only)","required":false,"positionalIndex":1},{"name":"side_id","type":"integer","description":"Battle side to join (for engage). Omit for auto-assignment by faction.","required":false,"positionalIndex":-1}],
+    params: [{"name":"side_id","type":"integer","description":"Side to join (optional for action=engage — auto-assigned by faction if omitted)","required":false,"positionalIndex":-1},{"name":"stance","type":"string","description":"Battle stance (required for action=stance): fire (100% dmg dealt/taken), evade (0% dealt, 50% taken, costs fuel), brace (0% dealt, 25% taken, shields regen 2x), flee (0% dealt, 100% taken, auto-retreats, 3 ticks from outer to escape)","required":false,"positionalIndex":-1,"enumValues":["fire","evade","brace","flee"]},{"name":"target_id","type":"string","description":"Player ID or username of enemy to target (required for action=target)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
+  }],
+  ["spacemolt_battle/help", {
+    toolGroup: "spacemolt_battle",
+    action: "help",
+    operationId: "spacemolt_battle_help",
+    summary: "help",
+    params: [{"name":"side_id","type":"integer","description":"Side to join (optional for action=engage — auto-assigned by faction if omitted)","required":false,"positionalIndex":-1},{"name":"stance","type":"string","description":"Battle stance (required for action=stance): fire (100% dmg dealt/taken), evade (0% dealt, 50% taken, costs fuel), brace (0% dealt, 25% taken, shields regen 2x), flee (0% dealt, 100% taken, auto-retreats, 3 ticks from outer to escape)","required":false,"positionalIndex":-1,"enumValues":["fire","evade","brace","flee"]},{"name":"target_id","type":"string","description":"Player ID or username of enemy to target (required for action=target)","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_battle/reload", {
     toolGroup: "spacemolt_battle",
     action: "reload",
     operationId: "spacemolt_battle_reload",
     summary: "reload",
-    params: [{"name":"id","type":"string","description":"Stance name (fire/evade/brace/flee), target player ID, or weapon instance ID (for reload)","required":false,"positionalIndex":0},{"name":"target","type":"string","description":"Ammo item ID (for reload only)","required":false,"positionalIndex":1},{"name":"side_id","type":"integer","description":"Battle side to join (for engage). Omit for auto-assignment by faction.","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Instance ID of the fitted weapon to reload (use get_ship to see weapon instance IDs)","required":true,"positionalIndex":0},{"name":"target","type":"string","description":"Item ID of ammo to load from cargo (must match the weapon's ammo type)","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_battle/retreat", {
@@ -477,7 +517,7 @@ const entries: [string, CommandMeta][] = [
     action: "retreat",
     operationId: "spacemolt_battle_retreat",
     summary: "retreat",
-    params: [{"name":"id","type":"string","description":"Stance name (fire/evade/brace/flee), target player ID, or weapon instance ID (for reload)","required":false,"positionalIndex":0},{"name":"target","type":"string","description":"Ammo item ID (for reload only)","required":false,"positionalIndex":1},{"name":"side_id","type":"integer","description":"Battle side to join (for engage). Omit for auto-assignment by faction.","required":false,"positionalIndex":-1}],
+    params: [{"name":"side_id","type":"integer","description":"Side to join (optional for action=engage — auto-assigned by faction if omitted)","required":false,"positionalIndex":-1},{"name":"stance","type":"string","description":"Battle stance (required for action=stance): fire (100% dmg dealt/taken), evade (0% dealt, 50% taken, costs fuel), brace (0% dealt, 25% taken, shields regen 2x), flee (0% dealt, 100% taken, auto-retreats, 3 ticks from outer to escape)","required":false,"positionalIndex":-1,"enumValues":["fire","evade","brace","flee"]},{"name":"target_id","type":"string","description":"Player ID or username of enemy to target (required for action=target)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_battle/stance", {
@@ -485,7 +525,7 @@ const entries: [string, CommandMeta][] = [
     action: "stance",
     operationId: "spacemolt_battle_stance",
     summary: "stance",
-    params: [{"name":"id","type":"string","description":"Stance name (fire/evade/brace/flee), target player ID, or weapon instance ID (for reload)","required":false,"positionalIndex":0},{"name":"target","type":"string","description":"Ammo item ID (for reload only)","required":false,"positionalIndex":1},{"name":"side_id","type":"integer","description":"Battle side to join (for engage). Omit for auto-assignment by faction.","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Battle stance (required for action=stance): fire (100% dmg dealt/taken), evade (0% dealt, 50% taken, costs fuel), brace (0% dealt, 25% taken, shields regen 2x), flee (0% dealt, 100% taken, auto-retreats, 3 ticks from outer to escape)","required":false,"positionalIndex":0,"enumValues":["fire","evade","brace","flee"]},{"name":"side_id","type":"integer","description":"Side to join (optional for action=engage — auto-assigned by faction if omitted)","required":false,"positionalIndex":-1},{"name":"target_id","type":"string","description":"Player ID or username of enemy to target (required for action=target)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_battle/status", {
@@ -493,15 +533,15 @@ const entries: [string, CommandMeta][] = [
     action: "status",
     operationId: "spacemolt_battle_status",
     summary: "status",
-    params: [{"name":"id","type":"string","description":"Stance name (fire/evade/brace/flee), target player ID, or weapon instance ID (for reload)","required":false,"positionalIndex":0},{"name":"target","type":"string","description":"Ammo item ID (for reload only)","required":false,"positionalIndex":1},{"name":"side_id","type":"integer","description":"Battle side to join (for engage). Omit for auto-assignment by faction.","required":false,"positionalIndex":-1}],
-    isAmbiguous: false,
+    params: [],
+    isAmbiguous: true,
   }],
   ["spacemolt_battle/target", {
     toolGroup: "spacemolt_battle",
     action: "target",
     operationId: "spacemolt_battle_target",
     summary: "target",
-    params: [{"name":"id","type":"string","description":"Stance name (fire/evade/brace/flee), target player ID, or weapon instance ID (for reload)","required":false,"positionalIndex":0},{"name":"target","type":"string","description":"Ammo item ID (for reload only)","required":false,"positionalIndex":1},{"name":"side_id","type":"integer","description":"Battle side to join (for engage). Omit for auto-assignment by faction.","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Player ID or username of enemy to target (required for action=target)","required":false,"positionalIndex":0},{"name":"side_id","type":"integer","description":"Side to join (optional for action=engage — auto-assigned by faction if omitted)","required":false,"positionalIndex":-1},{"name":"stance","type":"string","description":"Battle stance (required for action=stance): fire (100% dmg dealt/taken), evade (0% dealt, 50% taken, costs fuel), brace (0% dealt, 25% taken, shields regen 2x), flee (0% dealt, 100% taken, auto-retreats, 3 ticks from outer to escape)","required":false,"positionalIndex":-1,"enumValues":["fire","evade","brace","flee"]}],
     isAmbiguous: false,
   }],
   ["spacemolt_catalog/catalog", {
@@ -513,12 +553,124 @@ const entries: [string, CommandMeta][] = [
     isAmbiguous: false,
     isDirect: true,
   }],
+  ["spacemolt_citizenship/apply", {
+    toolGroup: "spacemolt_citizenship",
+    action: "apply",
+    operationId: "spacemolt_citizenship_apply",
+    summary: "apply",
+    params: [{"name":"target","type":"string","description":"Empire to act on. Required for apply, renounce, withdraw; ignored for list.","required":false,"positionalIndex":0,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_citizenship/list", {
+    toolGroup: "spacemolt_citizenship",
+    action: "list",
+    operationId: "spacemolt_citizenship_list",
+    summary: "list",
+    params: [{"name":"empire_id","type":"string","description":"Empire to act on. Required for apply, renounce, withdraw; ignored for list.","required":false,"positionalIndex":-1,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_citizenship/renounce", {
+    toolGroup: "spacemolt_citizenship",
+    action: "renounce",
+    operationId: "spacemolt_citizenship_renounce",
+    summary: "renounce",
+    params: [{"name":"target","type":"string","description":"Empire to act on. Required for apply, renounce, withdraw; ignored for list.","required":false,"positionalIndex":0,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_citizenship/withdraw", {
+    toolGroup: "spacemolt_citizenship",
+    action: "withdraw",
+    operationId: "spacemolt_citizenship_withdraw",
+    summary: "withdraw",
+    params: [{"name":"target","type":"string","description":"Empire to act on. Required for apply, renounce, withdraw; ignored for list.","required":false,"positionalIndex":0,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_drone/deploy", {
+    toolGroup: "spacemolt_drone",
+    action: "deploy",
+    operationId: "spacemolt_drone_deploy",
+    summary: "deploy",
+    params: [{"name":"id","type":"string","description":"ID of the drone to deploy from your bay (see get_drones)","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_drone/get", {
+    toolGroup: "spacemolt_drone",
+    action: "get",
+    operationId: "spacemolt_drone_get",
+    summary: "get",
+    params: [{"name":"id","type":"string","description":"ID of the drone to inspect","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_drone/list", {
+    toolGroup: "spacemolt_drone",
+    action: "list",
+    operationId: "spacemolt_drone_list",
+    summary: "list",
+    params: [],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_drone/load", {
+    toolGroup: "spacemolt_drone",
+    action: "load",
+    operationId: "spacemolt_drone_load",
+    summary: "load",
+    params: [{"name":"id","type":"string","description":"Drone item ID from cargo (combat_drone, mining_drone, repair_drone, salvage_drone, scout_drone)","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_drone/recall", {
+    toolGroup: "spacemolt_drone",
+    action: "recall",
+    operationId: "spacemolt_drone_recall",
+    summary: "recall",
+    params: [{"name":"id","type":"string","description":"ID of a specific drone to recall","required":false,"positionalIndex":0},{"name":"all","type":"boolean","description":"Set to true to recall all drones at your current location","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_drone/unload", {
+    toolGroup: "spacemolt_drone",
+    action: "unload",
+    operationId: "spacemolt_drone_unload",
+    summary: "unload",
+    params: [{"name":"id","type":"string","description":"ID of the drone to return to cargo (must be in bay, not deployed)","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_drone/upload", {
+    toolGroup: "spacemolt_drone",
+    action: "upload",
+    operationId: "spacemolt_drone_upload",
+    summary: "upload",
+    params: [{"name":"id","type":"string","description":"ID of the drone to program","required":true,"positionalIndex":0},{"name":"text","type":"string","description":"DroneLang script source (max 2000 chars). Pass empty string to clear.","required":true,"positionalIndex":1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_facility/browse_for_sale", {
+    toolGroup: "spacemolt_facility",
+    action: "browse_for_sale",
+    operationId: "spacemolt_facility_browse_for_sale",
+    summary: "browse_for_sale",
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_facility/build", {
     toolGroup: "spacemolt_facility",
     action: "build",
     operationId: "spacemolt_facility_build",
     summary: "build",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_facility/buy_listing", {
+    toolGroup: "spacemolt_facility",
+    action: "buy_listing",
+    operationId: "spacemolt_facility_buy_listing",
+    summary: "buy_listing",
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_facility/cancel_listing", {
+    toolGroup: "spacemolt_facility",
+    action: "cancel_listing",
+    operationId: "spacemolt_facility_cancel_listing",
+    summary: "cancel_listing",
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/faction_build", {
@@ -526,7 +678,7 @@ const entries: [string, CommandMeta][] = [
     action: "faction_build",
     operationId: "spacemolt_facility_faction_build",
     summary: "faction_build",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/faction_list", {
@@ -534,7 +686,7 @@ const entries: [string, CommandMeta][] = [
     action: "faction_list",
     operationId: "spacemolt_facility_faction_list",
     summary: "faction_list",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/faction_toggle", {
@@ -542,7 +694,7 @@ const entries: [string, CommandMeta][] = [
     action: "faction_toggle",
     operationId: "spacemolt_facility_faction_toggle",
     summary: "faction_toggle",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/faction_upgrade", {
@@ -550,7 +702,7 @@ const entries: [string, CommandMeta][] = [
     action: "faction_upgrade",
     operationId: "spacemolt_facility_faction_upgrade",
     summary: "faction_upgrade",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/list", {
@@ -558,15 +710,23 @@ const entries: [string, CommandMeta][] = [
     action: "list",
     operationId: "spacemolt_facility_list",
     summary: "list",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
+  }],
+  ["spacemolt_facility/list_for_sale", {
+    toolGroup: "spacemolt_facility",
+    action: "list_for_sale",
+    operationId: "spacemolt_facility_list_for_sale",
+    summary: "list_for_sale",
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
   }],
   ["spacemolt_facility/personal_build", {
     toolGroup: "spacemolt_facility",
     action: "personal_build",
     operationId: "spacemolt_facility_personal_build",
     summary: "personal_build",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/personal_decorate", {
@@ -574,7 +734,7 @@ const entries: [string, CommandMeta][] = [
     action: "personal_decorate",
     operationId: "spacemolt_facility_personal_decorate",
     summary: "personal_decorate",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/personal_visit", {
@@ -582,7 +742,7 @@ const entries: [string, CommandMeta][] = [
     action: "personal_visit",
     operationId: "spacemolt_facility_personal_visit",
     summary: "personal_visit",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/toggle", {
@@ -590,7 +750,7 @@ const entries: [string, CommandMeta][] = [
     action: "toggle",
     operationId: "spacemolt_facility_toggle",
     summary: "toggle",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/transfer", {
@@ -598,7 +758,7 @@ const entries: [string, CommandMeta][] = [
     action: "transfer",
     operationId: "spacemolt_facility_transfer",
     summary: "transfer",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/types", {
@@ -606,7 +766,7 @@ const entries: [string, CommandMeta][] = [
     action: "types",
     operationId: "spacemolt_facility_types",
     summary: "types",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/upgrade", {
@@ -614,7 +774,7 @@ const entries: [string, CommandMeta][] = [
     action: "upgrade",
     operationId: "spacemolt_facility_upgrade",
     summary: "upgrade",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/upgrades", {
@@ -622,7 +782,15 @@ const entries: [string, CommandMeta][] = [
     action: "upgrades",
     operationId: "spacemolt_facility_upgrades",
     summary: "upgrades",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID (for build, upgrade, faction_build, types detail view)","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility ID (for toggle, upgrade, transfer)","required":false,"positionalIndex":1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle' and 'upgrade' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_faction/accept_ally", {
+    toolGroup: "spacemolt_faction",
+    action: "accept_ally",
+    operationId: "spacemolt_faction_accept_ally",
+    summary: "accept_ally",
+    params: [{"name":"id","type":"string","description":"Target faction ID or 4-character faction tag (e.g. NOVA)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/accept_peace", {
@@ -630,7 +798,7 @@ const entries: [string, CommandMeta][] = [
     action: "accept_peace",
     operationId: "spacemolt_faction_accept_peace",
     summary: "accept_peace",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"Faction ID or 4-character tag of peace proposer","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/cancel_mission", {
@@ -638,7 +806,7 @@ const entries: [string, CommandMeta][] = [
     action: "cancel_mission",
     operationId: "spacemolt_faction_cancel_mission",
     summary: "cancel_mission",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"ID of the faction mission template to cancel","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/create", {
@@ -646,15 +814,15 @@ const entries: [string, CommandMeta][] = [
     action: "create",
     operationId: "spacemolt_faction_create",
     summary: "create",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
-    isAmbiguous: false,
+    params: [{"name":"id","type":"string","description":"Faction tag (2-4 characters)","required":true,"positionalIndex":0},{"name":"text","type":"string","description":"Faction name (must be unique)","required":true,"positionalIndex":1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_faction/declare_war", {
     toolGroup: "spacemolt_faction",
     action: "declare_war",
     operationId: "spacemolt_faction_declare_war",
     summary: "declare_war",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"Target faction ID or 4-character faction tag (e.g. NOVA)","required":true,"positionalIndex":0},{"name":"text","type":"string","description":"Reason for war (optional casus belli)","required":false,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/decline_invite", {
@@ -662,7 +830,7 @@ const entries: [string, CommandMeta][] = [
     action: "decline_invite",
     operationId: "spacemolt_faction_decline_invite",
     summary: "decline_invite",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"Faction ID to decline invitation from","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/delete_role", {
@@ -670,7 +838,7 @@ const entries: [string, CommandMeta][] = [
     action: "delete_role",
     operationId: "spacemolt_faction_delete_role",
     summary: "delete_role",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"ID of the role to delete. Members with this role are reassigned to 'member'.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/delete_room", {
@@ -678,7 +846,7 @@ const entries: [string, CommandMeta][] = [
     action: "delete_room",
     operationId: "spacemolt_faction_delete_room",
     summary: "delete_room",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"ID of the room to delete","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/get_invites", {
@@ -686,7 +854,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_invites",
     operationId: "spacemolt_faction_get_invites",
     summary: "get_invites",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/info", {
@@ -694,7 +862,7 @@ const entries: [string, CommandMeta][] = [
     action: "info",
     operationId: "spacemolt_faction_info",
     summary: "info",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"Faction ID (optional - omit for your own faction)","required":false,"positionalIndex":0},{"name":"limit","type":"integer","description":"Max members to return (default 50, max 100)","required":false,"positionalIndex":-1},{"name":"offset","type":"integer","description":"Pagination offset for member list (default 0)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/invite", {
@@ -702,15 +870,15 @@ const entries: [string, CommandMeta][] = [
     action: "invite",
     operationId: "spacemolt_faction_invite",
     summary: "invite",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
-    isAmbiguous: false,
+    params: [{"name":"id","type":"string","description":"Player ID to invite/kick","required":true,"positionalIndex":0}],
+    isAmbiguous: true,
   }],
   ["spacemolt_faction/join", {
     toolGroup: "spacemolt_faction",
     action: "join",
     operationId: "spacemolt_faction_join",
     summary: "join",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"UUID of faction to join (must have pending invite)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/kick", {
@@ -718,23 +886,23 @@ const entries: [string, CommandMeta][] = [
     action: "kick",
     operationId: "spacemolt_faction_kick",
     summary: "kick",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
-    isAmbiguous: false,
+    params: [{"name":"id","type":"string","description":"Player ID to invite/kick","required":true,"positionalIndex":0}],
+    isAmbiguous: true,
   }],
   ["spacemolt_faction/leave", {
     toolGroup: "spacemolt_faction",
     action: "leave",
     operationId: "spacemolt_faction_leave",
     summary: "leave",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
-    isAmbiguous: false,
+    params: [],
+    isAmbiguous: true,
   }],
   ["spacemolt_faction/list", {
     toolGroup: "spacemolt_faction",
     action: "list",
     operationId: "spacemolt_faction_list",
     summary: "list",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"limit","type":"integer","description":"Max results (default 50, max 100)","required":false,"positionalIndex":-1},{"name":"offset","type":"integer","description":"Pagination offset","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_faction/list_missions", {
@@ -742,7 +910,15 @@ const entries: [string, CommandMeta][] = [
     action: "list_missions",
     operationId: "spacemolt_faction_list_missions",
     summary: "list_missions",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_faction/propose_ally", {
+    toolGroup: "spacemolt_faction",
+    action: "propose_ally",
+    operationId: "spacemolt_faction_propose_ally",
+    summary: "propose_ally",
+    params: [{"name":"id","type":"string","description":"Target faction ID or 4-character faction tag (e.g. NOVA)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/propose_peace", {
@@ -750,7 +926,23 @@ const entries: [string, CommandMeta][] = [
     action: "propose_peace",
     operationId: "spacemolt_faction_propose_peace",
     summary: "propose_peace",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"Target faction ID or 4-character faction tag (must be at war)","required":true,"positionalIndex":0},{"name":"text","type":"string","description":"Peace terms (optional)","required":false,"positionalIndex":1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_faction/remove_ally", {
+    toolGroup: "spacemolt_faction",
+    action: "remove_ally",
+    operationId: "spacemolt_faction_remove_ally",
+    summary: "remove_ally",
+    params: [{"name":"id","type":"string","description":"Target faction ID or 4-character faction tag (e.g. NOVA)","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_faction/remove_enemy", {
+    toolGroup: "spacemolt_faction",
+    action: "remove_enemy",
+    operationId: "spacemolt_faction_remove_enemy",
+    summary: "remove_enemy",
+    params: [{"name":"id","type":"string","description":"Target faction ID or 4-character faction tag (e.g. NOVA)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/rooms", {
@@ -758,15 +950,7 @@ const entries: [string, CommandMeta][] = [
     action: "rooms",
     operationId: "spacemolt_faction_rooms",
     summary: "rooms",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
-    isAmbiguous: false,
-  }],
-  ["spacemolt_faction/set_ally", {
-    toolGroup: "spacemolt_faction",
-    action: "set_ally",
-    operationId: "spacemolt_faction_set_ally",
-    summary: "set_ally",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/set_enemy", {
@@ -774,7 +958,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_enemy",
     operationId: "spacemolt_faction_set_enemy",
     summary: "set_enemy",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"Target faction ID or 4-character faction tag (e.g. NOVA)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/visit_room", {
@@ -782,7 +966,7 @@ const entries: [string, CommandMeta][] = [
     action: "visit_room",
     operationId: "spacemolt_faction_visit_room",
     summary: "visit_room",
-    params: [{"name":"id","type":"string","description":"Target: faction ID, player ID, role ID, room ID, etc.","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Text: faction name, war reason, peace terms, etc.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"ID of the room to visit","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_admin/create_role", {
@@ -790,7 +974,7 @@ const entries: [string, CommandMeta][] = [
     action: "create_role",
     operationId: "spacemolt_faction_admin_create_role",
     summary: "create_role",
-    params: [{"name":"id","type":"string","description":"Player ID (for promote) or role ID (for edit_role)","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Role ID (for promote)","required":false,"positionalIndex":1}],
+    params: [{"name":"name","type":"string","description":"Role name","required":true,"positionalIndex":-1},{"name":"permissions","type":"object","description":"Permission flags (invite, kick, manage_roles, manage_treasury, etc.)","required":false,"positionalIndex":-1},{"name":"priority","type":"integer","description":"Role priority (2-99). Default roles: recruit=1, member=10, officer=50, leader=100","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_admin/edit", {
@@ -798,7 +982,7 @@ const entries: [string, CommandMeta][] = [
     action: "edit",
     operationId: "spacemolt_faction_admin_edit",
     summary: "edit",
-    params: [{"name":"id","type":"string","description":"Player ID (for promote) or role ID (for edit_role)","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Role ID (for promote)","required":false,"positionalIndex":1}],
+    params: [{"name":"ally_fuel_access","type":"boolean","description":"True to let allied faction members refuel for free from your faction's bunker reserves (default false → opt-in).","required":false,"positionalIndex":-1},{"name":"ally_intel_opt_out","type":"boolean","description":"True to withhold your intel pool from allied factions (default false → sharing on).","required":false,"positionalIndex":-1},{"name":"charter","type":"string","description":"Faction's founding document (max 4000 chars)","required":false,"positionalIndex":-1},{"name":"description","type":"string","description":"Faction's public tagline (max 500 chars)","required":false,"positionalIndex":-1},{"name":"primary_color","type":"string","description":"Primary color hex code (e.g., #FF0000)","required":false,"positionalIndex":-1},{"name":"secondary_color","type":"string","description":"Secondary color hex code (e.g., #00FF00)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_admin/edit_role", {
@@ -806,7 +990,7 @@ const entries: [string, CommandMeta][] = [
     action: "edit_role",
     operationId: "spacemolt_faction_admin_edit_role",
     summary: "edit_role",
-    params: [{"name":"id","type":"string","description":"Player ID (for promote) or role ID (for edit_role)","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Role ID (for promote)","required":false,"positionalIndex":1}],
+    params: [{"name":"name","type":"string","description":"New role name (optional)","required":false,"positionalIndex":-1},{"name":"permissions","type":"object","description":"Updated permission flags","required":false,"positionalIndex":-1},{"name":"role_id","type":"string","description":"ID of the role to edit","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_admin/post_mission", {
@@ -814,7 +998,7 @@ const entries: [string, CommandMeta][] = [
     action: "post_mission",
     operationId: "spacemolt_faction_admin_post_mission",
     summary: "post_mission",
-    params: [{"name":"id","type":"string","description":"Player ID (for promote) or role ID (for edit_role)","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Role ID (for promote)","required":false,"positionalIndex":1}],
+    params: [{"name":"description","type":"string","description":"Mission description","required":true,"positionalIndex":-1},{"name":"dialog","type":"object","description":"Optional: dialog text for offer/accept/decline/complete","required":false,"positionalIndex":-1},{"name":"expiration_hours","type":"integer","description":"Hours before mission expires (default 72, max 720)","required":false,"positionalIndex":-1},{"name":"giver_name","type":"string","description":"Optional: NPC name who gives the mission","required":false,"positionalIndex":-1},{"name":"giver_title","type":"string","description":"Optional: NPC title","required":false,"positionalIndex":-1},{"name":"objectives","type":"array","description":"List of mission objectives","required":true,"positionalIndex":-1},{"name":"rewards","type":"object","description":"Mission rewards (credits, items, reputation)","required":true,"positionalIndex":-1},{"name":"title","type":"string","description":"Mission title","required":true,"positionalIndex":-1},{"name":"triggers","type":"array","description":"Optional: triggers like 'open_to_all' to allow non-members","required":false,"positionalIndex":-1},{"name":"type","type":"string","description":"Mission type (delivery, combat, exploration, etc.)","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_admin/promote", {
@@ -822,7 +1006,7 @@ const entries: [string, CommandMeta][] = [
     action: "promote",
     operationId: "spacemolt_faction_admin_promote",
     summary: "promote",
-    params: [{"name":"id","type":"string","description":"Player ID (for promote) or role ID (for edit_role)","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Role ID (for promote)","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"Player ID to promote/demote","required":true,"positionalIndex":0},{"name":"text","type":"string","description":"New role (recruit, member, officer, leader)","required":true,"positionalIndex":1,"enumValues":["recruit","member","officer","leader"]}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_admin/write_room", {
@@ -830,7 +1014,7 @@ const entries: [string, CommandMeta][] = [
     action: "write_room",
     operationId: "spacemolt_faction_admin_write_room",
     summary: "write_room",
-    params: [{"name":"id","type":"string","description":"Player ID (for promote) or role ID (for edit_role)","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Role ID (for promote)","required":false,"positionalIndex":1}],
+    params: [{"name":"access","type":"string","description":"Access level for the room","required":false,"positionalIndex":-1,"enumValues":["public","members","officers"]},{"name":"description","type":"string","description":"Room description text (max 2000 chars)","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Room name (required for new rooms, max 64 chars)","required":false,"positionalIndex":-1},{"name":"room_id","type":"string","description":"Room ID to update (omit to create new room)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_commerce/create_buy_order", {
@@ -838,7 +1022,7 @@ const entries: [string, CommandMeta][] = [
     action: "create_buy_order",
     operationId: "spacemolt_faction_commerce_create_buy_order",
     summary: "create_buy_order",
-    params: [{"name":"item_id","type":"string","description":"Item ID for exchange orders","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Item quantity for exchange orders","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per item in credits","required":false,"positionalIndex":2}],
+    params: [{"name":"item_id","type":"string","description":"ID of the item to buy for faction storage","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to buy","required":true,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Maximum price per unit in credits","required":true,"positionalIndex":2}],
     isAmbiguous: true,
   }],
   ["spacemolt_faction_commerce/create_sell_order", {
@@ -846,7 +1030,79 @@ const entries: [string, CommandMeta][] = [
     action: "create_sell_order",
     operationId: "spacemolt_faction_commerce_create_sell_order",
     summary: "create_sell_order",
-    params: [{"name":"item_id","type":"string","description":"Item ID for exchange orders","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Item quantity for exchange orders","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per item in credits","required":false,"positionalIndex":2}],
+    params: [{"name":"item_id","type":"string","description":"ID of the item to sell from faction storage","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to list for sale","required":true,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per unit in credits","required":true,"positionalIndex":2}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_fleet/accept", {
+    toolGroup: "spacemolt_fleet",
+    action: "accept",
+    operationId: "spacemolt_fleet_accept",
+    summary: "accept",
+    params: [{"name":"player_id","type":"string","description":"Player name or ID (for invite/kick)","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_fleet/create", {
+    toolGroup: "spacemolt_fleet",
+    action: "create",
+    operationId: "spacemolt_fleet_create",
+    summary: "create",
+    params: [{"name":"player_id","type":"string","description":"Player name or ID (for invite/kick)","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_fleet/decline", {
+    toolGroup: "spacemolt_fleet",
+    action: "decline",
+    operationId: "spacemolt_fleet_decline",
+    summary: "decline",
+    params: [{"name":"player_id","type":"string","description":"Player name or ID (for invite/kick)","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_fleet/disband", {
+    toolGroup: "spacemolt_fleet",
+    action: "disband",
+    operationId: "spacemolt_fleet_disband",
+    summary: "disband",
+    params: [{"name":"player_id","type":"string","description":"Player name or ID (for invite/kick)","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_fleet/help", {
+    toolGroup: "spacemolt_fleet",
+    action: "help",
+    operationId: "spacemolt_fleet_help",
+    summary: "help",
+    params: [{"name":"player_id","type":"string","description":"Player name or ID (for invite/kick)","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_fleet/invite", {
+    toolGroup: "spacemolt_fleet",
+    action: "invite",
+    operationId: "spacemolt_fleet_invite",
+    summary: "invite",
+    params: [{"name":"id","type":"string","description":"Player name or ID (for invite/kick)","required":false,"positionalIndex":0}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_fleet/kick", {
+    toolGroup: "spacemolt_fleet",
+    action: "kick",
+    operationId: "spacemolt_fleet_kick",
+    summary: "kick",
+    params: [{"name":"id","type":"string","description":"Player name or ID (for invite/kick)","required":false,"positionalIndex":0}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_fleet/leave", {
+    toolGroup: "spacemolt_fleet",
+    action: "leave",
+    operationId: "spacemolt_fleet_leave",
+    summary: "leave",
+    params: [{"name":"player_id","type":"string","description":"Player name or ID (for invite/kick)","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_fleet/status", {
+    toolGroup: "spacemolt_fleet",
+    action: "status",
+    operationId: "spacemolt_fleet_status",
+    summary: "status",
+    params: [{"name":"player_id","type":"string","description":"Player name or ID (for invite/kick)","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_intel/intel_status", {
@@ -854,7 +1110,7 @@ const entries: [string, CommandMeta][] = [
     action: "intel_status",
     operationId: "spacemolt_intel_intel_status",
     summary: "intel_status",
-    params: [{"name":"system_id","type":"string","description":"System ID (for query_intel)","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID (for trade intel)","required":false,"positionalIndex":1},{"name":"base_id","type":"string","description":"Base/station ID (for trade intel)","required":false,"positionalIndex":-1},{"name":"stations","type":"array","description":"Array of station IDs (for submit_intel)","required":false,"positionalIndex":-1},{"name":"system_name","type":"string","description":"System name (for query_intel)","required":false,"positionalIndex":-1},{"name":"systems","type":"array","description":"Array of system IDs (for submit_intel)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_intel/query_intel", {
@@ -862,7 +1118,7 @@ const entries: [string, CommandMeta][] = [
     action: "query_intel",
     operationId: "spacemolt_intel_query_intel",
     summary: "query_intel",
-    params: [{"name":"system_id","type":"string","description":"System ID (for query_intel)","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID (for trade intel)","required":false,"positionalIndex":1},{"name":"base_id","type":"string","description":"Base/station ID (for trade intel)","required":false,"positionalIndex":-1},{"name":"stations","type":"array","description":"Array of station IDs (for submit_intel)","required":false,"positionalIndex":-1},{"name":"system_name","type":"string","description":"System name (for query_intel)","required":false,"positionalIndex":-1},{"name":"systems","type":"array","description":"Array of system IDs (for submit_intel)","required":false,"positionalIndex":-1}],
+    params: [{"name":"system_id","type":"string","description":"Filter by system ID","required":false,"positionalIndex":0},{"name":"limit","type":"integer","description":"Max results (default 50, max 100)","required":false,"positionalIndex":-1},{"name":"offset","type":"integer","description":"Pagination offset","required":false,"positionalIndex":-1},{"name":"poi_type","type":"string","description":"Filter by POI type (requires L2 Intel Center)","required":false,"positionalIndex":-1},{"name":"resource_type","type":"string","description":"Filter by resource type (requires L2 Intel Center)","required":false,"positionalIndex":-1},{"name":"source_faction_id","type":"string","description":"Optional ally faction whose intel pool to read (defaults to own faction). Allowed only when allied with the source and the source has not set ally_intel_opt_out.","required":false,"positionalIndex":-1},{"name":"system_name","type":"string","description":"Filter by system name (case-insensitive partial match)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_intel/query_trade_intel", {
@@ -870,7 +1126,7 @@ const entries: [string, CommandMeta][] = [
     action: "query_trade_intel",
     operationId: "spacemolt_intel_query_trade_intel",
     summary: "query_trade_intel",
-    params: [{"name":"system_id","type":"string","description":"System ID (for query_intel)","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID (for trade intel)","required":false,"positionalIndex":1},{"name":"base_id","type":"string","description":"Base/station ID (for trade intel)","required":false,"positionalIndex":-1},{"name":"stations","type":"array","description":"Array of station IDs (for submit_intel)","required":false,"positionalIndex":-1},{"name":"system_name","type":"string","description":"System name (for query_intel)","required":false,"positionalIndex":-1},{"name":"systems","type":"array","description":"Array of system IDs (for submit_intel)","required":false,"positionalIndex":-1}],
+    params: [{"name":"item_id","type":"string","description":"Filter by item ID (requires L2 Commerce Terminal)","required":false,"positionalIndex":1},{"name":"base_id","type":"string","description":"Filter by base/station ID","required":false,"positionalIndex":-1},{"name":"limit","type":"integer","description":"Max results (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"offset","type":"integer","description":"Pagination offset","required":false,"positionalIndex":-1},{"name":"source_faction_id","type":"string","description":"Optional ally faction whose trade intel pool to read (defaults to own faction). Allowed only when allied with the source and the source has not set ally_intel_opt_out.","required":false,"positionalIndex":-1},{"name":"station_name","type":"string","description":"Filter by station name","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_intel/submit_intel", {
@@ -878,7 +1134,7 @@ const entries: [string, CommandMeta][] = [
     action: "submit_intel",
     operationId: "spacemolt_intel_submit_intel",
     summary: "submit_intel",
-    params: [{"name":"system_id","type":"string","description":"System ID (for query_intel)","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID (for trade intel)","required":false,"positionalIndex":1},{"name":"base_id","type":"string","description":"Base/station ID (for trade intel)","required":false,"positionalIndex":-1},{"name":"stations","type":"array","description":"Array of station IDs (for submit_intel)","required":false,"positionalIndex":-1},{"name":"system_name","type":"string","description":"System name (for query_intel)","required":false,"positionalIndex":-1},{"name":"systems","type":"array","description":"Array of system IDs (for submit_intel)","required":false,"positionalIndex":-1}],
+    params: [{"name":"systems","type":"array","description":"Array of system intel reports. Each entry: system_id (required), name (required), description, empire, police_level, connections (array of {system_id, name, distance} objects or bare ID strings), pois (array of {id, type, name, description, class, position:{x,y}, base_id, base_name, resources:[{resource_id, richness, remaining}]})","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_intel/submit_trade_intel", {
@@ -886,7 +1142,7 @@ const entries: [string, CommandMeta][] = [
     action: "submit_trade_intel",
     operationId: "spacemolt_intel_submit_trade_intel",
     summary: "submit_trade_intel",
-    params: [{"name":"system_id","type":"string","description":"System ID (for query_intel)","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID (for trade intel)","required":false,"positionalIndex":1},{"name":"base_id","type":"string","description":"Base/station ID (for trade intel)","required":false,"positionalIndex":-1},{"name":"stations","type":"array","description":"Array of station IDs (for submit_intel)","required":false,"positionalIndex":-1},{"name":"system_name","type":"string","description":"System name (for query_intel)","required":false,"positionalIndex":-1},{"name":"systems","type":"array","description":"Array of system IDs (for submit_intel)","required":false,"positionalIndex":-1}],
+    params: [{"name":"stations","type":"array","description":"Array of station market reports (max 20 stations per submission)","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_intel/trade_intel_status", {
@@ -894,7 +1150,7 @@ const entries: [string, CommandMeta][] = [
     action: "trade_intel_status",
     operationId: "spacemolt_intel_trade_intel_status",
     summary: "trade_intel_status",
-    params: [{"name":"system_id","type":"string","description":"System ID (for query_intel)","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID (for trade intel)","required":false,"positionalIndex":1},{"name":"base_id","type":"string","description":"Base/station ID (for trade intel)","required":false,"positionalIndex":-1},{"name":"stations","type":"array","description":"Array of station IDs (for submit_intel)","required":false,"positionalIndex":-1},{"name":"system_name","type":"string","description":"System name (for query_intel)","required":false,"positionalIndex":-1},{"name":"systems","type":"array","description":"Array of system IDs (for submit_intel)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_market/analyze_market", {
@@ -902,7 +1158,7 @@ const entries: [string, CommandMeta][] = [
     action: "analyze_market",
     operationId: "spacemolt_market_analyze_market",
     summary: "analyze_market",
-    params: [{"name":"item_id","type":"string","description":"Item ID for orders or market queries","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to buy/sell","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per item in credits","required":false,"positionalIndex":2},{"name":"order_id","type":"string","description":"Order ID (for cancel_order, modify_order)","required":false,"positionalIndex":3},{"name":"order_type","type":"string","description":"view_orders: filter by 'buy' or 'sell'","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"view_orders: page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"view_orders: results per page (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"scope","type":"string","description":"view_orders: 'personal' (default) or 'faction'","required":false,"positionalIndex":-1},{"name":"search","type":"string","description":"view_orders: substring search on item names","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"view_orders: 'newest', 'oldest', 'price_asc', 'price_desc'","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view orders at without docking (view_orders only)","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_market/cancel_order", {
@@ -910,7 +1166,7 @@ const entries: [string, CommandMeta][] = [
     action: "cancel_order",
     operationId: "spacemolt_market_cancel_order",
     summary: "cancel_order",
-    params: [{"name":"item_id","type":"string","description":"Item ID for orders or market queries","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to buy/sell","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per item in credits","required":false,"positionalIndex":2},{"name":"order_id","type":"string","description":"Order ID (for cancel_order, modify_order)","required":false,"positionalIndex":3},{"name":"order_type","type":"string","description":"view_orders: filter by 'buy' or 'sell'","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"view_orders: page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"view_orders: results per page (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"scope","type":"string","description":"view_orders: 'personal' (default) or 'faction'","required":false,"positionalIndex":-1},{"name":"search","type":"string","description":"view_orders: substring search on item names","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"view_orders: 'newest', 'oldest', 'price_asc', 'price_desc'","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view orders at without docking (view_orders only)","required":false,"positionalIndex":-1}],
+    params: [{"name":"order_id","type":"string","description":"ID of the order to cancel, or 'all' to cancel all your orders at this station. Use view_orders to see your orders.","required":false,"positionalIndex":3},{"name":"order_ids","type":"array","description":"Bulk mode: array of order IDs to cancel (max 50). When provided, the top-level order_id is ignored.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_market/create_buy_order", {
@@ -918,7 +1174,7 @@ const entries: [string, CommandMeta][] = [
     action: "create_buy_order",
     operationId: "spacemolt_market_create_buy_order",
     summary: "create_buy_order",
-    params: [{"name":"item_id","type":"string","description":"Item ID for orders or market queries","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to buy/sell","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per item in credits","required":false,"positionalIndex":2},{"name":"order_id","type":"string","description":"Order ID (for cancel_order, modify_order)","required":false,"positionalIndex":3},{"name":"order_type","type":"string","description":"view_orders: filter by 'buy' or 'sell'","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"view_orders: page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"view_orders: results per page (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"scope","type":"string","description":"view_orders: 'personal' (default) or 'faction'","required":false,"positionalIndex":-1},{"name":"search","type":"string","description":"view_orders: substring search on item names","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"view_orders: 'newest', 'oldest', 'price_asc', 'price_desc'","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view orders at without docking (view_orders only)","required":false,"positionalIndex":-1}],
+    params: [{"name":"item_id","type":"string","description":"ID of the item to buy (e.g., iron_ore, steel_plate). Required for single mode.","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to buy. Required for single mode.","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Maximum price per unit in credits. Required for single mode.","required":false,"positionalIndex":2},{"name":"deliver_to","type":"string","description":"Where to deliver filled items: 'cargo' (default) or 'storage' (station storage).","required":false,"positionalIndex":-1,"enumValues":["cargo","storage"]},{"name":"orders","type":"array","description":"Bulk mode: array of buy orders to create (max 50). Each entry needs item_id, quantity, price_each. When provided, the top-level item_id/quantity/price_each are ignored.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_market/create_sell_order", {
@@ -926,7 +1182,7 @@ const entries: [string, CommandMeta][] = [
     action: "create_sell_order",
     operationId: "spacemolt_market_create_sell_order",
     summary: "create_sell_order",
-    params: [{"name":"item_id","type":"string","description":"Item ID for orders or market queries","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to buy/sell","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per item in credits","required":false,"positionalIndex":2},{"name":"order_id","type":"string","description":"Order ID (for cancel_order, modify_order)","required":false,"positionalIndex":3},{"name":"order_type","type":"string","description":"view_orders: filter by 'buy' or 'sell'","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"view_orders: page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"view_orders: results per page (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"scope","type":"string","description":"view_orders: 'personal' (default) or 'faction'","required":false,"positionalIndex":-1},{"name":"search","type":"string","description":"view_orders: substring search on item names","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"view_orders: 'newest', 'oldest', 'price_asc', 'price_desc'","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view orders at without docking (view_orders only)","required":false,"positionalIndex":-1}],
+    params: [{"name":"item_id","type":"string","description":"ID of the item to sell (e.g., iron_ore, steel_plate). Required for single mode.","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to list for sale. Required for single mode.","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per unit in credits. Required for single mode.","required":false,"positionalIndex":2},{"name":"orders","type":"array","description":"Bulk mode: array of sell orders to create (max 50). Each entry needs item_id, quantity, price_each. When provided, the top-level item_id/quantity/price_each are ignored.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_market/estimate_purchase", {
@@ -934,7 +1190,7 @@ const entries: [string, CommandMeta][] = [
     action: "estimate_purchase",
     operationId: "spacemolt_market_estimate_purchase",
     summary: "estimate_purchase",
-    params: [{"name":"item_id","type":"string","description":"Item ID for orders or market queries","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to buy/sell","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per item in credits","required":false,"positionalIndex":2},{"name":"order_id","type":"string","description":"Order ID (for cancel_order, modify_order)","required":false,"positionalIndex":3},{"name":"order_type","type":"string","description":"view_orders: filter by 'buy' or 'sell'","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"view_orders: page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"view_orders: results per page (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"scope","type":"string","description":"view_orders: 'personal' (default) or 'faction'","required":false,"positionalIndex":-1},{"name":"search","type":"string","description":"view_orders: substring search on item names","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"view_orders: 'newest', 'oldest', 'price_asc', 'price_desc'","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view orders at without docking (view_orders only)","required":false,"positionalIndex":-1}],
+    params: [{"name":"item_id","type":"string","description":"ID of the item to estimate buying","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to estimate buying","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_market/modify_order", {
@@ -942,7 +1198,7 @@ const entries: [string, CommandMeta][] = [
     action: "modify_order",
     operationId: "spacemolt_market_modify_order",
     summary: "modify_order",
-    params: [{"name":"item_id","type":"string","description":"Item ID for orders or market queries","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to buy/sell","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per item in credits","required":false,"positionalIndex":2},{"name":"order_id","type":"string","description":"Order ID (for cancel_order, modify_order)","required":false,"positionalIndex":3},{"name":"order_type","type":"string","description":"view_orders: filter by 'buy' or 'sell'","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"view_orders: page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"view_orders: results per page (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"scope","type":"string","description":"view_orders: 'personal' (default) or 'faction'","required":false,"positionalIndex":-1},{"name":"search","type":"string","description":"view_orders: substring search on item names","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"view_orders: 'newest', 'oldest', 'price_asc', 'price_desc'","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view orders at without docking (view_orders only)","required":false,"positionalIndex":-1}],
+    params: [{"name":"price_each","type":"integer","description":"New price per unit in credits. Required for single mode.","required":false,"positionalIndex":2},{"name":"order_id","type":"string","description":"ID of the order to modify. Required for single mode.","required":false,"positionalIndex":3},{"name":"orders","type":"array","description":"Bulk mode: array of order modifications (max 50). Each entry needs order_id and new_price. When provided, the top-level order_id/new_price are ignored.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_market/view_market", {
@@ -950,7 +1206,7 @@ const entries: [string, CommandMeta][] = [
     action: "view_market",
     operationId: "spacemolt_market_view_market",
     summary: "view_market",
-    params: [{"name":"item_id","type":"string","description":"Item ID for orders or market queries","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to buy/sell","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per item in credits","required":false,"positionalIndex":2},{"name":"order_id","type":"string","description":"Order ID (for cancel_order, modify_order)","required":false,"positionalIndex":3},{"name":"order_type","type":"string","description":"view_orders: filter by 'buy' or 'sell'","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"view_orders: page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"view_orders: results per page (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"scope","type":"string","description":"view_orders: 'personal' (default) or 'faction'","required":false,"positionalIndex":-1},{"name":"search","type":"string","description":"view_orders: substring search on item names","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"view_orders: 'newest', 'oldest', 'price_asc', 'price_desc'","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view orders at without docking (view_orders only)","required":false,"positionalIndex":-1}],
+    params: [{"name":"item_id","type":"string","description":"Optional: filter to a specific item for full order book depth (e.g., iron_ore)","required":false,"positionalIndex":0},{"name":"category","type":"string","description":"Optional: filter summary by category (e.g., ore, commodity, weapon, module). Use without item_id.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_market/view_orders", {
@@ -958,7 +1214,7 @@ const entries: [string, CommandMeta][] = [
     action: "view_orders",
     operationId: "spacemolt_market_view_orders",
     summary: "view_orders",
-    params: [{"name":"item_id","type":"string","description":"Item ID for orders or market queries","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to buy/sell","required":false,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per item in credits","required":false,"positionalIndex":2},{"name":"order_id","type":"string","description":"Order ID (for cancel_order, modify_order)","required":false,"positionalIndex":3},{"name":"order_type","type":"string","description":"view_orders: filter by 'buy' or 'sell'","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"view_orders: page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"view_orders: results per page (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"scope","type":"string","description":"view_orders: 'personal' (default) or 'faction'","required":false,"positionalIndex":-1},{"name":"search","type":"string","description":"view_orders: substring search on item names","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"view_orders: 'newest', 'oldest', 'price_asc', 'price_desc'","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view orders at without docking (view_orders only)","required":false,"positionalIndex":-1}],
+    params: [{"name":"item_id","type":"string","description":"Filter by item (exact match on item name or ID)","required":false,"positionalIndex":0},{"name":"order_type","type":"string","description":"Filter by order type: 'buy' or 'sell'","required":false,"positionalIndex":-1,"enumValues":["buy","sell"]},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"Results per page (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"scope","type":"string","description":"Order scope: 'personal' (default) or 'faction' (requires faction membership)","required":false,"positionalIndex":-1,"enumValues":["personal","faction"]},{"name":"search","type":"string","description":"Filter by substring match on item names","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"Sort order: 'newest' (default), 'oldest', 'price_asc', 'price_desc'","required":false,"positionalIndex":-1,"enumValues":["newest","oldest","price_asc","price_desc"]},{"name":"station_id","type":"string","description":"Optional: station ID to view your orders at without being docked. If omitted, must be docked and uses the current station.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/insure", {
@@ -966,7 +1222,7 @@ const entries: [string, CommandMeta][] = [
     action: "insure",
     operationId: "spacemolt_salvage_insure",
     summary: "insure",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [{"name":"ticks","type":"integer","description":"Number of ticks to insure for","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/loot", {
@@ -974,7 +1230,7 @@ const entries: [string, CommandMeta][] = [
     action: "loot",
     operationId: "spacemolt_salvage_loot",
     summary: "loot",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"UUID of the wreck to loot. Omit when towing a wreck to default to your towed wreck.","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Specific cargo item ID to loot. Omit to loot everything (all cargo and modules go to cargo hold).","required":false,"positionalIndex":-1},{"name":"module_id","type":"string","description":"Module instance ID to loot directly onto your ship (requires free slot, CPU, and power). Get module IDs from get_wrecks. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).","required":false,"positionalIndex":-1},{"name":"quantity","type":"integer","description":"Quantity of cargo item to loot (only used with item_id)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/policies", {
@@ -982,7 +1238,7 @@ const entries: [string, CommandMeta][] = [
     action: "policies",
     operationId: "spacemolt_salvage_policies",
     summary: "policies",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/quote", {
@@ -990,7 +1246,7 @@ const entries: [string, CommandMeta][] = [
     action: "quote",
     operationId: "spacemolt_salvage_quote",
     summary: "quote",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/release", {
@@ -998,7 +1254,7 @@ const entries: [string, CommandMeta][] = [
     action: "release",
     operationId: "spacemolt_salvage_release",
     summary: "release",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/salvage", {
@@ -1006,7 +1262,7 @@ const entries: [string, CommandMeta][] = [
     action: "salvage",
     operationId: "spacemolt_salvage_salvage",
     summary: "salvage",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"UUID of the wreck to salvage","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/scrap", {
@@ -1014,7 +1270,7 @@ const entries: [string, CommandMeta][] = [
     action: "scrap",
     operationId: "spacemolt_salvage_scrap",
     summary: "scrap",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/sell", {
@@ -1022,7 +1278,7 @@ const entries: [string, CommandMeta][] = [
     action: "sell",
     operationId: "spacemolt_salvage_sell",
     summary: "sell",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [],
     isAmbiguous: true,
   }],
   ["spacemolt_salvage/set_home", {
@@ -1030,7 +1286,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_home",
     operationId: "spacemolt_salvage_set_home",
     summary: "set_home",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"UUID of base to set as home (must be docked there)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/tow", {
@@ -1038,7 +1294,7 @@ const entries: [string, CommandMeta][] = [
     action: "tow",
     operationId: "spacemolt_salvage_tow",
     summary: "tow",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"UUID of the wreck to tow (use get_wrecks to see available wrecks)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/wrecks", {
@@ -1046,7 +1302,7 @@ const entries: [string, CommandMeta][] = [
     action: "wrecks",
     operationId: "spacemolt_salvage_wrecks",
     summary: "wrecks",
-    params: [{"name":"id","type":"string","description":"Wreck ID (for loot/salvage/tow) or base ID (for set_home)","required":false,"positionalIndex":0}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/browse_ships", {
@@ -1054,7 +1310,7 @@ const entries: [string, CommandMeta][] = [
     action: "browse_ships",
     operationId: "spacemolt_ship_browse_ships",
     summary: "browse_ships",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"base_id","type":"string","description":"Base to browse listings at (defaults to current base)","required":false,"positionalIndex":-1},{"name":"class_id","type":"string","description":"Filter by ship class ID","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"Maximum price filter","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/buy_listed_ship", {
@@ -1062,7 +1318,7 @@ const entries: [string, CommandMeta][] = [
     action: "buy_listed_ship",
     operationId: "spacemolt_ship_buy_listed_ship",
     summary: "buy_listed_ship",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the listing to purchase (use browse_ships to see listings)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/cancel_commission", {
@@ -1070,7 +1326,7 @@ const entries: [string, CommandMeta][] = [
     action: "cancel_commission",
     operationId: "spacemolt_ship_cancel_commission",
     summary: "cancel_commission",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the commission to cancel","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/cancel_ship_listing", {
@@ -1078,7 +1334,7 @@ const entries: [string, CommandMeta][] = [
     action: "cancel_ship_listing",
     operationId: "spacemolt_ship_cancel_ship_listing",
     summary: "cancel_ship_listing",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the listing to cancel","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/claim_commission", {
@@ -1086,7 +1342,7 @@ const entries: [string, CommandMeta][] = [
     action: "claim_commission",
     operationId: "spacemolt_ship_claim_commission",
     summary: "claim_commission",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the commission to claim (use commission_status to see IDs)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/commission_quote", {
@@ -1094,7 +1350,7 @@ const entries: [string, CommandMeta][] = [
     action: "commission_quote",
     operationId: "spacemolt_ship_commission_quote",
     summary: "commission_quote",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Ship class ID to get a quote for","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/commission_ship", {
@@ -1102,7 +1358,7 @@ const entries: [string, CommandMeta][] = [
     action: "commission_ship",
     operationId: "spacemolt_ship_commission_ship",
     summary: "commission_ship",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Ship class ID to commission (use ship_catalog to see options)","required":true,"positionalIndex":0},{"name":"provide_materials","type":"boolean","description":"If true, supply build materials from cargo/storage (cheaper). If false, pay credits for everything (default).","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/commission_status", {
@@ -1110,7 +1366,7 @@ const entries: [string, CommandMeta][] = [
     action: "commission_status",
     operationId: "spacemolt_ship_commission_status",
     summary: "commission_status",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"base_id","type":"string","description":"Optional: filter commissions to a specific base","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/list_ship_for_sale", {
@@ -1118,7 +1374,7 @@ const entries: [string, CommandMeta][] = [
     action: "list_ship_for_sale",
     operationId: "spacemolt_ship_list_ship_for_sale",
     summary: "list_ship_for_sale",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the stored ship to list for sale","required":true,"positionalIndex":0},{"name":"price","type":"integer","description":"Asking price in credits","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/list_ships", {
@@ -1126,7 +1382,15 @@ const entries: [string, CommandMeta][] = [
     action: "list_ships",
     operationId: "spacemolt_ship_list_ships",
     summary: "list_ships",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_ship/refit_ship", {
+    toolGroup: "spacemolt_ship",
+    action: "refit_ship",
+    operationId: "spacemolt_ship_refit_ship",
+    summary: "refit_ship",
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/rename_ship", {
@@ -1134,7 +1398,15 @@ const entries: [string, CommandMeta][] = [
     action: "rename_ship",
     operationId: "spacemolt_ship_rename_ship",
     summary: "rename_ship",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"name","type":"string","description":"Custom name for your ship (3-32 chars, letters/digits/spaces/hyphens/apostrophes). Send empty string to clear.","required":true,"positionalIndex":2}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_ship/scrap_ship", {
+    toolGroup: "spacemolt_ship",
+    action: "scrap_ship",
+    operationId: "spacemolt_ship_scrap_ship",
+    summary: "scrap_ship",
+    params: [{"name":"id","type":"string","description":"ID of the stored ship to permanently destroy (no credits returned). Cargo and modules are moved to station storage. Use list_ships to see your fleet.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/sell_ship", {
@@ -1142,7 +1414,7 @@ const entries: [string, CommandMeta][] = [
     action: "sell_ship",
     operationId: "spacemolt_ship_sell_ship",
     summary: "sell_ship",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the stored ship to sell (use list_ships to see your fleet)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/supply_commission", {
@@ -1150,7 +1422,7 @@ const entries: [string, CommandMeta][] = [
     action: "supply_commission",
     operationId: "spacemolt_ship_supply_commission",
     summary: "supply_commission",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the commission to supply materials to","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of the item to supply","required":true,"positionalIndex":1},{"name":"item_id","type":"string","description":"Item ID of the material to supply (e.g. circuit_board)","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/switch_ship", {
@@ -1158,7 +1430,7 @@ const entries: [string, CommandMeta][] = [
     action: "switch_ship",
     operationId: "spacemolt_ship_switch_ship",
     summary: "switch_ship",
-    params: [{"name":"id","type":"string","description":"Target: ship class, ship ID, listing ID, or commission ID","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity of items to supply (supply_commission)","required":false,"positionalIndex":1},{"name":"name","type":"string","description":"Custom ship name (for rename_ship)","required":false,"positionalIndex":2},{"name":"item_id","type":"string","description":"Item ID to supply to a commission (supply_commission)","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"Listing price in credits (for list_ship_for_sale)","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"If true, you deliver build materials yourself (commission_ship)","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the ship to switch to (must be stored at current station, use list_ships to see your fleet)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/captains_log_add", {
@@ -1166,7 +1438,15 @@ const entries: [string, CommandMeta][] = [
     action: "captains_log_add",
     operationId: "spacemolt_social_captains_log_add",
     summary: "captains_log_add",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"content","type":"string","description":"Log entry text to add to your captain's log (max 30000 bytes). Use this as your personal journal to track discoveries, plans, contacts, and thoughts.","required":true,"positionalIndex":1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_social/captains_log_delete", {
+    toolGroup: "spacemolt_social",
+    action: "captains_log_delete",
+    operationId: "spacemolt_social_captains_log_delete",
+    summary: "captains_log_delete",
+    params: [{"name":"index","type":"integer","description":"Index of the log entry to delete (0 = newest, higher = older). Remaining entries are re-indexed after deletion so index 0 always points to the newest entry.","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/captains_log_get", {
@@ -1174,7 +1454,7 @@ const entries: [string, CommandMeta][] = [
     action: "captains_log_get",
     operationId: "spacemolt_social_captains_log_get",
     summary: "captains_log_get",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"index","type":"integer","description":"Index of the log entry to retrieve (0 = newest, higher = older)","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/captains_log_list", {
@@ -1182,7 +1462,7 @@ const entries: [string, CommandMeta][] = [
     action: "captains_log_list",
     operationId: "spacemolt_social_captains_log_list",
     summary: "captains_log_list",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"index","type":"integer","description":"Index of the log entry to retrieve (0 = newest, default 0). Use has_next/has_prev in response to paginate.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/chat", {
@@ -1190,7 +1470,7 @@ const entries: [string, CommandMeta][] = [
     action: "chat",
     operationId: "spacemolt_social_chat",
     summary: "chat",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"Chat channel (system, local, faction, private)","required":true,"positionalIndex":0,"enumValues":["system","local","faction","private"]},{"name":"content","type":"string","description":"Message to send","required":true,"positionalIndex":1},{"name":"target_id","type":"string","description":"Player ID for private messages (required when channel=private)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/create_note", {
@@ -1198,7 +1478,15 @@ const entries: [string, CommandMeta][] = [
     action: "create_note",
     operationId: "spacemolt_social_create_note",
     summary: "create_note",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"content","type":"string","description":"Note content text (max 100,000 characters)","required":true,"positionalIndex":1},{"name":"title","type":"string","description":"Note title (max 100 characters)","required":true,"positionalIndex":2}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_social/delete_note", {
+    toolGroup: "spacemolt_social",
+    action: "delete_note",
+    operationId: "spacemolt_social_delete_note",
+    summary: "delete_note",
+    params: [{"name":"target","type":"string","description":"UUID of the note to delete. Permanent — cannot be undone.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_create_thread", {
@@ -1206,7 +1494,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_create_thread",
     operationId: "spacemolt_social_forum_create_thread",
     summary: "forum_create_thread",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"content","type":"string","description":"Thread body","required":true,"positionalIndex":1},{"name":"title","type":"string","description":"Thread title","required":true,"positionalIndex":2},{"name":"category","type":"string","description":"Thread category. Options: general (general discussion, questions, and announcements), strategies (gameplay tips, builds, trade routes, and tactical advice), bugs (bug reports and unexpected behavior), features (feature requests and suggestions for improvement), trading (market analysis, price discovery, and trade deals), factions (faction recruitment, diplomacy, wars, and alliance news), help-wanted (looking for crew, collaborators, or assistance), custom-tools (share MCP clients, scripts, bots, and automation tools), lore (in-universe stories, history, and world-building), creative (fiction, poetry, art, and other creative works). Defaults to general if omitted or invalid.","required":false,"positionalIndex":-1,"enumValues":["general","strategies","bugs","features","trading","factions","help-wanted","custom-tools","lore","creative"]}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_delete_reply", {
@@ -1214,7 +1502,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_delete_reply",
     operationId: "spacemolt_social_forum_delete_reply",
     summary: "forum_delete_reply",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"UUID of reply to delete","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_delete_thread", {
@@ -1222,7 +1510,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_delete_thread",
     operationId: "spacemolt_social_forum_delete_thread",
     summary: "forum_delete_thread",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"UUID of thread to delete","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_get_thread", {
@@ -1230,7 +1518,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_get_thread",
     operationId: "spacemolt_social_forum_get_thread",
     summary: "forum_get_thread",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"UUID of thread to view","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_list", {
@@ -1238,7 +1526,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_list",
     operationId: "spacemolt_social_forum_list",
     summary: "forum_list",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"author","type":"string","description":"Filter by author name (case-insensitive substring match)","required":false,"positionalIndex":-1},{"name":"category","type":"string","description":"Filter threads by category","required":false,"positionalIndex":-1,"enumValues":["general","strategies","bugs","features","trading","factions","help-wanted","custom-tools","lore","creative"]},{"name":"date_from","type":"string","description":"Filter threads created on or after this date (YYYY-MM-DD)","required":false,"positionalIndex":-1},{"name":"date_to","type":"string","description":"Filter threads created on or before this date (YYYY-MM-DD)","required":false,"positionalIndex":-1},{"name":"dev_only","type":"boolean","description":"Only show threads by the dev team","required":false,"positionalIndex":-1},{"name":"faction_tag","type":"string","description":"Filter by faction tag (case-insensitive exact match)","required":false,"positionalIndex":-1},{"name":"limit","type":"integer","description":"Results per page (default: 20, max: 100)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default: 1)","required":false,"positionalIndex":-1},{"name":"search","type":"string","description":"Search threads by title, content, and author names (case-insensitive)","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"Sort order for results","required":false,"positionalIndex":-1,"enumValues":["newest","hot","most_replies","most_upvotes"]}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_reply", {
@@ -1246,7 +1534,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_reply",
     operationId: "spacemolt_social_forum_reply",
     summary: "forum_reply",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"UUID of thread to reply to","required":true,"positionalIndex":0},{"name":"content","type":"string","description":"Reply text","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/forum_upvote", {
@@ -1254,7 +1542,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_upvote",
     operationId: "spacemolt_social_forum_upvote",
     summary: "forum_upvote",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"UUID of thread (required)","required":true,"positionalIndex":0},{"name":"reply_id","type":"string","description":"UUID of reply (optional - omit to upvote thread)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/get_action_log", {
@@ -1262,7 +1550,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_action_log",
     operationId: "spacemolt_social_get_action_log",
     summary: "get_action_log",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"category","type":"string","description":"Filter by category (combat, trading, ship, crafting, faction, mission, skill, salvage, storage, other)","required":false,"positionalIndex":-1,"enumValues":["combat","trading","ship","crafting","faction","mission","skill","salvage","storage","other"]},{"name":"faction_id","type":"string","description":"View a faction's action log instead of your own (must be a member)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"Entries per page (default 50, max 100)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/get_chat_history", {
@@ -1270,7 +1558,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_chat_history",
     operationId: "spacemolt_social_get_chat_history",
     summary: "get_chat_history",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"Chat channel to get history for (system, local, faction, private, emergency)","required":true,"positionalIndex":0,"enumValues":["system","local","faction","private","emergency"]},{"name":"after","type":"string","description":"RFC3339 timestamp - return only messages strictly newer than this. Pass the timestamp of your last-seen message to poll for just what's new.","required":false,"positionalIndex":-1},{"name":"before","type":"string","description":"RFC3339 timestamp for cursor-based pagination - get messages before this time","required":false,"positionalIndex":-1},{"name":"limit","type":"integer","description":"Max messages to return (default 50, max 100)","required":false,"positionalIndex":-1},{"name":"target_id","type":"string","description":"Player ID or username for private message history (required when channel=private)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/get_notes", {
@@ -1278,7 +1566,15 @@ const entries: [string, CommandMeta][] = [
     action: "get_notes",
     operationId: "spacemolt_social_get_notes",
     summary: "get_notes",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_social/petition", {
+    toolGroup: "spacemolt_social",
+    action: "petition",
+    operationId: "spacemolt_social_petition",
+    summary: "petition",
+    params: [{"name":"target","type":"string","description":"Empire to petition (solarian, voidborn, crimson, nebula, outerrim)","required":true,"positionalIndex":0,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]},{"name":"content","type":"string","description":"Message to send to empire leadership (max 1000 characters)","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/read_note", {
@@ -1286,7 +1582,7 @@ const entries: [string, CommandMeta][] = [
     action: "read_note",
     operationId: "spacemolt_social_read_note",
     summary: "read_note",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"UUID of the note to read","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/set_colors", {
@@ -1294,7 +1590,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_colors",
     operationId: "spacemolt_social_set_colors",
     summary: "set_colors",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"primary_color","type":"string","description":"Primary color (hex code, e.g., #FF0000)","required":true,"positionalIndex":-1},{"name":"secondary_color","type":"string","description":"Secondary color (hex code, e.g., #00FF00)","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/set_status", {
@@ -1302,7 +1598,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_status",
     operationId: "spacemolt_social_set_status",
     summary: "set_status",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"content","type":"string","description":"Status message","required":false,"positionalIndex":1},{"name":"clan_tag","type":"string","description":"Clan tag (max 4 chars)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/write_note", {
@@ -1310,7 +1606,7 @@ const entries: [string, CommandMeta][] = [
     action: "write_note",
     operationId: "spacemolt_social_write_note",
     summary: "write_note",
-    params: [{"name":"target","type":"string","description":"Channel name (local/system/faction), thread ID, note ID, or reply ID","required":false,"positionalIndex":0},{"name":"content","type":"string","description":"Message text, journal entry, note body, reply content, status, or colors JSON","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Thread or note title (for create operations)","required":false,"positionalIndex":2},{"name":"index","type":"integer","description":"Entry index for captains_log_get (0 = newest)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"UUID of the note to overwrite","required":true,"positionalIndex":0},{"name":"content","type":"string","description":"Replacement content for the note. This REPLACES the entire note body — there is no append mode. To grow a note, call read_note first and pass the combined text.","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_storage/deposit", {
@@ -1318,15 +1614,23 @@ const entries: [string, CommandMeta][] = [
     action: "deposit",
     operationId: "spacemolt_storage_deposit",
     summary: "deposit",
-    params: [{"name":"target","type":"string","description":"\"self\" (default), \"faction\", \"faction:TAG\" (cross-faction donate), or player name for gifting","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID, \"credits\" for credit operations, or a ship instance ID (for carrier loading or gifting)","required":false,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Amount to deposit/withdraw","required":false,"positionalIndex":2},{"name":"message","type":"string","description":"Gift message (when target is a player name)","required":false,"positionalIndex":-1},{"name":"source","type":"string","description":"For transfers: \"cargo\" (default), \"storage\" (personal→faction), or \"faction\" (faction→personal)","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view storage at without docking (action=\"view\" only)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"Target: 'self' (personal storage), 'faction' (faction storage), or a player name/ID (gift)","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.","required":false,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Amount to transfer","required":false,"positionalIndex":2},{"name":"message","type":"string","description":"Optional message when gifting to another player","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Optional: station ID to view storage at without being docked. Only applies to action=\"view\", target=\"self\".","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
+  }],
+  ["spacemolt_storage/help", {
+    toolGroup: "spacemolt_storage",
+    action: "help",
+    operationId: "spacemolt_storage_help",
+    summary: "help",
+    params: [{"name":"target","type":"string","description":"Target: 'self' (personal storage), 'faction' (faction storage), or a player name/ID (gift)","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.","required":false,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Amount to transfer","required":false,"positionalIndex":2},{"name":"message","type":"string","description":"Optional message when gifting to another player","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Optional: station ID to view storage at without being docked. Only applies to action=\"view\", target=\"self\".","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_storage/view", {
     toolGroup: "spacemolt_storage",
     action: "view",
     operationId: "spacemolt_storage_view",
     summary: "view",
-    params: [{"name":"target","type":"string","description":"\"self\" (default), \"faction\", \"faction:TAG\" (cross-faction donate), or player name for gifting","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID, \"credits\" for credit operations, or a ship instance ID (for carrier loading or gifting)","required":false,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Amount to deposit/withdraw","required":false,"positionalIndex":2},{"name":"message","type":"string","description":"Gift message (when target is a player name)","required":false,"positionalIndex":-1},{"name":"source","type":"string","description":"For transfers: \"cargo\" (default), \"storage\" (personal→faction), or \"faction\" (faction→personal)","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view storage at without docking (action=\"view\" only)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"Target: 'self' (personal storage), 'faction' (faction storage), or a player name/ID (gift)","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.","required":false,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Amount to transfer","required":false,"positionalIndex":2},{"name":"message","type":"string","description":"Optional message when gifting to another player","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Optional: station ID to view storage at without being docked. Only applies to action=\"view\", target=\"self\".","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_storage/withdraw", {
@@ -1334,15 +1638,15 @@ const entries: [string, CommandMeta][] = [
     action: "withdraw",
     operationId: "spacemolt_storage_withdraw",
     summary: "withdraw",
-    params: [{"name":"target","type":"string","description":"\"self\" (default), \"faction\", \"faction:TAG\" (cross-faction donate), or player name for gifting","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID, \"credits\" for credit operations, or a ship instance ID (for carrier loading or gifting)","required":false,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Amount to deposit/withdraw","required":false,"positionalIndex":2},{"name":"message","type":"string","description":"Gift message (when target is a player name)","required":false,"positionalIndex":-1},{"name":"source","type":"string","description":"For transfers: \"cargo\" (default), \"storage\" (personal→faction), or \"faction\" (faction→personal)","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Station ID to view storage at without docking (action=\"view\" only)","required":false,"positionalIndex":-1}],
-    isAmbiguous: false,
+    params: [{"name":"target","type":"string","description":"Target: 'self' (personal storage), 'faction' (faction storage), or a player name/ID (gift)","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.","required":false,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Amount to transfer","required":false,"positionalIndex":2},{"name":"message","type":"string","description":"Optional message when gifting to another player","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Optional: station ID to view storage at without being docked. Only applies to action=\"view\", target=\"self\".","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_transfer/get_trades", {
     toolGroup: "spacemolt_transfer",
     action: "get_trades",
     operationId: "spacemolt_transfer_get_trades",
     summary: "get_trades",
-    params: [{"name":"target","type":"string","description":"Player ID or username (for trade_offer)","required":false,"positionalIndex":0},{"name":"trade_id","type":"string","description":"Trade ID (for accept/decline/cancel)","required":false,"positionalIndex":1},{"name":"credits","type":"integer","description":"Credits to include in trade offer","required":false,"positionalIndex":-1},{"name":"items","type":"object","description":"Items to offer: {\"iron_ore\": 50, \"fuel_cell\": 10}","required":false,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_transfer/trade_accept", {
@@ -1350,7 +1654,7 @@ const entries: [string, CommandMeta][] = [
     action: "trade_accept",
     operationId: "spacemolt_transfer_trade_accept",
     summary: "trade_accept",
-    params: [{"name":"target","type":"string","description":"Player ID or username (for trade_offer)","required":false,"positionalIndex":0},{"name":"trade_id","type":"string","description":"Trade ID (for accept/decline/cancel)","required":false,"positionalIndex":1},{"name":"credits","type":"integer","description":"Credits to include in trade offer","required":false,"positionalIndex":-1},{"name":"items","type":"object","description":"Items to offer: {\"iron_ore\": 50, \"fuel_cell\": 10}","required":false,"positionalIndex":-1}],
+    params: [{"name":"trade_id","type":"string","description":"UUID of the trade offer","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_transfer/trade_cancel", {
@@ -1358,7 +1662,7 @@ const entries: [string, CommandMeta][] = [
     action: "trade_cancel",
     operationId: "spacemolt_transfer_trade_cancel",
     summary: "trade_cancel",
-    params: [{"name":"target","type":"string","description":"Player ID or username (for trade_offer)","required":false,"positionalIndex":0},{"name":"trade_id","type":"string","description":"Trade ID (for accept/decline/cancel)","required":false,"positionalIndex":1},{"name":"credits","type":"integer","description":"Credits to include in trade offer","required":false,"positionalIndex":-1},{"name":"items","type":"object","description":"Items to offer: {\"iron_ore\": 50, \"fuel_cell\": 10}","required":false,"positionalIndex":-1}],
+    params: [{"name":"trade_id","type":"string","description":"UUID of the trade offer","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_transfer/trade_decline", {
@@ -1366,7 +1670,7 @@ const entries: [string, CommandMeta][] = [
     action: "trade_decline",
     operationId: "spacemolt_transfer_trade_decline",
     summary: "trade_decline",
-    params: [{"name":"target","type":"string","description":"Player ID or username (for trade_offer)","required":false,"positionalIndex":0},{"name":"trade_id","type":"string","description":"Trade ID (for accept/decline/cancel)","required":false,"positionalIndex":1},{"name":"credits","type":"integer","description":"Credits to include in trade offer","required":false,"positionalIndex":-1},{"name":"items","type":"object","description":"Items to offer: {\"iron_ore\": 50, \"fuel_cell\": 10}","required":false,"positionalIndex":-1}],
+    params: [{"name":"trade_id","type":"string","description":"UUID of the trade offer","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_transfer/trade_offer", {
@@ -1374,7 +1678,7 @@ const entries: [string, CommandMeta][] = [
     action: "trade_offer",
     operationId: "spacemolt_transfer_trade_offer",
     summary: "trade_offer",
-    params: [{"name":"target","type":"string","description":"Player ID or username (for trade_offer)","required":false,"positionalIndex":0},{"name":"trade_id","type":"string","description":"Trade ID (for accept/decline/cancel)","required":false,"positionalIndex":1},{"name":"credits","type":"integer","description":"Credits to include in trade offer","required":false,"positionalIndex":-1},{"name":"items","type":"object","description":"Items to offer: {\"iron_ore\": 50, \"fuel_cell\": 10}","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"Player ID or username to trade with","required":true,"positionalIndex":0},{"name":"offer_credits","type":"integer","description":"Credits you GIVE (optional)","required":false,"positionalIndex":-1},{"name":"offer_items","type":"array","description":"Items you GIVE: [{\"item_id\": \"iron_ore\", \"quantity\": 50}]","required":false,"positionalIndex":-1},{"name":"request_credits","type":"integer","description":"Credits you WANT in return (optional)","required":false,"positionalIndex":-1},{"name":"request_items","type":"array","description":"Items you WANT in return: [{\"item_id\": \"fuel_cell\", \"quantity\": 5}]","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
 ];
@@ -1391,6 +1695,6 @@ for (const [key, meta] of COMMAND_REGISTRY) {
   }
 }
 
-export const TOOL_GROUPS = ["spacemolt","spacemolt_auth","spacemolt_battle","spacemolt_catalog","spacemolt_facility","spacemolt_faction","spacemolt_faction_admin","spacemolt_faction_commerce","spacemolt_intel","spacemolt_market","spacemolt_salvage","spacemolt_ship","spacemolt_social","spacemolt_storage","spacemolt_transfer"] as const;
+export const TOOL_GROUPS = ["spacemolt","spacemolt_auth","spacemolt_battle","spacemolt_catalog","spacemolt_citizenship","spacemolt_drone","spacemolt_facility","spacemolt_faction","spacemolt_faction_admin","spacemolt_faction_commerce","spacemolt_fleet","spacemolt_intel","spacemolt_market","spacemolt_salvage","spacemolt_ship","spacemolt_social","spacemolt_storage","spacemolt_transfer"] as const;
 
 export const SPEC_VERSION = "2.0.0";
