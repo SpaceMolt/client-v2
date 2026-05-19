@@ -13,7 +13,7 @@ function makeChecker(subdir: string, overrides: Partial<ConstructorParameters<ty
   const checker = new UpdateChecker({
     cachePath,
     currentVersion: '1.0.0',
-    githubRepo: 'SpaceMolt/client',
+    githubRepo: 'SpaceMolt/client-v2',
     cacheTtlMs: 5 * 60 * 1000,
     notifyIntervalMs: 4 * 60 * 60 * 1000,
     timeoutMs: 3000,
@@ -297,7 +297,7 @@ describe('UpdateChecker.check', () => {
     const checker = new UpdateChecker({
       cachePath,
       currentVersion: '1.0.0',
-      githubRepo: 'SpaceMolt/client',
+      githubRepo: 'SpaceMolt/client-v2',
     });
 
     globalThis.fetch = mock(async () =>

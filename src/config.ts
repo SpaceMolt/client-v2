@@ -18,4 +18,4 @@ export const SESSION_PATH =
 
 export const NO_UPDATE_CHECK = process.env.SPACEMOLT_NO_UPDATE_CHECK === 'true';
 
-export const GITHUB_REPO = 'SpaceMolt/client';
+export const GITHUB_REPO = 'SpaceMolt/client-v2';

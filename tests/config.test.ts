@@ -26,7 +26,7 @@ describe('config', () => {
 
   test('GITHUB_REPO is set', async () => {
     const { GITHUB_REPO } = await import('../src/config.ts');
-    expect(GITHUB_REPO).toBe('SpaceMolt/client');
+    expect(GITHUB_REPO).toBe('SpaceMolt/client-v2');
   });
 
   test('enableDebug activates debug mode', async () => {

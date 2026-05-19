@@ -124,7 +124,7 @@ export class UpdateChecker {
       `\n${c.yellow}Update available:${c.reset} ${c.dim}v${this.currentVersion}${c.reset} -> ${c.green}${latestVersion}${c.reset}`,
     );
     console.error(
-      `${c.dim}Run: bun install -g @spacemolt/client  or download from GitHub${c.reset}\n`,
+      `${c.dim}Download from https://github.com/${this.githubRepo}/releases/latest${c.reset}\n`,
     );
 
     // Record that we notified

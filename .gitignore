@@ -1,5 +1,41 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+out/
+*.tgz
+
+# Compiled binary
 spacemolt
+spacemolt-client-*
+
+# Saved credentials and session
 .spacemolt-session.json
+.spacemolt-credentials.json
+
+# Logs
 *.log
+logs/
+
+# Coverage
+coverage/
+*.lcov
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Caches
+.cache/
+*.tsbuildinfo
+
+# Per-user IDE / agent settings
+.claude/
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db
