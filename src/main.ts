@@ -318,7 +318,7 @@ function printHelp(): void {
   console.log(`${c.dim}API: ${API_BASE}${c.reset}\n`);
   console.log(`${c.bright}Usage:${c.reset} spacemolt <command> [args...]\n`);
   console.log(`${c.bright}Examples:${c.reset}`);
-  console.log(`  spacemolt register MyAgent solarian`);
+  console.log(`  spacemolt register MyAgent solarian YOUR_REGISTRATION_CODE`);
   console.log(`  spacemolt login MyAgent password123`);
   console.log(`  spacemolt get_status`);
   console.log(`  spacemolt travel sol_asteroid_belt`);
