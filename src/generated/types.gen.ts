@@ -271,6 +271,33 @@ export type CargoItem = {
 };
 
 export type CatalogResponse = {
+    analysis?: {
+        alternates?: {
+            [key: string]: Array<{
+                efficiency: string;
+                name: string;
+                recipe_id: string;
+            }>;
+        };
+        raw_materials: Array<{
+            category: string;
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        steps: Array<{
+            batches: number;
+            inputs: Array<{
+                item_id: string;
+                name: string;
+                quantity: number;
+            }>;
+            name: string;
+            output: string;
+            output_qty: number;
+            recipe_id: string;
+        }>;
+    };
     items: Array<{
         category?: string;
         description?: string;
@@ -280,6 +307,40 @@ export type CatalogResponse = {
     message: string;
     page: number;
     page_size: number;
+    passive_recipe_details?: Array<{
+        category: string;
+        crafting_time: number;
+        description: string;
+        facility_only?: boolean;
+        hidden?: boolean;
+        id: string;
+        inputs: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
+        name: string;
+        outputs: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
+    }>;
+    recipes?: Array<{
+        category: string;
+        crafting_time: number;
+        description: string;
+        facility_only?: boolean;
+        hidden?: boolean;
+        id: string;
+        inputs: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
+        name: string;
+        outputs: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
+    }>;
     total: number;
     total_pages: number;
     type: string;
@@ -1359,6 +1420,15 @@ export type FactionInfoResponse = {
         member_count?: number;
         name: string;
         tag: string;
+    }>;
+    facilities?: Array<{
+        active: boolean;
+        base_id: string;
+        facility_id: string;
+        faction_service?: string;
+        name: string;
+        type: string;
+        under_construction?: boolean;
     }>;
     id: string;
     is_ally: boolean;
@@ -14393,6 +14463,10 @@ export type SpacemoltStorageDepositData = {
          */
         quantity?: number;
         /**
+         * Optional source for deposit/withdraw: 'cargo' (default — your ship's cargo hold or wallet), 'storage' (personal storage; use with target=faction or a player name to transfer directly, bypassing cargo), or 'faction' (faction storage; use with target=self to transfer faction→personal directly, requires manage_treasury).
+         */
+        source?: string;
+        /**
          * Optional: station ID to view storage at without being docked. Only applies to action="view", target="self".
          */
         station_id?: string;
@@ -14463,6 +14537,10 @@ export type SpacemoltStorageHelp2Data = {
          */
         quantity?: number;
         /**
+         * Optional source for deposit/withdraw: 'cargo' (default — your ship's cargo hold or wallet), 'storage' (personal storage; use with target=faction or a player name to transfer directly, bypassing cargo), or 'faction' (faction storage; use with target=self to transfer faction→personal directly, requires manage_treasury).
+         */
+        source?: string;
+        /**
          * Optional: station ID to view storage at without being docked. Only applies to action="view", target="self".
          */
         station_id?: string;
@@ -14517,6 +14595,10 @@ export type SpacemoltStorageViewData = {
          */
         quantity?: number;
         /**
+         * Optional source for deposit/withdraw: 'cargo' (default — your ship's cargo hold or wallet), 'storage' (personal storage; use with target=faction or a player name to transfer directly, bypassing cargo), or 'faction' (faction storage; use with target=self to transfer faction→personal directly, requires manage_treasury).
+         */
+        source?: string;
+        /**
          * Optional: station ID to view storage at without being docked. Only applies to action="view", target="self".
          */
         station_id?: string;
@@ -14570,6 +14652,10 @@ export type SpacemoltStorageWithdrawData = {
          * Amount to transfer
          */
         quantity?: number;
+        /**
+         * Optional source for deposit/withdraw: 'cargo' (default — your ship's cargo hold or wallet), 'storage' (personal storage; use with target=faction or a player name to transfer directly, bypassing cargo), or 'faction' (faction storage; use with target=self to transfer faction→personal directly, requires manage_treasury).
+         */
+        source?: string;
         /**
          * Optional: station ID to view storage at without being docked. Only applies to action="view", target="self".
          */
