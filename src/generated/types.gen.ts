@@ -312,6 +312,7 @@ export type CatalogResponse = {
         crafting_time: number;
         description: string;
         facility_only?: boolean;
+        fuel_output?: number;
         hidden?: boolean;
         id: string;
         inputs: Array<{
@@ -329,6 +330,7 @@ export type CatalogResponse = {
         crafting_time: number;
         description: string;
         facility_only?: boolean;
+        fuel_output?: number;
         hidden?: boolean;
         id: string;
         inputs: Array<{
@@ -1711,6 +1713,11 @@ export type FactionVisitRoomResponse = {
     name: string;
     room_id: string;
     updated_at: string;
+};
+
+export type FactionWithdrawInviteResponse = {
+    message: string;
+    player_id: string;
 };
 
 export type FactionWriteRoomResponse = {
@@ -4691,6 +4698,10 @@ export type V2GameState = {
          */
         transit_arrival_tick?: number;
         /**
+         * Plotted compass bearing in degrees (pathfinder only)
+         */
+        transit_bearing?: number;
+        /**
          * Destination POI ID (travel only)
          */
         transit_dest_poi_id?: string;
@@ -4707,9 +4718,21 @@ export type V2GameState = {
          */
         transit_dest_system_name?: string;
         /**
-         * "jump" or "travel"
+         * Ticks since the pathfinder drift began (pathfinder only)
+         */
+        transit_ticks_elapsed?: number;
+        /**
+         * "jump", "travel", or "pathfinder"
          */
         transit_type?: string;
+        /**
+         * Current galactic X coordinate (pathfinder only)
+         */
+        transit_x?: number;
+        /**
+         * Current galactic Y coordinate (pathfinder only)
+         */
+        transit_y?: number;
     };
     message?: string;
     /**
@@ -6519,7 +6542,7 @@ export type SpacemoltJettisonResponse = SpacemoltJettisonResponses[keyof Spacemo
 export type SpacemoltJumpData = {
     body?: {
         /**
-         * ID of the adjacent system to jump to (use get_system to see connected systems)
+         * ID of the adjacent system to jump to (use get_system to see connected systems), or a numeric compass bearing in degrees for an off-network Pathfinder Drive jump
          */
         id: string;
     };
@@ -10047,6 +10070,44 @@ export type SpacemoltFactionAcceptAllyResponses = {
 
 export type SpacemoltFactionAcceptAllyResponse = SpacemoltFactionAcceptAllyResponses[keyof SpacemoltFactionAcceptAllyResponses];
 
+export type SpacemoltFactionAcceptInviteData = {
+    body?: {
+        /**
+         * UUID of faction to join (must have pending invite)
+         */
+        id: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction/accept_invite';
+};
+
+export type SpacemoltFactionAcceptInviteErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFactionAcceptInviteResponses = {
+    /**
+     * Result. structuredContent type: JoinFactionResponse
+     */
+    200: V2Response & {
+        structuredContent?: JoinFactionResponse;
+    };
+};
+
+export type SpacemoltFactionAcceptInviteResponse = SpacemoltFactionAcceptInviteResponses[keyof SpacemoltFactionAcceptInviteResponses];
+
 export type SpacemoltFactionAcceptPeaceData = {
     body?: {
         /**
@@ -10421,7 +10482,7 @@ export type SpacemoltFactionInfoResponse = SpacemoltFactionInfoResponses[keyof S
 export type SpacemoltFactionInviteData = {
     body?: {
         /**
-         * Player ID to invite/kick
+         * Player ID or username
          */
         id: string;
     };
@@ -10497,7 +10558,7 @@ export type SpacemoltFactionJoinResponse = SpacemoltFactionJoinResponses[keyof S
 export type SpacemoltFactionKickData = {
     body?: {
         /**
-         * Player ID to invite/kick
+         * Player ID or username
          */
         id: string;
     };
@@ -10910,6 +10971,44 @@ export type SpacemoltFactionVisitRoomResponses = {
 };
 
 export type SpacemoltFactionVisitRoomResponse = SpacemoltFactionVisitRoomResponses[keyof SpacemoltFactionVisitRoomResponses];
+
+export type SpacemoltFactionWithdrawInviteData = {
+    body?: {
+        /**
+         * Player ID or username
+         */
+        id: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction/withdraw_invite';
+};
+
+export type SpacemoltFactionWithdrawInviteErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFactionWithdrawInviteResponses = {
+    /**
+     * Result. structuredContent type: FactionWithdrawInviteResponse
+     */
+    200: V2Response & {
+        structuredContent?: FactionWithdrawInviteResponse;
+    };
+};
+
+export type SpacemoltFactionWithdrawInviteResponse = SpacemoltFactionWithdrawInviteResponses[keyof SpacemoltFactionWithdrawInviteResponses];
 
 export type SpacemoltFactionAdminCreateRoleData = {
     body?: {

@@ -325,7 +325,7 @@ const entries: [string, CommandMeta][] = [
     action: "jump",
     operationId: "spacemolt_jump",
     summary: "jump",
-    params: [{"name":"id","type":"string","description":"ID of the adjacent system to jump to (use get_system to see connected systems)","required":true,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"ID of the adjacent system to jump to (use get_system to see connected systems), or a numeric compass bearing in degrees for an off-network Pathfinder Drive jump","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/mine", {
@@ -793,6 +793,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"Target faction ID or 4-character faction tag (e.g. NOVA)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
+  ["spacemolt_faction/accept_invite", {
+    toolGroup: "spacemolt_faction",
+    action: "accept_invite",
+    operationId: "spacemolt_faction_accept_invite",
+    summary: "accept_invite",
+    params: [{"name":"id","type":"string","description":"UUID of faction to join (must have pending invite)","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_faction/accept_peace", {
     toolGroup: "spacemolt_faction",
     action: "accept_peace",
@@ -870,7 +878,7 @@ const entries: [string, CommandMeta][] = [
     action: "invite",
     operationId: "spacemolt_faction_invite",
     summary: "invite",
-    params: [{"name":"id","type":"string","description":"Player ID to invite/kick","required":true,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"Player ID or username","required":true,"positionalIndex":0}],
     isAmbiguous: true,
   }],
   ["spacemolt_faction/join", {
@@ -886,7 +894,7 @@ const entries: [string, CommandMeta][] = [
     action: "kick",
     operationId: "spacemolt_faction_kick",
     summary: "kick",
-    params: [{"name":"id","type":"string","description":"Player ID to invite/kick","required":true,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"Player ID or username","required":true,"positionalIndex":0}],
     isAmbiguous: true,
   }],
   ["spacemolt_faction/leave", {
@@ -967,6 +975,14 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_faction_visit_room",
     summary: "visit_room",
     params: [{"name":"id","type":"string","description":"ID of the room to visit","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_faction/withdraw_invite", {
+    toolGroup: "spacemolt_faction",
+    action: "withdraw_invite",
+    operationId: "spacemolt_faction_withdraw_invite",
+    summary: "withdraw_invite",
+    params: [{"name":"id","type":"string","description":"Player ID or username","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_admin/create_role", {
