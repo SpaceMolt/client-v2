@@ -4733,6 +4733,10 @@ export type V2GameState = {
          * Current galactic Y coordinate (pathfinder only)
          */
         transit_y?: number;
+        /**
+         * Navigation flavour text; present only when drifting beyond the galaxy edge (pathfinder void transit only)
+         */
+        void_message?: string;
     };
     message?: string;
     /**
