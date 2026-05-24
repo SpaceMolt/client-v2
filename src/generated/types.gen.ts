@@ -320,6 +320,7 @@ export type CatalogResponse = {
             quantity: number;
         }>;
         name: string;
+        no_recycle?: boolean;
         outputs: Array<{
             item_id: string;
             quantity: number;
@@ -338,6 +339,7 @@ export type CatalogResponse = {
             quantity: number;
         }>;
         name: string;
+        no_recycle?: boolean;
         outputs: Array<{
             item_id: string;
             quantity: number;
@@ -1275,6 +1277,11 @@ export type FacilityResponse = {
     action: string;
     facility_id: string;
     message: string;
+} | {
+    facility_id: string;
+    message: string;
+    recipe_id: string;
+    recipe_name: string;
 };
 
 export type FactionAcceptAllyResponse = {
@@ -5423,7 +5430,7 @@ export type SpacemoltCraftData = {
          */
         id: string;
         /**
-         * Number of times to craft (1-10, default 1). Batch craft to save actions. If cargo is full, crafted items overflow to station storage.
+         * Number of times to craft (default 1; server-capped by crafting skill level). Batch craft to save actions. If cargo is full, crafted items overflow to station storage.
          */
         quantity?: number;
     };
@@ -6546,7 +6553,7 @@ export type SpacemoltJettisonResponse = SpacemoltJettisonResponses[keyof Spacemo
 export type SpacemoltJumpData = {
     body?: {
         /**
-         * ID of the adjacent system to jump to (use get_system to see connected systems), or a numeric compass bearing in degrees for an off-network Pathfinder Drive jump
+         * ID of the adjacent system to jump to (use get_system to see connected systems), or a numeric compass bearing in degrees for an off-network Pathfinder Drive jump. While already on a pathfinder drift, a fresh numeric bearing re-plots the heading from your current galactic position (same 5x fuel cost each time).
          */
         id: string;
     };
