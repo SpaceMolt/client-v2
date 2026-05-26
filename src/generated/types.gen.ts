@@ -1499,15 +1499,15 @@ export type FactionInfoResponse = {
 };
 
 export type FactionIntelStatusResponse = {
+    contributors?: number;
+    coverage_pct: number;
     intel_level: number;
-    reports_24h?: number;
-    top_contributors?: Array<{
-        reports: number;
-        username: string;
-    }>;
-    total_reports?: number;
-    unique_players?: number;
-    unique_systems?: number;
+    most_recent_tick?: number;
+    pois_known: number;
+    systems_known: number;
+    top_contributions?: number;
+    top_contributor?: string;
+    total_systems?: number;
 };
 
 export type FactionInviteResponse = {
@@ -1700,15 +1700,15 @@ export type FactionSubmitTradeIntelResponse = {
 };
 
 export type FactionTradeIntelStatusResponse = {
+    contributors?: number;
+    coverage_pct: number;
     intel_level: number;
-    reports_24h?: number;
-    top_contributors?: Array<{
-        reports: number;
-        username: string;
-    }>;
-    total_reports?: number;
-    unique_items?: number;
-    unique_stations?: number;
+    items_tracked: number;
+    most_recent_tick?: number;
+    stations_known: number;
+    top_contributions?: number;
+    top_contributor?: string;
+    total_stations?: number;
 };
 
 export type FactionVisitRoomResponse = {
