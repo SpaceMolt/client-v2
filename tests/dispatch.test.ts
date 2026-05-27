@@ -131,6 +131,13 @@ describe('resolveCommand', () => {
     expect(result!.toolGroup).toBe('spacemolt_ship');
   });
 
+  test('resolves operationId-derived command names', () => {
+    const result = resolveCommand('faction_info');
+    expect(result).not.toBeNull();
+    expect(result!.toolGroup).toBe('spacemolt_faction');
+    expect(result!.action).toBe('info');
+  });
+
   test('resolves catalog (direct endpoint, no action segment)', () => {
     const result = resolveCommand('catalog');
     expect(result).not.toBeNull();

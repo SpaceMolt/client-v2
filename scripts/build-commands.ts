@@ -216,6 +216,10 @@ function generateOutput(commands: CommandEntry[], specVersion: string): string {
   lines.push('  if (!meta.isAmbiguous) {');
   lines.push('    SHORT_NAMES.set(meta.action, key);');
   lines.push('  }');
+  lines.push('  const operationName = meta.operationId.replace(/^spacemolt_/, "");');
+  lines.push('  if (operationName !== meta.action) {');
+  lines.push('    SHORT_NAMES.set(operationName, key);');
+  lines.push('  }');
   lines.push('}');
   lines.push('');
 

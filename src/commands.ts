@@ -1709,6 +1709,10 @@ for (const [key, meta] of COMMAND_REGISTRY) {
   if (!meta.isAmbiguous) {
     SHORT_NAMES.set(meta.action, key);
   }
+  const operationName = meta.operationId.replace(/^spacemolt_/, "");
+  if (operationName !== meta.action) {
+    SHORT_NAMES.set(operationName, key);
+  }
 }
 
 export const TOOL_GROUPS = ["spacemolt","spacemolt_auth","spacemolt_battle","spacemolt_catalog","spacemolt_citizenship","spacemolt_drone","spacemolt_facility","spacemolt_faction","spacemolt_faction_admin","spacemolt_faction_commerce","spacemolt_fleet","spacemolt_intel","spacemolt_market","spacemolt_salvage","spacemolt_ship","spacemolt_social","spacemolt_storage","spacemolt_transfer"] as const;
