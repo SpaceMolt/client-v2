@@ -831,6 +831,40 @@ export type EstimatePurchaseResponse = {
 
 export type FacilityResponse = {
     base_id: string;
+    construction?: {
+        pending?: Array<{
+            build_cost?: number;
+            category: string;
+            definition_id: string;
+            materials?: Array<{
+                item_id: string;
+                name?: string;
+                quantity_in_storage: number;
+                quantity_missing?: number;
+                quantity_required: number;
+            }>;
+            name: string;
+            reason?: string;
+            status: string;
+            ticks_until_complete?: number;
+        }>;
+        under_construction?: Array<{
+            build_cost?: number;
+            category: string;
+            definition_id: string;
+            materials?: Array<{
+                item_id: string;
+                name?: string;
+                quantity_in_storage: number;
+                quantity_missing?: number;
+                quantity_required: number;
+            }>;
+            name: string;
+            reason?: string;
+            status: string;
+            ticks_until_complete?: number;
+        }>;
+    };
     faction_facilities: Array<{
         active: boolean;
         bonus_type?: string;
@@ -871,6 +905,13 @@ export type FacilityResponse = {
         service?: string;
         type: string;
     }>;
+    power?: {
+        battery_capacity: number;
+        battery_stored: number;
+        efficiency: number;
+        structural_draw: number;
+        supply: number;
+    };
     station_facilities: Array<{
         active: boolean;
         bonus_type?: string;
@@ -2028,9 +2069,50 @@ export type GetBaseResponse = {
         satisfied_count: number;
         total_service_infra: number;
     };
+    construction?: {
+        pending?: Array<{
+            build_cost?: number;
+            category: string;
+            definition_id: string;
+            materials?: Array<{
+                item_id: string;
+                name?: string;
+                quantity_in_storage: number;
+                quantity_missing?: number;
+                quantity_required: number;
+            }>;
+            name: string;
+            reason?: string;
+            status: string;
+            ticks_until_complete?: number;
+        }>;
+        under_construction?: Array<{
+            build_cost?: number;
+            category: string;
+            definition_id: string;
+            materials?: Array<{
+                item_id: string;
+                name?: string;
+                quantity_in_storage: number;
+                quantity_missing?: number;
+                quantity_required: number;
+            }>;
+            name: string;
+            reason?: string;
+            status: string;
+            ticks_until_complete?: number;
+        }>;
+    };
     faction_fuel_capacity?: number;
     faction_fuel_reserve?: number;
     fuel_price?: number;
+    power?: {
+        battery_capacity: number;
+        battery_stored: number;
+        efficiency: number;
+        structural_draw: number;
+        supply: number;
+    };
     services: Array<string>;
 };
 
@@ -2110,6 +2192,7 @@ export type GetDroneResponse = {
     memory: {
         [key: string]: string;
     };
+    name?: string;
     poi_id?: string;
     script: string;
     status: string;
@@ -2131,6 +2214,7 @@ export type GetDronesResponse = {
         hull: number;
         id: string;
         max_hull: number;
+        name?: string;
         poi_id?: string;
         script_preview?: string;
         status: string;
@@ -3204,6 +3288,7 @@ export type NotificationCombatUpdate = {
 
 export type NotificationMiningYield = {
     depletion_percent?: number;
+    drone_id?: string;
     max_remaining?: number;
     quantity: number;
     remaining: number;
@@ -4069,6 +4154,12 @@ export type SellWreckResponse = {
 
 export type SetColorsResponse = {
     action: string;
+};
+
+export type SetDroneNameResponse = {
+    drone_id: string;
+    message: string;
+    name: string;
 };
 
 export type SetHomeBaseResponse = {
@@ -7979,9 +8070,13 @@ export type SpacemoltCitizenshipWithdrawResponse = SpacemoltCitizenshipWithdrawR
 export type SpacemoltDroneDeployData = {
     body?: {
         /**
-         * ID of the drone to deploy from your bay (see get_drones)
+         * Set to true to deploy every in-bay drone in a single tick. Drones that would exceed remaining bandwidth are skipped.
          */
-        id: string;
+        all?: boolean;
+        /**
+         * ID of a specific drone to deploy from your bay (see get_drones)
+         */
+        id?: string;
     };
     path?: never;
     query?: never;
@@ -8141,6 +8236,48 @@ export type SpacemoltDroneLoadResponses = {
 
 export type SpacemoltDroneLoadResponse = SpacemoltDroneLoadResponses[keyof SpacemoltDroneLoadResponses];
 
+export type SpacemoltDroneNameData = {
+    body?: {
+        /**
+         * ID of the drone to rename (you must own it)
+         */
+        id: string;
+        /**
+         * Display name (max 32 chars; same rules as ship names). Pass empty string to clear.
+         */
+        text: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_drone/name';
+};
+
+export type SpacemoltDroneNameErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltDroneNameResponses = {
+    /**
+     * Result. structuredContent type: SetDroneNameResponse
+     */
+    200: V2Response & {
+        structuredContent?: SetDroneNameResponse;
+    };
+};
+
+export type SpacemoltDroneNameResponse = SpacemoltDroneNameResponses[keyof SpacemoltDroneNameResponses];
+
 export type SpacemoltDroneRecallData = {
     body?: {
         /**
@@ -8290,7 +8427,7 @@ export type SpacemoltFacilityBrowseForSaleData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -8388,7 +8525,7 @@ export type SpacemoltFacilityBuildData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -8486,7 +8623,7 @@ export type SpacemoltFacilityBuyListingData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -8584,7 +8721,7 @@ export type SpacemoltFacilityCancelListingData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -8682,7 +8819,7 @@ export type SpacemoltFacilityFactionBuildData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -8780,7 +8917,7 @@ export type SpacemoltFacilityFactionListData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -8878,7 +9015,7 @@ export type SpacemoltFacilityFactionToggleData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -8976,7 +9113,7 @@ export type SpacemoltFacilityFactionUpgradeData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -9090,7 +9227,7 @@ export type SpacemoltFacilityListData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -9188,7 +9325,7 @@ export type SpacemoltFacilityListForSaleData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -9286,7 +9423,7 @@ export type SpacemoltFacilityPersonalBuildData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -9384,7 +9521,7 @@ export type SpacemoltFacilityPersonalDecorateData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -9482,7 +9619,7 @@ export type SpacemoltFacilityPersonalVisitData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -9580,7 +9717,7 @@ export type SpacemoltFacilityToggleData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -9678,7 +9815,7 @@ export type SpacemoltFacilityTransferData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -9776,7 +9913,7 @@ export type SpacemoltFacilityTypesData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -9874,7 +10011,7 @@ export type SpacemoltFacilityUpgradeData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
@@ -9972,7 +10109,7 @@ export type SpacemoltFacilityUpgradesData = {
          */
         facility_type?: string;
         /**
-         * For 'list_for_sale': set true to list a faction-owned facility (requires ManageFacilities permission).
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
          */
         faction?: boolean;
         /**
