@@ -4893,6 +4893,10 @@ export type V2GameState = {
             };
         };
         status_message?: string;
+        /**
+         * ID of the wreck this player is currently towing (omitted when not towing)
+         */
+        towing_wreck_id?: string;
         username?: string;
     };
     /**
