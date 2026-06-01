@@ -871,10 +871,13 @@ export type FacilityResponse = {
         bonus_value?: number;
         capacity?: number;
         category: string;
+        configured_recipe_id?: string;
         description: string;
         facility_id: string;
         faction_id?: string;
         faction_service?: string;
+        is_recycler?: boolean;
+        level: number;
         maintenance_satisfied: boolean;
         name: string;
         owner_id?: string;
@@ -891,10 +894,13 @@ export type FacilityResponse = {
         bonus_value?: number;
         capacity?: number;
         category: string;
+        configured_recipe_id?: string;
         description: string;
         facility_id: string;
         faction_id?: string;
         faction_service?: string;
+        is_recycler?: boolean;
+        level: number;
         maintenance_satisfied: boolean;
         name: string;
         owner_id?: string;
@@ -918,10 +924,13 @@ export type FacilityResponse = {
         bonus_value?: number;
         capacity?: number;
         category: string;
+        configured_recipe_id?: string;
         description: string;
         facility_id: string;
         faction_id?: string;
         faction_service?: string;
+        is_recycler?: boolean;
+        level: number;
         maintenance_satisfied: boolean;
         name: string;
         owner_id?: string;
@@ -4859,6 +4868,10 @@ export type V2GameState = {
         [key: string]: unknown;
     }>;
     player?: {
+        /**
+         * Empire IDs this player holds citizenship in (omitted when empty). Independent of the immutable origin empire.
+         */
+        citizenships?: Array<string>;
         clan_tag?: string;
         credits?: number;
         empire?: string;
