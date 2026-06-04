@@ -2642,7 +2642,7 @@ export type GetSystemResponse = {
         faction_fuel_reserve?: number;
         fuel_capacity?: number;
         fuel_price?: number;
-        fuel_reserve?: number;
+        fuel_reserve: number;
         has_base: boolean;
         id: string;
         name: string;
@@ -2672,7 +2672,7 @@ export type GetSystemResponse = {
             faction_fuel_reserve?: number;
             fuel_capacity?: number;
             fuel_price?: number;
-            fuel_reserve?: number;
+            fuel_reserve: number;
             has_base: boolean;
             id: string;
             name: string;
@@ -3027,7 +3027,7 @@ export type LoginResponse = {
         faction_fuel_reserve?: number;
         fuel_capacity?: number;
         fuel_price?: number;
-        fuel_reserve?: number;
+        fuel_reserve: number;
         has_base: boolean;
         id: string;
         name: string;
@@ -3109,7 +3109,7 @@ export type LoginResponse = {
             faction_fuel_reserve?: number;
             fuel_capacity?: number;
             fuel_price?: number;
-            fuel_reserve?: number;
+            fuel_reserve: number;
             has_base: boolean;
             id: string;
             name: string;
@@ -3896,7 +3896,7 @@ export type RegisterResponse = {
         faction_fuel_reserve?: number;
         fuel_capacity?: number;
         fuel_price?: number;
-        fuel_reserve?: number;
+        fuel_reserve: number;
         has_base: boolean;
         id: string;
         name: string;
@@ -3973,7 +3973,7 @@ export type RegisterResponse = {
             faction_fuel_reserve?: number;
             fuel_capacity?: number;
             fuel_price?: number;
-            fuel_reserve?: number;
+            fuel_reserve: number;
             has_base: boolean;
             id: string;
             name: string;
@@ -4783,10 +4783,16 @@ export type UseItemResponse = {
  */
 export type V2GameState = {
     cargo?: Array<{
-        item_id: string;
-        name: string;
-        quantity: number;
-        size: number;
+        item_id?: string;
+        /**
+         * Resolved display name of the item
+         */
+        item_name?: string;
+        quantity?: number;
+        /**
+         * Cargo space one unit occupies
+         */
+        size?: number;
     }>;
     /**
      * Action-specific detail data
@@ -4796,15 +4802,90 @@ export type V2GameState = {
     };
     hints?: Array<string>;
     location?: {
+        /**
+         * System IDs adjacent to the current system
+         */
+        connections?: Array<string>;
         docked_at?: string;
         empire?: string;
         /**
          * True when actively jumping or traveling
          */
         in_transit?: boolean;
+        /**
+         * Count of nearby empire NPCs before the response cap is applied
+         */
+        nearby_empire_npc_count?: number;
+        /**
+         * Empire NPCs at the current POI
+         */
+        nearby_empire_npcs?: Array<{
+            empire?: string;
+            /**
+             * Set for empire fleet member NPCs
+             */
+            fleet_name?: string;
+            in_combat?: boolean;
+            name?: string;
+            npc_id?: string;
+            role?: string;
+            ship_class?: string;
+            ship_name?: string;
+        }>;
+        /**
+         * Count of nearby pirates before the response cap is applied
+         */
+        nearby_pirate_count?: number;
+        /**
+         * Pirate NPCs at the current POI
+         */
+        nearby_pirates?: Array<{
+            hull?: number;
+            is_boss?: boolean;
+            max_hull?: number;
+            max_shield?: number;
+            name?: string;
+            pirate_id?: string;
+            shield?: number;
+            status?: string;
+            tier?: string;
+        }>;
+        /**
+         * Count of nearby players before the response cap is applied
+         */
+        nearby_player_count?: number;
+        /**
+         * Other (non-cloaked) players at the current POI
+         */
+        nearby_players?: Array<{
+            clan_tag?: string;
+            faction_tag?: string;
+            in_combat?: boolean;
+            offline?: boolean;
+            player_id?: string;
+            ship_class?: string;
+            /**
+             * Custom ship name
+             */
+            ship_name?: string;
+            username?: string;
+        }>;
+        /**
+         * Number of offline nearby players collapsed into a count when the POI is crowded (omitted when zero)
+         */
+        offline_collapsed?: number;
         poi_id?: string;
         poi_name?: string;
         poi_type?: string;
+        /**
+         * Mineable resources at the current POI
+         */
+        resources?: Array<{
+            item_id?: string;
+            item_name?: string;
+            remaining?: number;
+            richness?: number;
+        }>;
         security_status?: string;
         system_id?: string;
         system_name?: string;
@@ -4886,6 +4967,14 @@ export type V2GameState = {
         faction_id?: string;
         faction_rank?: string;
         home_base?: string;
+        /**
+         * POI ID of the home base (omitted when no home base set)
+         */
+        home_poi?: string;
+        /**
+         * System ID of the home base (omitted when no home base set)
+         */
+        home_system?: string;
         id?: string;
         is_cloaked?: boolean;
         primary_color?: string;
@@ -4913,6 +5002,12 @@ export type V2GameState = {
                 reputation?: number;
             };
         };
+        /**
+         * Lifetime player statistics (credits earned, ships destroyed, ore mined, etc.)
+         */
+        stats?: {
+            [key: string]: unknown;
+        };
         status_message?: string;
         /**
          * ID of the wreck this player is currently towing (omitted when not towing)
@@ -4935,22 +5030,82 @@ export type V2GameState = {
         cargo_used?: number;
         class_id?: string;
         class_name?: string;
+        /**
+         * Total CPU available
+         */
+        cpu_capacity?: number;
+        /**
+         * CPU consumed by fitted modules (after engineering efficiency bonus)
+         */
+        cpu_used?: number;
+        /**
+         * Player-assigned custom ship name (omitted when unset)
+         */
+        custom_name?: string;
+        /**
+         * Number of defense module slots
+         */
+        defense_slots?: number;
         fuel?: number;
+        /**
+         * Percent of normal cargo space gases occupy (omitted when 100)
+         */
+        gas_cargo_efficiency?: number;
         hull?: number;
+        /**
+         * Percent of normal cargo space ices occupy (omitted when 100)
+         */
+        ice_cargo_efficiency?: number;
         id?: string;
         max_fuel?: number;
         max_hull?: number;
         max_shield?: number;
+        /**
+         * Display name of the ship (custom name if set, otherwise the class name)
+         */
+        name?: string;
+        /**
+         * Percent of normal cargo space ores/crystals occupy (50 = half; omitted when 100)
+         */
+        ore_cargo_efficiency?: number;
+        /**
+         * Total power available
+         */
+        power_capacity?: number;
+        /**
+         * Power consumed by fitted modules (after engineering efficiency bonus)
+         */
+        power_used?: number;
         shield?: number;
         shield_recharge?: number;
         speed?: number;
+        /**
+         * Number of utility module slots
+         */
+        utility_slots?: number;
+        /**
+         * Number of weapon module slots
+         */
+        weapon_slots?: number;
     };
     /**
      * Player skill levels and XP, keyed by skill ID
      */
     skills?: {
         [key: string]: {
+            /**
+             * Skill category
+             */
+            category?: string;
             level?: number;
+            /**
+             * Maximum attainable level for this skill
+             */
+            max_level?: number;
+            /**
+             * Display name of the skill
+             */
+            name?: string;
             next_level_xp?: number;
             xp?: number;
         };
