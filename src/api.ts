@@ -4,6 +4,12 @@ import type { V2Response } from './generated/types.gen.ts';
 
 const MAX_RETRIES = 3;
 
+// Movement commands (travel/jump) long-poll until arrival — legal transits run
+// up to ~285s, and the server's own long-poll cap is 340s. The client timeout
+// must sit above both so we never abort a response the server will still
+// deliver. 600s matches the v1 reference client.
+const FETCH_TIMEOUT_MS = 600_000;
+
 export interface ApiClientOptions {
   apiBase: string;
   debug: boolean | (() => boolean);
@@ -50,9 +56,15 @@ export class ApiClient {
           'X-Session-Id': session.id,
         },
         body: body ? JSON.stringify(body) : undefined,
-        signal: AbortSignal.timeout(300_000),
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       });
     } catch (err) {
+      const isTimeout = err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError');
+      if (isTimeout) {
+        throw new Error(
+          'No response from the server before the timeout. If this was a travel or jump, the transit has likely continued server-side — check get_status before retrying.',
+        );
+      }
       throw new Error(`Connection failed: ${err instanceof Error ? err.message : String(err)}`);
     }
 
@@ -136,7 +148,7 @@ export class ApiClient {
       headers: {
         'X-Session-Id': session.id,
       },
-      signal: AbortSignal.timeout(300_000),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     const contentType = response.headers.get('content-type') || '';
