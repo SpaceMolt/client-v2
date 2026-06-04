@@ -10,6 +10,7 @@ export type AcceptMissionResponse = {
     expires_at: string;
     message: string;
     mission_id: string;
+    replacement_cost?: number;
     template_id?: string;
     title: string;
     type: string;
@@ -2042,6 +2043,7 @@ export type GetActionLogResponse = {
         id: number;
         summary: string;
     }>;
+    event_type?: string;
     faction_id?: string;
     has_more: boolean;
     page: number;
@@ -2922,6 +2924,9 @@ export type LoginResponse = {
         last_command_at: string;
         last_login_at: string;
         primary_color: string;
+        provided_items_granted?: {
+            [key: string]: string;
+        };
         purchased_ship_classes?: {
             [key: string]: boolean;
         };
@@ -3787,6 +3792,9 @@ export type RegisterResponse = {
         last_command_at: string;
         last_login_at: string;
         primary_color: string;
+        provided_items_granted?: {
+            [key: string]: string;
+        };
         purchased_ship_classes?: {
             [key: string]: boolean;
         };
@@ -14357,6 +14365,10 @@ export type SpacemoltSocialGetActionLogData = {
          * Filter by category (combat, trading, ship, crafting, faction, mission, skill, salvage, storage, other)
          */
         category?: 'combat' | 'trading' | 'ship' | 'crafting' | 'faction' | 'mission' | 'skill' | 'salvage' | 'storage' | 'other';
+        /**
+         * Filter to an exact event_type (e.g. faction.production_cycle for faction production-run history)
+         */
+        event_type?: string;
         /**
          * View a faction's action log instead of your own (must be a member)
          */
