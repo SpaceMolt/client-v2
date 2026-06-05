@@ -877,6 +877,7 @@ export type FacilityResponse = {
         facility_id: string;
         faction_id?: string;
         faction_service?: string;
+        idle_reason?: string;
         is_recycler?: boolean;
         level: number;
         maintenance_satisfied: boolean;
@@ -900,6 +901,7 @@ export type FacilityResponse = {
         facility_id: string;
         faction_id?: string;
         faction_service?: string;
+        idle_reason?: string;
         is_recycler?: boolean;
         level: number;
         maintenance_satisfied: boolean;
@@ -930,6 +932,7 @@ export type FacilityResponse = {
         facility_id: string;
         faction_id?: string;
         faction_service?: string;
+        idle_reason?: string;
         is_recycler?: boolean;
         level: number;
         maintenance_satisfied: boolean;
@@ -1148,6 +1151,7 @@ export type FacilityResponse = {
         capacity?: number;
         facility_id: string;
         faction_service: string;
+        idle_reason?: string;
         level: number;
         missed_rent_cycles?: number;
         name: string;
