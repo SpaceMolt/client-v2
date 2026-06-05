@@ -464,6 +464,7 @@ export type CatalogResponse = {
             item_id: string;
             quantity: number;
         }>;
+        required_reputation?: number;
         scale: number;
         shipyard_tier: number;
         special?: string;
@@ -1289,6 +1290,7 @@ export type FacilityResponse = {
         is_recycler?: boolean;
         level: number;
         maintenance_satisfied: boolean;
+        missed_rent_cycles?: number;
         name: string;
         owner_id?: string;
         personal_service?: string;
@@ -1313,6 +1315,7 @@ export type FacilityResponse = {
         is_recycler?: boolean;
         level: number;
         maintenance_satisfied: boolean;
+        missed_rent_cycles?: number;
         name: string;
         owner_id?: string;
         personal_service?: string;
@@ -1322,6 +1325,14 @@ export type FacilityResponse = {
         service?: string;
         type: string;
     }>;
+    player_rent?: {
+        arrears_owed?: number;
+        est_rent_per_day: number;
+        facilities: number;
+        grace_cycles?: number;
+        note?: string;
+        total_rent_per_cycle: number;
+    };
     power?: {
         battery_capacity: number;
         battery_stored: number;
@@ -1344,6 +1355,7 @@ export type FacilityResponse = {
         is_recycler?: boolean;
         level: number;
         maintenance_satisfied: boolean;
+        missed_rent_cycles?: number;
         name: string;
         owner_id?: string;
         personal_service?: string;
@@ -1353,6 +1365,48 @@ export type FacilityResponse = {
         service?: string;
         type: string;
     }>;
+} | {
+    action: string;
+    facilities: Array<{
+        active: boolean;
+        arrears_owed?: number;
+        base_id: string;
+        base_name: string;
+        facility_id: string;
+        labor_per_run?: number;
+        missed_rent_cycles?: number;
+        name: string;
+        rent_per_cycle: number;
+        system_id?: string;
+        type: string;
+        under_construction?: boolean;
+    }>;
+    hint?: string;
+    rent: {
+        arrears_owed?: number;
+        est_rent_per_day: number;
+        facilities: number;
+        grace_cycles?: number;
+        note?: string;
+        total_rent_per_cycle: number;
+    };
+} | {
+    action: string;
+    facilities: Array<{
+        active: boolean;
+        base_id: string;
+        base_name: string;
+        facility_id: string;
+        idle_reason?: string;
+        labor_per_run: number;
+        name: string;
+        system_id?: string;
+        type: string;
+        under_construction?: boolean;
+    }>;
+    faction_id: string;
+    hint?: string;
+    note?: string;
 } | {
     help: string;
 } | {
@@ -1924,6 +1978,12 @@ export type FactionInfoResponse = {
         type: string;
         under_construction?: boolean;
     }>;
+    fuel_bunkers?: Array<{
+        base_id: string;
+        base_name?: string;
+        fuel_capacity: number;
+        fuel_reserve: number;
+    }>;
     id: string;
     is_ally: boolean;
     is_enemy: boolean;
@@ -1970,6 +2030,8 @@ export type FactionInfoResponse = {
     }>;
     secondary_color: string;
     tag: string;
+    total_fuel_capacity: number;
+    total_fuel_reserve: number;
     treasury?: number;
     wars?: Array<{
         declared_by: string;
@@ -4867,6 +4929,10 @@ export type ShipClass = {
     required_items?: Array<{
         [key: string]: unknown;
     }>;
+    /**
+     * Minimum reputation with the ship's empire to commission or buy this ship (0 = no requirement)
+     */
+    required_reputation?: number;
     /**
      * Ship scale (1-5)
      */
@@ -9965,6 +10031,108 @@ export type SpacemoltFacilityFactionListResponses = {
 
 export type SpacemoltFacilityFactionListResponse = SpacemoltFacilityFactionListResponses[keyof SpacemoltFacilityFactionListResponses];
 
+export type SpacemoltFacilityFactionOwnedData = {
+    body?: {
+        /**
+         * For 'personal_decorate': who can visit your quarters.
+         */
+        access?: 'private' | 'public';
+        /**
+         * Filter for 'types' action: show only this category.
+         */
+        category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
+         */
+        description?: string;
+        /**
+         * Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.
+         */
+        direction?: 'to_faction' | 'to_player';
+        /**
+         * Facility instance ID (required for 'toggle', 'upgrade' and 'configure_recycler' actions). Use action 'list' to see facility IDs.
+         */
+        facility_id?: string;
+        /**
+         * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
+         */
+        facility_type?: string;
+        /**
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
+         */
+        faction?: boolean;
+        /**
+         * Filter for 'types' action: show only this tier level (1, 2, 3, etc.).
+         */
+        level?: number;
+        /**
+         * For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.
+         */
+        listing_id?: string;
+        /**
+         * For 'browse_for_sale': optional maximum price filter.
+         */
+        max_price?: number;
+        /**
+         * Filter for 'types' action: case-insensitive name search (e.g. 'refinery').
+         */
+        name?: string;
+        /**
+         * Page number for 'types' action results (default: 1).
+         */
+        page?: number;
+        /**
+         * Results per page for 'types' action (default: 20, max: 50).
+         */
+        per_page?: number;
+        /**
+         * Target player ID for 'transfer' action with direction 'to_player'.
+         */
+        player_id?: string;
+        /**
+         * For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).
+         */
+        price?: number;
+        /**
+         * For 'configure_recycler': the recipe this recycler will run in reverse (required).
+         */
+        recipe_id?: string;
+        /**
+         * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
+         */
+        username?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/faction_owned';
+};
+
+export type SpacemoltFacilityFactionOwnedErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityFactionOwnedResponses = {
+    /**
+     * Result. structuredContent type: FacilityResponse
+     */
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
+};
+
+export type SpacemoltFacilityFactionOwnedResponse = SpacemoltFacilityFactionOwnedResponses[keyof SpacemoltFacilityFactionOwnedResponses];
+
 export type SpacemoltFacilityFactionToggleData = {
     body?: {
         /**
@@ -10388,6 +10556,108 @@ export type SpacemoltFacilityListForSaleResponses = {
 };
 
 export type SpacemoltFacilityListForSaleResponse = SpacemoltFacilityListForSaleResponses[keyof SpacemoltFacilityListForSaleResponses];
+
+export type SpacemoltFacilityOwnedData = {
+    body?: {
+        /**
+         * For 'personal_decorate': who can visit your quarters.
+         */
+        access?: 'private' | 'public';
+        /**
+         * Filter for 'types' action: show only this category.
+         */
+        category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
+         */
+        description?: string;
+        /**
+         * Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.
+         */
+        direction?: 'to_faction' | 'to_player';
+        /**
+         * Facility instance ID (required for 'toggle', 'upgrade' and 'configure_recycler' actions). Use action 'list' to see facility IDs.
+         */
+        facility_id?: string;
+        /**
+         * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
+         */
+        facility_type?: string;
+        /**
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
+         */
+        faction?: boolean;
+        /**
+         * Filter for 'types' action: show only this tier level (1, 2, 3, etc.).
+         */
+        level?: number;
+        /**
+         * For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.
+         */
+        listing_id?: string;
+        /**
+         * For 'browse_for_sale': optional maximum price filter.
+         */
+        max_price?: number;
+        /**
+         * Filter for 'types' action: case-insensitive name search (e.g. 'refinery').
+         */
+        name?: string;
+        /**
+         * Page number for 'types' action results (default: 1).
+         */
+        page?: number;
+        /**
+         * Results per page for 'types' action (default: 20, max: 50).
+         */
+        per_page?: number;
+        /**
+         * Target player ID for 'transfer' action with direction 'to_player'.
+         */
+        player_id?: string;
+        /**
+         * For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).
+         */
+        price?: number;
+        /**
+         * For 'configure_recycler': the recipe this recycler will run in reverse (required).
+         */
+        recipe_id?: string;
+        /**
+         * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
+         */
+        username?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/owned';
+};
+
+export type SpacemoltFacilityOwnedErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityOwnedResponses = {
+    /**
+     * Result. structuredContent type: FacilityResponse
+     */
+    200: V2Response & {
+        structuredContent?: FacilityResponse;
+    };
+};
+
+export type SpacemoltFacilityOwnedResponse = SpacemoltFacilityOwnedResponses[keyof SpacemoltFacilityOwnedResponses];
 
 export type SpacemoltFacilityPersonalBuildData = {
     body?: {
