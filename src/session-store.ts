@@ -96,8 +96,13 @@ export class SessionStore {
         mkdirSync(dir, { recursive: true });
       }
 
-      // Atomic write: write to temp file, then rename into place
-      const tmpPath = this.path + '.tmp';
+      // Atomic write: write to temp file, then rename into place. The temp
+      // name includes the pid so concurrent processes can't clobber each
+      // other's temp file — two processes saving at once would otherwise race
+      // on a shared name and the loser's rename throws ENOENT. Last rename
+      // wins, which is benign: all concurrently-created sessions are valid
+      // server-side.
+      const tmpPath = `${this.path}.${process.pid}.tmp`;
       writeFileSync(tmpPath, JSON.stringify(this.cache, null, 2));
       try {
         chmodSync(tmpPath, 0o600);
