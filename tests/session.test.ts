@@ -600,6 +600,36 @@ describe('SessionStore - save error handling', () => {
       chmodSync(dir, 0o755); // restore for cleanup
     }
   });
+
+  test('concurrent saves from separate processes do not collide on the temp file', async () => {
+    const dir = join(TEST_DIR, 'save-race');
+    mkdirSync(dir, { recursive: true });
+    const sessionPath = join(dir, 'session.json');
+
+    // Each subprocess loads and saves the store against the same path,
+    // mimicking parallel CLI invocations creating a fresh session at once.
+    // With a shared temp filename the loser's rename throws ENOENT.
+    const script = `
+      const { SessionStore } = await import('${join(import.meta.dir, '..', 'src', 'session-store.ts')}');
+      const store = new SessionStore('${sessionPath}', false);
+      store.load();
+      for (let i = 0; i < 50; i++) store.save();
+    `;
+    const procs = Array.from({ length: 8 }, () =>
+      Bun.spawn(['bun', '-e', script], { stdout: 'pipe', stderr: 'pipe' }),
+    );
+    const results = await Promise.all(procs.map(async p => ({
+      code: await p.exited,
+      stderr: await new Response(p.stderr).text(),
+    })));
+
+    for (const r of results) {
+      expect(r.stderr).not.toContain('Session file write failed');
+      expect(r.code).toBe(0);
+    }
+    // The final session file is intact valid JSON.
+    expect(JSON.parse(readFileSync(sessionPath, 'utf-8')).version).toBe(2);
+  });
 });
 
 describe('SessionStore - gitignore detection', () => {
