@@ -38,6 +38,16 @@ const formatters: Record<string, Formatter> = {
       console.log(`  ${s.name || s.class_name} (${s.class_id})`);
       console.log(`  Hull: ${colorHealth(s.hull as number, s.max_hull as number)} | Shield: ${colorHealth(s.shield as number, s.max_shield as number)}`);
       console.log(`  Fuel: ${s.fuel}/${s.max_fuel} | Cargo: ${s.cargo_used}/${s.cargo_capacity}`);
+
+      // Active combat status effects (fields are omitted by the server when inactive)
+      const effects: string[] = [];
+      if ((s.burn_ticks_remaining as number) > 0) {
+        effects.push(`Burning: ${s.burn_damage_per_tick} dmg/tick, ${s.burn_ticks_remaining} ticks left`);
+      }
+      if ((s.armor_melt_ticks_remaining as number) > 0) {
+        effects.push(`Armor melt: ${Math.round((s.armor_melt_pct as number) * 100)}%, ${s.armor_melt_ticks_remaining} ticks left`);
+      }
+      if (effects.length) console.log(`  ${c.red}${c.bright}⚠ ${effects.join(' | ')}${c.reset}`);
     }
 
     if (loc) {

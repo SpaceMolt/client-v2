@@ -70,6 +70,34 @@ describe('tryCustomFormatter', () => {
     expect(tryCustomFormatter('get_status', { foo: 'bar' })).toBe(false);
   });
 
+  test('get_status shows active burn and armor melt effects', () => {
+    const { result, output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt/get_status', {
+        ship: {
+          name: 'Hauler', class_id: 'freighter', hull: 80, max_hull: 100, shield: 30, max_shield: 50,
+          fuel: 45, max_fuel: 100, cargo_used: 20, cargo_capacity: 50,
+          burn_damage_per_tick: 12, burn_ticks_remaining: 4, burn_source_id: 'pid-9',
+          armor_melt_pct: 0.35, armor_melt_ticks_remaining: 2,
+        },
+      }),
+    );
+
+    expect(result).toBe(true);
+    expect(output.some(l => l.includes('Burning: 12 dmg/tick, 4 ticks left'))).toBe(true);
+    expect(output.some(l => l.includes('Armor melt: 35%, 2 ticks left'))).toBe(true);
+  });
+
+  test('get_status omits status effects line when none are active', () => {
+    const { output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt/get_status', {
+        ship: { name: 'Hauler', class_id: 'freighter', hull: 80, max_hull: 100, shield: 30, max_shield: 50, fuel: 45, max_fuel: 100, cargo_used: 20, cargo_capacity: 50 },
+      }),
+    );
+
+    expect(output.some(l => l.includes('Burning'))).toBe(false);
+    expect(output.some(l => l.includes('Armor melt'))).toBe(false);
+  });
+
   test('formats get_system response', () => {
     const { result, output } = captureOutput(() =>
       tryCustomFormatter('spacemolt/get_system', {
