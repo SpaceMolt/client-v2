@@ -18,6 +18,9 @@ on:
 
 permissions:
   contents: write
+  # Required for the `gh workflow run release.yml` dispatch step; without it
+  # the dispatch fails with HTTP 403 and no release binaries get built.
+  actions: write
 
 concurrency:
   # Never let two sync runs race; a queued run waits, doesn't pile up.
