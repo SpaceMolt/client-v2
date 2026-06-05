@@ -326,6 +326,29 @@ export type CatalogResponse = {
         category: string;
         description: string;
         effect?: {
+            ammo?: {
+                anti_drone_mod?: number;
+                anti_large_mod?: number;
+                anti_small_mod?: number;
+                armor_bypass?: number;
+                armor_melt_pct?: number;
+                armor_melt_ticks?: number;
+                damage_mod?: number;
+                disrupt_bonus_speed?: number;
+                disrupt_bonus_ticks?: number;
+                disrupt_damage?: number;
+                disrupt_speed?: number;
+                disrupt_ticks?: number;
+                dot_pct?: number;
+                dot_ticks?: number;
+                hit_chance_mod?: number;
+                hull_damage_mod?: number;
+                shield_bypass?: number;
+                shield_damage_mod?: number;
+                splash_pct?: number;
+                untraceable?: boolean;
+                wear_per_shot?: number;
+            };
             amount?: number;
             duration?: number;
             stat?: string;
@@ -3470,6 +3493,11 @@ export type LoginResponse = {
             stat: string;
         }>;
         armor: number;
+        armor_melt_pct?: number;
+        armor_melt_ticks_remaining?: number;
+        burn_damage_per_tick?: number;
+        burn_source_id?: string;
+        burn_ticks_remaining?: number;
         cargo: Array<{
             item_id: string;
             name?: string;
@@ -4363,6 +4391,11 @@ export type RegisterResponse = {
             stat: string;
         }>;
         armor: number;
+        armor_melt_pct?: number;
+        armor_melt_ticks_remaining?: number;
+        burn_damage_per_tick?: number;
+        burn_source_id?: string;
+        burn_ticks_remaining?: number;
         cargo: Array<{
             item_id: string;
             name?: string;
@@ -4662,6 +4695,26 @@ export type Ship = {
         [key: string]: unknown;
     }>;
     armor?: number;
+    /**
+     * Armor effectiveness reduction while melted (0-1 fraction)
+     */
+    armor_melt_pct?: number;
+    /**
+     * Ticks of armor melt remaining (from plasma/corrosive ammo)
+     */
+    armor_melt_ticks_remaining?: number;
+    /**
+     * Hull damage applied each battle tick while burning
+     */
+    burn_damage_per_tick?: number;
+    /**
+     * Player who applied the burn (credited on burn kills)
+     */
+    burn_source_id?: string;
+    /**
+     * Ticks of burn damage-over-time remaining (from incendiary/entropic ammo)
+     */
+    burn_ticks_remaining?: number;
     cargo?: Array<CargoItem>;
     cargo_capacity: number;
     cargo_used?: number;
