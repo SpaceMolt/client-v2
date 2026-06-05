@@ -304,6 +304,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"Exact version to look up (e.g. '0.188.0' or 'v0.188.0')","required":false,"positionalIndex":0},{"name":"text","type":"string","description":"Search term to find in release notes","required":false,"positionalIndex":2},{"name":"count","type":"integer","description":"Number of releases per page (1-20, default 5)","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
+  ["spacemolt/help", {
+    toolGroup: "spacemolt",
+    action: "help",
+    operationId: "spacemolt_help_post",
+    summary: "Get help for spacemolt",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
   ["spacemolt/install_mod", {
     toolGroup: "spacemolt",
     action: "install_mod",
@@ -448,6 +456,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"registration_code","type":"string","description":"Your registration code from https://spacemolt.com/dashboard","required":true,"positionalIndex":3}],
     isAmbiguous: false,
   }],
+  ["spacemolt_auth/help", {
+    toolGroup: "spacemolt_auth",
+    action: "help",
+    operationId: "spacemolt_auth_help_post",
+    summary: "Get help for spacemolt_auth",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
   ["spacemolt_auth/login", {
     toolGroup: "spacemolt_auth",
     action: "login",
@@ -501,7 +517,7 @@ const entries: [string, CommandMeta][] = [
     action: "help",
     operationId: "spacemolt_battle_help_post",
     summary: "Get help for spacemolt_battle",
-    params: [],
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_battle/reload", {
@@ -558,7 +574,7 @@ const entries: [string, CommandMeta][] = [
     action: "help",
     operationId: "spacemolt_catalog_help_post",
     summary: "Get help for spacemolt_catalog",
-    params: [],
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_citizenship/apply", {
@@ -568,6 +584,14 @@ const entries: [string, CommandMeta][] = [
     summary: "View and manage your empire citizenships (list, apply, renounce, withdraw)",
     params: [{"name":"target","type":"string","description":"Empire to act on. Required for apply, renounce, withdraw; ignored for list.","required":false,"positionalIndex":0,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]}],
     isAmbiguous: false,
+  }],
+  ["spacemolt_citizenship/help", {
+    toolGroup: "spacemolt_citizenship",
+    action: "help",
+    operationId: "spacemolt_citizenship_help_post",
+    summary: "Get help for spacemolt_citizenship",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_citizenship/list", {
     toolGroup: "spacemolt_citizenship",
@@ -608,6 +632,14 @@ const entries: [string, CommandMeta][] = [
     summary: "Get full details for a specific drone including script and memory",
     params: [{"name":"id","type":"string","description":"ID of the drone to inspect","required":true,"positionalIndex":0}],
     isAmbiguous: false,
+  }],
+  ["spacemolt_drone/help", {
+    toolGroup: "spacemolt_drone",
+    action: "help",
+    operationId: "spacemolt_drone_help_post",
+    summary: "Get help for spacemolt_drone",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_drone/list", {
     toolGroup: "spacemolt_drone",
@@ -736,6 +768,14 @@ const entries: [string, CommandMeta][] = [
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
     params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":false,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'toggle', 'upgrade' and 'configure_recycler' actions). Use action 'list' to see facility IDs.","required":false,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters.","required":false,"positionalIndex":-1,"enumValues":["private","public"]},{"name":"category","type":"string","description":"Filter for 'types' action: show only this category.","required":false,"positionalIndex":-1,"enumValues":["infrastructure","service","production","faction","personal"]},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Transfer direction for 'transfer' action: 'to_faction' or 'to_player'.","required":false,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).","required":false,"positionalIndex":-1},{"name":"level","type":"integer","description":"Filter for 'types' action: show only this tier level (1, 2, 3, etc.).","required":false,"positionalIndex":-1},{"name":"listing_id","type":"string","description":"For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"For 'browse_for_sale': optional maximum price filter.","required":false,"positionalIndex":-1},{"name":"name","type":"string","description":"Filter for 'types' action: case-insensitive name search (e.g. 'refinery').","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number for 'types' action results (default: 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Results per page for 'types' action (default: 20, max: 50).","required":false,"positionalIndex":-1},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1},{"name":"price","type":"integer","description":"For 'list_for_sale': asking price in credits. Listing fee is 1% (non-refundable, paid to local station).","required":false,"positionalIndex":-1},{"name":"recipe_id","type":"string","description":"For 'configure_recycler': the recipe this recycler will run in reverse (required).","required":false,"positionalIndex":-1},{"name":"username","type":"string","description":"For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
+  }],
+  ["spacemolt_facility/help", {
+    toolGroup: "spacemolt_facility",
+    action: "help",
+    operationId: "spacemolt_facility_help_post",
+    summary: "Get help for spacemolt_facility",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_facility/list", {
     toolGroup: "spacemolt_facility",
@@ -905,6 +945,14 @@ const entries: [string, CommandMeta][] = [
     params: [],
     isAmbiguous: false,
   }],
+  ["spacemolt_faction/help", {
+    toolGroup: "spacemolt_faction",
+    action: "help",
+    operationId: "spacemolt_faction_help_post",
+    summary: "Get help for spacemolt_faction",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
   ["spacemolt_faction/info", {
     toolGroup: "spacemolt_faction",
     action: "info",
@@ -1049,6 +1097,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"name","type":"string","description":"New role name (optional)","required":false,"positionalIndex":-1},{"name":"permissions","type":"object","description":"Updated permission flags","required":false,"positionalIndex":-1},{"name":"role_id","type":"string","description":"ID of the role to edit","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
+  ["spacemolt_faction_admin/help", {
+    toolGroup: "spacemolt_faction_admin",
+    action: "help",
+    operationId: "spacemolt_faction_admin_help_post",
+    summary: "Get help for spacemolt_faction_admin",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
   ["spacemolt_faction_admin/post_mission", {
     toolGroup: "spacemolt_faction_admin",
     action: "post_mission",
@@ -1089,6 +1145,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"item_id","type":"string","description":"ID of the item to sell from faction storage","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to list for sale","required":true,"positionalIndex":1},{"name":"price_each","type":"integer","description":"Price per unit in credits","required":true,"positionalIndex":2}],
     isAmbiguous: true,
   }],
+  ["spacemolt_faction_commerce/help", {
+    toolGroup: "spacemolt_faction_commerce",
+    action: "help",
+    operationId: "spacemolt_faction_commerce_help_post",
+    summary: "Get help for spacemolt_faction_commerce",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
   ["spacemolt_fleet/accept", {
     toolGroup: "spacemolt_fleet",
     action: "accept",
@@ -1126,7 +1190,7 @@ const entries: [string, CommandMeta][] = [
     action: "help",
     operationId: "spacemolt_fleet_help_post",
     summary: "Get help for spacemolt_fleet",
-    params: [],
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_fleet/invite", {
@@ -1159,6 +1223,14 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_fleet_status",
     summary: "Create and manage player fleets for coordinated movement and combat",
     params: [{"name":"player_id","type":"string","description":"Player name or ID (for invite/kick)","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_intel/help", {
+    toolGroup: "spacemolt_intel",
+    action: "help",
+    operationId: "spacemolt_intel_help_post",
+    summary: "Get help for spacemolt_intel",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_intel/intel_status", {
@@ -1249,6 +1321,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"item_id","type":"string","description":"ID of the item to estimate buying","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of items to estimate buying","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
+  ["spacemolt_market/help", {
+    toolGroup: "spacemolt_market",
+    action: "help",
+    operationId: "spacemolt_market_help_post",
+    summary: "Get help for spacemolt_market",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
   ["spacemolt_market/modify_order", {
     toolGroup: "spacemolt_market",
     action: "modify_order",
@@ -1272,6 +1352,14 @@ const entries: [string, CommandMeta][] = [
     summary: "View your own orders at a station",
     params: [{"name":"item_id","type":"string","description":"Filter by item (exact match on item name or ID)","required":false,"positionalIndex":0},{"name":"order_type","type":"string","description":"Filter by order type: 'buy' or 'sell'","required":false,"positionalIndex":-1,"enumValues":["buy","sell"]},{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"Results per page (default 20, max 50)","required":false,"positionalIndex":-1},{"name":"scope","type":"string","description":"Order scope: 'personal' (default) or 'faction' (requires faction membership)","required":false,"positionalIndex":-1,"enumValues":["personal","faction"]},{"name":"search","type":"string","description":"Filter by substring match on item names","required":false,"positionalIndex":-1},{"name":"sort_by","type":"string","description":"Sort order: 'newest' (default), 'oldest', 'price_asc', 'price_desc'","required":false,"positionalIndex":-1,"enumValues":["newest","oldest","price_asc","price_desc"]},{"name":"station_id","type":"string","description":"Optional: station ID to view your orders at without being docked. If omitted, must be docked and uses the current station.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
+  }],
+  ["spacemolt_salvage/help", {
+    toolGroup: "spacemolt_salvage",
+    action: "help",
+    operationId: "spacemolt_salvage_help_post",
+    summary: "Get help for spacemolt_salvage",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_salvage/insure", {
     toolGroup: "spacemolt_salvage",
@@ -1424,6 +1512,14 @@ const entries: [string, CommandMeta][] = [
     summary: "Check the status of your ship commissions",
     params: [{"name":"base_id","type":"string","description":"Optional: filter commissions to a specific base","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
+  }],
+  ["spacemolt_ship/help", {
+    toolGroup: "spacemolt_ship",
+    action: "help",
+    operationId: "spacemolt_ship_help_post",
+    summary: "Get help for spacemolt_ship",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_ship/list_ship_for_sale", {
     toolGroup: "spacemolt_ship",
@@ -1625,6 +1721,14 @@ const entries: [string, CommandMeta][] = [
     params: [],
     isAmbiguous: false,
   }],
+  ["spacemolt_social/help", {
+    toolGroup: "spacemolt_social",
+    action: "help",
+    operationId: "spacemolt_social_help_post",
+    summary: "Get help for spacemolt_social",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
   ["spacemolt_social/petition", {
     toolGroup: "spacemolt_social",
     action: "petition",
@@ -1678,7 +1782,7 @@ const entries: [string, CommandMeta][] = [
     action: "help",
     operationId: "spacemolt_storage_help_post",
     summary: "Get help for spacemolt_storage",
-    params: [],
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_storage/view", {
@@ -1704,6 +1808,14 @@ const entries: [string, CommandMeta][] = [
     summary: "View pending trade offers",
     params: [],
     isAmbiguous: false,
+  }],
+  ["spacemolt_transfer/help", {
+    toolGroup: "spacemolt_transfer",
+    action: "help",
+    operationId: "spacemolt_transfer_help_post",
+    summary: "Get help for spacemolt_transfer",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_transfer/trade_accept", {
     toolGroup: "spacemolt_transfer",

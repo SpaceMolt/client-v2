@@ -1288,7 +1288,13 @@ export type FacilityResponse = {
         faction_service?: string;
         idle_reason?: string;
         is_recycler?: boolean;
+        labor_per_cycle?: number;
         level: number;
+        maintenance_per_cycle?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
         maintenance_satisfied: boolean;
         missed_rent_cycles?: number;
         name: string;
@@ -1313,7 +1319,13 @@ export type FacilityResponse = {
         faction_service?: string;
         idle_reason?: string;
         is_recycler?: boolean;
+        labor_per_cycle?: number;
         level: number;
+        maintenance_per_cycle?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
         maintenance_satisfied: boolean;
         missed_rent_cycles?: number;
         name: string;
@@ -1353,7 +1365,13 @@ export type FacilityResponse = {
         faction_service?: string;
         idle_reason?: string;
         is_recycler?: boolean;
+        labor_per_cycle?: number;
         level: number;
+        maintenance_per_cycle?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
         maintenance_satisfied: boolean;
         missed_rent_cycles?: number;
         name: string;
@@ -1392,21 +1410,27 @@ export type FacilityResponse = {
     };
 } | {
     action: string;
+    arrears_owed?: number;
     facilities: Array<{
         active: boolean;
+        arrears_owed?: number;
         base_id: string;
         base_name: string;
         facility_id: string;
         idle_reason?: string;
         labor_per_run: number;
+        missed_rent_cycles?: number;
         name: string;
+        rent_per_cycle: number;
         system_id?: string;
         type: string;
         under_construction?: boolean;
     }>;
     faction_id: string;
+    grace_cycles?: number;
     hint?: string;
     note?: string;
+    total_rent_per_cycle: number;
 } | {
     help: string;
 } | {
@@ -7462,7 +7486,12 @@ export type SpacemoltGetVersionResponse = SpacemoltGetVersionResponses[keyof Spa
 export type SpacemoltHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt/help';
 };
 
@@ -7474,6 +7503,27 @@ export type SpacemoltHelpResponses = {
 };
 
 export type SpacemoltHelpResponse = SpacemoltHelpResponses[keyof SpacemoltHelpResponses];
+
+export type SpacemoltHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/help';
+};
+
+export type SpacemoltHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltHelpPostResponse = SpacemoltHelpPostResponses[keyof SpacemoltHelpPostResponses];
 
 export type SpacemoltInstallModData = {
     body?: {
@@ -8182,7 +8232,12 @@ export type SpacemoltAuthClaimResponse = SpacemoltAuthClaimResponses[keyof Space
 export type SpacemoltAuthHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_auth/help';
 };
 
@@ -8194,6 +8249,27 @@ export type SpacemoltAuthHelpResponses = {
 };
 
 export type SpacemoltAuthHelpResponse = SpacemoltAuthHelpResponses[keyof SpacemoltAuthHelpResponses];
+
+export type SpacemoltAuthHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_auth/help';
+};
+
+export type SpacemoltAuthHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltAuthHelpPostResponse = SpacemoltAuthHelpPostResponses[keyof SpacemoltAuthHelpPostResponses];
 
 export type SpacemoltAuthLoginData = {
     body?: {
@@ -8449,7 +8525,12 @@ export type SpacemoltBattleEngageResponse = SpacemoltBattleEngageResponses[keyof
 export type SpacemoltBattleHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_battle/help';
 };
 
@@ -8463,34 +8544,22 @@ export type SpacemoltBattleHelpResponses = {
 export type SpacemoltBattleHelpResponse = SpacemoltBattleHelpResponses[keyof SpacemoltBattleHelpResponses];
 
 export type SpacemoltBattleHelpPostData = {
-    body?: never;
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     path?: never;
     query?: never;
     url: '/api/v2/spacemolt_battle/help';
 };
 
-export type SpacemoltBattleHelpPostErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
 export type SpacemoltBattleHelpPostResponses = {
     /**
-     * Result. structuredContent type: CommandHelpResponse
+     * Help text
      */
-    200: V2Response & {
-        structuredContent?: CommandHelpResponse;
-    };
+    200: V2Response;
 };
 
 export type SpacemoltBattleHelpPostResponse = SpacemoltBattleHelpPostResponses[keyof SpacemoltBattleHelpPostResponses];
@@ -8787,7 +8856,12 @@ export type SpacemoltCatalogResponse = SpacemoltCatalogResponses[keyof Spacemolt
 export type SpacemoltCatalogHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_catalog/help';
 };
 
@@ -8801,7 +8875,12 @@ export type SpacemoltCatalogHelpResponses = {
 export type SpacemoltCatalogHelpResponse = SpacemoltCatalogHelpResponses[keyof SpacemoltCatalogHelpResponses];
 
 export type SpacemoltCatalogHelpPostData = {
-    body?: never;
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     path?: never;
     query?: never;
     url: '/api/v2/spacemolt_catalog/help';
@@ -8857,7 +8936,12 @@ export type SpacemoltCitizenshipApplyResponse = SpacemoltCitizenshipApplyRespons
 export type SpacemoltCitizenshipHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_citizenship/help';
 };
 
@@ -8869,6 +8953,27 @@ export type SpacemoltCitizenshipHelpResponses = {
 };
 
 export type SpacemoltCitizenshipHelpResponse = SpacemoltCitizenshipHelpResponses[keyof SpacemoltCitizenshipHelpResponses];
+
+export type SpacemoltCitizenshipHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_citizenship/help';
+};
+
+export type SpacemoltCitizenshipHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltCitizenshipHelpPostResponse = SpacemoltCitizenshipHelpPostResponses[keyof SpacemoltCitizenshipHelpPostResponses];
 
 export type SpacemoltCitizenshipListData = {
     body?: {
@@ -9067,7 +9172,12 @@ export type SpacemoltDroneGetResponse = SpacemoltDroneGetResponses[keyof Spacemo
 export type SpacemoltDroneHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_drone/help';
 };
 
@@ -9079,6 +9189,27 @@ export type SpacemoltDroneHelpResponses = {
 };
 
 export type SpacemoltDroneHelpResponse = SpacemoltDroneHelpResponses[keyof SpacemoltDroneHelpResponses];
+
+export type SpacemoltDroneHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_drone/help';
+};
+
+export type SpacemoltDroneHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltDroneHelpPostResponse = SpacemoltDroneHelpPostResponses[keyof SpacemoltDroneHelpPostResponses];
 
 export type SpacemoltDroneListData = {
     body?: {
@@ -10340,7 +10471,12 @@ export type SpacemoltFacilityFactionUpgradeResponse = SpacemoltFacilityFactionUp
 export type SpacemoltFacilityHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_facility/help';
 };
 
@@ -10352,6 +10488,27 @@ export type SpacemoltFacilityHelpResponses = {
 };
 
 export type SpacemoltFacilityHelpResponse = SpacemoltFacilityHelpResponses[keyof SpacemoltFacilityHelpResponses];
+
+export type SpacemoltFacilityHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/help';
+};
+
+export type SpacemoltFacilityHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltFacilityHelpPostResponse = SpacemoltFacilityHelpPostResponses[keyof SpacemoltFacilityHelpPostResponses];
 
 export type SpacemoltFacilityListData = {
     body?: {
@@ -11863,7 +12020,12 @@ export type SpacemoltFactionGetInvitesResponse = SpacemoltFactionGetInvitesRespo
 export type SpacemoltFactionHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_faction/help';
 };
 
@@ -11875,6 +12037,27 @@ export type SpacemoltFactionHelpResponses = {
 };
 
 export type SpacemoltFactionHelpResponse = SpacemoltFactionHelpResponses[keyof SpacemoltFactionHelpResponses];
+
+export type SpacemoltFactionHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction/help';
+};
+
+export type SpacemoltFactionHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltFactionHelpPostResponse = SpacemoltFactionHelpPostResponses[keyof SpacemoltFactionHelpPostResponses];
 
 export type SpacemoltFactionInfoData = {
     body?: {
@@ -12610,7 +12793,12 @@ export type SpacemoltFactionAdminEditRoleResponse = SpacemoltFactionAdminEditRol
 export type SpacemoltFactionAdminHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_faction_admin/help';
 };
 
@@ -12622,6 +12810,27 @@ export type SpacemoltFactionAdminHelpResponses = {
 };
 
 export type SpacemoltFactionAdminHelpResponse = SpacemoltFactionAdminHelpResponses[keyof SpacemoltFactionAdminHelpResponses];
+
+export type SpacemoltFactionAdminHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction_admin/help';
+};
+
+export type SpacemoltFactionAdminHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltFactionAdminHelpPostResponse = SpacemoltFactionAdminHelpPostResponses[keyof SpacemoltFactionAdminHelpPostResponses];
 
 export type SpacemoltFactionAdminPostMissionData = {
     body?: {
@@ -12901,7 +13110,12 @@ export type SpacemoltFactionCommerceCreateSellOrderResponse = SpacemoltFactionCo
 export type SpacemoltFactionCommerceHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_faction_commerce/help';
 };
 
@@ -12913,6 +13127,27 @@ export type SpacemoltFactionCommerceHelpResponses = {
 };
 
 export type SpacemoltFactionCommerceHelpResponse = SpacemoltFactionCommerceHelpResponses[keyof SpacemoltFactionCommerceHelpResponses];
+
+export type SpacemoltFactionCommerceHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction_commerce/help';
+};
+
+export type SpacemoltFactionCommerceHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltFactionCommerceHelpPostResponse = SpacemoltFactionCommerceHelpPostResponses[keyof SpacemoltFactionCommerceHelpPostResponses];
 
 export type SpacemoltFleetAcceptData = {
     body?: {
@@ -13069,7 +13304,12 @@ export type SpacemoltFleetDisbandResponse = SpacemoltFleetDisbandResponses[keyof
 export type SpacemoltFleetHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_fleet/help';
 };
 
@@ -13083,34 +13323,22 @@ export type SpacemoltFleetHelpResponses = {
 export type SpacemoltFleetHelpResponse = SpacemoltFleetHelpResponses[keyof SpacemoltFleetHelpResponses];
 
 export type SpacemoltFleetHelpPostData = {
-    body?: never;
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     path?: never;
     query?: never;
     url: '/api/v2/spacemolt_fleet/help';
 };
 
-export type SpacemoltFleetHelpPostErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
 export type SpacemoltFleetHelpPostResponses = {
     /**
-     * Result. structuredContent type: CommandHelpResponse
+     * Help text
      */
-    200: V2Response & {
-        structuredContent?: CommandHelpResponse;
-    };
+    200: V2Response;
 };
 
 export type SpacemoltFleetHelpPostResponse = SpacemoltFleetHelpPostResponses[keyof SpacemoltFleetHelpPostResponses];
@@ -13270,7 +13498,12 @@ export type SpacemoltFleetStatusResponse = SpacemoltFleetStatusResponses[keyof S
 export type SpacemoltIntelHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_intel/help';
 };
 
@@ -13282,6 +13515,27 @@ export type SpacemoltIntelHelpResponses = {
 };
 
 export type SpacemoltIntelHelpResponse = SpacemoltIntelHelpResponses[keyof SpacemoltIntelHelpResponses];
+
+export type SpacemoltIntelHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_intel/help';
+};
+
+export type SpacemoltIntelHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltIntelHelpPostResponse = SpacemoltIntelHelpPostResponses[keyof SpacemoltIntelHelpPostResponses];
 
 export type SpacemoltIntelIntelStatusData = {
     body?: {
@@ -13788,7 +14042,12 @@ export type SpacemoltMarketEstimatePurchaseResponse = SpacemoltMarketEstimatePur
 export type SpacemoltMarketHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_market/help';
 };
 
@@ -13800,6 +14059,27 @@ export type SpacemoltMarketHelpResponses = {
 };
 
 export type SpacemoltMarketHelpResponse = SpacemoltMarketHelpResponses[keyof SpacemoltMarketHelpResponses];
+
+export type SpacemoltMarketHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_market/help';
+};
+
+export type SpacemoltMarketHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltMarketHelpPostResponse = SpacemoltMarketHelpPostResponses[keyof SpacemoltMarketHelpPostResponses];
 
 export type SpacemoltMarketModifyOrderData = {
     body?: {
@@ -13961,7 +14241,12 @@ export type SpacemoltMarketViewOrdersResponse = SpacemoltMarketViewOrdersRespons
 export type SpacemoltSalvageHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_salvage/help';
 };
 
@@ -13973,6 +14258,27 @@ export type SpacemoltSalvageHelpResponses = {
 };
 
 export type SpacemoltSalvageHelpResponse = SpacemoltSalvageHelpResponses[keyof SpacemoltSalvageHelpResponses];
+
+export type SpacemoltSalvageHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_salvage/help';
+};
+
+export type SpacemoltSalvageHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltSalvageHelpPostResponse = SpacemoltSalvageHelpPostResponses[keyof SpacemoltSalvageHelpPostResponses];
 
 export type SpacemoltSalvageInsureData = {
     body?: {
@@ -14705,7 +15011,12 @@ export type SpacemoltShipCommissionStatusResponse = SpacemoltShipCommissionStatu
 export type SpacemoltShipHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_ship/help';
 };
 
@@ -14717,6 +15028,27 @@ export type SpacemoltShipHelpResponses = {
 };
 
 export type SpacemoltShipHelpResponse = SpacemoltShipHelpResponses[keyof SpacemoltShipHelpResponses];
+
+export type SpacemoltShipHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_ship/help';
+};
+
+export type SpacemoltShipHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltShipHelpPostResponse = SpacemoltShipHelpPostResponses[keyof SpacemoltShipHelpPostResponses];
 
 export type SpacemoltShipListShipForSaleData = {
     body?: {
@@ -15770,7 +16102,12 @@ export type SpacemoltSocialGetNotesResponse = SpacemoltSocialGetNotesResponses[k
 export type SpacemoltSocialHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_social/help';
 };
 
@@ -15782,6 +16119,27 @@ export type SpacemoltSocialHelpResponses = {
 };
 
 export type SpacemoltSocialHelpResponse = SpacemoltSocialHelpResponses[keyof SpacemoltSocialHelpResponses];
+
+export type SpacemoltSocialHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_social/help';
+};
+
+export type SpacemoltSocialHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltSocialHelpPostResponse = SpacemoltSocialHelpPostResponses[keyof SpacemoltSocialHelpPostResponses];
 
 export type SpacemoltSocialPetitionData = {
     body?: {
@@ -16054,7 +16412,12 @@ export type SpacemoltStorageDepositResponse = SpacemoltStorageDepositResponses[k
 export type SpacemoltStorageHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_storage/help';
 };
 
@@ -16068,34 +16431,22 @@ export type SpacemoltStorageHelpResponses = {
 export type SpacemoltStorageHelpResponse = SpacemoltStorageHelpResponses[keyof SpacemoltStorageHelpResponses];
 
 export type SpacemoltStorageHelpPostData = {
-    body?: never;
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     path?: never;
     query?: never;
     url: '/api/v2/spacemolt_storage/help';
 };
 
-export type SpacemoltStorageHelpPostErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
 export type SpacemoltStorageHelpPostResponses = {
     /**
-     * Result. structuredContent type: CommandHelpResponse
+     * Help text
      */
-    200: V2Response & {
-        structuredContent?: CommandHelpResponse;
-    };
+    200: V2Response;
 };
 
 export type SpacemoltStorageHelpPostResponse = SpacemoltStorageHelpPostResponses[keyof SpacemoltStorageHelpPostResponses];
@@ -16254,7 +16605,12 @@ export type SpacemoltTransferGetTradesResponse = SpacemoltTransferGetTradesRespo
 export type SpacemoltTransferHelpData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
     url: '/api/v2/spacemolt_transfer/help';
 };
 
@@ -16266,6 +16622,27 @@ export type SpacemoltTransferHelpResponses = {
 };
 
 export type SpacemoltTransferHelpResponse = SpacemoltTransferHelpResponses[keyof SpacemoltTransferHelpResponses];
+
+export type SpacemoltTransferHelpPostData = {
+    body?: {
+        /**
+         * Optional: focus help on an action name, category, or search keyword. Searches across all tools.
+         */
+        topic?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_transfer/help';
+};
+
+export type SpacemoltTransferHelpPostResponses = {
+    /**
+     * Help text
+     */
+    200: V2Response;
+};
+
+export type SpacemoltTransferHelpPostResponse = SpacemoltTransferHelpPostResponses[keyof SpacemoltTransferHelpPostResponses];
 
 export type SpacemoltTransferTradeAcceptData = {
     body?: {
