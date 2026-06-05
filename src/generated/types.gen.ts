@@ -394,6 +394,9 @@ export type CatalogResponse = {
         max_fuel_bonus?: number;
         mining_power?: number;
         name: string;
+        passenger_business_berths?: number;
+        passenger_economy_berths?: number;
+        passenger_first_berths?: number;
         passive_recipe?: string;
         power_bonus?: number;
         power_usage: number;
@@ -1173,6 +1176,30 @@ export type DockResponse = {
     }>;
     open_orders_count?: number;
     open_orders_truncated?: boolean;
+    passenger_arrivals?: {
+        delivered?: Array<{
+            citizen_id: string;
+            class: string;
+            destination: string;
+            destination_name: string;
+            fare: number;
+            name: string;
+            ticks_remaining: number;
+        }>;
+        fare_collected?: number;
+        reputation_changes?: {
+            [key: string]: number;
+        };
+        stranded?: Array<{
+            citizen_id: string;
+            class: string;
+            destination: string;
+            destination_name: string;
+            fare: number;
+            name: string;
+            ticks_remaining: number;
+        }>;
+    };
     station_condition: {
         condition: string;
         condition_text: string;
@@ -3326,6 +3353,22 @@ export type JumpResponse = {
     origin_y?: number;
 };
 
+export type ListPassengersResponse = {
+    business_berths: string;
+    count: number;
+    economy_berths: string;
+    first_berths: string;
+    passengers: Array<{
+        citizen_id: string;
+        class: string;
+        destination: string;
+        destination_name: string;
+        fare: number;
+        name: string;
+        ticks_remaining: number;
+    }>;
+};
+
 export type ListShipForSaleResponse = {
     credits_left: number;
     fee: number;
@@ -3365,6 +3408,21 @@ export type LoadDroneResponse = {
     hull: number;
     message: string;
     status: string;
+};
+
+export type LoadPassengersResponse = {
+    count: number;
+    loaded: Array<{
+        citizen_id: string;
+        class: string;
+        destination: string;
+        destination_name: string;
+        fare: number;
+        name: string;
+        ticks_remaining: number;
+    }>;
+    message: string;
+    total_fare: number;
 };
 
 export type LoginResponse = {
@@ -4920,7 +4978,7 @@ export type ShipClass = {
          */
         flag?: string;
         /**
-         * Capability type: ore_yield_bonus, ice_yield_bonus, gas_yield_bonus, integrated_cloak, integrated_scanner, scan_resistance, integrated_survey_scanner, special_flag
+         * Capability type: ore_yield_bonus, ice_yield_bonus, gas_yield_bonus, integrated_cloak, integrated_scanner, scan_resistance, integrated_survey_scanner, ship_bay_capacity, passenger_economy_berths, passenger_business_berths, passenger_first_berths, special_flag
          */
         type?: string;
         /**
@@ -5009,6 +5067,19 @@ export type StationHealth = {
      * Total service/infrastructure facilities at the station
      */
     total_service_infra: number;
+};
+
+export type StationPassengersResponse = {
+    count: number;
+    station: string;
+    waiting: Array<{
+        citizen_id: string;
+        citizenship: string;
+        class: string;
+        destination: string;
+        destination_name: string;
+        name: string;
+    }>;
 };
 
 export type StorageResponse = {
@@ -5450,6 +5521,13 @@ export type UnloadDroneResponse = {
     drone_id: string;
     item_id: string;
     message: string;
+};
+
+export type UnloadPassengerResponse = {
+    delivered: boolean;
+    fare_paid: number;
+    message: string;
+    name: string;
 };
 
 export type UploadDroneScriptResponse = {
@@ -7643,6 +7721,117 @@ export type SpacemoltJumpResponses = {
 
 export type SpacemoltJumpResponse = SpacemoltJumpResponses[keyof SpacemoltJumpResponses];
 
+export type SpacemoltListPassengersData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/list_passengers';
+};
+
+export type SpacemoltListPassengersErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltListPassengersResponses = {
+    /**
+     * Result. structuredContent type: ListPassengersResponse
+     */
+    200: V2Response & {
+        structuredContent?: ListPassengersResponse;
+    };
+};
+
+export type SpacemoltListPassengersResponse = SpacemoltListPassengersResponses[keyof SpacemoltListPassengersResponses];
+
+export type SpacemoltListStationPassengersData = {
+    body?: {
+        /**
+         * Optional station ID or name. Defaults to your current station if docked.
+         */
+        id?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/list_station_passengers';
+};
+
+export type SpacemoltListStationPassengersErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltListStationPassengersResponses = {
+    /**
+     * Result. structuredContent type: StationPassengersResponse
+     */
+    200: V2Response & {
+        structuredContent?: StationPassengersResponse;
+    };
+};
+
+export type SpacemoltListStationPassengersResponse = SpacemoltListStationPassengersResponses[keyof SpacemoltListStationPassengersResponses];
+
+export type SpacemoltLoadPassengerData = {
+    body?: {
+        /**
+         * Destination station ID or name. Loads all waiting passengers here bound for it, up to your free berths.
+         */
+        id: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/load_passenger';
+};
+
+export type SpacemoltLoadPassengerErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltLoadPassengerResponses = {
+    /**
+     * Result. structuredContent type: LoadPassengersResponse
+     */
+    200: V2Response & {
+        structuredContent?: LoadPassengersResponse;
+    };
+};
+
+export type SpacemoltLoadPassengerResponse = SpacemoltLoadPassengerResponses[keyof SpacemoltLoadPassengerResponses];
+
 export type SpacemoltMineData = {
     body?: {
         [key: string]: unknown;
@@ -8110,6 +8299,44 @@ export type SpacemoltUninstallModResponses = {
 };
 
 export type SpacemoltUninstallModResponse = SpacemoltUninstallModResponses[keyof SpacemoltUninstallModResponses];
+
+export type SpacemoltUnloadPassengerData = {
+    body?: {
+        /**
+         * Name (or citizen ID) of the passenger to put off the ship at the current station.
+         */
+        id: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/unload_passenger';
+};
+
+export type SpacemoltUnloadPassengerErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltUnloadPassengerResponses = {
+    /**
+     * Result. structuredContent type: UnloadPassengerResponse
+     */
+    200: V2Response & {
+        structuredContent?: UnloadPassengerResponse;
+    };
+};
+
+export type SpacemoltUnloadPassengerResponse = SpacemoltUnloadPassengerResponses[keyof SpacemoltUnloadPassengerResponses];
 
 export type SpacemoltUseItemData = {
     body?: {
