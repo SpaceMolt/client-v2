@@ -1,18 +1,28 @@
 name: Sync OpenAPI spec
 
-# Polls the live SpaceMolt v2 OpenAPI spec every 30 minutes. When the spec
-# changes, regenerates types + command registry, runs tests, bumps the
-# client patch version, commits to main, and tags a new release (which
-# triggers release.yml to build and publish platform binaries).
+# Syncs the live SpaceMolt v2 OpenAPI spec. When the spec changes,
+# regenerates types + command registry, runs tests, bumps the client patch
+# version, commits to main, and tags a new release (which triggers
+# release.yml to build and publish platform binaries).
 #
-# Manual override: trigger via the Actions tab (`workflow_dispatch`).
+# Triggers:
+# - repository_dispatch (gameserver-deployed): fired by the gameserver's
+#   deploy workflow right after it kicks off a Render deploy. Render deploys
+#   are asynchronous, so the sync first polls until the dispatched version
+#   is actually live.
+# - schedule: backstop in case a dispatch is missed. GitHub Actions cron is
+#   heavily throttled in practice — observed intervals of 80-100 minutes
+#   despite the 30-minute schedule.
+# - workflow_dispatch: manual override via the Actions tab.
 #
 # Cost when nothing changed: ~10s (curl + diff + exit). Cost when a change
 # is detected: ~2 minutes (full test suite + commit/push).
 
 on:
+  repository_dispatch:
+    types: [gameserver-deployed]
   schedule:
-    # Every 30 minutes. GitHub Actions cron is best-effort; expect ~5min jitter.
+    # Every 30 minutes (best-effort; see note above).
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
@@ -45,6 +55,28 @@ jobs:
 
       - name: Install dependencies
         run: bun install
+
+      - name: Wait for dispatched gameserver version to be live
+        if: github.event_name == 'repository_dispatch' && github.event.client_payload.version != null
+        run: |
+          # The gameserver fires the dispatch when it *starts* the Render
+          # deploy; the new version goes live a few minutes later. Poll the
+          # spec's x-gameserver-version until it matches. 60s spacing stays
+          # under the spec endpoint's rate limit.
+          TARGET="${{ github.event.client_payload.version }}"
+          TARGET="${TARGET#v}"
+          echo "Waiting for gameserver v${TARGET} to be live..."
+          for i in $(seq 1 20); do
+            LIVE=$(curl -sf https://game.spacemolt.com/api/v2/openapi.json | jq -r '.info["x-gameserver-version"] // empty' 2>/dev/null || true)
+            LIVE="${LIVE#v}"
+            if [ "$LIVE" = "$TARGET" ]; then
+              echo "Live version is v${LIVE} — proceeding with sync."
+              exit 0
+            fi
+            echo "Attempt ${i}/20: live=v${LIVE:-unknown}, want=v${TARGET}. Sleeping 60s."
+            sleep 60
+          done
+          echo "Timed out waiting for v${TARGET}; syncing whatever is live. The cron backstop will catch any miss."
 
       - name: Fetch live spec
         run: bun run fetch-spec
