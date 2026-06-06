@@ -1178,6 +1178,7 @@ export type DockResponse = {
     open_orders_truncated?: boolean;
     passenger_arrivals?: {
         delivered?: Array<{
+            bio: string;
             citizen_id: string;
             class: string;
             destination: string;
@@ -1191,6 +1192,7 @@ export type DockResponse = {
             [key: string]: number;
         };
         stranded?: Array<{
+            bio: string;
             citizen_id: string;
             class: string;
             destination: string;
@@ -3359,6 +3361,7 @@ export type ListPassengersResponse = {
     economy_berths: string;
     first_berths: string;
     passengers: Array<{
+        bio: string;
         citizen_id: string;
         class: string;
         destination: string;
@@ -3413,6 +3416,7 @@ export type LoadDroneResponse = {
 export type LoadPassengersResponse = {
     count: number;
     loaded: Array<{
+        bio: string;
         citizen_id: string;
         class: string;
         destination: string;
@@ -5073,6 +5077,7 @@ export type StationPassengersResponse = {
     count: number;
     station: string;
     waiting: Array<{
+        bio: string;
         citizen_id: string;
         citizenship: string;
         class: string;
