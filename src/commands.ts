@@ -1518,7 +1518,7 @@ const entries: [string, CommandMeta][] = [
     action: "claim_commission",
     operationId: "spacemolt_ship_claim_commission",
     summary: "Claim a completed ship from a commission",
-    params: [{"name":"id","type":"string","description":"ID of the commission to claim (use commission_status to see IDs)","required":true,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"ID of the commission to claim (use commission_status to see IDs), or \"all\" to claim every ready commission at the docked base at once","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/commission_quote", {

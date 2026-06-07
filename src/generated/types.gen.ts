@@ -646,11 +646,16 @@ export type CitizenshipResponse = {
 };
 
 export type ClaimCommissionResponse = {
+    claimed_count?: number;
+    claimed_ships?: Array<{
+        ship_class: string;
+        ship_id: string;
+    }>;
     credits_left: number;
     message: string;
-    new_ship_id: string;
-    old_ship_id: string;
-    ship_class: string;
+    new_ship_id?: string;
+    old_ship_id?: string;
+    ship_class?: string;
 };
 
 export type ClaimInsuranceResponse = {
@@ -15087,7 +15092,7 @@ export type SpacemoltShipCancelShipListingResponse = SpacemoltShipCancelShipList
 export type SpacemoltShipClaimCommissionData = {
     body?: {
         /**
-         * ID of the commission to claim (use commission_status to see IDs)
+         * ID of the commission to claim (use commission_status to see IDs), or "all" to claim every ready commission at the docked base at once
          */
         id: string;
     };
