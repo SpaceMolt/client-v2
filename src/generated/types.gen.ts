@@ -1106,6 +1106,22 @@ export type DepositItemsResponse = {
     fuel_capacity: number;
     ship_fuel: number;
     storage_fuel: number;
+} | {
+    action: string;
+    failed: number;
+    requested: number;
+    results: Array<{
+        error?: string;
+        item_id: string;
+        message?: string;
+        quantity: number;
+        result?: {
+            [key: string]: unknown;
+        };
+        success: boolean;
+    }>;
+    succeeded: number;
+    target?: string;
 };
 
 export type DistressSignalResponse = {
@@ -5258,6 +5274,22 @@ export type StorageResponse = {
     amount: number;
     faction_credits: number;
     player_credits: number;
+} | {
+    action: string;
+    failed: number;
+    requested: number;
+    results: Array<{
+        error?: string;
+        item_id: string;
+        message?: string;
+        quantity: number;
+        result?: {
+            [key: string]: unknown;
+        };
+        success: boolean;
+    }>;
+    succeeded: number;
+    target?: string;
 };
 
 export type SupplyCommissionResponse = {
@@ -6137,6 +6169,22 @@ export type WithdrawItemsResponse = {
     amount: number;
     faction_credits: number;
     player_credits: number;
+} | {
+    action: string;
+    failed: number;
+    requested: number;
+    results: Array<{
+        error?: string;
+        item_id: string;
+        message?: string;
+        quantity: number;
+        result?: {
+            [key: string]: unknown;
+        };
+        success: boolean;
+    }>;
+    succeeded: number;
+    target?: string;
 };
 
 export type WriteNoteResponse = {
@@ -16595,6 +16643,13 @@ export type SpacemoltStorageDepositData = {
          */
         item_id?: string;
         /**
+         * Bulk deposit/withdraw: array of {item_id, quantity} objects moved in a single action (one write) instead of one per tick. Items only. Honors target/source like single-item (cargo↔personal, cargo↔faction, personal↔faction transfers, gifts). Omit item_id/quantity when using this. The response reports per-item success/failure.
+         */
+        items?: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
+        /**
          * Optional message when gifting to another player
          */
         message?: string;
@@ -16695,6 +16750,13 @@ export type SpacemoltStorageViewData = {
          */
         item_id?: string;
         /**
+         * Bulk deposit/withdraw: array of {item_id, quantity} objects moved in a single action (one write) instead of one per tick. Items only. Honors target/source like single-item (cargo↔personal, cargo↔faction, personal↔faction transfers, gifts). Omit item_id/quantity when using this. The response reports per-item success/failure.
+         */
+        items?: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
+        /**
          * Optional message when gifting to another player
          */
         message?: string;
@@ -16752,6 +16814,13 @@ export type SpacemoltStorageWithdrawData = {
          * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
+        /**
+         * Bulk deposit/withdraw: array of {item_id, quantity} objects moved in a single action (one write) instead of one per tick. Items only. Honors target/source like single-item (cargo↔personal, cargo↔faction, personal↔faction transfers, gifts). Omit item_id/quantity when using this. The response reports per-item success/failure.
+         */
+        items?: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
         /**
          * Optional message when gifting to another player
          */
