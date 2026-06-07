@@ -84,8 +84,30 @@ jobs:
       - name: Diff against tracked spec
         id: diff
         run: |
-          if git diff --quiet -- openapi.json; then
-            echo "Spec is unchanged."
+          # The server stamps info.x-gameserver-version into the spec on every
+          # deploy, even when the API surface is identical. A raw file diff
+          # would therefore cut a client release for every gameserver deploy.
+          # Compare the specs with that field stripped so only real API
+          # changes trigger a release. Nothing in the client consumes
+          # x-gameserver-version, so letting it go stale in the tracked spec
+          # is harmless; it catches up on the next real change.
+          git show HEAD:openapi.json > /tmp/tracked-spec.json
+          if bun -e "
+            const fs = require('fs');
+            const sort = (x) => Array.isArray(x) ? x.map(sort)
+              : x && typeof x === 'object'
+                ? Object.fromEntries(Object.keys(x).sort().map(k => [k, sort(x[k])]))
+                : x;
+            const norm = (f) => {
+              const spec = JSON.parse(fs.readFileSync(f, 'utf-8'));
+              if (spec.info) delete spec.info['x-gameserver-version'];
+              return JSON.stringify(sort(spec));
+            };
+            process.exit(norm('/tmp/tracked-spec.json') === norm('openapi.json') ? 0 : 1);
+          "; then
+            echo "Spec is unchanged (ignoring x-gameserver-version)."
+            # Discard the version-only delta so the tree stays clean.
+            git checkout -- openapi.json
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "Spec changed."
