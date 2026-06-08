@@ -1204,8 +1204,10 @@ export type DockResponse = {
             class: string;
             destination: string;
             destination_name: string;
+            destination_system?: string;
             fare: number;
             name: string;
+            speed_bonus?: number;
             ticks_remaining: number;
         }>;
         fare_collected?: number;
@@ -1218,8 +1220,10 @@ export type DockResponse = {
             class: string;
             destination: string;
             destination_name: string;
+            destination_system?: string;
             fare: number;
             name: string;
+            speed_bonus?: number;
             ticks_remaining: number;
         }>;
     };
@@ -3387,8 +3391,10 @@ export type ListPassengersResponse = {
         class: string;
         destination: string;
         destination_name: string;
+        destination_system?: string;
         fare: number;
         name: string;
+        speed_bonus?: number;
         ticks_remaining: number;
     }>;
 };
@@ -3442,8 +3448,10 @@ export type LoadPassengersResponse = {
         class: string;
         destination: string;
         destination_name: string;
+        destination_system?: string;
         fare: number;
         name: string;
+        speed_bonus?: number;
         ticks_remaining: number;
     }>;
     message: string;
@@ -5104,6 +5112,8 @@ export type StationPassengersResponse = {
         class: string;
         destination: string;
         destination_name: string;
+        destination_system?: string;
+        estimated_fare?: number;
         name: string;
     }>;
 };
@@ -5566,10 +5576,42 @@ export type UnloadDroneResponse = {
 };
 
 export type UnloadPassengerResponse = {
+    base_fare?: number;
     delivered: boolean;
     fare_paid: number;
     message: string;
     name: string;
+    speed_bonus?: number;
+} | {
+    delivered: Array<{
+        bio: string;
+        citizen_id: string;
+        class: string;
+        destination: string;
+        destination_name: string;
+        destination_system?: string;
+        fare: number;
+        name: string;
+        speed_bonus?: number;
+        ticks_remaining: number;
+    }>;
+    fare_collected: number;
+    message: string;
+    reputation_changes?: {
+        [key: string]: number;
+    };
+    stranded: Array<{
+        bio: string;
+        citizen_id: string;
+        class: string;
+        destination: string;
+        destination_name: string;
+        destination_system?: string;
+        fare: number;
+        name: string;
+        speed_bonus?: number;
+        ticks_remaining: number;
+    }>;
 };
 
 export type UploadDroneScriptResponse = {
@@ -8361,7 +8403,7 @@ export type SpacemoltUninstallModResponse = SpacemoltUninstallModResponses[keyof
 export type SpacemoltUnloadPassengerData = {
     body?: {
         /**
-         * Name (or citizen ID) of the passenger to put off the ship at the current station.
+         * Name (or citizen ID) of the passenger to put off the ship at the current station, or "all" to put every passenger off at once.
          */
         id: string;
     };

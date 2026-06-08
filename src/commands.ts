@@ -460,8 +460,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt",
     action: "unload_passenger",
     operationId: "spacemolt_unload_passenger",
-    summary: "Put a single passenger off the ship at the current station",
-    params: [{"name":"id","type":"string","description":"Name (or citizen ID) of the passenger to put off the ship at the current station.","required":true,"positionalIndex":0}],
+    summary: "Put a passenger (or everyone) off the ship at the current station",
+    params: [{"name":"id","type":"string","description":"Name (or citizen ID) of the passenger to put off the ship at the current station, or \"all\" to put every passenger off at once.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/use_item", {
