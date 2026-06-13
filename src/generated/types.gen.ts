@@ -2691,6 +2691,8 @@ export type GetBaseResponse = {
     faction_fuel_capacity?: number;
     faction_fuel_reserve?: number;
     fuel_price?: number;
+    fuel_price_all_in?: number;
+    fuel_tax_per_unit?: number;
     power?: {
         battery_capacity: number;
         battery_stored: number;
@@ -3100,6 +3102,8 @@ export type GetPoiResponse = {
     faction_fuel_capacity?: number;
     faction_fuel_reserve?: number;
     fuel_price?: number;
+    fuel_price_all_in?: number;
+    fuel_tax_per_unit?: number;
     poi: {
         base_id?: string;
         class?: string;
@@ -5133,6 +5137,7 @@ export type StorageResponse = {
         ships?: Array<{
             class_id: string;
             class_name: string;
+            custom_name?: string;
             ship_id: string;
         }>;
         timestamp: string;
@@ -5153,6 +5158,7 @@ export type StorageResponse = {
         cargo_used: number;
         class_id: string;
         class_name?: string;
+        custom_name?: string;
         modules: number;
         ship_id: string;
     }>;
@@ -7974,7 +7980,7 @@ export type SpacemoltRefuelData = {
          */
         id?: string;
         /**
-         * Number of fuel cells to burn or units to transfer (default 1). Capped to what's available and what your tank needs.
+         * Number of fuel cells to burn or units to transfer (default 1). Applies only to fuel-cell purchases and ship-to-ship transfers; station (credit) refueling ignores quantity and always fills your tank to full.
          */
         quantity?: number;
         /**

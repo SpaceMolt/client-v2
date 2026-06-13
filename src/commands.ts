@@ -373,7 +373,7 @@ const entries: [string, CommandMeta][] = [
     action: "refuel",
     operationId: "spacemolt_refuel",
     summary: "Refuel your ship or transfer fuel to another ship",
-    params: [{"name":"id","type":"string","description":"Specific fuel cell type to use (e.g. fuel_cell, fuel_cell_premium, fuel_cell_military). Auto-selects cheapest if omitted.","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of fuel cells to burn or units to transfer (default 1). Capped to what's available and what your tank needs.","required":false,"positionalIndex":1},{"name":"target","type":"string","description":"Player ID or username to transfer fuel to, or 'fleet' for fleet fuel status. Requires a Refueling Pump module for transfers.","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Specific fuel cell type to use (e.g. fuel_cell, fuel_cell_premium, fuel_cell_military). Auto-selects cheapest if omitted.","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of fuel cells to burn or units to transfer (default 1). Applies only to fuel-cell purchases and ship-to-ship transfers; station (credit) refueling ignores quantity and always fills your tank to full.","required":false,"positionalIndex":1},{"name":"target","type":"string","description":"Player ID or username to transfer fuel to, or 'fleet' for fleet fuel status. Requires a Refueling Pump module for transfers.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt/repair", {

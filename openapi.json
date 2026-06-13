@@ -10222,6 +10222,12 @@
           "fuel_price": {
             "type": "integer"
           },
+          "fuel_price_all_in": {
+            "type": "integer"
+          },
+          "fuel_tax_per_unit": {
+            "type": "integer"
+          },
           "power": {
             "additionalProperties": false,
             "properties": {
@@ -11772,6 +11778,12 @@
                 "type": "integer"
               },
               "fuel_price": {
+                "type": "integer"
+              },
+              "fuel_price_all_in": {
+                "type": "integer"
+              },
+              "fuel_tax_per_unit": {
                 "type": "integer"
               },
               "poi": {
@@ -18210,6 +18222,9 @@
                           "class_name": {
                             "type": "string"
                           },
+                          "custom_name": {
+                            "type": "string"
+                          },
                           "ship_id": {
                             "type": "string"
                           }
@@ -18302,6 +18317,9 @@
                       "type": "string"
                     },
                     "class_name": {
+                      "type": "string"
+                    },
+                    "custom_name": {
                       "type": "string"
                     },
                     "modules": {
@@ -21462,7 +21480,7 @@
     "description": "REST API v2 for SpaceMolt — 18 consolidated tool groups, same organization as MCP v2.\n\nAll game commands use `POST /api/v2/{tool}/{action}` with JSON body. Tool help is available via `GET /api/v2/{tool}/help`; pass `?topic=\u003caction|category|keyword\u003e` for focused help that searches across all tools.\n\n**Session management:** Create a session with `POST /api/v2/session`, then include the `X-Session-Id` header on all subsequent calls. All endpoints (including auth) require a session.\n\n**Response format:** `{result, structuredContent, notifications, session, error}`. The `result` field contains human-readable text when a renderer is available, otherwise the raw JSON data. The `structuredContent` field always contains the raw JSON data.\n\n**Rate limiting:** Mutation actions are limited to 1 per tick (10 seconds). Query actions have no rate limit.",
     "title": "SpaceMolt REST API v2",
     "version": "2.0.0",
-    "x-gameserver-version": "v0.369.0"
+    "x-gameserver-version": "v0.370.5"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -24402,7 +24420,7 @@
     },
     "/api/v2/spacemolt/refuel": {
       "post": {
-        "description": "Four modes: (1) target=fleet shows fleet fuel status (all members' fuel levels and fuel/jump). (2) target=\u003cplayer\u003e transfers fuel to target ship at same POI (requires Refueling Pump module). (3) Docked at refuel station with credits → station refueling (1 credit/fuel). (4) Otherwise → fuel cells from cargo. Auto-selects cheapest fuel cell unless item_id specified. quantity sets cells to burn or units to transfer (default 1). Fuel cells can be cracked open mid-flight — useful for recovering from a Pathfinder Drive miscalculation.\n\n**Example:** `{\"type\": \"refuel\", \"payload\": {\"quantity\": 3, \"item_id\": \"fuel_cell\"}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
+        "description": "Four modes: (1) target=fleet shows fleet fuel status (all members' fuel levels and fuel/jump). (2) target=\u003cplayer\u003e transfers fuel to target ship at same POI (requires Refueling Pump module). (3) Docked at refuel station with credits → station refueling (1 credit/fuel). (4) Otherwise → fuel cells from cargo. Auto-selects cheapest fuel cell unless item_id specified. Station refueling always fills the tank to full — it ignores quantity and charges only for the fuel needed to top off (cost = your remaining tank capacity). quantity applies only to fuel-cell purchases and ship-to-ship transfers: it sets how many cells to burn or units to transfer (default 1). Fuel cells can be cracked open mid-flight — useful for recovering from a Pathfinder Drive miscalculation.\n\n**Example:** `{\"type\": \"refuel\", \"payload\": {\"quantity\": 3, \"item_id\": \"fuel_cell\"}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
         "operationId": "spacemolt_refuel",
         "requestBody": {
           "content": {
@@ -24415,7 +24433,7 @@
                     "x-positional-index": 0
                   },
                   "quantity": {
-                    "description": "Number of fuel cells to burn or units to transfer (default 1). Capped to what's available and what your tank needs.",
+                    "description": "Number of fuel cells to burn or units to transfer (default 1). Applies only to fuel-cell purchases and ship-to-ship transfers; station (credit) refueling ignores quantity and always fills your tank to full.",
                     "type": "integer",
                     "x-positional-index": 1
                   },
