@@ -4358,6 +4358,7 @@ export type RefuelResponse = {
     has_pump?: boolean;
     item_id?: string;
     item_name?: string;
+    market_cost?: number;
     members?: Array<{
         fuel: number;
         fuel_pct: number;
