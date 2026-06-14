@@ -6414,10 +6414,12 @@ export type SpacemoltAcceptMissionErrors = {
 
 export type SpacemoltAcceptMissionResponses = {
     /**
-     * Result. structuredContent type: AcceptMissionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (AcceptMissionResponse)
      */
     200: V2Response & {
-        structuredContent?: AcceptMissionResponse;
+        structuredContent?: V2GameState & {
+            details?: AcceptMissionResponse;
+        };
     };
 };
 
@@ -6452,10 +6454,12 @@ export type SpacemoltAttackErrors = {
 
 export type SpacemoltAttackResponses = {
     /**
-     * Result. structuredContent type: AttackResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (AttackResponse)
      */
     200: V2Response & {
-        structuredContent?: AttackResponse;
+        structuredContent?: V2GameState & {
+            details?: AttackResponse;
+        };
     };
 };
 
@@ -6502,10 +6506,12 @@ export type SpacemoltBuyErrors = {
 
 export type SpacemoltBuyResponses = {
     /**
-     * Result. structuredContent type: BuyResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (BuyResponse)
      */
     200: V2Response & {
-        structuredContent?: BuyResponse;
+        structuredContent?: V2GameState & {
+            details?: BuyResponse;
+        };
     };
 };
 
@@ -6544,10 +6550,12 @@ export type SpacemoltCloakErrors = {
 
 export type SpacemoltCloakResponses = {
     /**
-     * Result. structuredContent type: CloakResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CloakResponse)
      */
     200: V2Response & {
-        structuredContent?: CloakResponse;
+        structuredContent?: V2GameState & {
+            details?: CloakResponse;
+        };
     };
 };
 
@@ -6582,10 +6590,12 @@ export type SpacemoltCompleteMissionErrors = {
 
 export type SpacemoltCompleteMissionResponses = {
     /**
-     * Result. structuredContent type: CompleteMissionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CompleteMissionResponse)
      */
     200: V2Response & {
-        structuredContent?: CompleteMissionResponse;
+        structuredContent?: V2GameState & {
+            details?: CompleteMissionResponse;
+        };
     };
 };
 
@@ -6667,10 +6677,12 @@ export type SpacemoltCraftErrors = {
 
 export type SpacemoltCraftResponses = {
     /**
-     * Result. structuredContent type: CraftResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CraftResponse)
      */
     200: V2Response & {
-        structuredContent?: CraftResponse;
+        structuredContent?: V2GameState & {
+            details?: CraftResponse;
+        };
     };
 };
 
@@ -6747,10 +6759,12 @@ export type SpacemoltDistressSignalErrors = {
 
 export type SpacemoltDistressSignalResponses = {
     /**
-     * Result. structuredContent type: DistressSignalResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (DistressSignalResponse)
      */
     200: V2Response & {
-        structuredContent?: DistressSignalResponse;
+        structuredContent?: V2GameState & {
+            details?: DistressSignalResponse;
+        };
     };
 };
 
@@ -6782,10 +6796,12 @@ export type SpacemoltDockErrors = {
 
 export type SpacemoltDockResponses = {
     /**
-     * Result. structuredContent type: DockResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (DockResponse)
      */
     200: V2Response & {
-        structuredContent?: DockResponse;
+        structuredContent?: V2GameState & {
+            details?: DockResponse;
+        };
     };
 };
 
@@ -7738,10 +7754,12 @@ export type SpacemoltInstallModErrors = {
 
 export type SpacemoltInstallModResponses = {
     /**
-     * Result. structuredContent type: InstallModResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (InstallModResponse)
      */
     200: V2Response & {
-        structuredContent?: InstallModResponse;
+        structuredContent?: V2GameState & {
+            details?: InstallModResponse;
+        };
     };
 };
 
@@ -7780,10 +7798,12 @@ export type SpacemoltJettisonErrors = {
 
 export type SpacemoltJettisonResponses = {
     /**
-     * Result. structuredContent type: JettisonResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (JettisonResponse)
      */
     200: V2Response & {
-        structuredContent?: JettisonResponse;
+        structuredContent?: V2GameState & {
+            details?: JettisonResponse;
+        };
     };
 };
 
@@ -7818,10 +7838,12 @@ export type SpacemoltJumpErrors = {
 
 export type SpacemoltJumpResponses = {
     /**
-     * Result. structuredContent type: JumpResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (JumpResponse)
      */
     200: V2Response & {
-        structuredContent?: JumpResponse;
+        structuredContent?: V2GameState & {
+            details?: JumpResponse;
+        };
     };
 };
 
@@ -7929,10 +7951,12 @@ export type SpacemoltLoadPassengerErrors = {
 
 export type SpacemoltLoadPassengerResponses = {
     /**
-     * Result. structuredContent type: LoadPassengersResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (LoadPassengersResponse)
      */
     200: V2Response & {
-        structuredContent?: LoadPassengersResponse;
+        structuredContent?: V2GameState & {
+            details?: LoadPassengersResponse;
+        };
     };
 };
 
@@ -7964,10 +7988,12 @@ export type SpacemoltMineErrors = {
 
 export type SpacemoltMineResponses = {
     /**
-     * Result. structuredContent type: MineResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (MineResponse)
      */
     200: V2Response & {
-        structuredContent?: MineResponse;
+        structuredContent?: V2GameState & {
+            details?: MineResponse;
+        };
     };
 };
 
@@ -8010,10 +8036,12 @@ export type SpacemoltRefuelErrors = {
 
 export type SpacemoltRefuelResponses = {
     /**
-     * Result. structuredContent type: RefuelResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (RefuelResponse)
      */
     200: V2Response & {
-        structuredContent?: RefuelResponse;
+        structuredContent?: V2GameState & {
+            details?: RefuelResponse;
+        };
     };
 };
 
@@ -8056,10 +8084,12 @@ export type SpacemoltRepairErrors = {
 
 export type SpacemoltRepairResponses = {
     /**
-     * Result. structuredContent type: RepairResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (RepairResponse)
      */
     200: V2Response & {
-        structuredContent?: RepairResponse;
+        structuredContent?: V2GameState & {
+            details?: RepairResponse;
+        };
     };
 };
 
@@ -8094,10 +8124,12 @@ export type SpacemoltRepairModuleErrors = {
 
 export type SpacemoltRepairModuleResponses = {
     /**
-     * Result. structuredContent type: RepairModuleResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (RepairModuleResponse)
      */
     200: V2Response & {
-        structuredContent?: RepairModuleResponse;
+        structuredContent?: V2GameState & {
+            details?: RepairModuleResponse;
+        };
     };
 };
 
@@ -8132,10 +8164,12 @@ export type SpacemoltScanErrors = {
 
 export type SpacemoltScanResponses = {
     /**
-     * Result. structuredContent type: ScanResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ScanResponse)
      */
     200: V2Response & {
-        structuredContent?: ScanResponse;
+        structuredContent?: V2GameState & {
+            details?: ScanResponse;
+        };
     };
 };
 
@@ -8205,10 +8239,12 @@ export type SpacemoltSelfDestructErrors = {
 
 export type SpacemoltSelfDestructResponses = {
     /**
-     * Result. structuredContent type: SelfDestructResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (SelfDestructResponse)
      */
     200: V2Response & {
-        structuredContent?: SelfDestructResponse;
+        structuredContent?: V2GameState & {
+            details?: SelfDestructResponse;
+        };
     };
 };
 
@@ -8251,10 +8287,12 @@ export type SpacemoltSellErrors = {
 
 export type SpacemoltSellResponses = {
     /**
-     * Result. structuredContent type: SellResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (SellResponse)
      */
     200: V2Response & {
-        structuredContent?: SellResponse;
+        structuredContent?: V2GameState & {
+            details?: SellResponse;
+        };
     };
 };
 
@@ -8286,10 +8324,12 @@ export type SpacemoltSurveySystemErrors = {
 
 export type SpacemoltSurveySystemResponses = {
     /**
-     * Result. structuredContent type: SurveySystemResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (SurveySystemResponse)
      */
     200: V2Response & {
-        structuredContent?: SurveySystemResponse;
+        structuredContent?: V2GameState & {
+            details?: SurveySystemResponse;
+        };
     };
 };
 
@@ -8324,10 +8364,12 @@ export type SpacemoltTravelErrors = {
 
 export type SpacemoltTravelResponses = {
     /**
-     * Result. structuredContent type: TravelResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (TravelResponse)
      */
     200: V2Response & {
-        structuredContent?: TravelResponse;
+        structuredContent?: V2GameState & {
+            details?: TravelResponse;
+        };
     };
 };
 
@@ -8359,10 +8401,12 @@ export type SpacemoltUndockErrors = {
 
 export type SpacemoltUndockResponses = {
     /**
-     * Result. structuredContent type: UndockResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (UndockResponse)
      */
     200: V2Response & {
-        structuredContent?: UndockResponse;
+        structuredContent?: V2GameState & {
+            details?: UndockResponse;
+        };
     };
 };
 
@@ -8397,10 +8441,12 @@ export type SpacemoltUninstallModErrors = {
 
 export type SpacemoltUninstallModResponses = {
     /**
-     * Result. structuredContent type: UninstallModResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (UninstallModResponse)
      */
     200: V2Response & {
-        structuredContent?: UninstallModResponse;
+        structuredContent?: V2GameState & {
+            details?: UninstallModResponse;
+        };
     };
 };
 
@@ -8435,10 +8481,12 @@ export type SpacemoltUnloadPassengerErrors = {
 
 export type SpacemoltUnloadPassengerResponses = {
     /**
-     * Result. structuredContent type: UnloadPassengerResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (UnloadPassengerResponse)
      */
     200: V2Response & {
-        structuredContent?: UnloadPassengerResponse;
+        structuredContent?: V2GameState & {
+            details?: UnloadPassengerResponse;
+        };
     };
 };
 
@@ -8477,10 +8525,12 @@ export type SpacemoltUseItemErrors = {
 
 export type SpacemoltUseItemResponses = {
     /**
-     * Result. structuredContent type: UseItemResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (UseItemResponse)
      */
     200: V2Response & {
-        structuredContent?: UseItemResponse;
+        structuredContent?: V2GameState & {
+            details?: UseItemResponse;
+        };
     };
 };
 
@@ -8930,10 +8980,12 @@ export type SpacemoltBattleReloadErrors = {
 
 export type SpacemoltBattleReloadResponses = {
     /**
-     * Result. structuredContent type: ReloadResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ReloadResponse)
      */
     200: V2Response & {
-        structuredContent?: ReloadResponse;
+        structuredContent?: V2GameState & {
+            details?: ReloadResponse;
+        };
     };
 };
 
@@ -9257,10 +9309,12 @@ export type SpacemoltCitizenshipApplyErrors = {
 
 export type SpacemoltCitizenshipApplyResponses = {
     /**
-     * Result. structuredContent type: CitizenshipResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CitizenshipResponse)
      */
     200: V2Response & {
-        structuredContent?: CitizenshipResponse;
+        structuredContent?: V2GameState & {
+            details?: CitizenshipResponse;
+        };
     };
 };
 
@@ -9375,10 +9429,12 @@ export type SpacemoltCitizenshipRenounceErrors = {
 
 export type SpacemoltCitizenshipRenounceResponses = {
     /**
-     * Result. structuredContent type: CitizenshipResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CitizenshipResponse)
      */
     200: V2Response & {
-        structuredContent?: CitizenshipResponse;
+        structuredContent?: V2GameState & {
+            details?: CitizenshipResponse;
+        };
     };
 };
 
@@ -9413,10 +9469,12 @@ export type SpacemoltCitizenshipWithdrawErrors = {
 
 export type SpacemoltCitizenshipWithdrawResponses = {
     /**
-     * Result. structuredContent type: CitizenshipResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CitizenshipResponse)
      */
     200: V2Response & {
-        structuredContent?: CitizenshipResponse;
+        structuredContent?: V2GameState & {
+            details?: CitizenshipResponse;
+        };
     };
 };
 
@@ -9455,10 +9513,12 @@ export type SpacemoltDroneDeployErrors = {
 
 export type SpacemoltDroneDeployResponses = {
     /**
-     * Result. structuredContent type: DeployDroneResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (DeployDroneResponse)
      */
     200: V2Response & {
-        structuredContent?: DeployDroneResponse;
+        structuredContent?: V2GameState & {
+            details?: DeployDroneResponse;
+        };
     };
 };
 
@@ -9608,10 +9668,12 @@ export type SpacemoltDroneLoadErrors = {
 
 export type SpacemoltDroneLoadResponses = {
     /**
-     * Result. structuredContent type: LoadDroneResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (LoadDroneResponse)
      */
     200: V2Response & {
-        structuredContent?: LoadDroneResponse;
+        structuredContent?: V2GameState & {
+            details?: LoadDroneResponse;
+        };
     };
 };
 
@@ -9692,10 +9754,12 @@ export type SpacemoltDroneRecallErrors = {
 
 export type SpacemoltDroneRecallResponses = {
     /**
-     * Result. structuredContent type: RecallDroneResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (RecallDroneResponse)
      */
     200: V2Response & {
-        structuredContent?: RecallDroneResponse;
+        structuredContent?: V2GameState & {
+            details?: RecallDroneResponse;
+        };
     };
 };
 
@@ -9730,10 +9794,12 @@ export type SpacemoltDroneUnloadErrors = {
 
 export type SpacemoltDroneUnloadResponses = {
     /**
-     * Result. structuredContent type: UnloadDroneResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (UnloadDroneResponse)
      */
     200: V2Response & {
-        structuredContent?: UnloadDroneResponse;
+        structuredContent?: V2GameState & {
+            details?: UnloadDroneResponse;
+        };
     };
 };
 
@@ -9772,10 +9838,12 @@ export type SpacemoltDroneUploadErrors = {
 
 export type SpacemoltDroneUploadResponses = {
     /**
-     * Result. structuredContent type: UploadDroneScriptResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (UploadDroneScriptResponse)
      */
     200: V2Response & {
-        structuredContent?: UploadDroneScriptResponse;
+        structuredContent?: V2GameState & {
+            details?: UploadDroneScriptResponse;
+        };
     };
 };
 
@@ -9976,10 +10044,12 @@ export type SpacemoltFacilityBuildErrors = {
 
 export type SpacemoltFacilityBuildResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -10078,10 +10148,12 @@ export type SpacemoltFacilityBuyListingErrors = {
 
 export type SpacemoltFacilityBuyListingResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -10180,10 +10252,12 @@ export type SpacemoltFacilityCancelListingErrors = {
 
 export type SpacemoltFacilityCancelListingResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -10384,10 +10458,12 @@ export type SpacemoltFacilityFactionBuildErrors = {
 
 export type SpacemoltFacilityFactionBuildResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -10690,10 +10766,12 @@ export type SpacemoltFacilityFactionToggleErrors = {
 
 export type SpacemoltFacilityFactionToggleResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -10792,10 +10870,12 @@ export type SpacemoltFacilityFactionUpgradeErrors = {
 
 export type SpacemoltFacilityFactionUpgradeResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -11038,10 +11118,12 @@ export type SpacemoltFacilityListForSaleErrors = {
 
 export type SpacemoltFacilityListForSaleResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -11242,10 +11324,12 @@ export type SpacemoltFacilityPersonalBuildErrors = {
 
 export type SpacemoltFacilityPersonalBuildResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -11344,10 +11428,12 @@ export type SpacemoltFacilityPersonalDecorateErrors = {
 
 export type SpacemoltFacilityPersonalDecorateResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -11548,10 +11634,12 @@ export type SpacemoltFacilityToggleErrors = {
 
 export type SpacemoltFacilityToggleResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -11650,10 +11738,12 @@ export type SpacemoltFacilityTransferErrors = {
 
 export type SpacemoltFacilityTransferResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -11854,10 +11944,12 @@ export type SpacemoltFacilityUpgradeErrors = {
 
 export type SpacemoltFacilityUpgradeResponses = {
     /**
-     * Result. structuredContent type: FacilityResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
      */
     200: V2Response & {
-        structuredContent?: FacilityResponse;
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
     };
 };
 
@@ -11994,10 +12086,12 @@ export type SpacemoltFactionAcceptAllyErrors = {
 
 export type SpacemoltFactionAcceptAllyResponses = {
     /**
-     * Result. structuredContent type: FactionAcceptAllyResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionAcceptAllyResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionAcceptAllyResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionAcceptAllyResponse;
+        };
     };
 };
 
@@ -12032,10 +12126,12 @@ export type SpacemoltFactionAcceptInviteErrors = {
 
 export type SpacemoltFactionAcceptInviteResponses = {
     /**
-     * Result. structuredContent type: JoinFactionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (JoinFactionResponse)
      */
     200: V2Response & {
-        structuredContent?: JoinFactionResponse;
+        structuredContent?: V2GameState & {
+            details?: JoinFactionResponse;
+        };
     };
 };
 
@@ -12070,10 +12166,12 @@ export type SpacemoltFactionAcceptPeaceErrors = {
 
 export type SpacemoltFactionAcceptPeaceResponses = {
     /**
-     * Result. structuredContent type: FactionAcceptPeaceResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionAcceptPeaceResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionAcceptPeaceResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionAcceptPeaceResponse;
+        };
     };
 };
 
@@ -12108,10 +12206,12 @@ export type SpacemoltFactionCancelMissionErrors = {
 
 export type SpacemoltFactionCancelMissionResponses = {
     /**
-     * Result. structuredContent type: FactionCancelMissionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionCancelMissionResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionCancelMissionResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionCancelMissionResponse;
+        };
     };
 };
 
@@ -12150,10 +12250,12 @@ export type SpacemoltFactionCreateErrors = {
 
 export type SpacemoltFactionCreateResponses = {
     /**
-     * Result. structuredContent type: CreateFactionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CreateFactionResponse)
      */
     200: V2Response & {
-        structuredContent?: CreateFactionResponse;
+        structuredContent?: V2GameState & {
+            details?: CreateFactionResponse;
+        };
     };
 };
 
@@ -12192,10 +12294,12 @@ export type SpacemoltFactionDeclareWarErrors = {
 
 export type SpacemoltFactionDeclareWarResponses = {
     /**
-     * Result. structuredContent type: FactionDeclareWarResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionDeclareWarResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionDeclareWarResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionDeclareWarResponse;
+        };
     };
 };
 
@@ -12467,10 +12571,12 @@ export type SpacemoltFactionInviteErrors = {
 
 export type SpacemoltFactionInviteResponses = {
     /**
-     * Result. structuredContent type: FactionInviteResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionInviteResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionInviteResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionInviteResponse;
+        };
     };
 };
 
@@ -12505,10 +12611,12 @@ export type SpacemoltFactionJoinErrors = {
 
 export type SpacemoltFactionJoinResponses = {
     /**
-     * Result. structuredContent type: JoinFactionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (JoinFactionResponse)
      */
     200: V2Response & {
-        structuredContent?: JoinFactionResponse;
+        structuredContent?: V2GameState & {
+            details?: JoinFactionResponse;
+        };
     };
 };
 
@@ -12543,10 +12651,12 @@ export type SpacemoltFactionKickErrors = {
 
 export type SpacemoltFactionKickResponses = {
     /**
-     * Result. structuredContent type: FactionKickResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionKickResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionKickResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionKickResponse;
+        };
     };
 };
 
@@ -12578,10 +12688,12 @@ export type SpacemoltFactionLeaveErrors = {
 
 export type SpacemoltFactionLeaveResponses = {
     /**
-     * Result. structuredContent type: MessageResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (MessageResponse)
      */
     200: V2Response & {
-        structuredContent?: MessageResponse;
+        structuredContent?: V2GameState & {
+            details?: MessageResponse;
+        };
     };
 };
 
@@ -12693,10 +12805,12 @@ export type SpacemoltFactionProposeAllyErrors = {
 
 export type SpacemoltFactionProposeAllyResponses = {
     /**
-     * Result. structuredContent type: FactionProposeAllyResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionProposeAllyResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionProposeAllyResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionProposeAllyResponse;
+        };
     };
 };
 
@@ -12735,10 +12849,12 @@ export type SpacemoltFactionProposePeaceErrors = {
 
 export type SpacemoltFactionProposePeaceResponses = {
     /**
-     * Result. structuredContent type: FactionProposePeaceResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionProposePeaceResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionProposePeaceResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionProposePeaceResponse;
+        };
     };
 };
 
@@ -12773,10 +12889,12 @@ export type SpacemoltFactionRemoveAllyErrors = {
 
 export type SpacemoltFactionRemoveAllyResponses = {
     /**
-     * Result. structuredContent type: FactionRemoveAllyResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionRemoveAllyResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionRemoveAllyResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionRemoveAllyResponse;
+        };
     };
 };
 
@@ -12811,10 +12929,12 @@ export type SpacemoltFactionRemoveEnemyErrors = {
 
 export type SpacemoltFactionRemoveEnemyResponses = {
     /**
-     * Result. structuredContent type: FactionRemoveEnemyResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionRemoveEnemyResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionRemoveEnemyResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionRemoveEnemyResponse;
+        };
     };
 };
 
@@ -12884,10 +13004,12 @@ export type SpacemoltFactionSetEnemyErrors = {
 
 export type SpacemoltFactionSetEnemyResponses = {
     /**
-     * Result. structuredContent type: FactionSetEnemyResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionSetEnemyResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionSetEnemyResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionSetEnemyResponse;
+        };
     };
 };
 
@@ -12960,10 +13082,12 @@ export type SpacemoltFactionWithdrawInviteErrors = {
 
 export type SpacemoltFactionWithdrawInviteResponses = {
     /**
-     * Result. structuredContent type: FactionWithdrawInviteResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionWithdrawInviteResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionWithdrawInviteResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionWithdrawInviteResponse;
+        };
     };
 };
 
@@ -13247,10 +13371,12 @@ export type SpacemoltFactionAdminPostMissionErrors = {
 
 export type SpacemoltFactionAdminPostMissionResponses = {
     /**
-     * Result. structuredContent type: FactionPostMissionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionPostMissionResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionPostMissionResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionPostMissionResponse;
+        };
     };
 };
 
@@ -13289,10 +13415,12 @@ export type SpacemoltFactionAdminPromoteErrors = {
 
 export type SpacemoltFactionAdminPromoteResponses = {
     /**
-     * Result. structuredContent type: FactionPromoteResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionPromoteResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionPromoteResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionPromoteResponse;
+        };
     };
 };
 
@@ -13385,10 +13513,12 @@ export type SpacemoltFactionCommerceCreateBuyOrderErrors = {
 
 export type SpacemoltFactionCommerceCreateBuyOrderResponses = {
     /**
-     * Result. structuredContent type: FactionCreateBuyOrderResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionCreateBuyOrderResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionCreateBuyOrderResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionCreateBuyOrderResponse;
+        };
     };
 };
 
@@ -13431,10 +13561,12 @@ export type SpacemoltFactionCommerceCreateSellOrderErrors = {
 
 export type SpacemoltFactionCommerceCreateSellOrderResponses = {
     /**
-     * Result. structuredContent type: FactionCreateSellOrderResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionCreateSellOrderResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionCreateSellOrderResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionCreateSellOrderResponse;
+        };
     };
 };
 
@@ -13511,10 +13643,12 @@ export type SpacemoltFleetAcceptErrors = {
 
 export type SpacemoltFleetAcceptResponses = {
     /**
-     * Result. structuredContent type: FleetResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FleetResponse)
      */
     200: V2Response & {
-        structuredContent?: FleetResponse;
+        structuredContent?: V2GameState & {
+            details?: FleetResponse;
+        };
     };
 };
 
@@ -13549,10 +13683,12 @@ export type SpacemoltFleetCreateErrors = {
 
 export type SpacemoltFleetCreateResponses = {
     /**
-     * Result. structuredContent type: FleetCreateResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FleetCreateResponse)
      */
     200: V2Response & {
-        structuredContent?: FleetCreateResponse;
+        structuredContent?: V2GameState & {
+            details?: FleetCreateResponse;
+        };
     };
 };
 
@@ -13587,10 +13723,12 @@ export type SpacemoltFleetDeclineErrors = {
 
 export type SpacemoltFleetDeclineResponses = {
     /**
-     * Result. structuredContent type: FleetResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FleetResponse)
      */
     200: V2Response & {
-        structuredContent?: FleetResponse;
+        structuredContent?: V2GameState & {
+            details?: FleetResponse;
+        };
     };
 };
 
@@ -13625,10 +13763,12 @@ export type SpacemoltFleetDisbandErrors = {
 
 export type SpacemoltFleetDisbandResponses = {
     /**
-     * Result. structuredContent type: FleetResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FleetResponse)
      */
     200: V2Response & {
-        structuredContent?: FleetResponse;
+        structuredContent?: V2GameState & {
+            details?: FleetResponse;
+        };
     };
 };
 
@@ -13705,10 +13845,12 @@ export type SpacemoltFleetInviteErrors = {
 
 export type SpacemoltFleetInviteResponses = {
     /**
-     * Result. structuredContent type: FleetResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FleetResponse)
      */
     200: V2Response & {
-        structuredContent?: FleetResponse;
+        structuredContent?: V2GameState & {
+            details?: FleetResponse;
+        };
     };
 };
 
@@ -13743,10 +13885,12 @@ export type SpacemoltFleetKickErrors = {
 
 export type SpacemoltFleetKickResponses = {
     /**
-     * Result. structuredContent type: FleetResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FleetResponse)
      */
     200: V2Response & {
-        structuredContent?: FleetResponse;
+        structuredContent?: V2GameState & {
+            details?: FleetResponse;
+        };
     };
 };
 
@@ -13781,10 +13925,12 @@ export type SpacemoltFleetLeaveErrors = {
 
 export type SpacemoltFleetLeaveResponses = {
     /**
-     * Result. structuredContent type: FleetResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FleetResponse)
      */
     200: V2Response & {
-        structuredContent?: FleetResponse;
+        structuredContent?: V2GameState & {
+            details?: FleetResponse;
+        };
     };
 };
 
@@ -14056,10 +14202,12 @@ export type SpacemoltIntelSubmitIntelErrors = {
 
 export type SpacemoltIntelSubmitIntelResponses = {
     /**
-     * Result. structuredContent type: FactionSubmitIntelResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionSubmitIntelResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionSubmitIntelResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionSubmitIntelResponse;
+        };
     };
 };
 
@@ -14096,10 +14244,12 @@ export type SpacemoltIntelSubmitTradeIntelErrors = {
 
 export type SpacemoltIntelSubmitTradeIntelResponses = {
     /**
-     * Result. structuredContent type: FactionSubmitTradeIntelResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionSubmitTradeIntelResponse)
      */
     200: V2Response & {
-        structuredContent?: FactionSubmitTradeIntelResponse;
+        structuredContent?: V2GameState & {
+            details?: FactionSubmitTradeIntelResponse;
+        };
     };
 };
 
@@ -14208,10 +14358,12 @@ export type SpacemoltMarketCancelOrderErrors = {
 
 export type SpacemoltMarketCancelOrderResponses = {
     /**
-     * Result. structuredContent type: CancelOrderResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CancelOrderResponse)
      */
     200: V2Response & {
-        structuredContent?: CancelOrderResponse;
+        structuredContent?: V2GameState & {
+            details?: CancelOrderResponse;
+        };
     };
 };
 
@@ -14267,10 +14419,12 @@ export type SpacemoltMarketCreateBuyOrderErrors = {
 
 export type SpacemoltMarketCreateBuyOrderResponses = {
     /**
-     * Result. structuredContent type: CreateBuyOrderResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CreateBuyOrderResponse)
      */
     200: V2Response & {
-        structuredContent?: CreateBuyOrderResponse;
+        structuredContent?: V2GameState & {
+            details?: CreateBuyOrderResponse;
+        };
     };
 };
 
@@ -14321,10 +14475,12 @@ export type SpacemoltMarketCreateSellOrderErrors = {
 
 export type SpacemoltMarketCreateSellOrderResponses = {
     /**
-     * Result. structuredContent type: CreateSellOrderResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CreateSellOrderResponse)
      */
     200: V2Response & {
-        structuredContent?: CreateSellOrderResponse;
+        structuredContent?: V2GameState & {
+            details?: CreateSellOrderResponse;
+        };
     };
 };
 
@@ -14454,10 +14610,12 @@ export type SpacemoltMarketModifyOrderErrors = {
 
 export type SpacemoltMarketModifyOrderResponses = {
     /**
-     * Result. structuredContent type: ModifyOrderResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ModifyOrderResponse)
      */
     200: V2Response & {
-        structuredContent?: ModifyOrderResponse;
+        structuredContent?: V2GameState & {
+            details?: ModifyOrderResponse;
+        };
     };
 };
 
@@ -14642,10 +14800,12 @@ export type SpacemoltSalvageInsureErrors = {
 
 export type SpacemoltSalvageInsureResponses = {
     /**
-     * Result. structuredContent type: BuyInsuranceResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (BuyInsuranceResponse)
      */
     200: V2Response & {
-        structuredContent?: BuyInsuranceResponse;
+        structuredContent?: V2GameState & {
+            details?: BuyInsuranceResponse;
+        };
     };
 };
 
@@ -14692,10 +14852,12 @@ export type SpacemoltSalvageLootErrors = {
 
 export type SpacemoltSalvageLootResponses = {
     /**
-     * Result. structuredContent type: LootWreckResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (LootWreckResponse)
      */
     200: V2Response & {
-        structuredContent?: LootWreckResponse;
+        structuredContent?: V2GameState & {
+            details?: LootWreckResponse;
+        };
     };
 };
 
@@ -14797,10 +14959,12 @@ export type SpacemoltSalvageReleaseErrors = {
 
 export type SpacemoltSalvageReleaseResponses = {
     /**
-     * Result. structuredContent type: ReleaseTowResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ReleaseTowResponse)
      */
     200: V2Response & {
-        structuredContent?: ReleaseTowResponse;
+        structuredContent?: V2GameState & {
+            details?: ReleaseTowResponse;
+        };
     };
 };
 
@@ -14835,10 +14999,12 @@ export type SpacemoltSalvageSalvageErrors = {
 
 export type SpacemoltSalvageSalvageResponses = {
     /**
-     * Result. structuredContent type: ScrapWreckResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ScrapWreckResponse)
      */
     200: V2Response & {
-        structuredContent?: ScrapWreckResponse;
+        structuredContent?: V2GameState & {
+            details?: ScrapWreckResponse;
+        };
     };
 };
 
@@ -14870,10 +15036,12 @@ export type SpacemoltSalvageScrapErrors = {
 
 export type SpacemoltSalvageScrapResponses = {
     /**
-     * Result. structuredContent type: ScrapWreckResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ScrapWreckResponse)
      */
     200: V2Response & {
-        structuredContent?: ScrapWreckResponse;
+        structuredContent?: V2GameState & {
+            details?: ScrapWreckResponse;
+        };
     };
 };
 
@@ -14905,10 +15073,12 @@ export type SpacemoltSalvageSellErrors = {
 
 export type SpacemoltSalvageSellResponses = {
     /**
-     * Result. structuredContent type: SellWreckResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (SellWreckResponse)
      */
     200: V2Response & {
-        structuredContent?: SellWreckResponse;
+        structuredContent?: V2GameState & {
+            details?: SellWreckResponse;
+        };
     };
 };
 
@@ -14943,10 +15113,12 @@ export type SpacemoltSalvageSetHomeErrors = {
 
 export type SpacemoltSalvageSetHomeResponses = {
     /**
-     * Result. structuredContent type: SetHomeBaseResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (SetHomeBaseResponse)
      */
     200: V2Response & {
-        structuredContent?: SetHomeBaseResponse;
+        structuredContent?: V2GameState & {
+            details?: SetHomeBaseResponse;
+        };
     };
 };
 
@@ -14981,10 +15153,12 @@ export type SpacemoltSalvageTowErrors = {
 
 export type SpacemoltSalvageTowResponses = {
     /**
-     * Result. structuredContent type: TowWreckResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (TowWreckResponse)
      */
     200: V2Response & {
-        structuredContent?: TowWreckResponse;
+        structuredContent?: V2GameState & {
+            details?: TowWreckResponse;
+        };
     };
 };
 
@@ -15100,10 +15274,12 @@ export type SpacemoltShipBuyListedShipErrors = {
 
 export type SpacemoltShipBuyListedShipResponses = {
     /**
-     * Result. structuredContent type: BuyListedShipResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (BuyListedShipResponse)
      */
     200: V2Response & {
-        structuredContent?: BuyListedShipResponse;
+        structuredContent?: V2GameState & {
+            details?: BuyListedShipResponse;
+        };
     };
 };
 
@@ -15138,10 +15314,12 @@ export type SpacemoltShipCancelCommissionErrors = {
 
 export type SpacemoltShipCancelCommissionResponses = {
     /**
-     * Result. structuredContent type: CancelCommissionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CancelCommissionResponse)
      */
     200: V2Response & {
-        structuredContent?: CancelCommissionResponse;
+        structuredContent?: V2GameState & {
+            details?: CancelCommissionResponse;
+        };
     };
 };
 
@@ -15176,10 +15354,12 @@ export type SpacemoltShipCancelShipListingErrors = {
 
 export type SpacemoltShipCancelShipListingResponses = {
     /**
-     * Result. structuredContent type: CancelShipListingResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CancelShipListingResponse)
      */
     200: V2Response & {
-        structuredContent?: CancelShipListingResponse;
+        structuredContent?: V2GameState & {
+            details?: CancelShipListingResponse;
+        };
     };
 };
 
@@ -15214,10 +15394,12 @@ export type SpacemoltShipClaimCommissionErrors = {
 
 export type SpacemoltShipClaimCommissionResponses = {
     /**
-     * Result. structuredContent type: ClaimCommissionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ClaimCommissionResponse)
      */
     200: V2Response & {
-        structuredContent?: ClaimCommissionResponse;
+        structuredContent?: V2GameState & {
+            details?: ClaimCommissionResponse;
+        };
     };
 };
 
@@ -15294,10 +15476,12 @@ export type SpacemoltShipCommissionShipErrors = {
 
 export type SpacemoltShipCommissionShipResponses = {
     /**
-     * Result. structuredContent type: CommissionShipResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CommissionShipResponse)
      */
     200: V2Response & {
-        structuredContent?: CommissionShipResponse;
+        structuredContent?: V2GameState & {
+            details?: CommissionShipResponse;
+        };
     };
 };
 
@@ -15416,10 +15600,12 @@ export type SpacemoltShipListShipForSaleErrors = {
 
 export type SpacemoltShipListShipForSaleResponses = {
     /**
-     * Result. structuredContent type: ListShipForSaleResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ListShipForSaleResponse)
      */
     200: V2Response & {
-        structuredContent?: ListShipForSaleResponse;
+        structuredContent?: V2GameState & {
+            details?: ListShipForSaleResponse;
+        };
     };
 };
 
@@ -15486,10 +15672,12 @@ export type SpacemoltShipRefitShipErrors = {
 
 export type SpacemoltShipRefitShipResponses = {
     /**
-     * Result. structuredContent type: RefitShipResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (RefitShipResponse)
      */
     200: V2Response & {
-        structuredContent?: RefitShipResponse;
+        structuredContent?: V2GameState & {
+            details?: RefitShipResponse;
+        };
     };
 };
 
@@ -15524,10 +15712,12 @@ export type SpacemoltShipRenameShipErrors = {
 
 export type SpacemoltShipRenameShipResponses = {
     /**
-     * Result. structuredContent type: NameShipResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (NameShipResponse)
      */
     200: V2Response & {
-        structuredContent?: NameShipResponse;
+        structuredContent?: V2GameState & {
+            details?: NameShipResponse;
+        };
     };
 };
 
@@ -15562,10 +15752,12 @@ export type SpacemoltShipScrapShipErrors = {
 
 export type SpacemoltShipScrapShipResponses = {
     /**
-     * Result. structuredContent type: ScrapShipResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ScrapShipResponse)
      */
     200: V2Response & {
-        structuredContent?: ScrapShipResponse;
+        structuredContent?: V2GameState & {
+            details?: ScrapShipResponse;
+        };
     };
 };
 
@@ -15600,10 +15792,12 @@ export type SpacemoltShipSellShipErrors = {
 
 export type SpacemoltShipSellShipResponses = {
     /**
-     * Result. structuredContent type: SellShipResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (SellShipResponse)
      */
     200: V2Response & {
-        structuredContent?: SellShipResponse;
+        structuredContent?: V2GameState & {
+            details?: SellShipResponse;
+        };
     };
 };
 
@@ -15646,10 +15840,12 @@ export type SpacemoltShipSupplyCommissionErrors = {
 
 export type SpacemoltShipSupplyCommissionResponses = {
     /**
-     * Result. structuredContent type: SupplyCommissionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (SupplyCommissionResponse)
      */
     200: V2Response & {
-        structuredContent?: SupplyCommissionResponse;
+        structuredContent?: V2GameState & {
+            details?: SupplyCommissionResponse;
+        };
     };
 };
 
@@ -15684,10 +15880,12 @@ export type SpacemoltShipSwitchShipErrors = {
 
 export type SpacemoltShipSwitchShipResponses = {
     /**
-     * Result. structuredContent type: SwitchShipResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (SwitchShipResponse)
      */
     200: V2Response & {
-        structuredContent?: SwitchShipResponse;
+        structuredContent?: V2GameState & {
+            details?: SwitchShipResponse;
+        };
     };
 };
 
@@ -16008,10 +16206,12 @@ export type SpacemoltSocialForumCreateThreadErrors = {
 
 export type SpacemoltSocialForumCreateThreadResponses = {
     /**
-     * Result. structuredContent type: ForumCreateThreadResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ForumCreateThreadResponse)
      */
     200: V2Response & {
-        structuredContent?: ForumCreateThreadResponse;
+        structuredContent?: V2GameState & {
+            details?: ForumCreateThreadResponse;
+        };
     };
 };
 
@@ -16046,10 +16246,12 @@ export type SpacemoltSocialForumDeleteReplyErrors = {
 
 export type SpacemoltSocialForumDeleteReplyResponses = {
     /**
-     * Result. structuredContent type: ForumDeleteReplyResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ForumDeleteReplyResponse)
      */
     200: V2Response & {
-        structuredContent?: ForumDeleteReplyResponse;
+        structuredContent?: V2GameState & {
+            details?: ForumDeleteReplyResponse;
+        };
     };
 };
 
@@ -16084,10 +16286,12 @@ export type SpacemoltSocialForumDeleteThreadErrors = {
 
 export type SpacemoltSocialForumDeleteThreadResponses = {
     /**
-     * Result. structuredContent type: ForumDeleteThreadResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ForumDeleteThreadResponse)
      */
     200: V2Response & {
-        structuredContent?: ForumDeleteThreadResponse;
+        structuredContent?: V2GameState & {
+            details?: ForumDeleteThreadResponse;
+        };
     };
 };
 
@@ -16238,10 +16442,12 @@ export type SpacemoltSocialForumReplyErrors = {
 
 export type SpacemoltSocialForumReplyResponses = {
     /**
-     * Result. structuredContent type: ForumReplyResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ForumReplyResponse)
      */
     200: V2Response & {
-        structuredContent?: ForumReplyResponse;
+        structuredContent?: V2GameState & {
+            details?: ForumReplyResponse;
+        };
     };
 };
 
@@ -16280,10 +16486,12 @@ export type SpacemoltSocialForumUpvoteErrors = {
 
 export type SpacemoltSocialForumUpvoteResponses = {
     /**
-     * Result. structuredContent type: ForumUpvoteResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ForumUpvoteResponse)
      */
     200: V2Response & {
-        structuredContent?: ForumUpvoteResponse;
+        structuredContent?: V2GameState & {
+            details?: ForumUpvoteResponse;
+        };
     };
 };
 
@@ -16740,10 +16948,12 @@ export type SpacemoltStorageDepositErrors = {
 
 export type SpacemoltStorageDepositResponses = {
     /**
-     * Result. structuredContent type: DepositItemsResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (DepositItemsResponse)
      */
     200: V2Response & {
-        structuredContent?: DepositItemsResponse;
+        structuredContent?: V2GameState & {
+            details?: DepositItemsResponse;
+        };
     };
 };
 
@@ -16912,10 +17122,12 @@ export type SpacemoltStorageWithdrawErrors = {
 
 export type SpacemoltStorageWithdrawResponses = {
     /**
-     * Result. structuredContent type: WithdrawItemsResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (WithdrawItemsResponse)
      */
     200: V2Response & {
-        structuredContent?: WithdrawItemsResponse;
+        structuredContent?: V2GameState & {
+            details?: WithdrawItemsResponse;
+        };
     };
 };
 
@@ -17027,10 +17239,12 @@ export type SpacemoltTransferTradeAcceptErrors = {
 
 export type SpacemoltTransferTradeAcceptResponses = {
     /**
-     * Result. structuredContent type: TradeAcceptResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (TradeAcceptResponse)
      */
     200: V2Response & {
-        structuredContent?: TradeAcceptResponse;
+        structuredContent?: V2GameState & {
+            details?: TradeAcceptResponse;
+        };
     };
 };
 
@@ -17163,10 +17377,12 @@ export type SpacemoltTransferTradeOfferErrors = {
 
 export type SpacemoltTransferTradeOfferResponses = {
     /**
-     * Result. structuredContent type: TradeOfferResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (TradeOfferResponse)
      */
     200: V2Response & {
-        structuredContent?: TradeOfferResponse;
+        structuredContent?: V2GameState & {
+            details?: TradeOfferResponse;
+        };
     };
 };
 
