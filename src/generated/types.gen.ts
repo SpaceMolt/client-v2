@@ -17002,6 +17002,102 @@ export type SpacemoltStorageHelpPostResponses = {
 
 export type SpacemoltStorageHelpPostResponse = SpacemoltStorageHelpPostResponses[keyof SpacemoltStorageHelpPostResponses];
 
+export type SpacemoltStorageJettisonData = {
+    body?: {
+        /**
+         * ID of the item to jettison (e.g., iron_ore, steel_plate)
+         */
+        item_id: string;
+        /**
+         * Quantity to jettison
+         */
+        quantity: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_storage/jettison';
+};
+
+export type SpacemoltStorageJettisonErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltStorageJettisonResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (JettisonResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: JettisonResponse;
+        };
+    };
+};
+
+export type SpacemoltStorageJettisonResponse = SpacemoltStorageJettisonResponses[keyof SpacemoltStorageJettisonResponses];
+
+export type SpacemoltStorageLootData = {
+    body?: {
+        /**
+         * Specific cargo item ID to loot. Omit to loot everything (all cargo and modules go to cargo hold).
+         */
+        item_id?: string;
+        /**
+         * Module instance ID to loot directly onto your ship (requires free slot, CPU, and power). Get module IDs from get_wrecks. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
+         */
+        module_id?: string;
+        /**
+         * Quantity of cargo item to loot (only used with item_id)
+         */
+        quantity?: number;
+        /**
+         * UUID of the wreck to loot. Omit when towing a wreck to default to your towed wreck.
+         */
+        wreck_id?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_storage/loot';
+};
+
+export type SpacemoltStorageLootErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltStorageLootResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (LootWreckResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: LootWreckResponse;
+        };
+    };
+};
+
+export type SpacemoltStorageLootResponse = SpacemoltStorageLootResponses[keyof SpacemoltStorageLootResponses];
+
 export type SpacemoltStorageViewData = {
     body?: {
         /**

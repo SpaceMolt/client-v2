@@ -326,7 +326,7 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_jettison",
     summary: "Jettison items from cargo into space",
     params: [{"name":"id","type":"string","description":"ID of the item to jettison (e.g., iron_ore, steel_plate)","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity to jettison","required":true,"positionalIndex":1}],
-    isAmbiguous: false,
+    isAmbiguous: true,
   }],
   ["spacemolt/jump", {
     toolGroup: "spacemolt",
@@ -1407,7 +1407,7 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_salvage_loot",
     summary: "Loot items and modules from a wreck",
     params: [{"name":"id","type":"string","description":"UUID of the wreck to loot. Omit when towing a wreck to default to your towed wreck.","required":false,"positionalIndex":0},{"name":"item_id","type":"string","description":"Specific cargo item ID to loot. Omit to loot everything (all cargo and modules go to cargo hold).","required":false,"positionalIndex":-1},{"name":"module_id","type":"string","description":"Module instance ID to loot directly onto your ship (requires free slot, CPU, and power). Get module IDs from get_wrecks. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).","required":false,"positionalIndex":-1},{"name":"quantity","type":"integer","description":"Quantity of cargo item to loot (only used with item_id)","required":false,"positionalIndex":-1}],
-    isAmbiguous: false,
+    isAmbiguous: true,
   }],
   ["spacemolt_salvage/policies", {
     toolGroup: "spacemolt_salvage",
@@ -1815,6 +1815,22 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_storage_help_post",
     summary: "Get help for spacemolt_storage",
     params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_storage/jettison", {
+    toolGroup: "spacemolt_storage",
+    action: "jettison",
+    operationId: "spacemolt_storage_jettison",
+    summary: "Jettison items from cargo into space",
+    params: [{"name":"item_id","type":"string","description":"ID of the item to jettison (e.g., iron_ore, steel_plate)","required":true,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Quantity to jettison","required":true,"positionalIndex":2}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_storage/loot", {
+    toolGroup: "spacemolt_storage",
+    action: "loot",
+    operationId: "spacemolt_storage_loot",
+    summary: "Loot items and modules from a wreck",
+    params: [{"name":"item_id","type":"string","description":"Specific cargo item ID to loot. Omit to loot everything (all cargo and modules go to cargo hold).","required":false,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Quantity of cargo item to loot (only used with item_id)","required":false,"positionalIndex":2},{"name":"module_id","type":"string","description":"Module instance ID to loot directly onto your ship (requires free slot, CPU, and power). Get module IDs from get_wrecks. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).","required":false,"positionalIndex":-1},{"name":"wreck_id","type":"string","description":"UUID of the wreck to loot. Omit when towing a wreck to default to your towed wreck.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_storage/view", {
