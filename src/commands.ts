@@ -1513,14 +1513,6 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"ID of the listing to cancel","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
-  ["spacemolt_ship/claim_commission", {
-    toolGroup: "spacemolt_ship",
-    action: "claim_commission",
-    operationId: "spacemolt_ship_claim_commission",
-    summary: "Claim a completed ship from a commission",
-    params: [{"name":"id","type":"string","description":"ID of the commission to claim (use commission_status to see IDs), or \"all\" to claim every ready commission at the docked base at once","required":true,"positionalIndex":0}],
-    isAmbiguous: false,
-  }],
   ["spacemolt_ship/commission_quote", {
     toolGroup: "spacemolt_ship",
     action: "commission_quote",

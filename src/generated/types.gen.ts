@@ -645,19 +645,6 @@ export type CitizenshipResponse = {
     status?: string;
 };
 
-export type ClaimCommissionResponse = {
-    claimed_count?: number;
-    claimed_ships?: Array<{
-        ship_class: string;
-        ship_id: string;
-    }>;
-    credits_left: number;
-    message: string;
-    new_ship_id?: string;
-    old_ship_id?: string;
-    ship_class?: string;
-};
-
 export type ClaimInsuranceResponse = {
     message: string;
     policies: Array<{
@@ -1154,14 +1141,6 @@ export type DockResponse = {
         ship_class: string;
         status: string;
         ticks_remaining?: number;
-    }>;
-    commissions_note?: string;
-    commissions_ready?: Array<{
-        class_id: string;
-        commission_id: string;
-        ship_class: string;
-        ship_id?: string;
-        status: string;
     }>;
     facility_note?: string;
     fuel_warning?: string;
@@ -15365,46 +15344,6 @@ export type SpacemoltShipCancelShipListingResponses = {
 };
 
 export type SpacemoltShipCancelShipListingResponse = SpacemoltShipCancelShipListingResponses[keyof SpacemoltShipCancelShipListingResponses];
-
-export type SpacemoltShipClaimCommissionData = {
-    body?: {
-        /**
-         * ID of the commission to claim (use commission_status to see IDs), or "all" to claim every ready commission at the docked base at once
-         */
-        id: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v2/spacemolt_ship/claim_commission';
-};
-
-export type SpacemoltShipClaimCommissionErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
-export type SpacemoltShipClaimCommissionResponses = {
-    /**
-     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ClaimCommissionResponse)
-     */
-    200: V2Response & {
-        structuredContent?: V2GameState & {
-            details?: ClaimCommissionResponse;
-        };
-    };
-};
-
-export type SpacemoltShipClaimCommissionResponse = SpacemoltShipClaimCommissionResponses[keyof SpacemoltShipClaimCommissionResponses];
 
 export type SpacemoltShipCommissionQuoteData = {
     body?: {
