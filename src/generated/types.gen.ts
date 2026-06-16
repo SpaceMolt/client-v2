@@ -3932,6 +3932,26 @@ export type NotificationCombatUpdate = {
     tick: number;
 };
 
+export type NotificationMarketUpdate = {
+    base_id: string;
+    base_name?: string;
+    items: Array<{
+        buy_orders: Array<{
+            price_each: number;
+            quantity: number;
+            source?: string;
+        }>;
+        item_id: string;
+        item_name?: string;
+        sell_orders: Array<{
+            price_each: number;
+            quantity: number;
+            source?: string;
+        }>;
+    }>;
+    tick: number;
+};
+
 export type NotificationMiningYield = {
     auto_docked?: boolean;
     auto_undocked?: boolean;
@@ -5288,6 +5308,27 @@ export type StorageResponse = {
     target?: string;
 };
 
+export type SubscribeMarketResponse = {
+    action: string;
+    base_id: string;
+    base_name: string;
+    items: Array<{
+        buy_orders: Array<{
+            price_each: number;
+            quantity: number;
+            source?: string;
+        }>;
+        item_id: string;
+        item_name?: string;
+        sell_orders: Array<{
+            price_each: number;
+            quantity: number;
+            source?: string;
+        }>;
+    }>;
+    message?: string;
+};
+
 export type SupplyCommissionResponse = {
     all_sourced: boolean;
     commission_id: string;
@@ -5598,6 +5639,11 @@ export type UnloadPassengerResponse = {
         speed_bonus?: number;
         ticks_remaining: number;
     }>;
+};
+
+export type UnsubscribeMarketResponse = {
+    action: string;
+    message: string;
 };
 
 export type UploadDroneScriptResponse = {
@@ -6021,7 +6067,7 @@ export type V2Response = {
         /**
          * Notification payload. Shape depends on msg_type — see the Notification_* schemas under components.schemas.
          */
-        data?: NotificationChatMessage | NotificationCombatUpdate | NotificationMiningYield | NotificationPilotlessShip | NotificationPlayerDied | NotificationReconnected | NotificationScanDetected | NotificationScanResult | NotificationSkillLevelUp | NotificationTradeOfferReceived;
+        data?: NotificationChatMessage | NotificationCombatUpdate | NotificationMarketUpdate | NotificationMiningYield | NotificationPilotlessShip | NotificationPlayerDied | NotificationReconnected | NotificationScanDetected | NotificationScanResult | NotificationSkillLevelUp | NotificationTradeOfferReceived;
         id?: string;
         /**
          * Specific message subtype used for handler routing (e.g. chat_message, combat_update, action_result, mining_yield). Switch on this to pick the matching Notification_* payload schema.
@@ -6352,10 +6398,12 @@ export type SpacemoltAbandonMissionErrors = {
 
 export type SpacemoltAbandonMissionResponses = {
     /**
-     * Result. structuredContent type: AbandonMissionResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (AbandonMissionResponse)
      */
     200: V2Response & {
-        structuredContent?: AbandonMissionResponse;
+        structuredContent?: V2GameState & {
+            details?: AbandonMissionResponse;
+        };
     };
 };
 
@@ -14600,6 +14648,76 @@ export type SpacemoltMarketModifyOrderResponses = {
 };
 
 export type SpacemoltMarketModifyOrderResponse = SpacemoltMarketModifyOrderResponses[keyof SpacemoltMarketModifyOrderResponses];
+
+export type SpacemoltMarketSubscribeMarketData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_market/subscribe_market';
+};
+
+export type SpacemoltMarketSubscribeMarketErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltMarketSubscribeMarketResponses = {
+    /**
+     * Result. structuredContent type: SubscribeMarketResponse
+     */
+    200: V2Response & {
+        structuredContent?: SubscribeMarketResponse;
+    };
+};
+
+export type SpacemoltMarketSubscribeMarketResponse = SpacemoltMarketSubscribeMarketResponses[keyof SpacemoltMarketSubscribeMarketResponses];
+
+export type SpacemoltMarketUnsubscribeMarketData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_market/unsubscribe_market';
+};
+
+export type SpacemoltMarketUnsubscribeMarketErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltMarketUnsubscribeMarketResponses = {
+    /**
+     * Result. structuredContent type: UnsubscribeMarketResponse
+     */
+    200: V2Response & {
+        structuredContent?: UnsubscribeMarketResponse;
+    };
+};
+
+export type SpacemoltMarketUnsubscribeMarketResponse = SpacemoltMarketUnsubscribeMarketResponses[keyof SpacemoltMarketUnsubscribeMarketResponses];
 
 export type SpacemoltMarketViewMarketData = {
     body?: {

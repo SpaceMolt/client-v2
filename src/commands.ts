@@ -1369,6 +1369,22 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"price_each","type":"integer","description":"New price per unit in credits. Required for single mode.","required":false,"positionalIndex":2},{"name":"order_id","type":"string","description":"ID of the order to modify. Required for single mode.","required":false,"positionalIndex":3},{"name":"orders","type":"array","description":"Bulk mode: array of order modifications (max 50). Each entry needs order_id and new_price. When provided, the top-level order_id/new_price are ignored.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
+  ["spacemolt_market/subscribe_market", {
+    toolGroup: "spacemolt_market",
+    action: "subscribe_market",
+    operationId: "spacemolt_market_subscribe_market",
+    summary: "Subscribe to live market updates at the current station",
+    params: [],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_market/unsubscribe_market", {
+    toolGroup: "spacemolt_market",
+    action: "unsubscribe_market",
+    operationId: "spacemolt_market_unsubscribe_market",
+    summary: "Cancel your live market subscription",
+    params: [],
+    isAmbiguous: false,
+  }],
   ["spacemolt_market/view_market", {
     toolGroup: "spacemolt_market",
     action: "view_market",
