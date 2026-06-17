@@ -5785,6 +5785,10 @@ export type V2GameState = {
         size?: number;
     }>;
     /**
+     * Current credit balance, surfaced by lean query endpoints (get_ship, get_cargo, get_location) that omit the full player blob
+     */
+    credits?: number;
+    /**
      * Action-specific detail data
      */
     details?: {
