@@ -120,6 +120,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"ID of the destination system. Use search_systems to find system IDs by name.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
+  ["spacemolt/get_achievements", {
+    toolGroup: "spacemolt",
+    action: "get_achievements",
+    operationId: "spacemolt_get_achievements",
+    summary: "Get your achievement progress",
+    params: [],
+    isAmbiguous: false,
+  }],
   ["spacemolt/get_active_missions", {
     toolGroup: "spacemolt",
     action: "get_active_missions",
@@ -158,6 +166,14 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_get_empire_info",
     summary: "Get the live policy snapshot for one or all empires",
     params: [{"name":"id","type":"string","description":"Empire to query. Omit to get all five empires.","required":false,"positionalIndex":0,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt/get_faction_achievements", {
+    toolGroup: "spacemolt",
+    action: "get_faction_achievements",
+    operationId: "spacemolt_get_faction_achievements",
+    summary: "Get your faction's achievement progress",
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/get_guide", {
@@ -1390,7 +1406,7 @@ const entries: [string, CommandMeta][] = [
     action: "view_market",
     operationId: "spacemolt_market_view_market",
     summary: "View the market at the current station",
-    params: [{"name":"item_id","type":"string","description":"Optional: filter to a specific item for full order book depth (e.g., iron_ore)","required":false,"positionalIndex":0},{"name":"category","type":"string","description":"Optional: filter summary by category (e.g., ore, commodity, weapon, module). Use without item_id.","required":false,"positionalIndex":-1}],
+    params: [{"name":"item_id","type":"string","description":"Optional: filter to a specific item for full order book depth (e.g., iron_ore)","required":false,"positionalIndex":0},{"name":"category","type":"string","description":"Optional: filter summary by category (e.g., ore, commodity, weapon, module). Use without item_id.","required":false,"positionalIndex":-1},{"name":"since","type":"integer","description":"Optional: a prior current_tick. Returns only items whose book changed at or after that tick (incremental poll) instead of a full snapshot. Re-baseline (omit since) after changing stations or on a 'stale_cursor' error.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_market/view_orders", {

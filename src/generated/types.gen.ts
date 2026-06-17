@@ -2584,6 +2584,30 @@ export type GenericObjectResponse = {
     [key: string]: unknown;
 };
 
+export type GetAchievementsResponse = {
+    achievements: Array<{
+        category: string;
+        description: string;
+        earned: boolean;
+        earned_at?: string;
+        hidden: boolean;
+        id: string;
+        name: string;
+        points: number;
+        progress?: {
+            current: number;
+            target: number;
+        };
+        share_url?: string;
+    }>;
+    message?: string;
+    summary: {
+        earned: number;
+        points: number;
+        total: number;
+    };
+};
+
 export type GetActionLogResponse = {
     category: string;
     entries: Array<{
@@ -2840,6 +2864,30 @@ export type GetEmpireInfoResponse = {
         stateless_sales_tax_bps: number;
         tax_delinquency_bounty_per_credit: number;
     }>;
+};
+
+export type GetFactionAchievementsResponse = {
+    achievements: Array<{
+        category: string;
+        description: string;
+        earned: boolean;
+        earned_at?: string;
+        hidden: boolean;
+        id: string;
+        name: string;
+        points: number;
+        progress?: {
+            current: number;
+            target: number;
+        };
+        share_url?: string;
+    }>;
+    message?: string;
+    summary: {
+        earned: number;
+        points: number;
+        total: number;
+    };
 };
 
 export type GetGuideResponse = {
@@ -3463,6 +3511,9 @@ export type LoginResponse = {
         target_id: string;
     }>;
     player: {
+        achievements?: {
+            [key: string]: string;
+        };
         captains_log?: Array<{
             created_at: string;
             entry: string;
@@ -3588,6 +3639,9 @@ export type LoginResponse = {
             insurance_policies_bought: number;
             items_crafted: number;
             items_jettisoned: number;
+            items_sold_by_type?: {
+                [key: string]: number;
+            };
             jumps_completed: number;
             last_income_tax_assessed_at?: number;
             last_property_tax_assessed_at?: number;
@@ -3598,6 +3652,7 @@ export type LoginResponse = {
             npcs_destroyed: number;
             ore_mined: number;
             pirates_destroyed: number;
+            prayer_distance_traveled: number;
             refuels_given: number;
             repairs_given: number;
             scans_performed: number;
@@ -3610,14 +3665,19 @@ export type LoginResponse = {
             time_played: number;
             times_docked: number;
             trades_completed: number;
+            void_drifts: number;
             wormholes_traversed: number;
             wreck_items_looted: number;
             wrecks_scrapped: number;
             wrecks_sold: number;
         };
         status_message: string;
+        titles?: Array<string>;
         towing_wreck_id?: string;
         trading_restricted_until?: string;
+        transported_citizens?: {
+            [key: string]: boolean;
+        };
         username: string;
     };
     poi: {
@@ -4296,6 +4356,10 @@ export type PlayerStats = {
     npcs_destroyed?: number;
     ore_mined?: number;
     pirates_destroyed?: number;
+    /**
+     * Cumulative distance flown in a Prayer-class hull
+     */
+    prayer_distance_traveled?: number;
     refuels_given?: number;
     repairs_given?: number;
     scans_performed?: number;
@@ -4311,6 +4375,10 @@ export type PlayerStats = {
     time_played?: number;
     times_docked?: number;
     trades_completed?: number;
+    /**
+     * Times a Pathfinder course was plotted into open space
+     */
+    void_drifts?: number;
     wormholes_traversed?: number;
     wreck_items_looted?: number;
     wrecks_scrapped?: number;
@@ -4386,6 +4454,9 @@ export type RegisterResponse = {
     message: string;
     password: string;
     player: {
+        achievements?: {
+            [key: string]: string;
+        };
         captains_log?: Array<{
             created_at: string;
             entry: string;
@@ -4511,6 +4582,9 @@ export type RegisterResponse = {
             insurance_policies_bought: number;
             items_crafted: number;
             items_jettisoned: number;
+            items_sold_by_type?: {
+                [key: string]: number;
+            };
             jumps_completed: number;
             last_income_tax_assessed_at?: number;
             last_property_tax_assessed_at?: number;
@@ -4521,6 +4595,7 @@ export type RegisterResponse = {
             npcs_destroyed: number;
             ore_mined: number;
             pirates_destroyed: number;
+            prayer_distance_traveled: number;
             refuels_given: number;
             repairs_given: number;
             scans_performed: number;
@@ -4533,14 +4608,19 @@ export type RegisterResponse = {
             time_played: number;
             times_docked: number;
             trades_completed: number;
+            void_drifts: number;
             wormholes_traversed: number;
             wreck_items_looted: number;
             wrecks_scrapped: number;
             wrecks_sold: number;
         };
         status_message: string;
+        titles?: Array<string>;
         towing_wreck_id?: string;
         trading_restricted_until?: string;
+        transported_citizens?: {
+            [key: string]: boolean;
+        };
         username: string;
     };
     player_id: string;
@@ -6149,6 +6229,8 @@ export type ViewMarketResponse = {
     base: string;
     base_id: string;
     categories?: Array<string>;
+    current_tick: number;
+    incremental?: boolean;
     items: Array<{
         best_buy: number;
         best_buy_qty: number;
@@ -6873,6 +6955,41 @@ export type SpacemoltFindRouteResponses = {
 
 export type SpacemoltFindRouteResponse = SpacemoltFindRouteResponses[keyof SpacemoltFindRouteResponses];
 
+export type SpacemoltGetAchievementsData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/get_achievements';
+};
+
+export type SpacemoltGetAchievementsErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltGetAchievementsResponses = {
+    /**
+     * Result. structuredContent type: GetAchievementsResponse
+     */
+    200: V2Response & {
+        structuredContent?: GetAchievementsResponse;
+    };
+};
+
+export type SpacemoltGetAchievementsResponse = SpacemoltGetAchievementsResponses[keyof SpacemoltGetAchievementsResponses];
+
 export type SpacemoltGetActiveMissionsData = {
     body?: {
         [key: string]: unknown;
@@ -7050,6 +7167,41 @@ export type SpacemoltGetEmpireInfoResponses = {
 };
 
 export type SpacemoltGetEmpireInfoResponse = SpacemoltGetEmpireInfoResponses[keyof SpacemoltGetEmpireInfoResponses];
+
+export type SpacemoltGetFactionAchievementsData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/get_faction_achievements';
+};
+
+export type SpacemoltGetFactionAchievementsErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltGetFactionAchievementsResponses = {
+    /**
+     * Result. structuredContent type: GetFactionAchievementsResponse
+     */
+    200: V2Response & {
+        structuredContent?: GetFactionAchievementsResponse;
+    };
+};
+
+export type SpacemoltGetFactionAchievementsResponse = SpacemoltGetFactionAchievementsResponses[keyof SpacemoltGetFactionAchievementsResponses];
 
 export type SpacemoltGetGuideData = {
     body?: {
@@ -14729,6 +14881,10 @@ export type SpacemoltMarketViewMarketData = {
          * Optional: filter to a specific item for full order book depth (e.g., iron_ore)
          */
         item_id?: string;
+        /**
+         * Optional: a prior current_tick. Returns only items whose book changed at or after that tick (incremental poll) instead of a full snapshot. Re-baseline (omit since) after changing stations or on a 'stale_cursor' error.
+         */
+        since?: number;
     };
     path?: never;
     query?: never;
