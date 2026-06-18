@@ -2191,6 +2191,7 @@ export type FactionProposePeaceResponse = {
 
 export type FactionQueryIntelResponse = {
     count: number;
+    current_tick: number;
     entries: Array<{
         auto_synced?: boolean;
         connections?: Array<{
@@ -2227,6 +2228,7 @@ export type FactionQueryIntelResponse = {
     }>;
     intel_level: number;
     limit?: number;
+    live_systems?: Array<string>;
     message: string;
     offset?: number;
     total: number;
