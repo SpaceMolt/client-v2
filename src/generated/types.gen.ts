@@ -463,6 +463,8 @@ export type CatalogResponse = {
         piloting_required?: number;
         power_capacity: number;
         price: number;
+        required_achievement?: string;
+        required_faction_achievement?: string;
         required_items?: Array<{
             item_id: string;
             quantity: number;
@@ -5122,6 +5124,14 @@ export type ShipClass = {
     piloting_required?: number;
     power_capacity?: number;
     price: number;
+    /**
+     * Player achievement required to commission or buy this prestige hull (empty = none)
+     */
+    required_achievement?: string;
+    /**
+     * Faction achievement the player's faction must hold to commission or buy this prestige hull (empty = none)
+     */
+    required_faction_achievement?: string;
     /**
      * Item requirements for purchase
      */
