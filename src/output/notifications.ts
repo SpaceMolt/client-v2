@@ -46,6 +46,20 @@ const handlers: Record<string, NotificationHandler> = {
     console.log(`${c.dim}[${t}]${c.reset} ${c.green}[MINED]${c.reset} +${d.quantity || 0}x ${d.resource_id || 'ore'}${remainingMsg}`);
   },
 
+  crafting_update: (d, t) => {
+    const jobs = (d.jobs as Array<Record<string, any>>) || [];
+    for (const j of jobs) {
+      if (j.completed) {
+        const items = ((j.deposited as Array<Record<string, any>>) || [])
+          .map(i => `${i.quantity}x ${i.item_name || i.item_id}`).join(', ');
+        const dest = j.storage ? ` → ${j.storage} storage` : '';
+        console.log(`${c.dim}[${t}]${c.reset} ${c.green}[CRAFTING]${c.reset} ${j.recipe || 'job'} complete at ${j.venue || 'facility'}: ${items || 'done'}${dest}`);
+      } else {
+        console.log(`${c.dim}[${t}]${c.reset} ${c.cyan}[CRAFTING]${c.reset} ${j.recipe || 'job'} at ${j.venue || 'facility'}: ${j.runs_done || 0} run(s) done, ${j.runs_remaining || 0} remaining`);
+      }
+    }
+  },
+
   trade_offer_received: (d, t) => {
     console.log(`${c.dim}[${t}]${c.reset} ${c.yellow}[TRADE]${c.reset} Offer from ${d.from_name || 'Someone'} (ID: ${d.trade_id || ''})`);
     if ((d.offer_credits as number) > 0) console.log(`  Offering: ${d.offer_credits} credits`);

@@ -35,6 +35,36 @@ describe('displayNotifications', () => {
     expect(lines[0]).toContain('Hello!');
   });
 
+  test('handles crafting_update for a completed job', () => {
+    const lines = captureOutput(() =>
+      displayNotifications([
+        { type: 'crafting_update', data: { tick: 100, jobs: [
+          { job_id: 'j1', recipe: 'Process Copper Wiring', mode: 'craft', venue: 'Copper Wire Mill', storage: 'station', runs_done: 1, runs_remaining: 0, completed: true, deposited: [{ item_id: 'copper_wiring', item_name: 'Copper Wiring', quantity: 2 }] },
+        ] } },
+      ]),
+    );
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain('CRAFTING');
+    expect(lines[0]).toContain('Process Copper Wiring');
+    expect(lines[0]).toContain('2x Copper Wiring');
+    expect(lines[0]).toContain('station storage');
+    // Must not dump raw JSON
+    expect(lines[0]).not.toContain('"job_id"');
+  });
+
+  test('handles crafting_update for an in-progress job', () => {
+    const lines = captureOutput(() =>
+      displayNotifications([
+        { type: 'crafting_update', data: { tick: 100, jobs: [
+          { job_id: 'j1', recipe: 'Forge Steel', mode: 'craft', venue: 'Iron Refinery', storage: 'station', runs_done: 1, runs_remaining: 3, completed: false, deposited: [] },
+        ] } },
+      ]),
+    );
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain('Forge Steel');
+    expect(lines[0]).toContain('3 remaining');
+  });
+
   test('handles combat_update', () => {
     const lines = captureOutput(() =>
       displayNotifications([
