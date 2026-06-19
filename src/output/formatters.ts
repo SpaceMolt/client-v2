@@ -175,6 +175,70 @@ const formatters: Record<string, Formatter> = {
     return formatFleetStatus(data);
   },
 
+  craft: (data) => {
+    // The command result is nested under `details` (CraftJobResponse), a 4-member
+    // oneOf: job-submit / queue-list / bulk-results / dry-run. Render from the
+    // structured fields rather than the top-level `result` string.
+    const d = data.details as Record<string, unknown> | undefined;
+    if (!d) return false;
+
+    // queue-list: { action, jobs } (jobs may be null when the queue is empty)
+    if ('jobs' in d) {
+      const jobs = d.jobs as Array<Record<string, unknown>> | null;
+      if (!jobs?.length) {
+        console.log(`${c.dim}No crafting jobs in the queue.${c.reset}`);
+        return true;
+      }
+      console.log(`${c.bright}Crafting queue${c.reset} ${c.dim}(${jobs.length} job${jobs.length === 1 ? '' : 's'})${c.reset}`);
+      for (const j of jobs) {
+        const eta = j.eta_ticks !== undefined ? `, ETA ${j.eta_ticks}t` : '';
+        const pct = j.progress !== undefined ? `${Math.round((j.progress as number) * 100)}%` : '?';
+        const status = j.status ? ` ${c.dim}[${j.status}]${c.reset}` : '';
+        console.log(`  ${c.cyan}#${j.position}${c.reset} ${j.recipe} → ${formatItems(j.produces) || j.recipe} — ${j.runs_done}/${j.runs_total} runs, ${pct}${eta}${status} ${c.dim}(job ${j.job_id})${c.reset}`);
+      }
+      return true;
+    }
+
+    // bulk-results: { action, mode, results, summary }
+    if ('results' in d && 'summary' in d) {
+      const s = d.summary as Record<string, unknown>;
+      const failed = (s.failed as number) || 0;
+      console.log(`${c.bright}Bulk craft:${c.reset} ${s.succeeded}/${s.total} queued${failed > 0 ? `, ${c.red}${failed} failed${c.reset}` : ''}`);
+      for (const r of (d.results as Array<Record<string, unknown>>) || []) {
+        if (r.success) {
+          const runs = r.runs !== undefined ? ` ${c.dim}(${r.runs} run(s))${c.reset}` : '';
+          console.log(`  ${c.green}✓${c.reset} ${r.recipe || ''}${runs} ${c.dim}(job ${r.job_id})${c.reset}`);
+        } else {
+          console.log(`  ${c.red}✗${c.reset} #${r.index} ${r.recipe || ''}: ${r.error || r.error_code || 'failed'}`);
+        }
+      }
+      return true;
+    }
+
+    // dry-run: { dry_run: true, ... } — the server's message is a complete quote.
+    if (d.dry_run === true) {
+      if (typeof d.message === 'string' && d.message) console.log(d.message);
+      return typeof d.message === 'string' && d.message.length > 0;
+    }
+
+    // job-submit: a single queued job carrying job_id. The message reads well; add
+    // the job_id + completion tick (not in the prose) so the job can be tracked.
+    if (d.job_id) {
+      if (typeof d.message === 'string' && d.message) console.log(d.message);
+      const tick = d.est_completion_tick !== undefined ? ` · completes ~tick ${d.est_completion_tick}` : '';
+      console.log(`  ${c.dim}Job ${d.job_id}${tick}${c.reset}`);
+      return true;
+    }
+
+    // Any other shape with a populated message — prefer it over the raw result.
+    if (typeof d.message === 'string' && d.message) {
+      console.log(d.message);
+      return true;
+    }
+
+    return false;
+  },
+
   get_guide: (data) => {
     const guides = data.guides as Array<Record<string, unknown>> | undefined;
     // Listing mode: show available guides
@@ -238,6 +302,11 @@ function formatFleetStatus(data: Record<string, unknown>): boolean {
     console.log(`    ${tag}${c.bright}${m.username || m.player_id}${c.reset}${ship}${here}`);
   }
   return true;
+}
+
+function formatItems(items: unknown): string {
+  if (!Array.isArray(items)) return '';
+  return (items as Array<Record<string, unknown>>).map(i => `${i.quantity}x ${i.name || i.item_id}`).join(', ');
 }
 
 function colorHealth(current: number | undefined, max: number | undefined): string {
