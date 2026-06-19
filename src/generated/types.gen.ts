@@ -830,29 +830,6 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
-    jobs: Array<{
-        eta_ticks: number;
-        external?: boolean;
-        facility_id: string;
-        job_id: string;
-        mode: string;
-        orderer: string;
-        position: number;
-        produces?: Array<{
-            item_id: string;
-            name: string;
-            quantity: number;
-        }>;
-        progress: number;
-        recipe: string;
-        runs_done: number;
-        runs_remaining: number;
-        runs_total: number;
-        status: string;
-        venue?: string;
-    }>;
-} | {
-    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -3327,6 +3304,7 @@ export type GetNearbyResponse = {
         tier: string;
     }>;
     poi_id: string;
+    unknown_signature?: boolean;
 };
 
 export type GetNotesResponse = {
@@ -4368,13 +4346,27 @@ export type NotificationScanDetected = {
 export type NotificationScanResult = {
     cargo_types?: Array<string>;
     cloaked?: boolean;
+    contacts?: Array<{
+        cloaked?: boolean;
+        faction_id?: string;
+        hull?: number;
+        revealed_info: Array<string>;
+        shield?: number;
+        ship_class?: string;
+        ship_name?: string;
+        target_id: string;
+        username?: string;
+    }>;
     faction_id?: string;
     hull?: number;
+    message?: string;
     revealed_info: Array<string>;
     shield?: number;
     ship_class?: string;
     ship_name?: string;
+    signature_detected?: boolean;
     success: boolean;
+    swept?: boolean;
     target_id: string;
     username?: string;
 };
@@ -5082,13 +5074,27 @@ export type RepairResponse = {
 export type ScanResponse = {
     cargo_types?: Array<string>;
     cloaked?: boolean;
+    contacts?: Array<{
+        cloaked?: boolean;
+        faction_id?: string;
+        hull?: number;
+        revealed_info: Array<string>;
+        shield?: number;
+        ship_class?: string;
+        ship_name?: string;
+        target_id: string;
+        username?: string;
+    }>;
     faction_id?: string;
     hull?: number;
+    message?: string;
     revealed_info: Array<string>;
     shield?: number;
     ship_class?: string;
     ship_name?: string;
+    signature_detected?: boolean;
     success: boolean;
+    swept?: boolean;
     target_id: string;
     username?: string;
 };
@@ -6217,6 +6223,10 @@ export type V2GameState = {
          * Current galactic Y coordinate (pathfinder only)
          */
         transit_y?: number;
+        /**
+         * True when a cloaked ship at this POI is near your sensor threshold. Presence only — run an area scan (scan with no target_id) to resolve it (omitted when false)
+         */
+        unknown_signature?: boolean;
         /**
          * Navigation flavour text; present only when drifting beyond the galaxy edge (pathfinder void transit only)
          */
@@ -8696,9 +8706,9 @@ export type SpacemoltRepairModuleResponse = SpacemoltRepairModuleResponses[keyof
 export type SpacemoltScanData = {
     body?: {
         /**
-         * Player ID to scan
+         * ID/username of the player or NPC to scan. Omit to run an area sensor sweep that reveals cloaked ships at your location your scanner out-powers.
          */
-        id: string;
+        id?: string;
     };
     path?: never;
     query?: never;
@@ -18202,7 +18212,7 @@ export type SpacemoltSocialGetChatHistoryData = {
          */
         target: 'system' | 'local' | 'faction' | 'private' | 'emergency';
         /**
-         * Player ID or username for private message history (required when channel=private)
+         * Player ID or username for a specific conversation when channel=private. Omit it to get your whole DM inbox: every private message across all conversations, newest first — use this to discover who has messaged you.
          */
         target_id?: string;
     };

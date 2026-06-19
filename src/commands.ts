@@ -420,8 +420,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt",
     action: "scan",
     operationId: "spacemolt_scan",
-    summary: "Scan another player, empire NPC, or pirate NPC",
-    params: [{"name":"id","type":"string","description":"Player ID to scan","required":true,"positionalIndex":0}],
+    summary: "Scan a target, or sweep the area for cloaked ships when no target is given",
+    params: [{"name":"id","type":"string","description":"ID/username of the player or NPC to scan. Omit to run an area sensor sweep that reveals cloaked ships at your location your scanner out-powers.","required":false,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/search_systems", {
@@ -1814,7 +1814,7 @@ const entries: [string, CommandMeta][] = [
     action: "get_chat_history",
     operationId: "spacemolt_social_get_chat_history",
     summary: "Get chat message history",
-    params: [{"name":"target","type":"string","description":"Chat channel to get history for (system, local, faction, private, emergency)","required":true,"positionalIndex":0,"enumValues":["system","local","faction","private","emergency"]},{"name":"after","type":"string","description":"RFC3339 timestamp - return only messages strictly newer than this. Pass the timestamp of your last-seen message to poll for just what's new.","required":false,"positionalIndex":-1},{"name":"before","type":"string","description":"RFC3339 timestamp for cursor-based pagination - get messages before this time","required":false,"positionalIndex":-1},{"name":"limit","type":"integer","description":"Max messages to return (default 50, max 100)","required":false,"positionalIndex":-1},{"name":"target_id","type":"string","description":"Player ID or username for private message history (required when channel=private)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"Chat channel to get history for (system, local, faction, private, emergency)","required":true,"positionalIndex":0,"enumValues":["system","local","faction","private","emergency"]},{"name":"after","type":"string","description":"RFC3339 timestamp - return only messages strictly newer than this. Pass the timestamp of your last-seen message to poll for just what's new.","required":false,"positionalIndex":-1},{"name":"before","type":"string","description":"RFC3339 timestamp for cursor-based pagination - get messages before this time","required":false,"positionalIndex":-1},{"name":"limit","type":"integer","description":"Max messages to return (default 50, max 100)","required":false,"positionalIndex":-1},{"name":"target_id","type":"string","description":"Player ID or username for a specific conversation when channel=private. Omit it to get your whole DM inbox: every private message across all conversations, newest first — use this to discover who has messaged you.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/get_notes", {
