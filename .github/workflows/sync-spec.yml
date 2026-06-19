@@ -162,14 +162,33 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         id: version
         run: |
+          # Pick the next FREE version rather than blindly bumping package.json.
+          # The base is the higher of the tracked package.json version and the
+          # highest existing release tag; the patch is then advanced until the
+          # matching tag is unused. This stops the bot from ever reusing or
+          # clobbering a version when a feature PR (or a prior run) has already
+          # advanced package.json or pushed a tag — the cause of the v1.4.50
+          # collision. Only the patch component moves; major/minor are never
+          # touched automatically. fetch-depth: 0 (above) ensures all tags are
+          # present locally for this comparison.
           OLD=$(node -p "require('./package.json').version")
-          # Bump only the patch component; refuse to touch major/minor automatically.
-          NEW=$(node -e "
-            const v = require('./package.json').version.split('.');
-            v[2] = String(parseInt(v[2], 10) + 1);
-            console.log(v.join('.'));
-          ")
-          echo "Bumping $OLD -> $NEW"
+          TAGS=$(git tag --list 'v*.*.*' | sed 's/^v//')
+          NEW=$(TAGS="$TAGS" node -e '
+            const pkg = require("./package.json").version;
+            const tags = (process.env.TAGS || "").split("\n").filter(Boolean);
+            const cmp = (a, b) => {
+              const pa = a.split(".").map(Number), pb = b.split(".").map(Number);
+              for (let i = 0; i < 3; i++) { if (pa[i] !== pb[i]) return pa[i] - pb[i]; }
+              return 0;
+            };
+            const taken = new Set(tags);
+            let base = pkg;
+            for (const t of tags) if (cmp(t, base) > 0) base = t;
+            const v = base.split(".").map(Number);
+            do { v[2]++; } while (taken.has(v.join(".")));
+            console.log(v.join("."));
+          ')
+          echo "Bumping $OLD -> $NEW (next free tag)"
           node -e "
             const fs = require('fs');
             const pkg = JSON.parse(fs.readFileSync('package.json','utf-8'));
