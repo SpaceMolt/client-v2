@@ -1615,7 +1615,6 @@ export type FacilityResponse = {
             }>;
             name: string;
             recipe_id?: string;
-            recipe_multiplier?: number;
             rent_per_cycle: number;
             type_id: string;
         };
@@ -1648,7 +1647,6 @@ export type FacilityResponse = {
             }>;
             name: string;
             recipe_id?: string;
-            recipe_multiplier?: number;
             rent_per_cycle: number;
             type_id: string;
         };
@@ -1681,7 +1679,6 @@ export type FacilityResponse = {
             }>;
             name: string;
             recipe_id?: string;
-            recipe_multiplier?: number;
             rent_per_cycle: number;
             type_id: string;
         };
@@ -1713,7 +1710,6 @@ export type FacilityResponse = {
             }>;
             name: string;
             recipe_id?: string;
-            recipe_multiplier?: number;
             rent_per_cycle: number;
             type_id: string;
         };
@@ -1733,7 +1729,6 @@ export type FacilityResponse = {
     level: number;
     personal_service?: string;
     recipe_id?: string;
-    recipe_multiplier?: number;
     rent_per_cycle: number;
 } | {
     action: string;
@@ -1757,6 +1752,7 @@ export type FacilityResponse = {
     faction_service: string;
     hint: string;
     members_awarded_xp?: number;
+    recipe_id?: string;
     rent_per_cycle: number;
     skill_xp?: {
         [key: string]: number;
@@ -1912,14 +1908,12 @@ export type FacilityResponse = {
         }>;
         name: string;
         outputs: Array<{
-            effective_quantity?: number;
             item_id: string;
             name: string;
             quantity: number;
         }>;
     };
     recipe_id?: string;
-    recipe_multiplier?: number;
     rent_per_cycle: number;
     requires_service_name?: string;
     requires_service_type?: string;
