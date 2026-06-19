@@ -830,29 +830,6 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
-    jobs: Array<{
-        eta_ticks: number;
-        external?: boolean;
-        facility_id: string;
-        job_id: string;
-        mode: string;
-        orderer: string;
-        position: number;
-        produces?: Array<{
-            item_id: string;
-            name: string;
-            quantity: number;
-        }>;
-        progress: number;
-        recipe: string;
-        runs_done: number;
-        runs_remaining: number;
-        runs_total: number;
-        status: string;
-        venue?: string;
-    }>;
-} | {
-    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -1379,7 +1356,6 @@ export type FacilityResponse = {
         }>;
     };
     faction_facilities: Array<{
-        active: boolean;
         bonus_type?: string;
         bonus_value?: number;
         capacity?: number;
@@ -1396,7 +1372,7 @@ export type FacilityResponse = {
             name: string;
             quantity: number;
         }>;
-        maintenance_satisfied: boolean;
+        maintenance_satisfied?: boolean;
         missed_rent_cycles?: number;
         name: string;
         owner_id?: string;
@@ -1417,9 +1393,9 @@ export type FacilityResponse = {
         rent_per_cycle?: number;
         service?: string;
         type: string;
+        under_construction?: boolean;
     }>;
     player_facilities: Array<{
-        active: boolean;
         bonus_type?: string;
         bonus_value?: number;
         capacity?: number;
@@ -1436,7 +1412,7 @@ export type FacilityResponse = {
             name: string;
             quantity: number;
         }>;
-        maintenance_satisfied: boolean;
+        maintenance_satisfied?: boolean;
         missed_rent_cycles?: number;
         name: string;
         owner_id?: string;
@@ -1457,6 +1433,7 @@ export type FacilityResponse = {
         rent_per_cycle?: number;
         service?: string;
         type: string;
+        under_construction?: boolean;
     }>;
     player_rent?: {
         arrears_owed?: number;
@@ -1474,7 +1451,6 @@ export type FacilityResponse = {
         supply: number;
     };
     public_facilities?: Array<{
-        active: boolean;
         bonus_type?: string;
         bonus_value?: number;
         capacity?: number;
@@ -1491,7 +1467,7 @@ export type FacilityResponse = {
             name: string;
             quantity: number;
         }>;
-        maintenance_satisfied: boolean;
+        maintenance_satisfied?: boolean;
         missed_rent_cycles?: number;
         name: string;
         owner_id?: string;
@@ -1512,9 +1488,9 @@ export type FacilityResponse = {
         rent_per_cycle?: number;
         service?: string;
         type: string;
+        under_construction?: boolean;
     }>;
     station_facilities: Array<{
-        active: boolean;
         bonus_type?: string;
         bonus_value?: number;
         capacity?: number;
@@ -1531,7 +1507,7 @@ export type FacilityResponse = {
             name: string;
             quantity: number;
         }>;
-        maintenance_satisfied: boolean;
+        maintenance_satisfied?: boolean;
         missed_rent_cycles?: number;
         name: string;
         owner_id?: string;
@@ -1552,11 +1528,11 @@ export type FacilityResponse = {
         rent_per_cycle?: number;
         service?: string;
         type: string;
+        under_construction?: boolean;
     }>;
 } | {
     action: string;
     facilities: Array<{
-        active: boolean;
         arrears_owed?: number;
         base_id: string;
         base_name: string;
@@ -1582,7 +1558,6 @@ export type FacilityResponse = {
     action: string;
     arrears_owed?: number;
     facilities: Array<{
-        active: boolean;
         arrears_owed?: number;
         base_id: string;
         base_name: string;
@@ -1763,6 +1738,18 @@ export type FacilityResponse = {
 } | {
     action: string;
     base_id: string;
+    complete_tick: number;
+    crate_count: number;
+    crate_item_id: string;
+    crate_name: string;
+    facility_id: string;
+    facility_name: string;
+    facility_type: string;
+    hint: string;
+    ticks_to_complete: number;
+} | {
+    action: string;
+    base_id: string;
     capacity?: number;
     facility_id: string;
     facility_name: string;
@@ -1792,7 +1779,6 @@ export type FacilityResponse = {
 } | {
     base_id: string;
     faction_facilities: Array<{
-        active: boolean;
         capacity?: number;
         facility_id: string;
         faction_service: string;
@@ -1958,7 +1944,6 @@ export type FacilityResponse = {
     base_name: string;
     count: number;
     listings: Array<{
-        active: boolean;
         build_cost?: number;
         build_time?: number;
         category?: string;
@@ -10838,6 +10823,130 @@ export type SpacemoltFacilityCancelListingResponses = {
 
 export type SpacemoltFacilityCancelListingResponse = SpacemoltFacilityCancelListingResponses[keyof SpacemoltFacilityCancelListingResponses];
 
+export type SpacemoltFacilityDismantleData = {
+    body?: {
+        /**
+         * For 'personal_decorate': who can visit your quarters. For 'set_access': 'public' opens your facility to renters, 'private' closes it.
+         */
+        access?: 'private' | 'public';
+        /**
+         * Filter for 'types' action: show only this category.
+         */
+        category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         */
+        deliver_to?: 'storage' | 'faction';
+        /**
+         * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
+         */
+        description?: string;
+        /**
+         * Transfer direction for 'transfer' action ('to_faction' or 'to_player'), or job direction for 'job_add' ('forward' or 'reverse').
+         */
+        direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
+        /**
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         */
+        facility_id?: string;
+        /**
+         * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
+         */
+        facility_type?: string;
+        /**
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
+         */
+        faction?: boolean;
+        /**
+         * Output item ID for 'set_output_price'.
+         */
+        item_id?: string;
+        /**
+         * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
+         */
+        job_id?: string;
+        /**
+         * Filter for 'types' action: show only this tier level (1, 2, 3, etc.).
+         */
+        level?: number;
+        /**
+         * For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.
+         */
+        listing_id?: string;
+        /**
+         * For 'browse_for_sale': optional maximum price filter.
+         */
+        max_price?: number;
+        /**
+         * Filter for 'types' action: case-insensitive name search (e.g. 'refinery').
+         */
+        name?: string;
+        /**
+         * Page number for 'types' action results (default: 1).
+         */
+        page?: number;
+        /**
+         * Results per page for 'types' action (default: 20, max: 50).
+         */
+        per_page?: number;
+        /**
+         * Target player ID for 'transfer' action with direction 'to_player'.
+         */
+        player_id?: string;
+        /**
+         * New queue position for 'job_reorder' (1-based).
+         */
+        position?: number;
+        /**
+         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         */
+        price?: number;
+        /**
+         * For 'job_add': number of runs to queue.
+         */
+        quantity?: number;
+        /**
+         * Recipe ID to run (for 'job_add' action).
+         */
+        recipe_id?: string;
+        /**
+         * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
+         */
+        username?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/dismantle';
+};
+
+export type SpacemoltFacilityDismantleErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityDismantleResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityDismantleResponse = SpacemoltFacilityDismantleResponses[keyof SpacemoltFacilityDismantleResponses];
+
 export type SpacemoltFacilityFactionBuildData = {
     body?: {
         /**
@@ -10961,6 +11070,130 @@ export type SpacemoltFacilityFactionBuildResponses = {
 };
 
 export type SpacemoltFacilityFactionBuildResponse = SpacemoltFacilityFactionBuildResponses[keyof SpacemoltFacilityFactionBuildResponses];
+
+export type SpacemoltFacilityFactionDismantleData = {
+    body?: {
+        /**
+         * For 'personal_decorate': who can visit your quarters. For 'set_access': 'public' opens your facility to renters, 'private' closes it.
+         */
+        access?: 'private' | 'public';
+        /**
+         * Filter for 'types' action: show only this category.
+         */
+        category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         */
+        deliver_to?: 'storage' | 'faction';
+        /**
+         * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
+         */
+        description?: string;
+        /**
+         * Transfer direction for 'transfer' action ('to_faction' or 'to_player'), or job direction for 'job_add' ('forward' or 'reverse').
+         */
+        direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
+        /**
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         */
+        facility_id?: string;
+        /**
+         * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
+         */
+        facility_type?: string;
+        /**
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
+         */
+        faction?: boolean;
+        /**
+         * Output item ID for 'set_output_price'.
+         */
+        item_id?: string;
+        /**
+         * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
+         */
+        job_id?: string;
+        /**
+         * Filter for 'types' action: show only this tier level (1, 2, 3, etc.).
+         */
+        level?: number;
+        /**
+         * For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.
+         */
+        listing_id?: string;
+        /**
+         * For 'browse_for_sale': optional maximum price filter.
+         */
+        max_price?: number;
+        /**
+         * Filter for 'types' action: case-insensitive name search (e.g. 'refinery').
+         */
+        name?: string;
+        /**
+         * Page number for 'types' action results (default: 1).
+         */
+        page?: number;
+        /**
+         * Results per page for 'types' action (default: 20, max: 50).
+         */
+        per_page?: number;
+        /**
+         * Target player ID for 'transfer' action with direction 'to_player'.
+         */
+        player_id?: string;
+        /**
+         * New queue position for 'job_reorder' (1-based).
+         */
+        position?: number;
+        /**
+         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         */
+        price?: number;
+        /**
+         * For 'job_add': number of runs to queue.
+         */
+        quantity?: number;
+        /**
+         * Recipe ID to run (for 'job_add' action).
+         */
+        recipe_id?: string;
+        /**
+         * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
+         */
+        username?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/faction_dismantle';
+};
+
+export type SpacemoltFacilityFactionDismantleErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityFactionDismantleResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityFactionDismantleResponse = SpacemoltFacilityFactionDismantleResponses[keyof SpacemoltFacilityFactionDismantleResponses];
 
 export type SpacemoltFacilityFactionListData = {
     body?: {
