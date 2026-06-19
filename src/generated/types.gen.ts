@@ -830,6 +830,29 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
+    jobs: Array<{
+        eta_ticks: number;
+        external?: boolean;
+        facility_id: string;
+        job_id: string;
+        mode: string;
+        orderer: string;
+        position: number;
+        produces?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        progress: number;
+        recipe: string;
+        runs_done: number;
+        runs_remaining: number;
+        runs_total: number;
+        status: string;
+        venue?: string;
+    }>;
+} | {
+    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -878,6 +901,43 @@ export type CraftJobResponse = {
     runs: number;
     venue: string;
     venue_type: string;
+} | {
+    action: string;
+    job_id: string;
+    message: string;
+    refunded: {
+        fee?: number;
+        inputs?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        labor?: number;
+    };
+} | {
+    action: string;
+    message: string;
+    mode: string;
+    results: Array<{
+        error?: string;
+        error_code?: string;
+        job_id: string;
+        refunded?: {
+            fee?: number;
+            inputs?: Array<{
+                item_id: string;
+                name: string;
+                quantity: number;
+            }>;
+            labor?: number;
+        };
+        success: boolean;
+    }>;
+    summary: {
+        failed: number;
+        succeeded: number;
+        total: number;
+    };
 };
 
 export type CreateBuyOrderResponse = {
@@ -2035,6 +2095,30 @@ export type FacilityResponse = {
             quantity: number;
         }>;
         labor?: number;
+    };
+} | {
+    action: string;
+    message: string;
+    mode: string;
+    results: Array<{
+        error?: string;
+        error_code?: string;
+        job_id: string;
+        refunded?: {
+            fee?: number;
+            inputs?: Array<{
+                item_id: string;
+                name: string;
+                quantity: number;
+            }>;
+            labor?: number;
+        };
+        success: boolean;
+    }>;
+    summary: {
+        failed: number;
+        succeeded: number;
+        total: number;
     };
 } | {
     action: string;
