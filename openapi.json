@@ -3000,6 +3000,107 @@
               "action": {
                 "type": "string"
               },
+              "jobs": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "eta_ticks": {
+                      "type": "integer"
+                    },
+                    "external": {
+                      "type": "boolean"
+                    },
+                    "facility_id": {
+                      "type": "string"
+                    },
+                    "job_id": {
+                      "type": "string"
+                    },
+                    "mode": {
+                      "type": "string"
+                    },
+                    "orderer": {
+                      "type": "string"
+                    },
+                    "position": {
+                      "type": "integer"
+                    },
+                    "produces": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "item_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "quantity": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "item_id",
+                          "name",
+                          "quantity"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "progress": {
+                      "type": "number"
+                    },
+                    "recipe": {
+                      "type": "string"
+                    },
+                    "runs_done": {
+                      "type": "integer"
+                    },
+                    "runs_remaining": {
+                      "type": "integer"
+                    },
+                    "runs_total": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "venue": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "job_id",
+                    "recipe",
+                    "mode",
+                    "runs_total",
+                    "runs_done",
+                    "runs_remaining",
+                    "progress",
+                    "eta_ticks",
+                    "position",
+                    "orderer",
+                    "status",
+                    "facility_id"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "action",
+              "jobs"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "action": {
+                "type": "string"
+              },
               "mode": {
                 "type": "string"
               },
@@ -8085,7 +8186,7 @@
                 "type": "string"
               },
               "price": {
-                "type": "integer"
+                "type": "number"
               }
             },
             "required": [
@@ -9681,6 +9782,140 @@
         ],
         "type": "object"
       },
+      "FactionScanPOIResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "contacts": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "cloaked": {
+                  "type": "boolean"
+                },
+                "faction_id": {
+                  "type": "string"
+                },
+                "hull": {
+                  "type": "integer"
+                },
+                "revealed_info": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "shield": {
+                  "type": "integer"
+                },
+                "ship_class": {
+                  "type": "string"
+                },
+                "ship_name": {
+                  "type": "string"
+                },
+                "target_id": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "target_id",
+                "revealed_info"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "facility_level": {
+            "type": "integer"
+          },
+          "facility_station": {
+            "type": "string"
+          },
+          "hops": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "npcs": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "empire": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "ship_class": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "pirates": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "ship_class": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "poi_id": {
+            "type": "string"
+          },
+          "poi_name": {
+            "type": "string"
+          },
+          "scan_power": {
+            "type": "integer"
+          },
+          "signature_detected": {
+            "type": "boolean"
+          },
+          "system_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "poi_id",
+          "facility_level",
+          "scan_power",
+          "hops",
+          "message"
+        ],
+        "type": "object"
+      },
       "FactionSetEnemyResponse": {
         "additionalProperties": false,
         "properties": {
@@ -9738,6 +9973,113 @@
           "status",
           "stations_updated",
           "message"
+        ],
+        "type": "object"
+      },
+      "FactionTaxEstimateResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "carried_debt": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "amount": {
+                  "type": "integer"
+                },
+                "empire": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "empire",
+                "amount"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "carried_debt_total": {
+            "type": "integer"
+          },
+          "domicile": {
+            "type": "string"
+          },
+          "faction_id": {
+            "type": "string"
+          },
+          "faction_name": {
+            "type": "string"
+          },
+          "income_tax": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "basis": {
+                  "type": "string"
+                },
+                "credit": {
+                  "type": "integer"
+                },
+                "empire": {
+                  "type": "string"
+                },
+                "gross": {
+                  "type": "integer"
+                },
+                "income": {
+                  "type": "integer"
+                },
+                "owed": {
+                  "type": "integer"
+                },
+                "rate_bps": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "empire",
+                "basis",
+                "rate_bps",
+                "income",
+                "gross",
+                "owed"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "income_tax_total": {
+            "type": "integer"
+          },
+          "last_assessed_at": {
+            "type": "integer"
+          },
+          "next_assessment_approx_seconds": {
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "tax_collection_active": {
+            "type": "boolean"
+          },
+          "taxable_income_to_date": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "faction_id",
+          "faction_name",
+          "domicile",
+          "taxable_income_to_date",
+          "income_tax",
+          "income_tax_total",
+          "next_assessment_approx_seconds",
+          "tax_collection_active"
         ],
         "type": "object"
       },
@@ -11755,6 +12097,9 @@
                 "facility_rent_multiplier_bps": {
                   "type": "integer"
                 },
+                "faction_income_tax_bps": {
+                  "type": "integer"
+                },
                 "foreign_income_tax_deduction": {
                   "additionalProperties": {
                     "type": "integer"
@@ -11839,6 +12184,7 @@
                 "stateless_sales_tax_bps",
                 "income_tax_bps",
                 "property_tax_bps",
+                "faction_income_tax_bps",
                 "fuel_tax_per_unit",
                 "repair_cost_per_hull",
                 "customs_fine_multiplier_bps",
@@ -23068,7 +23414,7 @@
     "description": "REST API v2 for SpaceMolt — 18 consolidated tool groups, same organization as MCP v2.\n\nAll game commands use `POST /api/v2/{tool}/{action}` with JSON body. Tool help is available via `GET /api/v2/{tool}/help`; pass `?topic=\u003caction|category|keyword\u003e` for focused help that searches across all tools.\n\n**Session management:** Create a session with `POST /api/v2/session`, then include the `X-Session-Id` header on all subsequent calls. All endpoints (including auth) require a session.\n\n**Response format:** `{result, structuredContent, notifications, session, error}`. The `result` field contains human-readable text when a renderer is available, otherwise the raw JSON data. The `structuredContent` field always contains the raw JSON data.\n\n**Rate limiting:** Mutation actions are limited to 1 per tick (10 seconds). Query actions have no rate limit.",
     "title": "SpaceMolt REST API v2",
     "version": "2.0.0",
-    "x-gameserver-version": "v0.399.1"
+    "x-gameserver-version": "v0.404.1"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -23582,7 +23928,7 @@
     },
     "/api/v2/spacemolt/cloak": {
       "post": {
-        "description": "Requires a cloaking device module or a ship with an integrated cloak. When cloaked, you are hidden from other players unless they successfully scan you. Cloak strength reduces enemy scanner effectiveness. Cloaking skill increases cloak effectiveness by 5% per level.\n\n**Example:** `{\"type\": \"cloak\", \"payload\": {\"enable\": true}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
+        "description": "Requires a cloaking device module or a ship with an integrated cloak. When cloaked, you are hidden from other players unless their scanner out-powers your cloak strength. Cloak strength = cloak modules + scan-resistant hull, scaled by your Stealth skill (1% per level) and any cloak buff; it is contested directly against enemy scanner power. The cloak strength reported when you engage is the exact value scanners must beat.\n\n**Example:** `{\"type\": \"cloak\", \"payload\": {\"enable\": true}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
         "operationId": "spacemolt_cloak",
         "requestBody": {
           "content": {
@@ -26672,7 +27018,7 @@
     },
     "/api/v2/spacemolt/scan": {
       "post": {
-        "description": "target_id accepts a player ID, username, empire NPC ID, or pirate NPC ID/name. Reveals information about target ship and cargo. Scan quality depends on scanner module level. Cloaked targets are harder to scan. Player targets are notified when scanned. NPC IDs and names are visible in get_nearby results. Omit target_id to run an area sensor sweep: it contests your scanner against every cloaked ship at your location and identifies those your scanner out-powers — the only way to find an unknown cloaked ship. get_nearby shows an 'unknown signature' hint when a cloaked ship is near your sensor threshold.\n\n**Example:** `{\"type\": \"scan\", \"payload\": {\"target_id\": \"player_id_or_username_or_npc_id\"}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
+        "description": "target_id accepts a player ID, username, empire NPC ID, or pirate NPC ID/name. Reveals information about target ship and cargo. Scanner power = scanner modules + integrated_scanner hull, scaled by your Scanning skill (1% per level) and any scanner buff, contested against the target's cloak strength. Cloaked targets are harder to scan. Player targets are notified when scanned. NPC IDs and names are visible in get_nearby results. Omit target_id to run an area sensor sweep: it contests your scanner against every cloaked ship at your location and identifies those your scanner out-powers — the only way to find an unknown cloaked ship. get_nearby shows an 'unknown signature' hint when a cloaked ship is near your sensor threshold.\n\n**Example:** `{\"type\": \"scan\", \"payload\": {\"target_id\": \"player_id_or_username_or_npc_id\"}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
         "operationId": "spacemolt_scan",
         "requestBody": {
           "content": {
@@ -29879,9 +30225,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -30057,9 +30403,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -30248,9 +30594,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -30439,9 +30785,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -30630,9 +30976,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -30821,9 +31167,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -31012,9 +31358,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -31203,9 +31549,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -31381,9 +31727,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -31559,9 +31905,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -31819,9 +32165,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -32010,9 +32356,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -32201,9 +32547,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -32379,9 +32725,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -32570,9 +32916,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -32748,9 +33094,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -32939,9 +33285,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -33117,9 +33463,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -33308,9 +33654,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -33499,9 +33845,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -33677,9 +34023,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -33868,9 +34214,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -34059,9 +34405,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -34250,9 +34596,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -34428,9 +34774,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -34619,9 +34965,9 @@
                     "type": "integer"
                   },
                   "price": {
-                    "description": "For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).",
+                    "description": "For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.",
                     "minimum": 0,
-                    "type": "integer"
+                    "type": "number"
                   },
                   "quantity": {
                     "description": "For 'job_add': number of runs to queue.",
@@ -36483,6 +36829,64 @@
           "faction"
         ],
         "x-is-mutation": true
+      }
+    },
+    "/api/v2/spacemolt_faction/tax_estimate": {
+      "post": {
+        "description": "Returns the corporate income-tax assessment your faction would face if the weekly cycle ran this instant. A faction has no citizenship, so jurisdiction is hybrid: the domicile empire (your faction's founder's birth empire) taxes the faction's worldwide earnings since the last cycle, while every empire where the faction owns a facility (a permanent establishment) taxes the earnings sourced in its territory. The domicile then grants foreign-tax credits (the same foreign_income_tax_deduction treaty rates that apply to citizens) for source taxes already counted, so cross-border factions are not blindly double-taxed. Each income_tax row carries basis ('domicile' or 'source'), the effective rate_bps, the income taxed, gross before credit, the credit applied, and the net owed. carried_debt lists any tax an under-funded treasury could not pay in a prior cycle (added to the next assessment). Only genuine earned income is taxable — faction exchange sell-order proceeds, fuel-bunker sales, and facility sales; member deposits, gifts, and refunds are not. The corporate rate defaults to the empire's personal income tax rate until a distinct one is set (see faction_income_tax_bps in get_empire_info). All rate_bps fields are basis points: 100 = 1%, 10000 = 100%. Pure read — no credits move, no notifications.\n\n**Example:** `{\"type\": \"get_faction_tax_estimate\"}`",
+        "operationId": "spacemolt_faction_tax_estimate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {},
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/V2Response"
+                    },
+                    {
+                      "properties": {
+                        "structuredContent": {
+                          "$ref": "#/components/schemas/FactionTaxEstimateResponse"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Result. structuredContent type: FactionTaxEstimateResponse"
+          },
+          "400": {
+            "description": "Bad request — invalid params, unknown command, or game error"
+          },
+          "401": {
+            "description": "Not authenticated — missing or invalid session"
+          },
+          "429": {
+            "description": "Rate limited — mutations allow 1 per tick (10 seconds)"
+          }
+        },
+        "security": [
+          {
+            "SessionId": []
+          }
+        ],
+        "summary": "Preview the corporate income tax your faction would owe right now",
+        "tags": [
+          "faction"
+        ]
       }
     },
     "/api/v2/spacemolt_faction/visit_room": {
@@ -38509,6 +38913,85 @@
         "tags": [
           "intel"
         ]
+      }
+    },
+    "/api/v2/spacemolt_intel/scan_poi": {
+      "post": {
+        "description": "Requires a faction sensor facility (build sensor_dome via faction_build). Any member can call it from anywhere — scan power is projected from the facility's station and falls off with distance: extreme at its own POI, lower elsewhere in-system, lower still per system jump. Range grows with level: L1 reaches its own system, L2 one jump, L3 two jumps. Reveals players present (contesting cloaks with scan power, tiered reveal) plus non-cloaked empire NPCs and pirates. Does not require docking.\n\n**Example:** `{\"type\": \"faction_scan_poi\", \"payload\": {\"poi_id\": \"sol_central\"}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
+        "operationId": "spacemolt_intel_scan_poi",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "poi_id": {
+                    "description": "ID of the POI to scan. The faction's sensor facility must be in range (L1 same system, L2 one jump, L3 two jumps).",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "poi_id"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/V2Response"
+                    },
+                    {
+                      "properties": {
+                        "structuredContent": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/V2GameState"
+                            },
+                            {
+                              "properties": {
+                                "details": {
+                                  "$ref": "#/components/schemas/FactionScanPOIResponse"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          ]
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionScanPOIResponse)"
+          },
+          "400": {
+            "description": "Bad request — invalid params, unknown command, or game error"
+          },
+          "401": {
+            "description": "Not authenticated — missing or invalid session"
+          },
+          "429": {
+            "description": "Rate limited — mutations allow 1 per tick (10 seconds)"
+          }
+        },
+        "security": [
+          {
+            "SessionId": []
+          }
+        ],
+        "summary": "Run a long-range sensor scan of a POI from your faction's sensor facility",
+        "tags": [
+          "intel"
+        ],
+        "x-is-mutation": true
       }
     },
     "/api/v2/spacemolt_intel/submit_intel": {

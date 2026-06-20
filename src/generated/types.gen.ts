@@ -830,6 +830,29 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
+    jobs: Array<{
+        eta_ticks: number;
+        external?: boolean;
+        facility_id: string;
+        job_id: string;
+        mode: string;
+        orderer: string;
+        position: number;
+        produces?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        progress: number;
+        recipe: string;
+        runs_done: number;
+        runs_remaining: number;
+        runs_total: number;
+        status: string;
+        venue?: string;
+    }>;
+} | {
+    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -2529,6 +2552,42 @@ export type FactionRoomsResponse = {
     tag: string;
 };
 
+export type FactionScanPoiResponse = {
+    contacts?: Array<{
+        cloaked?: boolean;
+        faction_id?: string;
+        hull?: number;
+        revealed_info: Array<string>;
+        shield?: number;
+        ship_class?: string;
+        ship_name?: string;
+        target_id: string;
+        username?: string;
+    }>;
+    facility_level: number;
+    facility_station?: string;
+    hops: number;
+    message: string;
+    npcs?: Array<{
+        empire?: string;
+        id: string;
+        name?: string;
+        role?: string;
+        ship_class?: string;
+    }>;
+    pirates?: Array<{
+        id: string;
+        name?: string;
+        role?: string;
+        ship_class?: string;
+    }>;
+    poi_id: string;
+    poi_name?: string;
+    scan_power: number;
+    signature_detected?: boolean;
+    system_id?: string;
+};
+
 export type FactionSetEnemyResponse = {
     message: string;
     target_faction_id: string;
@@ -2545,6 +2604,33 @@ export type FactionSubmitTradeIntelResponse = {
     message: string;
     stations_updated: number;
     status: string;
+};
+
+export type FactionTaxEstimateResponse = {
+    action: string;
+    carried_debt?: Array<{
+        amount: number;
+        empire: string;
+    }>;
+    carried_debt_total?: number;
+    domicile: string;
+    faction_id: string;
+    faction_name: string;
+    income_tax: Array<{
+        basis: string;
+        credit?: number;
+        empire: string;
+        gross: number;
+        income: number;
+        owed: number;
+        rate_bps: number;
+    }>;
+    income_tax_total: number;
+    last_assessed_at?: number;
+    next_assessment_approx_seconds: number;
+    note?: string;
+    tax_collection_active: boolean;
+    taxable_income_to_date: number;
 };
 
 export type FactionTradeIntelStatusResponse = {
@@ -3081,6 +3167,7 @@ export type GetEmpireInfoResponse = {
         empire_id: string;
         eviction_grace_cycles: number;
         facility_rent_multiplier_bps: number;
+        faction_income_tax_bps: number;
         foreign_income_tax_deduction?: {
             [key: string]: number;
         };
@@ -10492,7 +10579,7 @@ export type SpacemoltFacilityBrowseForSaleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -10614,7 +10701,7 @@ export type SpacemoltFacilityBuildData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -10738,7 +10825,7 @@ export type SpacemoltFacilityBuyListingData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -10862,7 +10949,7 @@ export type SpacemoltFacilityCancelListingData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -10986,7 +11073,7 @@ export type SpacemoltFacilityDismantleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -11110,7 +11197,7 @@ export type SpacemoltFacilityFactionBuildData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -11234,7 +11321,7 @@ export type SpacemoltFacilityFactionDismantleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -11358,7 +11445,7 @@ export type SpacemoltFacilityFactionListData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -11480,7 +11567,7 @@ export type SpacemoltFacilityFactionOwnedData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -11602,7 +11689,7 @@ export type SpacemoltFacilityFactionUpgradeData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -11768,7 +11855,7 @@ export type SpacemoltFacilityJobAddData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -11892,7 +11979,7 @@ export type SpacemoltFacilityJobCancelData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12016,7 +12103,7 @@ export type SpacemoltFacilityJobListData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12138,7 +12225,7 @@ export type SpacemoltFacilityJobReorderData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12262,7 +12349,7 @@ export type SpacemoltFacilityListData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12384,7 +12471,7 @@ export type SpacemoltFacilityListForSaleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12508,7 +12595,7 @@ export type SpacemoltFacilityOwnedData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12630,7 +12717,7 @@ export type SpacemoltFacilityPersonalBuildData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12754,7 +12841,7 @@ export type SpacemoltFacilityPersonalDecorateData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12878,7 +12965,7 @@ export type SpacemoltFacilityPersonalVisitData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13000,7 +13087,7 @@ export type SpacemoltFacilitySetAccessData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13124,7 +13211,7 @@ export type SpacemoltFacilitySetOutputPriceData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13248,7 +13335,7 @@ export type SpacemoltFacilityTransferData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13372,7 +13459,7 @@ export type SpacemoltFacilityTypesData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13494,7 +13581,7 @@ export type SpacemoltFacilityUpgradeData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13618,7 +13705,7 @@ export type SpacemoltFacilityUpgradesData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in credits. For 'set_output_price': per-unit rental price others pay to output this item (0 clears).
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -14622,6 +14709,41 @@ export type SpacemoltFactionSetEnemyResponses = {
 };
 
 export type SpacemoltFactionSetEnemyResponse = SpacemoltFactionSetEnemyResponses[keyof SpacemoltFactionSetEnemyResponses];
+
+export type SpacemoltFactionTaxEstimateData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction/tax_estimate';
+};
+
+export type SpacemoltFactionTaxEstimateErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFactionTaxEstimateResponses = {
+    /**
+     * Result. structuredContent type: FactionTaxEstimateResponse
+     */
+    200: V2Response & {
+        structuredContent?: FactionTaxEstimateResponse;
+    };
+};
+
+export type SpacemoltFactionTaxEstimateResponse = SpacemoltFactionTaxEstimateResponses[keyof SpacemoltFactionTaxEstimateResponses];
 
 export type SpacemoltFactionVisitRoomData = {
     body?: {
@@ -15778,6 +15900,46 @@ export type SpacemoltIntelQueryTradeIntelResponses = {
 };
 
 export type SpacemoltIntelQueryTradeIntelResponse = SpacemoltIntelQueryTradeIntelResponses[keyof SpacemoltIntelQueryTradeIntelResponses];
+
+export type SpacemoltIntelScanPoiData = {
+    body?: {
+        /**
+         * ID of the POI to scan. The faction's sensor facility must be in range (L1 same system, L2 one jump, L3 two jumps).
+         */
+        poi_id: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_intel/scan_poi';
+};
+
+export type SpacemoltIntelScanPoiErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltIntelScanPoiResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionScanPOIResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: FactionScanPoiResponse;
+        };
+    };
+};
+
+export type SpacemoltIntelScanPoiResponse = SpacemoltIntelScanPoiResponses[keyof SpacemoltIntelScanPoiResponses];
 
 export type SpacemoltIntelSubmitIntelData = {
     body?: {
