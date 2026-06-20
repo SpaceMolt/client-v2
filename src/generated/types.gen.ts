@@ -360,7 +360,7 @@ export type CatalogResponse = {
         }>;
     };
     /**
-     * Catalog entries. Shape depends on the requested type: ships → ShipClass, skills → Skill, recipes → Recipe, items → Item or Module.
+     * Catalog entries. Shape depends on the requested type: ships → ShipClass, skills → Skill, recipes → Recipe, items → Item or Module, facilities → FacilityDefinition.
      */
     items: Array<{
         base_value: number;
@@ -549,6 +549,55 @@ export type CatalogResponse = {
             item_id: string;
             quantity: number;
         }>;
+    } | {
+        allows_contraband?: boolean;
+        always_on: boolean;
+        battery_capacity?: number;
+        build_cost: number;
+        build_materials?: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
+        build_time: number;
+        category: string;
+        degraded_description?: string;
+        deposit_to_empire_reserves?: boolean;
+        description: string;
+        empire?: string;
+        expansion_of?: string;
+        expansion_scale?: number;
+        faction_cap?: number;
+        faction_service_type?: string;
+        fleet_upkeep?: boolean;
+        fuel_capacity?: number;
+        fuel_output?: boolean;
+        id: string;
+        is_recycler?: boolean;
+        labor_cost: number;
+        level: number;
+        life_support_draw?: number;
+        life_support_supply?: number;
+        lore?: string;
+        maintenance_inputs?: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
+        name: string;
+        personal_bonus_type?: string;
+        personal_bonus_value?: number;
+        personal_service_type?: string;
+        pirate_base_only?: boolean;
+        power_draw?: number;
+        power_supply?: number;
+        recipe_id?: string;
+        requires_service_type?: string;
+        satisfied_description?: string;
+        scan_falloff?: number;
+        scan_power?: number;
+        service_type?: string;
+        station_or_faction_only?: boolean;
+        unique?: boolean;
+        upgrades_from?: string;
     }>;
     message: string;
     page: number;
@@ -2876,6 +2925,9 @@ export type ForumDeleteThreadResponse = {
 };
 
 export type ForumGetThreadResponse = {
+    has_more: boolean;
+    page: number;
+    per_page: number;
     replies: Array<{
         author: string;
         author_empire?: string;
@@ -2917,6 +2969,7 @@ export type ForumGetThreadResponse = {
         updated_at: string;
         upvotes: number;
     };
+    total_replies: number;
 };
 
 export type ForumListResponse = {
@@ -3466,6 +3519,7 @@ export type GetNearbyResponse = {
 };
 
 export type GetNotesResponse = {
+    has_more: boolean;
     notes: Array<{
         content_length: number;
         created_at: string;
@@ -3474,6 +3528,8 @@ export type GetNotesResponse = {
         title: string;
         value: number;
     }>;
+    page: number;
+    page_size: number;
     total_count: number;
 };
 
@@ -9998,7 +10054,7 @@ export type SpacemoltBattleTargetResponse = SpacemoltBattleTargetResponses[keyof
 export type SpacemoltCatalogData = {
     body?: {
         /**
-         * Filter by category. Ships: Combat/Industrial/Commercial/etc. Others: their own category.
+         * Filter by category. Ships: Combat/Industrial/Commercial/etc. Facilities: service/infrastructure/production/faction/personal. Others: their own category.
          */
         category?: string;
         /**
@@ -10036,7 +10092,7 @@ export type SpacemoltCatalogData = {
         /**
          * Data type to browse
          */
-        type: 'ships' | 'skills' | 'recipes' | 'items';
+        type: 'ships' | 'skills' | 'recipes' | 'items' | 'facilities';
     };
     path?: never;
     query?: never;
@@ -19847,6 +19903,14 @@ export type SpacemoltSocialForumDeleteThreadResponse = SpacemoltSocialForumDelet
 export type SpacemoltSocialForumGetThreadData = {
     body?: {
         /**
+         * Replies per page (default 20, max 100)
+         */
+        limit?: number;
+        /**
+         * Reply page number (default 1)
+         */
+        page?: number;
+        /**
          * UUID of thread to view
          */
         target: string;
@@ -20154,7 +20218,14 @@ export type SpacemoltSocialGetChatHistoryResponse = SpacemoltSocialGetChatHistor
 
 export type SpacemoltSocialGetNotesData = {
     body?: {
-        [key: string]: unknown;
+        /**
+         * Page number (default 1)
+         */
+        page?: number;
+        /**
+         * Notes per page (default 20, max 100)
+         */
+        page_size?: number;
     };
     path?: never;
     query?: never;
