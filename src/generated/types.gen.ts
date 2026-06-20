@@ -53,6 +53,10 @@ export type AttackResponse = {
  */
 export type Base = {
     /**
+     * Whether non-owning-faction pilots may build facilities at this player station
+     */
+    allow_outsider_facilities?: boolean;
+    /**
      * Defense rating 0-100
      */
     defense_level: number;
@@ -67,6 +71,10 @@ export type Base = {
     has_drones?: boolean;
     id: string;
     /**
+     * Owner-set market listing fee in basis points (player station); 0 = default
+     */
+    market_fee_bps?: number;
+    /**
      * Maximum fuel tank capacity (0 if no fuel bunker installed)
      */
     max_fuel?: number;
@@ -79,9 +87,32 @@ export type Base = {
     poi_id: string;
     public_access: boolean;
     /**
+     * Owner-set per-unit station fuel price (player station); 0 = default
+     */
+    refuel_price_each?: number;
+    /**
+     * Owner-set per-hull-point repair price (player station); 0 = default
+     */
+    repair_price_per_hull?: number;
+    /**
+     * Per-service access policy on a player station (service type -> public|allies|faction)
+     */
+    service_access?: {
+        [key: string]: string;
+    };
+    /**
      * Base type (currently only 'station')
      */
     type?: string;
+};
+
+export type BaseCostResponse = {
+    eligible_here: boolean;
+    founding_fee: number;
+    max_per_faction: number;
+    reason?: string;
+    requirements: string;
+    station_core_item: string;
 };
 
 export type BattleResponse = {
@@ -134,6 +165,16 @@ export type BrowseShipsResponse = {
         ship_name?: string;
         tier?: number;
     }>;
+};
+
+export type BuildBaseResponse = {
+    base_id: string;
+    fee_paid: number;
+    hint: string;
+    name: string;
+    poi_id: string;
+    public_access: boolean;
+    system_id: string;
 };
 
 export type BuyInsuranceResponse = {
@@ -1420,6 +1461,7 @@ export type FacilityResponse = {
         bonus_value?: number;
         capacity?: number;
         category: string;
+        custom_name?: string;
         description: string;
         facility_id: string;
         faction_id?: string;
@@ -1460,6 +1502,7 @@ export type FacilityResponse = {
         bonus_value?: number;
         capacity?: number;
         category: string;
+        custom_name?: string;
         description: string;
         facility_id: string;
         faction_id?: string;
@@ -1515,6 +1558,7 @@ export type FacilityResponse = {
         bonus_value?: number;
         capacity?: number;
         category: string;
+        custom_name?: string;
         description: string;
         facility_id: string;
         faction_id?: string;
@@ -1555,6 +1599,7 @@ export type FacilityResponse = {
         bonus_value?: number;
         capacity?: number;
         category: string;
+        custom_name?: string;
         description: string;
         facility_id: string;
         faction_id?: string;
@@ -1596,6 +1641,7 @@ export type FacilityResponse = {
         arrears_owed?: number;
         base_id: string;
         base_name: string;
+        custom_name?: string;
         facility_id: string;
         labor_per_run?: number;
         missed_rent_cycles?: number;
@@ -1621,6 +1667,7 @@ export type FacilityResponse = {
         arrears_owed?: number;
         base_id: string;
         base_name: string;
+        custom_name?: string;
         facility_id: string;
         labor_per_run: number;
         missed_rent_cycles?: number;
@@ -1836,6 +1883,7 @@ export type FacilityResponse = {
     base_id: string;
     faction_facilities: Array<{
         capacity?: number;
+        custom_name?: string;
         facility_id: string;
         faction_service: string;
         level: number;
@@ -2135,6 +2183,11 @@ export type FacilityResponse = {
 } | {
     access: string;
     action: string;
+    facility_id: string;
+    message: string;
+} | {
+    action: string;
+    custom_name?: string;
     facility_id: string;
     message: string;
 };
@@ -2961,6 +3014,7 @@ export type GetActionLogResponse = {
 
 export type GetBaseResponse = {
     base: {
+        allow_outsider_facilities?: boolean;
         allowed_factions?: Array<string>;
         allowed_players?: Array<string>;
         banned_players?: Array<string>;
@@ -2972,12 +3026,18 @@ export type GetBaseResponse = {
         fuel: number;
         has_drones: boolean;
         id: string;
+        market_fee_bps?: number;
         max_fuel: number;
         name: string;
         owner_id?: string;
         pirate_rep_required?: number;
         poi_id: string;
         public_access: boolean;
+        refuel_price_each?: number;
+        repair_price_per_hull?: number;
+        service_access?: {
+            [key: string]: string;
+        };
         type?: string;
     };
     condition: {
@@ -3439,6 +3499,7 @@ export type GetPoiResponse = {
         }>;
     };
     base?: {
+        allow_outsider_facilities?: boolean;
         allowed_factions?: Array<string>;
         allowed_players?: Array<string>;
         banned_players?: Array<string>;
@@ -3450,12 +3511,18 @@ export type GetPoiResponse = {
         fuel: number;
         has_drones: boolean;
         id: string;
+        market_fee_bps?: number;
         max_fuel: number;
         name: string;
         owner_id?: string;
         pirate_rep_required?: number;
         poi_id: string;
         public_access: boolean;
+        refuel_price_each?: number;
+        repair_price_per_hull?: number;
+        service_access?: {
+            [key: string]: string;
+        };
         type?: string;
     };
     faction_fuel_capacity?: number;
@@ -5547,6 +5614,33 @@ export type ShipClass = {
     weapon_slots?: number;
 };
 
+export type ShipLicenseResponse = {
+    cost_paid: number;
+    empire: string;
+    faction_credits_left: number;
+    hint: string;
+    royalty_percent: number;
+};
+
+export type StationConfigResponse = {
+    action: string;
+    allow_outsider_facilities: boolean;
+    allowed_factions?: Array<string>;
+    allowed_players?: Array<string>;
+    banned_players?: Array<string>;
+    base_id: string;
+    description?: string;
+    market_fee_bps?: number;
+    message?: string;
+    name: string;
+    public_access: boolean;
+    refuel_price_each?: number;
+    repair_price_per_hull?: number;
+    service_access?: {
+        [key: string]: string;
+    };
+};
+
 /**
  * Station condition summary based on infrastructure satisfaction.
  */
@@ -7164,6 +7258,14 @@ export type SpacemoltCraftData = {
          */
         id?: string;
         /**
+         * Cancel this queued job (refunding its unconsumed inputs, labor, and rental fee) instead of crafting. Use action='queue' to list your job IDs. Setting job_id implies cancel.
+         */
+        job_id?: string;
+        /**
+         * Bulk cancel: cancel many queued jobs in one action. Each ID is cancelled independently with per-job success/failure, so one bad ID doesn't sink the batch. Refunds the unconsumed escrow of every cancelled job.
+         */
+        job_ids?: Array<string>;
+        /**
          * Bulk mode: queue many crafts in one action. Each entry: {recipe_id, quantity, facility_id?, preset?, deliver_to?}. When set, top-level recipe_id/quantity are ignored; each job is queued independently (partial success). Max 50.
          */
         jobs?: Array<{
@@ -8610,6 +8712,14 @@ export type SpacemoltRecycleData = {
          * Recipe ID to recycle (the recycler consumes the recipe's outputs and returns a lossy fraction of its inputs). Use catalog with type=recipes to browse.
          */
         id?: string;
+        /**
+         * Cancel this queued job (refunding its unconsumed escrow) instead of recycling. Setting job_id implies cancel.
+         */
+        job_id?: string;
+        /**
+         * Bulk cancel: cancel many queued jobs in one action. Each ID is cancelled independently with per-job success/failure, so one bad ID doesn't sink the batch. Refunds the unconsumed escrow of every cancelled job.
+         */
+        job_ids?: Array<string>;
         /**
          * Bulk mode: recycle many recipes in one action. Each entry: {recipe_id, quantity, facility_id?, deliver_to?}. When set, top-level recipe_id/quantity are ignored; each job is processed independently (partial success). Max 50.
          */
@@ -10504,6 +10614,269 @@ export type SpacemoltDroneUploadResponses = {
 
 export type SpacemoltDroneUploadResponse = SpacemoltDroneUploadResponses[keyof SpacemoltDroneUploadResponses];
 
+export type SpacemoltFacilityAllowFactionData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/allow_faction';
+};
+
+export type SpacemoltFacilityAllowFactionErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityAllowFactionResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityAllowFactionResponse = SpacemoltFacilityAllowFactionResponses[keyof SpacemoltFacilityAllowFactionResponses];
+
+export type SpacemoltFacilityAllowPlayerData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/allow_player';
+};
+
+export type SpacemoltFacilityAllowPlayerErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityAllowPlayerResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityAllowPlayerResponse = SpacemoltFacilityAllowPlayerResponses[keyof SpacemoltFacilityAllowPlayerResponses];
+
+export type SpacemoltFacilityBanData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/ban';
+};
+
+export type SpacemoltFacilityBanErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityBanResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityBanResponse = SpacemoltFacilityBanResponses[keyof SpacemoltFacilityBanResponses];
+
+export type SpacemoltFacilityBaseCostData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/base_cost';
+};
+
+export type SpacemoltFacilityBaseCostErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityBaseCostResponses = {
+    /**
+     * Result. structuredContent type: BaseCostResponse
+     */
+    200: V2Response & {
+        structuredContent?: BaseCostResponse;
+    };
+};
+
+export type SpacemoltFacilityBaseCostResponse = SpacemoltFacilityBaseCostResponses[keyof SpacemoltFacilityBaseCostResponses];
+
 export type SpacemoltFacilityBrowseForSaleData = {
     body?: {
         /**
@@ -10514,6 +10887,10 @@ export type SpacemoltFacilityBrowseForSaleData = {
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
         /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
@@ -10527,7 +10904,7 @@ export type SpacemoltFacilityBrowseForSaleData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -10637,6 +11014,10 @@ export type SpacemoltFacilityBuildData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -10649,7 +11030,7 @@ export type SpacemoltFacilityBuildData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -10761,6 +11142,10 @@ export type SpacemoltFacilityBuyListingData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -10773,7 +11158,7 @@ export type SpacemoltFacilityBuyListingData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -10874,6 +11259,46 @@ export type SpacemoltFacilityBuyListingResponses = {
 
 export type SpacemoltFacilityBuyListingResponse = SpacemoltFacilityBuyListingResponses[keyof SpacemoltFacilityBuyListingResponses];
 
+export type SpacemoltFacilityBuyShipLicenseData = {
+    body?: {
+        /**
+         * Empire to license shipbuilding from
+         */
+        empire: 'solarian' | 'voidborn' | 'crimson' | 'nebula' | 'outerrim';
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/buy_ship_license';
+};
+
+export type SpacemoltFacilityBuyShipLicenseErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityBuyShipLicenseResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ShipLicenseResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: ShipLicenseResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityBuyShipLicenseResponse = SpacemoltFacilityBuyShipLicenseResponses[keyof SpacemoltFacilityBuyShipLicenseResponses];
+
 export type SpacemoltFacilityCancelListingData = {
     body?: {
         /**
@@ -10884,6 +11309,10 @@ export type SpacemoltFacilityCancelListingData = {
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
         /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
@@ -10897,7 +11326,7 @@ export type SpacemoltFacilityCancelListingData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -10998,6 +11427,46 @@ export type SpacemoltFacilityCancelListingResponses = {
 
 export type SpacemoltFacilityCancelListingResponse = SpacemoltFacilityCancelListingResponses[keyof SpacemoltFacilityCancelListingResponses];
 
+export type SpacemoltFacilityDeployOutpostData = {
+    body?: {
+        /**
+         * Name for the new faction outpost
+         */
+        name: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/deploy_outpost';
+};
+
+export type SpacemoltFacilityDeployOutpostErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityDeployOutpostResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (BuildBaseResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: BuildBaseResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityDeployOutpostResponse = SpacemoltFacilityDeployOutpostResponses[keyof SpacemoltFacilityDeployOutpostResponses];
+
 export type SpacemoltFacilityDismantleData = {
     body?: {
         /**
@@ -11008,6 +11477,10 @@ export type SpacemoltFacilityDismantleData = {
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
         /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
@@ -11021,7 +11494,7 @@ export type SpacemoltFacilityDismantleData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -11133,6 +11606,10 @@ export type SpacemoltFacilityFactionBuildData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -11145,7 +11622,7 @@ export type SpacemoltFacilityFactionBuildData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -11257,6 +11734,10 @@ export type SpacemoltFacilityFactionDismantleData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -11269,7 +11750,7 @@ export type SpacemoltFacilityFactionDismantleData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -11381,6 +11862,10 @@ export type SpacemoltFacilityFactionListData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -11393,7 +11878,7 @@ export type SpacemoltFacilityFactionListData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -11503,6 +11988,10 @@ export type SpacemoltFacilityFactionOwnedData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -11515,7 +12004,7 @@ export type SpacemoltFacilityFactionOwnedData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -11625,6 +12114,10 @@ export type SpacemoltFacilityFactionUpgradeData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -11637,7 +12130,7 @@ export type SpacemoltFacilityFactionUpgradeData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -11738,6 +12231,50 @@ export type SpacemoltFacilityFactionUpgradeResponses = {
 
 export type SpacemoltFacilityFactionUpgradeResponse = SpacemoltFacilityFactionUpgradeResponses[keyof SpacemoltFacilityFactionUpgradeResponses];
 
+export type SpacemoltFacilityFoundStationData = {
+    body?: {
+        /**
+         * Name for the new faction station
+         */
+        name: string;
+        /**
+         * Whether any pilot may dock (default false — faction/allowed only)
+         */
+        public_access?: boolean;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/found_station';
+};
+
+export type SpacemoltFacilityFoundStationErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityFoundStationResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (BuildBaseResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: BuildBaseResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityFoundStationResponse = SpacemoltFacilityFoundStationResponses[keyof SpacemoltFacilityFoundStationResponses];
+
 export type SpacemoltFacilityHelpData = {
     body?: never;
     path?: never;
@@ -11791,6 +12328,10 @@ export type SpacemoltFacilityJobAddData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -11803,7 +12344,7 @@ export type SpacemoltFacilityJobAddData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -11915,6 +12456,10 @@ export type SpacemoltFacilityJobCancelData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -11927,7 +12472,7 @@ export type SpacemoltFacilityJobCancelData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -12039,6 +12584,10 @@ export type SpacemoltFacilityJobListData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -12051,7 +12600,7 @@ export type SpacemoltFacilityJobListData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -12161,6 +12710,10 @@ export type SpacemoltFacilityJobReorderData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -12173,7 +12726,7 @@ export type SpacemoltFacilityJobReorderData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -12285,6 +12838,10 @@ export type SpacemoltFacilityListData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -12297,7 +12854,7 @@ export type SpacemoltFacilityListData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -12407,6 +12964,10 @@ export type SpacemoltFacilityListForSaleData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -12419,7 +12980,7 @@ export type SpacemoltFacilityListForSaleData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -12531,6 +13092,10 @@ export type SpacemoltFacilityOwnedData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -12543,7 +13108,7 @@ export type SpacemoltFacilityOwnedData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -12653,6 +13218,10 @@ export type SpacemoltFacilityPersonalBuildData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -12665,7 +13234,7 @@ export type SpacemoltFacilityPersonalBuildData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -12777,6 +13346,10 @@ export type SpacemoltFacilityPersonalDecorateData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -12789,7 +13362,7 @@ export type SpacemoltFacilityPersonalDecorateData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -12901,6 +13474,10 @@ export type SpacemoltFacilityPersonalVisitData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -12913,7 +13490,7 @@ export type SpacemoltFacilityPersonalVisitData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -13012,6 +13589,158 @@ export type SpacemoltFacilityPersonalVisitResponses = {
 
 export type SpacemoltFacilityPersonalVisitResponse = SpacemoltFacilityPersonalVisitResponses[keyof SpacemoltFacilityPersonalVisitResponses];
 
+export type SpacemoltFacilityRemoveFactionData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/remove_faction';
+};
+
+export type SpacemoltFacilityRemoveFactionErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityRemoveFactionResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityRemoveFactionResponse = SpacemoltFacilityRemoveFactionResponses[keyof SpacemoltFacilityRemoveFactionResponses];
+
+export type SpacemoltFacilityRemovePlayerData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/remove_player';
+};
+
+export type SpacemoltFacilityRemovePlayerErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityRemovePlayerResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityRemovePlayerResponse = SpacemoltFacilityRemovePlayerResponses[keyof SpacemoltFacilityRemovePlayerResponses];
+
 export type SpacemoltFacilitySetAccessData = {
     body?: {
         /**
@@ -13022,6 +13751,10 @@ export type SpacemoltFacilitySetAccessData = {
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
         /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
@@ -13035,7 +13768,7 @@ export type SpacemoltFacilitySetAccessData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -13136,7 +13869,235 @@ export type SpacemoltFacilitySetAccessResponses = {
 
 export type SpacemoltFacilitySetAccessResponse = SpacemoltFacilitySetAccessResponses[keyof SpacemoltFacilitySetAccessResponses];
 
-export type SpacemoltFacilitySetOutputPriceData = {
+export type SpacemoltFacilitySetBuildPolicyData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/set_build_policy';
+};
+
+export type SpacemoltFacilitySetBuildPolicyErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilitySetBuildPolicyResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilitySetBuildPolicyResponse = SpacemoltFacilitySetBuildPolicyResponses[keyof SpacemoltFacilitySetBuildPolicyResponses];
+
+export type SpacemoltFacilitySetDescriptionData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/set_description';
+};
+
+export type SpacemoltFacilitySetDescriptionErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilitySetDescriptionResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilitySetDescriptionResponse = SpacemoltFacilitySetDescriptionResponses[keyof SpacemoltFacilitySetDescriptionResponses];
+
+export type SpacemoltFacilitySetMarketFeeData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/set_market_fee';
+};
+
+export type SpacemoltFacilitySetMarketFeeErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilitySetMarketFeeResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilitySetMarketFeeResponse = SpacemoltFacilitySetMarketFeeResponses[keyof SpacemoltFacilitySetMarketFeeResponses];
+
+export type SpacemoltFacilitySetNameData = {
     body?: {
         /**
          * For 'personal_decorate': who can visit your quarters. For 'set_access': 'public' opens your facility to renters, 'private' closes it.
@@ -13146,6 +14107,10 @@ export type SpacemoltFacilitySetOutputPriceData = {
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
         /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
@@ -13159,7 +14124,135 @@ export type SpacemoltFacilitySetOutputPriceData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
+         */
+        facility_id?: string;
+        /**
+         * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
+         */
+        facility_type?: string;
+        /**
+         * For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).
+         */
+        faction?: boolean;
+        /**
+         * Output item ID for 'set_output_price'.
+         */
+        item_id?: string;
+        /**
+         * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
+         */
+        job_id?: string;
+        /**
+         * Filter for 'types' action: show only this tier level (1, 2, 3, etc.).
+         */
+        level?: number;
+        /**
+         * For 'buy_listing' and 'cancel_listing': the facility listing ID. Use action 'browse_for_sale' to see listings.
+         */
+        listing_id?: string;
+        /**
+         * For 'browse_for_sale': optional maximum price filter.
+         */
+        max_price?: number;
+        /**
+         * Filter for 'types' action: case-insensitive name search (e.g. 'refinery').
+         */
+        name?: string;
+        /**
+         * Page number for 'types' action results (default: 1).
+         */
+        page?: number;
+        /**
+         * Results per page for 'types' action (default: 20, max: 50).
+         */
+        per_page?: number;
+        /**
+         * Target player ID for 'transfer' action with direction 'to_player'.
+         */
+        player_id?: string;
+        /**
+         * New queue position for 'job_reorder' (1-based).
+         */
+        position?: number;
+        /**
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         */
+        price?: number;
+        /**
+         * For 'job_add': number of runs to queue.
+         */
+        quantity?: number;
+        /**
+         * Recipe ID to run (for 'job_add' action).
+         */
+        recipe_id?: string;
+        /**
+         * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
+         */
+        username?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/set_name';
+};
+
+export type SpacemoltFacilitySetNameErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilitySetNameResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FacilityResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: FacilityResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilitySetNameResponse = SpacemoltFacilitySetNameResponses[keyof SpacemoltFacilitySetNameResponses];
+
+export type SpacemoltFacilitySetOutputPriceData = {
+    body?: {
+        /**
+         * For 'personal_decorate': who can visit your quarters. For 'set_access': 'public' opens your facility to renters, 'private' closes it.
+         */
+        access?: 'private' | 'public';
+        /**
+         * Filter for 'types' action: show only this category.
+         */
+        category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
+         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         */
+        deliver_to?: 'storage' | 'faction';
+        /**
+         * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
+         */
+        description?: string;
+        /**
+         * Transfer direction for 'transfer' action ('to_faction' or 'to_player'), or job direction for 'job_add' ('forward' or 'reverse').
+         */
+        direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
+        /**
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -13260,6 +14353,458 @@ export type SpacemoltFacilitySetOutputPriceResponses = {
 
 export type SpacemoltFacilitySetOutputPriceResponse = SpacemoltFacilitySetOutputPriceResponses[keyof SpacemoltFacilitySetOutputPriceResponses];
 
+export type SpacemoltFacilitySetPublicData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/set_public';
+};
+
+export type SpacemoltFacilitySetPublicErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilitySetPublicResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilitySetPublicResponse = SpacemoltFacilitySetPublicResponses[keyof SpacemoltFacilitySetPublicResponses];
+
+export type SpacemoltFacilitySetRefuelPriceData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/set_refuel_price';
+};
+
+export type SpacemoltFacilitySetRefuelPriceErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilitySetRefuelPriceResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilitySetRefuelPriceResponse = SpacemoltFacilitySetRefuelPriceResponses[keyof SpacemoltFacilitySetRefuelPriceResponses];
+
+export type SpacemoltFacilitySetRepairPriceData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/set_repair_price';
+};
+
+export type SpacemoltFacilitySetRepairPriceErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilitySetRepairPriceResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilitySetRepairPriceResponse = SpacemoltFacilitySetRepairPriceResponses[keyof SpacemoltFacilitySetRepairPriceResponses];
+
+export type SpacemoltFacilitySetServiceAccessData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/set_service_access';
+};
+
+export type SpacemoltFacilitySetServiceAccessErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilitySetServiceAccessResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilitySetServiceAccessResponse = SpacemoltFacilitySetServiceAccessResponses[keyof SpacemoltFacilitySetServiceAccessResponses];
+
+export type SpacemoltFacilityStationInfoData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/station_info';
+};
+
+export type SpacemoltFacilityStationInfoErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityStationInfoResponses = {
+    /**
+     * Result. structuredContent type: StationConfigResponse
+     */
+    200: V2Response & {
+        structuredContent?: StationConfigResponse;
+    };
+};
+
+export type SpacemoltFacilityStationInfoResponse = SpacemoltFacilityStationInfoResponses[keyof SpacemoltFacilityStationInfoResponses];
+
+export type SpacemoltFacilityStationSetNameData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/station_set_name';
+};
+
+export type SpacemoltFacilityStationSetNameErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityStationSetNameResponses = {
+    /**
+     * Result. structuredContent type: StationConfigResponse
+     */
+    200: V2Response & {
+        structuredContent?: StationConfigResponse;
+    };
+};
+
+export type SpacemoltFacilityStationSetNameResponse = SpacemoltFacilityStationSetNameResponses[keyof SpacemoltFacilityStationSetNameResponses];
+
 export type SpacemoltFacilityTransferData = {
     body?: {
         /**
@@ -13270,6 +14815,10 @@ export type SpacemoltFacilityTransferData = {
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
         /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
@@ -13283,7 +14832,7 @@ export type SpacemoltFacilityTransferData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -13395,6 +14944,10 @@ export type SpacemoltFacilityTypesData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -13407,7 +14960,7 @@ export type SpacemoltFacilityTypesData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -13506,6 +15059,82 @@ export type SpacemoltFacilityTypesResponses = {
 
 export type SpacemoltFacilityTypesResponse = SpacemoltFacilityTypesResponses[keyof SpacemoltFacilityTypesResponses];
 
+export type SpacemoltFacilityUnbanData = {
+    body?: {
+        /**
+         * Access level for set_service_access
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
+         * Whether non-members may build facilities here (set_build_policy)
+         */
+        allow_outsiders?: boolean;
+        /**
+         * New station description (set_description)
+         */
+        description?: string;
+        /**
+         * Target faction id (allow_faction/remove_faction)
+         */
+        faction?: string;
+        /**
+         * Market listing fee percent 0-10 (set_market_fee)
+         */
+        fee_percent?: number;
+        /**
+         * New station name (set_name)
+         */
+        name?: string;
+        /**
+         * Target player id or username (allow_player/remove_player/ban/unban)
+         */
+        player?: string;
+        /**
+         * Price for set_refuel_price (per unit) or set_repair_price (per hull point)
+         */
+        price?: number;
+        /**
+         * Whether anyone may dock (set_public)
+         */
+        public?: boolean;
+        /**
+         * Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard)
+         */
+        service?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/unban';
+};
+
+export type SpacemoltFacilityUnbanErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityUnbanResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (StationConfigResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: StationConfigResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityUnbanResponse = SpacemoltFacilityUnbanResponses[keyof SpacemoltFacilityUnbanResponses];
+
 export type SpacemoltFacilityUpgradeData = {
     body?: {
         /**
@@ -13516,6 +15145,10 @@ export type SpacemoltFacilityUpgradeData = {
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
+        /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
         /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
@@ -13529,7 +15162,7 @@ export type SpacemoltFacilityUpgradeData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
@@ -13641,6 +15274,10 @@ export type SpacemoltFacilityUpgradesData = {
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
         /**
+         * For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.
+         */
+        custom_name?: string;
+        /**
          * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
          */
         deliver_to?: 'storage' | 'faction';
@@ -13653,7 +15290,7 @@ export type SpacemoltFacilityUpgradesData = {
          */
         direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
         /**
-         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access' actions). Use action 'list' to see facility IDs.
+         * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
         facility_id?: string;
         /**
