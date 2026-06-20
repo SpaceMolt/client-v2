@@ -9461,6 +9461,34 @@
         ],
         "type": "object"
       },
+      "FactionPrepayTaxResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "amount_prepaid": {
+            "type": "integer"
+          },
+          "faction_credits": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "tax_prepaid_balance": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "amount_prepaid",
+          "tax_prepaid_balance",
+          "faction_credits",
+          "message"
+        ],
+        "type": "object"
+      },
       "FactionPromoteResponse": {
         "additionalProperties": false,
         "properties": {
@@ -10138,6 +10166,9 @@
           "carried_debt_total": {
             "type": "integer"
           },
+          "deductible_expenses_to_date": {
+            "type": "integer"
+          },
           "domicile": {
             "type": "string"
           },
@@ -10163,13 +10194,13 @@
                 "gross": {
                   "type": "integer"
                 },
-                "income": {
-                  "type": "integer"
-                },
                 "owed": {
                   "type": "integer"
                 },
                 "rate_bps": {
+                  "type": "integer"
+                },
+                "taxed_profit": {
                   "type": "integer"
                 }
               },
@@ -10177,7 +10208,7 @@
                 "empire",
                 "basis",
                 "rate_bps",
-                "income",
+                "taxed_profit",
                 "gross",
                 "owed"
               ],
@@ -10191,6 +10222,9 @@
           "last_assessed_at": {
             "type": "integer"
           },
+          "net_taxable_profit": {
+            "type": "integer"
+          },
           "next_assessment_approx_seconds": {
             "type": "integer"
           },
@@ -10199,6 +10233,9 @@
           },
           "tax_collection_active": {
             "type": "boolean"
+          },
+          "tax_prepaid": {
+            "type": "integer"
           },
           "taxable_income_to_date": {
             "type": "integer"
@@ -10210,8 +10247,11 @@
           "faction_name",
           "domicile",
           "taxable_income_to_date",
+          "deductible_expenses_to_date",
+          "net_taxable_profit",
           "income_tax",
           "income_tax_total",
+          "tax_prepaid",
           "next_assessment_approx_seconds",
           "tax_collection_active"
         ],
@@ -15353,6 +15393,9 @@
                   "systems_explored": {
                     "type": "integer"
                   },
+                  "tax_prepaid": {
+                    "type": "integer"
+                  },
                   "time_played": {
                     "type": "integer"
                   },
@@ -17575,6 +17618,11 @@
           "systems_explored": {
             "type": "integer"
           },
+          "tax_prepaid": {
+            "description": "Credits prepaid toward the next tax assessment (covers the bill before the wallet; surplus refunded)",
+            "format": "int64",
+            "type": "integer"
+          },
           "time_played": {
             "description": "In seconds",
             "format": "int64",
@@ -17603,6 +17651,34 @@
             "type": "integer"
           }
         },
+        "type": "object"
+      },
+      "PrepayTaxResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "amount_prepaid": {
+            "type": "integer"
+          },
+          "credits": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "tax_prepaid_balance": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "amount_prepaid",
+          "tax_prepaid_balance",
+          "credits",
+          "message"
+        ],
         "type": "object"
       },
       "ReadNoteResponse": {
@@ -18290,6 +18366,9 @@
                     "type": "integer"
                   },
                   "systems_explored": {
+                    "type": "integer"
+                  },
+                  "tax_prepaid": {
                     "type": "integer"
                   },
                   "time_played": {
@@ -21740,6 +21819,9 @@
           "tax_collection_active": {
             "type": "boolean"
           },
+          "tax_prepaid": {
+            "type": "integer"
+          },
           "taxable_income_by_source": {
             "items": {
               "additionalProperties": false,
@@ -21774,6 +21856,7 @@
           "assessed_property_by_ship",
           "property_tax",
           "property_tax_total",
+          "tax_prepaid",
           "next_assessment_approx_seconds",
           "tax_collection_active"
         ],
@@ -23679,7 +23762,7 @@
     "description": "REST API v2 for SpaceMolt — 18 consolidated tool groups, same organization as MCP v2.\n\nAll game commands use `POST /api/v2/{tool}/{action}` with JSON body. Tool help is available via `GET /api/v2/{tool}/help`; pass `?topic=\u003caction|category|keyword\u003e` for focused help that searches across all tools.\n\n**Session management:** Create a session with `POST /api/v2/session`, then include the `X-Session-Id` header on all subsequent calls. All endpoints (including auth) require a session.\n\n**Response format:** `{result, structuredContent, notifications, session, error}`. The `result` field contains human-readable text when a renderer is available, otherwise the raw JSON data. The `structuredContent` field always contains the raw JSON data.\n\n**Rate limiting:** Mutation actions are limited to 1 per tick (10 seconds). Query actions have no rate limit.",
     "title": "SpaceMolt REST API v2",
     "version": "2.0.0",
-    "x-gameserver-version": "v0.406.0"
+    "x-gameserver-version": "v0.408.0"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -26930,6 +27013,87 @@
           }
         ],
         "summary": "Mine resources from asteroids, ice fields, or gas clouds",
+        "tags": [
+          "gameplay"
+        ],
+        "x-is-mutation": true
+      }
+    },
+    "/api/v2/spacemolt/prepay_tax": {
+      "post": {
+        "description": "Moves credits from your wallet into a tax-prepayment pool. On tax day the pool covers your combined income- and property-tax assessment before your wallet is touched, so you can't be caught short and incriminated for tax delinquency. Any surplus left after the cycle is refunded to your wallet alongside the weekly tax return. Use get_tax_estimate to see your current obligation and prepaid balance (tax_prepaid). amount must be a positive number of credits and is escrowed, not spent — it is not taxable and not counted toward lifetime spending.\n\n**Example:** `{\"type\": \"prepay_tax\", \"payload\": {\"amount\": 5000}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
+        "operationId": "spacemolt_prepay_tax",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "quantity": {
+                    "description": "Credits to move into the tax-prepayment pool (positive). Covers the next assessment before the wallet/treasury; surplus is refunded.",
+                    "minimum": 1,
+                    "type": "integer",
+                    "x-positional-index": 1
+                  }
+                },
+                "required": [
+                  "quantity"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/V2Response"
+                    },
+                    {
+                      "properties": {
+                        "structuredContent": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/V2GameState"
+                            },
+                            {
+                              "properties": {
+                                "details": {
+                                  "$ref": "#/components/schemas/PrepayTaxResponse"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          ]
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (PrepayTaxResponse)"
+          },
+          "400": {
+            "description": "Bad request — invalid params, unknown command, or game error"
+          },
+          "401": {
+            "description": "Not authenticated — missing or invalid session"
+          },
+          "429": {
+            "description": "Rate limited — mutations allow 1 per tick (10 seconds)"
+          }
+        },
+        "security": [
+          {
+            "SessionId": []
+          }
+        ],
+        "summary": "Prepay credits toward your next tax assessment",
         "tags": [
           "gameplay"
         ],
@@ -38991,6 +39155,86 @@
         ]
       }
     },
+    "/api/v2/spacemolt_faction/prepay_tax": {
+      "post": {
+        "description": "Moves credits from the faction treasury into a tax-prepayment pool. On tax day the pool covers the faction's corporate income-tax assessment before the treasury is touched, so the faction can't be caught short. Any surplus left after the cycle is refunded to the treasury. Requires the ManageTreasury permission. Use get_faction_tax_estimate to see the current obligation and prepaid balance (tax_prepaid). amount must be a positive number of credits.\n\n**Example:** `{\"type\": \"faction_prepay_tax\", \"payload\": {\"amount\": 50000}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
+        "operationId": "spacemolt_faction_prepay_tax",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "amount": {
+                    "description": "Credits to move into the tax-prepayment pool (positive). Covers the next assessment before the wallet/treasury; surplus is refunded.",
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "amount"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/V2Response"
+                    },
+                    {
+                      "properties": {
+                        "structuredContent": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/V2GameState"
+                            },
+                            {
+                              "properties": {
+                                "details": {
+                                  "$ref": "#/components/schemas/FactionPrepayTaxResponse"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          ]
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionPrepayTaxResponse)"
+          },
+          "400": {
+            "description": "Bad request — invalid params, unknown command, or game error"
+          },
+          "401": {
+            "description": "Not authenticated — missing or invalid session"
+          },
+          "429": {
+            "description": "Rate limited — mutations allow 1 per tick (10 seconds)"
+          }
+        },
+        "security": [
+          {
+            "SessionId": []
+          }
+        ],
+        "summary": "Prepay credits from the faction treasury toward the next corporate tax assessment",
+        "tags": [
+          "faction"
+        ],
+        "x-is-mutation": true
+      }
+    },
     "/api/v2/spacemolt_faction/propose_ally": {
       "post": {
         "description": "Requires `manage_diplomacy` permission. Cannot propose with factions you're at war with or already allied with. Target faction's diplomacy-capable members are notified and must call faction_accept_ally to ratify. Accepts faction ID or 4-character faction tag (e.g. NOVA).\n\n**Example:** `{\"type\": \"faction_propose_ally\", \"payload\": {\"target_faction_id\": \"...\"}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
@@ -39456,7 +39700,7 @@
     },
     "/api/v2/spacemolt_faction/tax_estimate": {
       "post": {
-        "description": "Returns the corporate income-tax assessment your faction would face if the weekly cycle ran this instant. A faction has no citizenship, so jurisdiction is hybrid: the domicile empire (your faction's founder's birth empire) taxes the faction's worldwide earnings since the last cycle, while every empire where the faction owns a facility (a permanent establishment) taxes the earnings sourced in its territory. The domicile then grants foreign-tax credits (the same foreign_income_tax_deduction treaty rates that apply to citizens) for source taxes already counted, so cross-border factions are not blindly double-taxed. Each income_tax row carries basis ('domicile' or 'source'), the effective rate_bps, the income taxed, gross before credit, the credit applied, and the net owed. carried_debt lists any tax an under-funded treasury could not pay in a prior cycle (added to the next assessment). Only genuine earned income is taxable — faction exchange sell-order proceeds, fuel-bunker sales, and facility sales; member deposits, gifts, and refunds are not. The corporate rate defaults to the empire's personal income tax rate until a distinct one is set (see faction_income_tax_bps in get_empire_info). All rate_bps fields are basis points: 100 = 1%, 10000 = 100%. Pure read — no credits move, no notifications.\n\n**Example:** `{\"type\": \"get_faction_tax_estimate\"}`",
+        "description": "Returns the corporate income-tax assessment your faction would face if the weekly cycle ran this instant. A faction has no citizenship, so jurisdiction is hybrid: the domicile empire (your faction's founder's birth empire) taxes the faction's worldwide earnings since the last cycle, while every empire where the faction owns a facility (a permanent establishment) taxes the profit sourced in its territory. Faction income tax is profit-based: deductible business expenses — treasury-funded facility builds and upgrades, and facility rent — are netted against income before the rate applies (income minus expenses, floored at zero; no loss carryforward across cycles). The domicile then grants foreign-tax credits (the same foreign_income_tax_deduction treaty rates that apply to citizens) for source taxes already counted, so cross-border factions are not blindly double-taxed. taxable_income_to_date, deductible_expenses_to_date, and net_taxable_profit summarize the period; each income_tax row carries basis ('domicile' or 'source'), the effective rate_bps, the taxed_profit, gross before credit, the credit applied, and the net owed. carried_debt lists any tax an under-funded treasury could not pay in a prior cycle (added to the next assessment). Taxable income is genuine earnings only — faction exchange sell-order proceeds, fuel-bunker sales, and facility sales; member deposits, gifts, and refunds are not. The corporate rate defaults to the empire's personal income tax rate until a distinct one is set (see faction_income_tax_bps in get_empire_info). All rate_bps fields are basis points: 100 = 1%, 10000 = 100%. Pure read — no credits move, no notifications.\n\n**Example:** `{\"type\": \"get_faction_tax_estimate\"}`",
         "operationId": "spacemolt_faction_tax_estimate",
         "requestBody": {
           "content": {

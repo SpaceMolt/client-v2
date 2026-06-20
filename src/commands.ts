@@ -384,6 +384,14 @@ const entries: [string, CommandMeta][] = [
     params: [],
     isAmbiguous: false,
   }],
+  ["spacemolt/prepay_tax", {
+    toolGroup: "spacemolt",
+    action: "prepay_tax",
+    operationId: "spacemolt_prepay_tax",
+    summary: "Prepay credits toward your next tax assessment",
+    params: [{"name":"quantity","type":"integer","description":"Credits to move into the tax-prepayment pool (positive). Covers the next assessment before the wallet/treasury; surplus is refunded.","required":true,"positionalIndex":1}],
+    isAmbiguous: true,
+  }],
   ["spacemolt/recycle", {
     toolGroup: "spacemolt",
     action: "recycle",
@@ -1264,6 +1272,14 @@ const entries: [string, CommandMeta][] = [
     summary: "List your faction's posted missions at this station",
     params: [],
     isAmbiguous: false,
+  }],
+  ["spacemolt_faction/prepay_tax", {
+    toolGroup: "spacemolt_faction",
+    action: "prepay_tax",
+    operationId: "spacemolt_faction_prepay_tax",
+    summary: "Prepay credits from the faction treasury toward the next corporate tax assessment",
+    params: [{"name":"amount","type":"integer","description":"Credits to move into the tax-prepayment pool (positive). Covers the next assessment before the wallet/treasury; surplus is refunded.","required":true,"positionalIndex":-1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_faction/propose_ally", {
     toolGroup: "spacemolt_faction",

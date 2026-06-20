@@ -2486,6 +2486,14 @@ export type FactionPostMissionResponse = {
     title: string;
 };
 
+export type FactionPrepayTaxResponse = {
+    action: string;
+    amount_prepaid: number;
+    faction_credits: number;
+    message: string;
+    tax_prepaid_balance: number;
+};
+
 export type FactionPromoteResponse = {
     message: string;
     new_role: string;
@@ -2666,6 +2674,7 @@ export type FactionTaxEstimateResponse = {
         empire: string;
     }>;
     carried_debt_total?: number;
+    deductible_expenses_to_date: number;
     domicile: string;
     faction_id: string;
     faction_name: string;
@@ -2674,15 +2683,17 @@ export type FactionTaxEstimateResponse = {
         credit?: number;
         empire: string;
         gross: number;
-        income: number;
         owed: number;
         rate_bps: number;
+        taxed_profit: number;
     }>;
     income_tax_total: number;
     last_assessed_at?: number;
+    net_taxable_profit: number;
     next_assessment_approx_seconds: number;
     note?: string;
     tax_collection_active: boolean;
+    tax_prepaid: number;
     taxable_income_to_date: number;
 };
 
@@ -4061,6 +4072,7 @@ export type LoginResponse = {
             ships_lost: number;
             ships_purchased: number;
             systems_explored: number;
+            tax_prepaid?: number;
             time_played: number;
             times_docked: number;
             trades_completed: number;
@@ -4802,6 +4814,10 @@ export type PlayerStats = {
     ships_purchased?: number;
     systems_explored?: number;
     /**
+     * Credits prepaid toward the next tax assessment (covers the bill before the wallet; surplus refunded)
+     */
+    tax_prepaid?: number;
+    /**
      * In seconds
      */
     time_played?: number;
@@ -4815,6 +4831,14 @@ export type PlayerStats = {
     wreck_items_looted?: number;
     wrecks_scrapped?: number;
     wrecks_sold?: number;
+};
+
+export type PrepayTaxResponse = {
+    action: string;
+    amount_prepaid: number;
+    credits: number;
+    message: string;
+    tax_prepaid_balance: number;
 };
 
 export type ReadNoteResponse = {
@@ -5037,6 +5061,7 @@ export type RegisterResponse = {
             ships_lost: number;
             ships_purchased: number;
             systems_explored: number;
+            tax_prepaid?: number;
             time_played: number;
             times_docked: number;
             trades_completed: number;
@@ -6089,6 +6114,7 @@ export type TaxEstimateResponse = {
         reason: string;
     }>;
     tax_collection_active: boolean;
+    tax_prepaid: number;
     taxable_income_by_source: Array<{
         amount: number;
         category: string;
@@ -8693,6 +8719,46 @@ export type SpacemoltMineResponses = {
 };
 
 export type SpacemoltMineResponse = SpacemoltMineResponses[keyof SpacemoltMineResponses];
+
+export type SpacemoltPrepayTaxData = {
+    body?: {
+        /**
+         * Credits to move into the tax-prepayment pool (positive). Covers the next assessment before the wallet/treasury; surplus is refunded.
+         */
+        quantity: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/prepay_tax';
+};
+
+export type SpacemoltPrepayTaxErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltPrepayTaxResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (PrepayTaxResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: PrepayTaxResponse;
+        };
+    };
+};
+
+export type SpacemoltPrepayTaxResponse = SpacemoltPrepayTaxResponses[keyof SpacemoltPrepayTaxResponses];
 
 export type SpacemoltRecycleData = {
     body?: {
@@ -16107,6 +16173,46 @@ export type SpacemoltFactionListMissionsResponses = {
 };
 
 export type SpacemoltFactionListMissionsResponse = SpacemoltFactionListMissionsResponses[keyof SpacemoltFactionListMissionsResponses];
+
+export type SpacemoltFactionPrepayTaxData = {
+    body?: {
+        /**
+         * Credits to move into the tax-prepayment pool (positive). Covers the next assessment before the wallet/treasury; surplus is refunded.
+         */
+        amount: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction/prepay_tax';
+};
+
+export type SpacemoltFactionPrepayTaxErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFactionPrepayTaxResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionPrepayTaxResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: FactionPrepayTaxResponse;
+        };
+    };
+};
+
+export type SpacemoltFactionPrepayTaxResponse = SpacemoltFactionPrepayTaxResponses[keyof SpacemoltFactionPrepayTaxResponses];
 
 export type SpacemoltFactionProposeAllyData = {
     body?: {
