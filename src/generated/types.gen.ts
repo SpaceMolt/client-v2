@@ -511,6 +511,7 @@ export type CatalogResponse = {
         price: number;
         required_achievement?: string;
         required_faction_achievement?: string;
+        required_faction_leader?: boolean;
         required_items?: Array<{
             item_id: string;
             quantity: number;
@@ -923,6 +924,29 @@ export type CraftJobResponse = {
     runs: number;
     venue: string;
     venue_type: string;
+} | {
+    action: string;
+    jobs: Array<{
+        eta_ticks: number;
+        external?: boolean;
+        facility_id: string;
+        job_id: string;
+        mode: string;
+        orderer: string;
+        position: number;
+        produces?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        progress: number;
+        recipe: string;
+        runs_done: number;
+        runs_remaining: number;
+        runs_total: number;
+        status: string;
+        venue?: string;
+    }>;
 } | {
     action: string;
     mode: string;
@@ -5724,7 +5748,7 @@ export type ShipClass = {
          */
         flag?: string;
         /**
-         * Capability type: ore_yield_bonus, ice_yield_bonus, gas_yield_bonus, integrated_cloak, integrated_scanner, scan_resistance, integrated_survey_scanner, ship_bay_capacity, passenger_economy_berths, passenger_business_berths, passenger_first_berths, special_flag
+         * Capability type: ore_yield_bonus, ice_yield_bonus, gas_yield_bonus, integrated_cloak, integrated_scanner, scan_resistance, integrated_survey_scanner, ship_bay_capacity, passenger_economy_berths, passenger_business_berths, passenger_first_berths, fleet_command_capacity, special_flag
          */
         type?: string;
         /**
@@ -5759,6 +5783,10 @@ export type ShipClass = {
      * Faction achievement the player's faction must hold to commission or buy this prestige hull (empty = none)
      */
     required_faction_achievement?: string;
+    /**
+     * When true alongside required_faction_achievement, only the faction's leader may commission or buy this prestige hull
+     */
+    required_faction_leader?: boolean;
     /**
      * Item requirements for purchase
      */
