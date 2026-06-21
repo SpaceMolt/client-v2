@@ -424,6 +424,7 @@ export type CatalogResponse = {
         damage_reduction?: number;
         damage_type?: string;
         description: string;
+        disruptor_power?: number;
         drone_bandwidth?: number;
         drone_capacity?: number;
         fuel_efficiency?: number;
@@ -444,6 +445,7 @@ export type CatalogResponse = {
         quest_item?: boolean;
         range?: number;
         reach?: number;
+        remote_repair_power?: number;
         required_skills?: {
             [key: string]: number;
         };
@@ -452,6 +454,7 @@ export type CatalogResponse = {
         };
         salvage_bonus?: number;
         scanner_power?: number;
+        scramble_power?: number;
         shield_bonus?: number;
         shield_bypass_bonus?: number;
         shield_recharge_bonus?: number;
@@ -467,6 +470,8 @@ export type CatalogResponse = {
         tracking_bonus?: number;
         type: string;
         type_id: string;
+        warp_stabilization?: number;
+        webify_strength?: number;
     } | {
         base_armor: number;
         base_fuel: number;
@@ -1251,6 +1256,7 @@ export type DepositItemsResponse = {
     wallet_remaining?: number;
 } | {
     action: string;
+    bucket?: string;
     cargo_remaining: number;
     cargo_space: number;
     item_id: string;
@@ -1505,6 +1511,7 @@ export type FacilityResponse = {
         name: string;
         owner_id?: string;
         personal_service?: string;
+        power_throttled?: boolean;
         production?: {
             backlog_ticks: number;
             items_per_hour?: number;
@@ -1546,6 +1553,7 @@ export type FacilityResponse = {
         name: string;
         owner_id?: string;
         personal_service?: string;
+        power_throttled?: boolean;
         production?: {
             backlog_ticks: number;
             items_per_hour?: number;
@@ -1577,6 +1585,12 @@ export type FacilityResponse = {
         battery_stored: number;
         current_draw: number;
         efficiency: number;
+        fuel_inputs?: Array<{
+            item_id: string;
+            name?: string;
+            quantity_per_cycle: number;
+        }>;
+        remediation?: string;
         supply: number;
     };
     public_facilities?: Array<{
@@ -1602,6 +1616,7 @@ export type FacilityResponse = {
         name: string;
         owner_id?: string;
         personal_service?: string;
+        power_throttled?: boolean;
         production?: {
             backlog_ticks: number;
             items_per_hour?: number;
@@ -1643,6 +1658,7 @@ export type FacilityResponse = {
         name: string;
         owner_id?: string;
         personal_service?: string;
+        power_throttled?: boolean;
         production?: {
             backlog_ticks: number;
             items_per_hour?: number;
@@ -1672,6 +1688,7 @@ export type FacilityResponse = {
         labor_per_run?: number;
         missed_rent_cycles?: number;
         name: string;
+        power_throttled?: boolean;
         rent_per_cycle: number;
         system_id?: string;
         type: string;
@@ -1698,6 +1715,7 @@ export type FacilityResponse = {
         labor_per_run: number;
         missed_rent_cycles?: number;
         name: string;
+        power_throttled?: boolean;
         rent_per_cycle: number;
         system_id?: string;
         type: string;
@@ -2238,6 +2256,7 @@ export type FactionCancelMissionResponse = {
 export type FactionCreateBuyOrderResponse = {
     action: string;
     consolidated?: boolean;
+    escrow_refunded?: number;
     faction_id: string;
     faction_tag: string;
     item: string;
@@ -2247,6 +2266,7 @@ export type FactionCreateBuyOrderResponse = {
     order_id: string;
     price_each: number;
     quantity: number;
+    quantity_filled?: number;
     total_escrowed: number;
 };
 
@@ -2269,6 +2289,7 @@ export type FactionCreateSellOrderResponse = {
     order_id: string;
     price_each: number;
     quantity: number;
+    quantity_filled?: number;
 };
 
 export type FactionDeclareWarResponse = {
@@ -2564,7 +2585,10 @@ export type FactionQueryIntelResponse = {
                 y: number;
             };
             resources?: Array<{
+                depletion_percent?: number;
+                max_remaining?: number;
                 remaining: number;
+                remaining_display?: string;
                 resource_id: string;
                 richness: number;
             }>;
@@ -3132,6 +3156,12 @@ export type GetBaseResponse = {
         battery_stored: number;
         current_draw: number;
         efficiency: number;
+        fuel_inputs?: Array<{
+            item_id: string;
+            name?: string;
+            quantity_per_cycle: number;
+        }>;
+        remediation?: string;
         supply: number;
     };
     services: Array<string>;
@@ -3139,22 +3169,92 @@ export type GetBaseResponse = {
 
 export type GetBattleStatusResponse = {
     battle_id: string;
+    combat_state?: {
+        /**
+         * Whether you can flee at all. False only when warp disruption is holding you in place.
+         */
+        can_escape: boolean;
+        /**
+         * Remaining ticks of EM disruption (present only while em_disrupted).
+         */
+        disruption_ticks?: number;
+        /**
+         * Your ship speed after disruption penalties. Higher than your pursuers means you can disengage; lower means you are pinned.
+         */
+        effective_speed: number;
+        /**
+         * An EM-damage disruption debuff is active on you (reduces speed and damage output for a few ticks).
+         */
+        em_disrupted: boolean;
+        /**
+         * Consecutive flee ticks accumulated. Counts only while in the flee stance at the outer ring; resets if you stop fleeing.
+         */
+        flee_counter: number;
+        /**
+         * Flee ticks needed to escape under current conditions (slower-than-pursuer and webbing raise it). Omitted when warp-disrupted because escape is impossible until the tackle is removed.
+         */
+        flee_required?: number;
+        /**
+         * Largest zone distance any of your fitted weapons can fire across. An enemy whose zone_distance exceeds this is out of your range.
+         */
+        max_weapon_reach: number;
+        /**
+         * Current speed reduction from EM disruption as a percentage (present only while em_disrupted).
+         */
+        speed_penalty_pct?: number;
+        /**
+         * An enemy warp disruptor/scrambler is blocking your escape (net of your own warp core stabilizers). Kill the tackler or out-stabilize it to break free.
+         */
+        warp_disrupted: boolean;
+        /**
+         * An enemy stasis webifier is reducing your effective speed (slower escape and easier for enemies to hit you).
+         */
+        webbed: boolean;
+    };
     is_participant: boolean;
     participants?: Array<{
         auto_pilot: boolean;
+        /**
+         * Total damage dealt by you so far this battle (self only)
+         */
         damage_dealt?: number;
+        /**
+         * Total damage taken by you so far this battle (self only)
+         */
         damage_taken?: number;
+        /**
+         * Hull integrity as a percentage of max (0-100)
+         */
         hull_pct?: number;
+        /**
+         * Ships you have destroyed this battle (self only)
+         */
         kill_count?: number;
         player_id: string;
+        /**
+         * Shield strength as a percentage of max (0-100)
+         */
         shield_pct?: number;
         ship_class?: string;
         ship_name?: string;
         side_id: number;
+        /**
+         * Combat stance this tick (self only): fire/evade/brace/flee
+         */
         stance?: string;
+        /**
+         * Player ID this ship is focusing fire on (self only; empty = auto-target)
+         */
         target_id?: string;
         username: string;
+        /**
+         * Distance ring this ship occupies: outer/mid/inner/engaged
+         */
         zone?: string;
+        /**
+         * Zone separation from the requesting player (0 = same ring; higher = farther). Compare against your combat_state.max_weapon_reach to see if you can fire. Omitted when the requester is not a participant.
+         */
+        zone_distance?: number;
     }>;
     sides?: Array<{
         faction_id?: string;
@@ -5881,6 +5981,7 @@ export type StorageResponse = {
     wallet_remaining?: number;
 } | {
     action: string;
+    bucket?: string;
     cargo_remaining: number;
     cargo_space: number;
     item_id: string;
@@ -5899,6 +6000,7 @@ export type StorageResponse = {
     storage_fuel: number;
 } | {
     action: string;
+    bucket?: string;
     cargo_space: number;
     cargo_total: number;
     item_id: string;
@@ -6863,6 +6965,7 @@ export type WithdrawItemsResponse = {
     source_credits: number;
 } | {
     action: string;
+    bucket?: string;
     cargo_space: number;
     cargo_total: number;
     item_id: string;
@@ -7301,9 +7404,9 @@ export type SpacemoltCraftData = {
          */
         count?: number;
         /**
-         * Output destination: 'storage' (default), or 'faction' (faction storage — requires Faction Workshop facility and manage treasury permission).
+         * Output destination: 'storage' (default), 'faction' (faction storage — requires manage treasury permission), or 'faction:<bucket name or id>' to pull inputs from and deposit outputs into a specific faction Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * Return a cost+time quote (materials, labor, rental fee, auto-routed venue, ETA) without queuing or spending anything. Not supported with bulk jobs.
          */
@@ -17720,7 +17823,7 @@ export type SpacemoltIntelScanPoiResponse = SpacemoltIntelScanPoiResponses[keyof
 export type SpacemoltIntelSubmitIntelData = {
     body?: {
         /**
-         * Array of system intel reports. Each entry: system_id (required), name (required), description, empire, police_level, connections (array of {system_id, name, distance} objects or bare ID strings), pois (array of {id, type, name, description, class, position:{x,y}, base_id, base_name, resources:[{resource_id, richness, remaining}]})
+         * Array of system intel reports. Each entry: system_id (required), name (required), description, empire, police_level, connections (array of {system_id, name, distance} objects or bare ID strings), pois (array of {id, type, name, description, class, position:{x,y}, base_id, base_name, resources:[{resource_id, richness, remaining, max_remaining}]})
          */
         systems: Array<{
             [key: string]: unknown;
@@ -20490,6 +20593,10 @@ export type SpacemoltSocialWriteNoteResponse = SpacemoltSocialWriteNoteResponses
 export type SpacemoltStorageDepositData = {
     body?: {
         /**
+         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. See bucket names in action=view target=faction.
+         */
+        bucket?: string;
+        /**
          * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
@@ -20695,6 +20802,10 @@ export type SpacemoltStorageLootResponse = SpacemoltStorageLootResponses[keyof S
 export type SpacemoltStorageViewData = {
     body?: {
         /**
+         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. See bucket names in action=view target=faction.
+         */
+        bucket?: string;
+        /**
          * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
@@ -20759,6 +20870,10 @@ export type SpacemoltStorageViewResponse = SpacemoltStorageViewResponses[keyof S
 
 export type SpacemoltStorageWithdrawData = {
     body?: {
+        /**
+         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. See bucket names in action=view target=faction.
+         */
+        bucket?: string;
         /**
          * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
          */
