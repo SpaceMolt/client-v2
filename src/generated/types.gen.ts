@@ -925,29 +925,6 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
-    jobs: Array<{
-        eta_ticks: number;
-        external?: boolean;
-        facility_id: string;
-        job_id: string;
-        mode: string;
-        orderer: string;
-        position: number;
-        produces?: Array<{
-            item_id: string;
-            name: string;
-            quantity: number;
-        }>;
-        progress: number;
-        recipe: string;
-        runs_done: number;
-        runs_remaining: number;
-        runs_total: number;
-        status: string;
-        venue?: string;
-    }>;
-} | {
-    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -1102,6 +1079,7 @@ export type CreateBuyOrderResponse = {
 export type CreateFactionResponse = {
     action: string;
     faction_id: string;
+    message: string;
     name: string;
 };
 
@@ -1476,6 +1454,7 @@ export type EstimatePurchaseResponse = {
 };
 
 export type FacilityResponse = {
+    action: string;
     base_id: string;
     construction?: {
         pending?: Array<{
@@ -1764,6 +1743,7 @@ export type FacilityResponse = {
         [key: string]: number;
     };
 } | {
+    action: string;
     base_id: string;
     faction_locked_upgrades?: Array<{
         current_level: number;
@@ -1947,6 +1927,7 @@ export type FacilityResponse = {
         [key: string]: number;
     };
 } | {
+    action: string;
     base_id: string;
     faction_facilities: Array<{
         capacity?: number;
@@ -2313,6 +2294,8 @@ export type FactionCreateSellOrderResponse = {
     price_each: number;
     quantity: number;
     quantity_filled?: number;
+    quantity_listed?: number;
+    total_earned?: number;
 };
 
 export type FactionDeclareWarResponse = {
@@ -6360,6 +6343,7 @@ export type UninstallModResponse = {
     message: string;
     module_id: string;
     power_used: number;
+    uninstall_count?: number;
     wear?: number;
     wear_status?: string;
 };
