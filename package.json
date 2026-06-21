@@ -1,6 +1,6 @@
 {
   "name": "@spacemolt/client-v2",
-  "version": "1.4.60",
+  "version": "1.4.61",
   "description": "Typed CLI client for the SpaceMolt v2 REST API. Command registry and types are auto-generated from the live OpenAPI spec.",
   "type": "module",
   "private": true,

@@ -925,6 +925,29 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
+    jobs: Array<{
+        eta_ticks: number;
+        external?: boolean;
+        facility_id: string;
+        job_id: string;
+        mode: string;
+        orderer: string;
+        position: number;
+        produces?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        progress: number;
+        recipe: string;
+        runs_done: number;
+        runs_remaining: number;
+        runs_total: number;
+        status: string;
+        venue?: string;
+    }>;
+} | {
+    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -2739,6 +2762,7 @@ export type FactionTaxEstimateResponse = {
     }>;
     income_tax_total: number;
     last_assessed_at?: number;
+    loss_carryforward_applied?: number;
     net_taxable_profit: number;
     next_assessment_approx_seconds: number;
     note?: string;
@@ -4188,6 +4212,9 @@ export type LoginResponse = {
             jumps_completed: number;
             last_income_tax_assessed_at?: number;
             last_property_tax_assessed_at?: number;
+            market_purchases_deductible?: number;
+            market_purchases_deductible_snapshot?: number;
+            market_tax_loss_carryforward?: number;
             missions_abandoned: number;
             missions_accepted: number;
             missions_completed: number;
@@ -4926,6 +4953,18 @@ export type PlayerStats = {
      * Unix timestamp of the most recent property-tax assessment
      */
     last_property_tax_assessed_at?: number;
+    /**
+     * Lifetime credits spent acquiring resaleable goods on the market, deducted from market sale income so trading is taxed on margin
+     */
+    market_purchases_deductible?: number;
+    /**
+     * market_purchases_deductible at the most recent income-tax assessment
+     */
+    market_purchases_deductible_snapshot?: number;
+    /**
+     * Deductible market purchases that exceeded sales in a prior window, carried forward to offset future market income
+     */
+    market_tax_loss_carryforward?: number;
     missions_abandoned?: number;
     missions_accepted?: number;
     missions_completed?: number;
@@ -5177,6 +5216,9 @@ export type RegisterResponse = {
             jumps_completed: number;
             last_income_tax_assessed_at?: number;
             last_property_tax_assessed_at?: number;
+            market_purchases_deductible?: number;
+            market_purchases_deductible_snapshot?: number;
+            market_tax_loss_carryforward?: number;
             missions_abandoned: number;
             missions_accepted: number;
             missions_completed: number;
@@ -6227,6 +6269,9 @@ export type TaxEstimateResponse = {
     income_tax_total: number;
     last_assessed_at?: number;
     last_property_assessed_at?: number;
+    market_cost_of_goods_deducted: number;
+    market_loss_carryforward?: number;
+    market_sales_to_date: number;
     next_assessment_approx_seconds: number;
     note?: string;
     property_tax: Array<{
@@ -6255,6 +6300,7 @@ export type TaxEstimateResponse = {
         category: string;
     }>;
     taxable_income_to_date: number;
+    taxable_market_income: number;
 };
 
 export type TowWreckResponse = {
