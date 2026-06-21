@@ -920,29 +920,6 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
-    jobs: Array<{
-        eta_ticks: number;
-        external?: boolean;
-        facility_id: string;
-        job_id: string;
-        mode: string;
-        orderer: string;
-        position: number;
-        produces?: Array<{
-            item_id: string;
-            name: string;
-            quantity: number;
-        }>;
-        progress: number;
-        recipe: string;
-        runs_done: number;
-        runs_remaining: number;
-        runs_total: number;
-        status: string;
-        venue?: string;
-    }>;
-} | {
-    action: string;
     mode: string;
     results: Array<{
         error?: string;
