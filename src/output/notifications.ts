@@ -60,6 +60,21 @@ const handlers: Record<string, NotificationHandler> = {
     }
   },
 
+  market_update: (d, t) => {
+    const items = (d.items as Array<Record<string, any>>) || [];
+    const where = d.base_name || d.base_id || 'a base';
+    console.log(`${c.dim}[${t}]${c.reset} ${c.yellow}[MARKET]${c.reset} ${where} updated (tick ${d.tick ?? '?'}, ${items.length} item${items.length === 1 ? '' : 's'})`);
+    for (const it of items) {
+      const sells = (it.sell_orders as Array<Record<string, any>>) || [];
+      const buys = (it.buy_orders as Array<Record<string, any>>) || [];
+      const bestSell = sells.length ? Math.min(...sells.map(o => o.price_each)) : undefined;
+      const bestBuy = buys.length ? Math.max(...buys.map(o => o.price_each)) : undefined;
+      const sellMsg = bestSell !== undefined ? `sell from ${bestSell}` : 'no sellers';
+      const buyMsg = bestBuy !== undefined ? `buy up to ${bestBuy}` : 'no buyers';
+      console.log(`  ${it.item_name || it.item_id}: ${sellMsg}, ${buyMsg}`);
+    }
+  },
+
   trade_offer_received: (d, t) => {
     console.log(`${c.dim}[${t}]${c.reset} ${c.yellow}[TRADE]${c.reset} Offer from ${d.from_name || 'Someone'} (ID: ${d.trade_id || ''})`);
     if ((d.offer_credits as number) > 0) console.log(`  Offering: ${d.offer_credits} credits`);
