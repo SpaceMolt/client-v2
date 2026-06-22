@@ -37,6 +37,9 @@ const AMBIGUOUS_DEFAULTS: Record<string, string> = {
   list: 'spacemolt_faction/list',
   create_buy_order: 'spacemolt_market/create_buy_order',
   create_sell_order: 'spacemolt_market/create_sell_order',
+  // prepay_tax exists for the personal wallet and the faction treasury;
+  // a bare "prepay_tax" means the player's own tax (mirrors "sell" above).
+  prepay_tax: 'spacemolt/prepay_tax',
 };
 
 export function resolveCommand(input: string): ResolvedCommand | null {
