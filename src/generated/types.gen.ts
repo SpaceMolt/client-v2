@@ -927,29 +927,6 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
-    jobs: Array<{
-        eta_ticks: number;
-        external?: boolean;
-        facility_id: string;
-        job_id: string;
-        mode: string;
-        orderer: string;
-        position: number;
-        produces?: Array<{
-            item_id: string;
-            name: string;
-            quantity: number;
-        }>;
-        progress: number;
-        recipe: string;
-        runs_done: number;
-        runs_remaining: number;
-        runs_total: number;
-        status: string;
-        venue?: string;
-    }>;
-} | {
-    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -1219,6 +1196,7 @@ export type DepositItemsResponse = {
     storage_total: number;
 } | {
     action: string;
+    bucket?: string;
     dest_total: number;
     destination: string;
     item_id: string;
@@ -1301,6 +1279,7 @@ export type DepositItemsResponse = {
     storage_fuel: number;
 } | {
     action: string;
+    bucket?: string;
     failed: number;
     requested: number;
     results: Array<{
@@ -5982,6 +5961,7 @@ export type StorageResponse = {
     storage_remaining: number;
 } | {
     action: string;
+    bucket?: string;
     dest_total: number;
     destination: string;
     item_id: string;
@@ -6077,6 +6057,7 @@ export type StorageResponse = {
     player_credits: number;
 } | {
     action: string;
+    bucket?: string;
     failed: number;
     requested: number;
     results: Array<{
@@ -7019,6 +7000,7 @@ export type WithdrawItemsResponse = {
     storage_remaining: number;
 } | {
     action: string;
+    bucket?: string;
     dest_total: number;
     destination: string;
     item_id: string;
@@ -7047,6 +7029,7 @@ export type WithdrawItemsResponse = {
     player_credits: number;
 } | {
     action: string;
+    bucket?: string;
     failed: number;
     requested: number;
     results: Array<{
@@ -7473,7 +7456,7 @@ export type SpacemoltCraftData = {
          */
         count?: number;
         /**
-         * Output destination: 'storage' (default), 'faction' (faction storage — requires manage treasury permission), or 'faction:<bucket name or id>' to pull inputs from and deposit outputs into a specific faction Storage Extension bucket.
+         * Output destination: 'storage' (default), 'faction' (faction main store — requires manage treasury permission), or 'faction:<bucket name or id>' for a specific faction Storage Extension bucket.
          */
         deliver_to?: string;
         /**
@@ -7497,7 +7480,7 @@ export type SpacemoltCraftData = {
          */
         job_ids?: Array<string>;
         /**
-         * Bulk mode: queue many crafts in one action. Each entry: {recipe_id, quantity, facility_id?, preset?, deliver_to?}. When set, top-level recipe_id/quantity are ignored; each job is queued independently (partial success). Max 50.
+         * Bulk mode: queue many crafts in one action. Each entry: {recipe_id, quantity, facility_id?, preset?, deliver_to?, source?}. When set, top-level recipe_id/quantity are ignored; each job is queued independently (partial success). Max 50.
          */
         jobs?: Array<{
             [key: string]: unknown;
@@ -7510,6 +7493,10 @@ export type SpacemoltCraftData = {
          * Number of output items to make (default 1). Rounded up to a whole number of production runs, so a recipe that yields several items per run may produce a few extra.
          */
         quantity?: number;
+        /**
+         * Where inputs and labor/rental credits are pulled FROM. Same values as deliver_to: 'storage', 'faction', or 'faction:<bucket>'. Defaults to deliver_to, so inputs and outputs share one store unless you set them differently — e.g. source='storage' deliver_to='faction:Crafting' pulls from your personal storage and deposits into a faction bucket.
+         */
+        source?: string;
     };
     path?: never;
     query?: never;
@@ -8968,9 +8955,9 @@ export type SpacemoltPrepayTaxResponse = SpacemoltPrepayTaxResponses[keyof Space
 export type SpacemoltRecycleData = {
     body?: {
         /**
-         * Output destination: 'storage' (default) or 'faction' (faction storage — requires manage treasury permission).
+         * Output destination: 'storage' (default), 'faction' (faction main store — requires manage treasury permission), or 'faction:<bucket name or id>' for a specific Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * Return a cost+time quote (feedstock consumed, fees, venue, ETA) without queuing anything. Not supported with bulk jobs.
          */
@@ -8992,7 +8979,7 @@ export type SpacemoltRecycleData = {
          */
         job_ids?: Array<string>;
         /**
-         * Bulk mode: recycle many recipes in one action. Each entry: {recipe_id, quantity, facility_id?, deliver_to?}. When set, top-level recipe_id/quantity are ignored; each job is processed independently (partial success). Max 50.
+         * Bulk mode: recycle many recipes in one action. Each entry: {recipe_id, quantity, facility_id?, deliver_to?, source?}. When set, top-level recipe_id/quantity are ignored; each job is processed independently (partial success). Max 50.
          */
         jobs?: Array<{
             [key: string]: unknown;
@@ -9001,6 +8988,10 @@ export type SpacemoltRecycleData = {
          * Number of the recipe's output items to feed in and break down (default 1). Rounded up to a whole number of recycling runs.
          */
         quantity?: number;
+        /**
+         * Where feedstock (and labor/rental credits) are pulled FROM. Same values as deliver_to. Defaults to deliver_to.
+         */
+        source?: string;
     };
     path?: never;
     query?: never;
