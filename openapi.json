@@ -1605,6 +1605,9 @@
                     "cpu_capacity": {
                       "type": "integer"
                     },
+                    "default_loadout_version": {
+                      "type": "integer"
+                    },
                     "default_modules": {
                       "items": {
                         "type": "string"
@@ -16172,6 +16175,9 @@
               "loaded_on_carrier_id": {
                 "type": "string"
               },
+              "loadout_version": {
+                "type": "integer"
+              },
               "max_fuel": {
                 "type": "integer"
               },
@@ -19151,6 +19157,9 @@
               "loaded_on_carrier_id": {
                 "type": "string"
               },
+              "loadout_version": {
+                "type": "integer"
+              },
               "max_fuel": {
                 "type": "integer"
               },
@@ -20304,6 +20313,10 @@
             "description": "Ship ID of the carrier this ship is currently loaded on (empty when not in a carrier bay)",
             "type": "string"
           },
+          "loadout_version": {
+            "description": "Default-loadout version this ship was built or last refitted against; a lower value than the class's default_loadout_version means refit_ship is offered",
+            "type": "integer"
+          },
           "max_fuel": {
             "type": "integer"
           },
@@ -20416,6 +20429,10 @@
             "type": "string"
           },
           "cpu_capacity": {
+            "type": "integer"
+          },
+          "default_loadout_version": {
+            "description": "Bumped whenever the canonical default loadout changes; existing ships below this version are offered refit_ship",
             "type": "integer"
           },
           "default_modules": {
@@ -24228,7 +24245,7 @@
     "description": "REST API v2 for SpaceMolt — 18 consolidated tool groups, same organization as MCP v2.\n\nAll game commands use `POST /api/v2/{tool}/{action}` with JSON body. Tool help is available via `GET /api/v2/{tool}/help`; pass `?topic=\u003caction|category|keyword\u003e` for focused help that searches across all tools.\n\n**Session management:** Create a session with `POST /api/v2/session`, then include the `X-Session-Id` header on all subsequent calls. All endpoints (including auth) require a session.\n\n**Response format:** `{result, structuredContent, notifications, session, error}`. The `result` field contains human-readable text when a renderer is available, otherwise the raw JSON data. The `structuredContent` field always contains the raw JSON data.\n\n**Rate limiting:** Mutation actions are limited to 1 per tick (10 seconds). Query actions have no rate limit.",
     "title": "SpaceMolt REST API v2",
     "version": "2.0.0",
-    "x-gameserver-version": "v0.418.0"
+    "x-gameserver-version": "v0.419.0"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -45076,7 +45093,7 @@
     },
     "/api/v2/spacemolt_ship/refit_ship": {
       "post": {
-        "description": "Resets your ship's hull stats to the current class definition. All installed modules are returned to station storage. All cargo is moved to station storage. Default modules for this class are installed. Free of charge. Irreversible. Requires a shipyard. Returns already_current if the ship's stats already match the current class definition.\n\n**Example:** `{\"type\": \"refit_ship\", \"payload\": {}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
+        "description": "Resets your ship to the current class definition: hull stats are reset and the class's current default loadout is installed. Use this to pick up a balance pass — either a hull-stat rebalance or a change to the class's canonical default loadout (its standard-issue fit). You get the new stats plus the current default fit. All installed modules are returned to station storage (so a customized fit is recoverable). All cargo is moved to station storage. Free of charge. Irreversible. Requires a shipyard. Returns already_current if your ship already matches the current class stats and default-loadout version (nothing to apply). Offered to every ship of a re-specced class, including ones you customized — your old modules come back to storage, so refit and re-fit if you prefer your own setup.\n\n**Example:** `{\"type\": \"refit_ship\", \"payload\": {}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
         "operationId": "spacemolt_ship_refit_ship",
         "requestBody": {
           "content": {

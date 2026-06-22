@@ -489,6 +489,7 @@ export type CatalogResponse = {
         category?: string;
         class: string;
         cpu_capacity: number;
+        default_loadout_version?: number;
         default_modules?: Array<string>;
         defense_slots: number;
         description: string;
@@ -4320,6 +4321,7 @@ export type LoginResponse = {
         id: string;
         last_process_tick?: number;
         loaded_on_carrier_id?: string;
+        loadout_version?: number;
         max_fuel: number;
         max_hull: number;
         max_shield: number;
@@ -5320,6 +5322,7 @@ export type RegisterResponse = {
         id: string;
         last_process_tick?: number;
         loaded_on_carrier_id?: string;
+        loadout_version?: number;
         max_fuel: number;
         max_hull: number;
         max_shield: number;
@@ -5663,6 +5666,10 @@ export type Ship = {
      * Ship ID of the carrier this ship is currently loaded on (empty when not in a carrier bay)
      */
     loaded_on_carrier_id?: string;
+    /**
+     * Default-loadout version this ship was built or last refitted against; a lower value than the class's default_loadout_version means refit_ship is offered
+     */
+    loadout_version?: number;
     max_fuel: number;
     max_hull: number;
     max_shield?: number;
@@ -5723,6 +5730,10 @@ export type ShipClass = {
      */
     class: string;
     cpu_capacity?: number;
+    /**
+     * Bumped whenever the canonical default loadout changes; existing ships below this version are offered refit_ship
+     */
+    default_loadout_version?: number;
     default_modules?: Array<string>;
     defense_slots?: number;
     description?: string;
