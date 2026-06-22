@@ -927,6 +927,29 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
+    jobs: Array<{
+        eta_ticks: number;
+        external?: boolean;
+        facility_id: string;
+        job_id: string;
+        mode: string;
+        orderer: string;
+        position: number;
+        produces?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        progress: number;
+        recipe: string;
+        runs_done: number;
+        runs_remaining: number;
+        runs_total: number;
+        status: string;
+        venue?: string;
+    }>;
+} | {
+    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -2263,6 +2286,7 @@ export type FactionCancelMissionResponse = {
 
 export type FactionCreateBuyOrderResponse = {
     action: string;
+    bucket?: string;
     consolidated?: boolean;
     escrow_refunded?: number;
     faction_id: string;
@@ -2287,6 +2311,7 @@ export type FactionCreateRoleResponse = {
 
 export type FactionCreateSellOrderResponse = {
     action: string;
+    bucket?: string;
     consolidated?: boolean;
     faction_id: string;
     faction_tag: string;
@@ -4606,6 +4631,56 @@ export type NotificationMiningYield = {
     };
 };
 
+export type NotificationObservationUpdate = {
+    active_scan?: boolean;
+    cloaked_lost?: Array<string>;
+    cloaked_resolved?: Array<{
+        cloaked?: boolean;
+        faction_id?: string;
+        hull?: number;
+        revealed_info: Array<string>;
+        shield?: number;
+        ship_class?: string;
+        ship_name?: string;
+        target_id: string;
+        username?: string;
+    }>;
+    nearby_changed?: Array<{
+        clan_tag?: string;
+        faction_id?: string;
+        faction_tag?: string;
+        in_combat: boolean;
+        offline?: boolean;
+        player_id?: string;
+        primary_color?: string;
+        secondary_color?: string;
+        ship_class?: string;
+        ship_name?: string;
+        status_message?: string;
+        username?: string;
+    }>;
+    nearby_departed?: Array<string>;
+    poi_id: string;
+    system_changed?: Array<{
+        clan_tag?: string;
+        faction_id?: string;
+        faction_tag?: string;
+        in_combat: boolean;
+        offline?: boolean;
+        player_id?: string;
+        primary_color?: string;
+        secondary_color?: string;
+        ship_class?: string;
+        ship_name?: string;
+        status_message?: string;
+        username?: string;
+    }>;
+    system_departed?: Array<string>;
+    system_id: string;
+    tick: number;
+    unknown_signature: boolean;
+};
+
 export type NotificationPilotlessShip = {
     expire_tick: number;
     player_id: string;
@@ -6095,6 +6170,54 @@ export type SubscribeMarketResponse = {
     message?: string;
 };
 
+export type SubscribeObservationResponse = {
+    action: string;
+    active_scan: boolean;
+    cloaked_contacts?: Array<{
+        cloaked?: boolean;
+        faction_id?: string;
+        hull?: number;
+        revealed_info: Array<string>;
+        shield?: number;
+        ship_class?: string;
+        ship_name?: string;
+        target_id: string;
+        username?: string;
+    }>;
+    message?: string;
+    nearby: Array<{
+        clan_tag?: string;
+        faction_id?: string;
+        faction_tag?: string;
+        in_combat: boolean;
+        offline?: boolean;
+        player_id?: string;
+        primary_color?: string;
+        secondary_color?: string;
+        ship_class?: string;
+        ship_name?: string;
+        status_message?: string;
+        username?: string;
+    }>;
+    poi_id: string;
+    system_agents: Array<{
+        clan_tag?: string;
+        faction_id?: string;
+        faction_tag?: string;
+        in_combat: boolean;
+        offline?: boolean;
+        player_id?: string;
+        primary_color?: string;
+        secondary_color?: string;
+        ship_class?: string;
+        ship_name?: string;
+        status_message?: string;
+        username?: string;
+    }>;
+    system_id: string;
+    unknown_signature: boolean;
+};
+
 export type SupplyCommissionResponse = {
     all_sourced: boolean;
     commission_id: string;
@@ -6414,6 +6537,11 @@ export type UnloadPassengerResponse = {
 };
 
 export type UnsubscribeMarketResponse = {
+    action: string;
+    message: string;
+};
+
+export type UnsubscribeObservationResponse = {
     action: string;
     message: string;
 };
@@ -6847,7 +6975,7 @@ export type V2Response = {
         /**
          * Notification payload. Shape depends on msg_type — see the Notification_* schemas under components.schemas.
          */
-        data?: NotificationChatMessage | NotificationCombatUpdate | NotificationCraftingUpdate | NotificationMarketUpdate | NotificationMiningYield | NotificationPilotlessShip | NotificationPlayerDied | NotificationReconnected | NotificationScanDetected | NotificationScanResult | NotificationSkillLevelUp | NotificationTradeOfferReceived;
+        data?: NotificationChatMessage | NotificationCombatUpdate | NotificationCraftingUpdate | NotificationMarketUpdate | NotificationObservationUpdate | NotificationMiningYield | NotificationPilotlessShip | NotificationPlayerDied | NotificationReconnected | NotificationScanDetected | NotificationScanResult | NotificationSkillLevelUp | NotificationTradeOfferReceived;
         id?: string;
         /**
          * Specific message subtype used for handler routing (e.g. chat_message, combat_update, action_result, mining_yield). Switch on this to pick the matching Notification_* payload schema.
@@ -9325,6 +9453,44 @@ export type SpacemoltSellResponses = {
 
 export type SpacemoltSellResponse = SpacemoltSellResponses[keyof SpacemoltSellResponses];
 
+export type SpacemoltSubscribeObservationData = {
+    body?: {
+        /**
+         * Also run a continuous active sensor sweep that resolves cloaked ships (requires a scanner, must be undocked, burns 1 fuel/tick, alerts cloakers). Omit or false for the passive presence feed only.
+         */
+        active_scan?: boolean;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/subscribe_observation';
+};
+
+export type SpacemoltSubscribeObservationErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltSubscribeObservationResponses = {
+    /**
+     * Result. structuredContent type: SubscribeObservationResponse
+     */
+    200: V2Response & {
+        structuredContent?: SubscribeObservationResponse;
+    };
+};
+
+export type SpacemoltSubscribeObservationResponse = SpacemoltSubscribeObservationResponses[keyof SpacemoltSubscribeObservationResponses];
+
 export type SpacemoltSurveySystemData = {
     body?: {
         [key: string]: unknown;
@@ -9518,6 +9684,41 @@ export type SpacemoltUnloadPassengerResponses = {
 };
 
 export type SpacemoltUnloadPassengerResponse = SpacemoltUnloadPassengerResponses[keyof SpacemoltUnloadPassengerResponses];
+
+export type SpacemoltUnsubscribeObservationData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/unsubscribe_observation';
+};
+
+export type SpacemoltUnsubscribeObservationErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltUnsubscribeObservationResponses = {
+    /**
+     * Result. structuredContent type: UnsubscribeObservationResponse
+     */
+    200: V2Response & {
+        structuredContent?: UnsubscribeObservationResponse;
+    };
+};
+
+export type SpacemoltUnsubscribeObservationResponse = SpacemoltUnsubscribeObservationResponses[keyof SpacemoltUnsubscribeObservationResponses];
 
 export type SpacemoltUseItemData = {
     body?: {
@@ -11146,6 +11347,10 @@ export type SpacemoltFacilityBrowseForSaleData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -11154,9 +11359,9 @@ export type SpacemoltFacilityBrowseForSaleData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -11229,6 +11434,10 @@ export type SpacemoltFacilityBrowseForSaleData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -11272,6 +11481,10 @@ export type SpacemoltFacilityBuildData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -11280,9 +11493,9 @@ export type SpacemoltFacilityBuildData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -11355,6 +11568,10 @@ export type SpacemoltFacilityBuildData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -11400,6 +11617,10 @@ export type SpacemoltFacilityBuyListingData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -11408,9 +11629,9 @@ export type SpacemoltFacilityBuyListingData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -11483,6 +11704,10 @@ export type SpacemoltFacilityBuyListingData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -11568,6 +11793,10 @@ export type SpacemoltFacilityCancelListingData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -11576,9 +11805,9 @@ export type SpacemoltFacilityCancelListingData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -11651,6 +11880,10 @@ export type SpacemoltFacilityCancelListingData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -11736,6 +11969,10 @@ export type SpacemoltFacilityDismantleData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -11744,9 +11981,9 @@ export type SpacemoltFacilityDismantleData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -11819,6 +12056,10 @@ export type SpacemoltFacilityDismantleData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -11864,6 +12105,10 @@ export type SpacemoltFacilityFactionBuildData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -11872,9 +12117,9 @@ export type SpacemoltFacilityFactionBuildData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -11947,6 +12192,10 @@ export type SpacemoltFacilityFactionBuildData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -11992,6 +12241,10 @@ export type SpacemoltFacilityFactionDismantleData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -12000,9 +12253,9 @@ export type SpacemoltFacilityFactionDismantleData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -12075,6 +12328,10 @@ export type SpacemoltFacilityFactionDismantleData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -12120,6 +12377,10 @@ export type SpacemoltFacilityFactionListData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -12128,9 +12389,9 @@ export type SpacemoltFacilityFactionListData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -12203,6 +12464,10 @@ export type SpacemoltFacilityFactionListData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -12246,6 +12511,10 @@ export type SpacemoltFacilityFactionOwnedData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -12254,9 +12523,9 @@ export type SpacemoltFacilityFactionOwnedData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -12329,6 +12598,10 @@ export type SpacemoltFacilityFactionOwnedData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -12372,6 +12645,10 @@ export type SpacemoltFacilityFactionUpgradeData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -12380,9 +12657,9 @@ export type SpacemoltFacilityFactionUpgradeData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -12455,6 +12732,10 @@ export type SpacemoltFacilityFactionUpgradeData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -12586,6 +12867,10 @@ export type SpacemoltFacilityJobAddData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -12594,9 +12879,9 @@ export type SpacemoltFacilityJobAddData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -12669,6 +12954,10 @@ export type SpacemoltFacilityJobAddData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -12714,6 +13003,10 @@ export type SpacemoltFacilityJobCancelData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -12722,9 +13015,9 @@ export type SpacemoltFacilityJobCancelData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -12797,6 +13090,10 @@ export type SpacemoltFacilityJobCancelData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -12842,6 +13139,10 @@ export type SpacemoltFacilityJobListData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -12850,9 +13151,9 @@ export type SpacemoltFacilityJobListData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -12925,6 +13226,10 @@ export type SpacemoltFacilityJobListData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -12968,6 +13273,10 @@ export type SpacemoltFacilityJobReorderData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -12976,9 +13285,9 @@ export type SpacemoltFacilityJobReorderData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -13051,6 +13360,10 @@ export type SpacemoltFacilityJobReorderData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -13096,6 +13409,10 @@ export type SpacemoltFacilityListData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -13104,9 +13421,9 @@ export type SpacemoltFacilityListData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -13179,6 +13496,10 @@ export type SpacemoltFacilityListData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -13222,6 +13543,10 @@ export type SpacemoltFacilityListForSaleData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -13230,9 +13555,9 @@ export type SpacemoltFacilityListForSaleData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -13305,6 +13630,10 @@ export type SpacemoltFacilityListForSaleData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -13350,6 +13679,10 @@ export type SpacemoltFacilityOwnedData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -13358,9 +13691,9 @@ export type SpacemoltFacilityOwnedData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -13433,6 +13766,10 @@ export type SpacemoltFacilityOwnedData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -13476,6 +13813,10 @@ export type SpacemoltFacilityPersonalBuildData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -13484,9 +13825,9 @@ export type SpacemoltFacilityPersonalBuildData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -13559,6 +13900,10 @@ export type SpacemoltFacilityPersonalBuildData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -13604,6 +13949,10 @@ export type SpacemoltFacilityPersonalDecorateData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -13612,9 +13961,9 @@ export type SpacemoltFacilityPersonalDecorateData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -13687,6 +14036,10 @@ export type SpacemoltFacilityPersonalDecorateData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -13732,6 +14085,10 @@ export type SpacemoltFacilityPersonalVisitData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -13740,9 +14097,9 @@ export type SpacemoltFacilityPersonalVisitData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -13815,6 +14172,10 @@ export type SpacemoltFacilityPersonalVisitData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -14010,6 +14371,10 @@ export type SpacemoltFacilitySetAccessData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -14018,9 +14383,9 @@ export type SpacemoltFacilitySetAccessData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -14093,6 +14458,10 @@ export type SpacemoltFacilitySetAccessData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -14366,6 +14735,10 @@ export type SpacemoltFacilitySetNameData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -14374,9 +14747,9 @@ export type SpacemoltFacilitySetNameData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -14449,6 +14822,10 @@ export type SpacemoltFacilitySetNameData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -14494,6 +14871,10 @@ export type SpacemoltFacilitySetOutputPriceData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -14502,9 +14883,9 @@ export type SpacemoltFacilitySetOutputPriceData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -14577,6 +14958,10 @@ export type SpacemoltFacilitySetOutputPriceData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -15074,6 +15459,10 @@ export type SpacemoltFacilityTransferData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -15082,9 +15471,9 @@ export type SpacemoltFacilityTransferData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -15157,6 +15546,10 @@ export type SpacemoltFacilityTransferData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -15202,6 +15595,10 @@ export type SpacemoltFacilityTypesData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -15210,9 +15607,9 @@ export type SpacemoltFacilityTypesData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -15285,6 +15682,10 @@ export type SpacemoltFacilityTypesData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -15404,6 +15805,10 @@ export type SpacemoltFacilityUpgradeData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -15412,9 +15817,9 @@ export type SpacemoltFacilityUpgradeData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -15487,6 +15892,10 @@ export type SpacemoltFacilityUpgradeData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -15532,6 +15941,10 @@ export type SpacemoltFacilityUpgradesData = {
          */
         access?: 'private' | 'public';
         /**
+         * For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.
+         */
+        bucket?: string;
+        /**
          * Filter for 'types' action: show only this category.
          */
         category?: 'infrastructure' | 'service' | 'production' | 'faction' | 'personal';
@@ -15540,9 +15953,9 @@ export type SpacemoltFacilityUpgradesData = {
          */
         custom_name?: string;
         /**
-         * Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).
+         * Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.
          */
-        deliver_to?: 'storage' | 'faction';
+        deliver_to?: string;
         /**
          * For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel).
          */
@@ -15615,6 +16028,10 @@ export type SpacemoltFacilityUpgradesData = {
          * Recipe ID to run (for 'job_add' action).
          */
         recipe_id?: string;
+        /**
+         * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
+         */
+        source?: string;
         /**
          * For 'personal_visit': username of the player whose quarters to visit. Omit to visit your own.
          */
@@ -17148,6 +17565,10 @@ export type SpacemoltFactionAdminWriteRoomResponse = SpacemoltFactionAdminWriteR
 export type SpacemoltFactionCommerceCreateBuyOrderData = {
     body?: {
         /**
+         * Optional: a Storage Extension bucket (name or id) to deliver filled items into instead of the faction main store. Not valid for fuel orders.
+         */
+        bucket?: string;
+        /**
          * ID of the item to buy for faction storage
          */
         item_id: string;
@@ -17195,6 +17616,10 @@ export type SpacemoltFactionCommerceCreateBuyOrderResponse = SpacemoltFactionCom
 
 export type SpacemoltFactionCommerceCreateSellOrderData = {
     body?: {
+        /**
+         * Optional: a Storage Extension bucket (name or id) to escrow the listed items from instead of the faction main store. A cancellation returns them there. Not valid for fuel orders.
+         */
+        bucket?: string;
         /**
          * ID of the item to sell from faction storage
          */

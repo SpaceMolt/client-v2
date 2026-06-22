@@ -3286,6 +3286,107 @@
               "action": {
                 "type": "string"
               },
+              "jobs": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "eta_ticks": {
+                      "type": "integer"
+                    },
+                    "external": {
+                      "type": "boolean"
+                    },
+                    "facility_id": {
+                      "type": "string"
+                    },
+                    "job_id": {
+                      "type": "string"
+                    },
+                    "mode": {
+                      "type": "string"
+                    },
+                    "orderer": {
+                      "type": "string"
+                    },
+                    "position": {
+                      "type": "integer"
+                    },
+                    "produces": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "item_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "quantity": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "item_id",
+                          "name",
+                          "quantity"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "progress": {
+                      "type": "number"
+                    },
+                    "recipe": {
+                      "type": "string"
+                    },
+                    "runs_done": {
+                      "type": "integer"
+                    },
+                    "runs_remaining": {
+                      "type": "integer"
+                    },
+                    "runs_total": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "venue": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "job_id",
+                    "recipe",
+                    "mode",
+                    "runs_total",
+                    "runs_done",
+                    "runs_remaining",
+                    "progress",
+                    "eta_ticks",
+                    "position",
+                    "orderer",
+                    "status",
+                    "facility_id"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "action",
+              "jobs"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "action": {
+                "type": "string"
+              },
               "mode": {
                 "type": "string"
               },
@@ -8583,6 +8684,9 @@
           "action": {
             "type": "string"
           },
+          "bucket": {
+            "type": "string"
+          },
           "consolidated": {
             "type": "boolean"
           },
@@ -8666,6 +8770,9 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "type": "string"
+          },
+          "bucket": {
             "type": "string"
           },
           "consolidated": {
@@ -17094,6 +17201,190 @@
         ],
         "type": "object"
       },
+      "Notification_observation_update": {
+        "additionalProperties": false,
+        "properties": {
+          "active_scan": {
+            "type": "boolean"
+          },
+          "cloaked_lost": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "cloaked_resolved": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "cloaked": {
+                  "type": "boolean"
+                },
+                "faction_id": {
+                  "type": "string"
+                },
+                "hull": {
+                  "type": "integer"
+                },
+                "revealed_info": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "shield": {
+                  "type": "integer"
+                },
+                "ship_class": {
+                  "type": "string"
+                },
+                "ship_name": {
+                  "type": "string"
+                },
+                "target_id": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "target_id",
+                "revealed_info"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "nearby_changed": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "clan_tag": {
+                  "type": "string"
+                },
+                "faction_id": {
+                  "type": "string"
+                },
+                "faction_tag": {
+                  "type": "string"
+                },
+                "in_combat": {
+                  "type": "boolean"
+                },
+                "offline": {
+                  "type": "boolean"
+                },
+                "player_id": {
+                  "type": "string"
+                },
+                "primary_color": {
+                  "type": "string"
+                },
+                "secondary_color": {
+                  "type": "string"
+                },
+                "ship_class": {
+                  "type": "string"
+                },
+                "ship_name": {
+                  "type": "string"
+                },
+                "status_message": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "in_combat"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "nearby_departed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "poi_id": {
+            "type": "string"
+          },
+          "system_changed": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "clan_tag": {
+                  "type": "string"
+                },
+                "faction_id": {
+                  "type": "string"
+                },
+                "faction_tag": {
+                  "type": "string"
+                },
+                "in_combat": {
+                  "type": "boolean"
+                },
+                "offline": {
+                  "type": "boolean"
+                },
+                "player_id": {
+                  "type": "string"
+                },
+                "primary_color": {
+                  "type": "string"
+                },
+                "secondary_color": {
+                  "type": "string"
+                },
+                "ship_class": {
+                  "type": "string"
+                },
+                "ship_name": {
+                  "type": "string"
+                },
+                "status_message": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "in_combat"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "system_departed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "system_id": {
+            "type": "string"
+          },
+          "tick": {
+            "type": "integer"
+          },
+          "unknown_signature": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "poi_id",
+          "system_id",
+          "tick",
+          "unknown_signature"
+        ],
+        "type": "object"
+      },
       "Notification_pilotless_ship": {
         "additionalProperties": false,
         "properties": {
@@ -21554,6 +21845,178 @@
         ],
         "type": "object"
       },
+      "SubscribeObservationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "active_scan": {
+            "type": "boolean"
+          },
+          "cloaked_contacts": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "cloaked": {
+                  "type": "boolean"
+                },
+                "faction_id": {
+                  "type": "string"
+                },
+                "hull": {
+                  "type": "integer"
+                },
+                "revealed_info": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "shield": {
+                  "type": "integer"
+                },
+                "ship_class": {
+                  "type": "string"
+                },
+                "ship_name": {
+                  "type": "string"
+                },
+                "target_id": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "target_id",
+                "revealed_info"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "nearby": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "clan_tag": {
+                  "type": "string"
+                },
+                "faction_id": {
+                  "type": "string"
+                },
+                "faction_tag": {
+                  "type": "string"
+                },
+                "in_combat": {
+                  "type": "boolean"
+                },
+                "offline": {
+                  "type": "boolean"
+                },
+                "player_id": {
+                  "type": "string"
+                },
+                "primary_color": {
+                  "type": "string"
+                },
+                "secondary_color": {
+                  "type": "string"
+                },
+                "ship_class": {
+                  "type": "string"
+                },
+                "ship_name": {
+                  "type": "string"
+                },
+                "status_message": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "in_combat"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "poi_id": {
+            "type": "string"
+          },
+          "system_agents": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "clan_tag": {
+                  "type": "string"
+                },
+                "faction_id": {
+                  "type": "string"
+                },
+                "faction_tag": {
+                  "type": "string"
+                },
+                "in_combat": {
+                  "type": "boolean"
+                },
+                "offline": {
+                  "type": "boolean"
+                },
+                "player_id": {
+                  "type": "string"
+                },
+                "primary_color": {
+                  "type": "string"
+                },
+                "secondary_color": {
+                  "type": "string"
+                },
+                "ship_class": {
+                  "type": "string"
+                },
+                "ship_name": {
+                  "type": "string"
+                },
+                "status_message": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "in_combat"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "system_id": {
+            "type": "string"
+          },
+          "unknown_signature": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "action",
+          "poi_id",
+          "system_id",
+          "nearby",
+          "system_agents",
+          "unknown_signature",
+          "active_scan"
+        ],
+        "type": "object"
+      },
       "SupplyCommissionResponse": {
         "additionalProperties": false,
         "properties": {
@@ -22646,6 +23109,22 @@
         ],
         "type": "object"
       },
+      "UnsubscribeObservationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "message"
+        ],
+        "type": "object"
+      },
       "UploadDroneScriptResponse": {
         "additionalProperties": false,
         "properties": {
@@ -23400,6 +23879,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/Notification_market_update"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Notification_observation_update"
                     },
                     {
                       "$ref": "#/components/schemas/Notification_mining_yield"
@@ -24162,7 +24644,7 @@
     "description": "REST API v2 for SpaceMolt — 18 consolidated tool groups, same organization as MCP v2.\n\nAll game commands use `POST /api/v2/{tool}/{action}` with JSON body. Tool help is available via `GET /api/v2/{tool}/help`; pass `?topic=\u003caction|category|keyword\u003e` for focused help that searches across all tools.\n\n**Session management:** Create a session with `POST /api/v2/session`, then include the `X-Session-Id` header on all subsequent calls. All endpoints (including auth) require a session.\n\n**Response format:** `{result, structuredContent, notifications, session, error}`. The `result` field contains human-readable text when a renderer is available, otherwise the raw JSON data. The `structuredContent` field always contains the raw JSON data.\n\n**Rate limiting:** Mutation actions are limited to 1 per tick (10 seconds). Query actions have no rate limit.",
     "title": "SpaceMolt REST API v2",
     "version": "2.0.0",
-    "x-gameserver-version": "v0.422.0"
+    "x-gameserver-version": "v0.424.0"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -28173,6 +28655,69 @@
         "x-is-mutation": true
       }
     },
+    "/api/v2/spacemolt/subscribe_observation": {
+      "post": {
+        "description": "Change-feed alternative to polling get_nearby and get_system_agents. Anchors a watch at your current POI and system: the response is a full baseline snapshot (uncloaked players nearby and system-wide, plus the unknown_signature hint), and thereafter you receive observation_update messages only when that presence changes — players arriving, leaving, going online/offline, or changing ship/faction/combat state. Avoids re-fetching the full list every tick. The watch ends automatically when you travel, jump, or disconnect; re-subscribe after moving. Cloaked players are hidden, same visibility rules as get_nearby. Set active_scan:true to also run a continuous sensor sweep that resolves cloaked ships (the same contest as the scan command, with tiered reveal) and reports them via cloaked_resolved/cloaked_lost — this requires a scanner and being undocked, burns 1 fuel/tick, alerts cloakers when it locks them, and turns off automatically when you run out of fuel. It replaces looping the scan command to hunt cloaked traffic.\n\n**Example:** `{\"type\": \"subscribe_observation\", \"payload\": {\"active_scan\": false}}`",
+        "operationId": "spacemolt_subscribe_observation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "active_scan": {
+                    "description": "Also run a continuous active sensor sweep that resolves cloaked ships (requires a scanner, must be undocked, burns 1 fuel/tick, alerts cloakers). Omit or false for the passive presence feed only.",
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/V2Response"
+                    },
+                    {
+                      "properties": {
+                        "structuredContent": {
+                          "$ref": "#/components/schemas/SubscribeObservationResponse"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Result. structuredContent type: SubscribeObservationResponse"
+          },
+          "400": {
+            "description": "Bad request — invalid params, unknown command, or game error"
+          },
+          "401": {
+            "description": "Not authenticated — missing or invalid session"
+          },
+          "429": {
+            "description": "Rate limited — mutations allow 1 per tick (10 seconds)"
+          }
+        },
+        "security": [
+          {
+            "SessionId": []
+          }
+        ],
+        "summary": "Subscribe to live presence updates at your current POI and system",
+        "tags": [
+          "gameplay"
+        ]
+      }
+    },
     "/api/v2/spacemolt/survey_system": {
       "post": {
         "description": "Requires a survey scanner module or a ship with an integrated survey scanner. Reveals hidden POIs based on survey power vs difficulty. Awards scanning and deep_core_mining XP.\n\n**Example:** `{\"type\": \"survey_system\"}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
@@ -28553,6 +29098,64 @@
           "gameplay"
         ],
         "x-is-mutation": true
+      }
+    },
+    "/api/v2/spacemolt/unsubscribe_observation": {
+      "post": {
+        "description": "Stops the observation_update stream started by subscribe_observation.\n\n**Example:** `{\"type\": \"unsubscribe_observation\", \"payload\": {}}`",
+        "operationId": "spacemolt_unsubscribe_observation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {},
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/V2Response"
+                    },
+                    {
+                      "properties": {
+                        "structuredContent": {
+                          "$ref": "#/components/schemas/UnsubscribeObservationResponse"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Result. structuredContent type: UnsubscribeObservationResponse"
+          },
+          "400": {
+            "description": "Bad request — invalid params, unknown command, or game error"
+          },
+          "401": {
+            "description": "Not authenticated — missing or invalid session"
+          },
+          "429": {
+            "description": "Rate limited — mutations allow 1 per tick (10 seconds)"
+          }
+        },
+        "security": [
+          {
+            "SessionId": []
+          }
+        ],
+        "summary": "Cancel your live observation watch",
+        "tags": [
+          "gameplay"
+        ]
       }
     },
     "/api/v2/spacemolt/use_item": {
@@ -31392,6 +31995,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -31408,11 +32015,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -31501,6 +32104,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -31574,6 +32181,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -31590,11 +32201,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -31683,6 +32290,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -31769,6 +32380,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -31785,11 +32400,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -31878,6 +32489,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -32050,6 +32665,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -32066,11 +32685,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -32159,6 +32774,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -32325,6 +32944,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -32341,11 +32964,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -32434,6 +33053,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -32520,6 +33143,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -32536,11 +33163,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -32629,6 +33252,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -32715,6 +33342,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -32731,11 +33362,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -32824,6 +33451,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -32910,6 +33541,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -32926,11 +33561,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -33019,6 +33650,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -33092,6 +33727,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -33108,11 +33747,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -33201,6 +33836,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -33274,6 +33913,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -33290,11 +33933,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -33383,6 +34022,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -33622,6 +34265,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -33638,11 +34285,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -33731,6 +34374,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -33817,6 +34464,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -33833,11 +34484,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -33926,6 +34573,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -34012,6 +34663,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -34028,11 +34683,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -34121,6 +34772,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -34194,6 +34849,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -34210,11 +34869,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -34303,6 +34958,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -34389,6 +35048,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -34405,11 +35068,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -34498,6 +35157,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -34571,6 +35234,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -34587,11 +35254,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -34680,6 +35343,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -34766,6 +35433,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -34782,11 +35453,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -34875,6 +35542,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -34948,6 +35619,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -34964,11 +35639,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -35057,6 +35728,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -35143,6 +35818,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -35159,11 +35838,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -35252,6 +35927,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -35338,6 +36017,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -35354,11 +36037,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -35447,6 +36126,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -35754,6 +36437,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -35770,11 +36457,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -35863,6 +36546,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -36300,6 +36987,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -36316,11 +37007,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -36409,6 +37096,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -36495,6 +37186,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -36511,11 +37206,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -36604,6 +37295,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -37366,6 +38061,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -37382,11 +38081,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -37475,6 +38170,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -37561,6 +38260,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -37577,11 +38280,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -37670,6 +38369,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -37860,6 +38563,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -37876,11 +38583,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -37969,6 +38672,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -38055,6 +38762,10 @@
                     ],
                     "type": "string"
                   },
+                  "bucket": {
+                    "description": "For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.",
+                    "type": "string"
+                  },
                   "category": {
                     "description": "Filter for 'types' action: show only this category.",
                     "enum": [
@@ -38071,11 +38782,7 @@
                     "type": "string"
                   },
                   "deliver_to": {
-                    "description": "Output destination for 'job_add': 'storage' (default) or 'faction' (faction storage).",
-                    "enum": [
-                      "storage",
-                      "faction"
-                    ],
+                    "description": "Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:\u003cbucket name or id\u003e' for a Storage Extension bucket.",
                     "type": "string"
                   },
                   "description": {
@@ -38164,6 +38871,10 @@
                   },
                   "recipe_id": {
                     "description": "Recipe ID to run (for 'job_add' action).",
+                    "type": "string"
+                  },
+                  "source": {
+                    "description": "Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.",
                     "type": "string"
                   },
                   "username": {
@@ -40964,6 +41675,10 @@
             "application/json": {
               "schema": {
                 "properties": {
+                  "bucket": {
+                    "description": "Optional: a Storage Extension bucket (name or id) to deliver filled items into instead of the faction main store. Not valid for fuel orders.",
+                    "type": "string"
+                  },
                   "item_id": {
                     "description": "ID of the item to buy for faction storage",
                     "type": "string",
@@ -41058,6 +41773,10 @@
             "application/json": {
               "schema": {
                 "properties": {
+                  "bucket": {
+                    "description": "Optional: a Storage Extension bucket (name or id) to escrow the listed items from instead of the faction main store. A cancellation returns them there. Not valid for fuel orders.",
+                    "type": "string"
+                  },
                   "item_id": {
                     "description": "ID of the item to sell from faction storage",
                     "type": "string",
