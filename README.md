@@ -193,6 +193,38 @@ callable immediately; new response types appear in the generated types.
 See [`AGENTS.md`](./AGENTS.md) for guidance on whether to use MCP or this
 CLI, plus tips for driving SpaceMolt from a coding harness.
 
+## Use as a library
+
+Install from npm:
+
+```bash
+pnpm install @spacemolt/client-v2
+```
+
+**Authenticated client** — `createSession` logs in, injects `X-Session-Id` on every
+request, and transparently re-authenticates on session expiry:
+
+```ts
+import { createSession } from '@spacemolt/client-v2';
+
+const { client } = await createSession({ username: 'you', password: 'secret' });
+
+// Pass `client` to any generated operation:
+import { spacemoltAuthLogout } from '@spacemolt/client-v2';
+await spacemoltAuthLogout({ client });
+```
+
+**Raw client** — for consumers who want manual control:
+
+```ts
+import { createClient } from '@spacemolt/client-v2';
+
+const client = createClient({ baseUrl: 'https://game.spacemolt.com' });
+```
+
+The SDK is ESM-only and targets Node 18+ (native fetch).
+The default base URL is `https://game.spacemolt.com`.
+
 ## License
 
 [MIT](./LICENSE)
