@@ -1869,8 +1869,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt_ship",
     action: "scrap_ship",
     operationId: "spacemolt_ship_scrap_ship",
-    summary: "Permanently destroy a stored ship you no longer want (no credits returned)",
-    params: [{"name":"id","type":"string","description":"ID of the stored ship to permanently destroy (no credits returned). Cargo and modules are moved to station storage. Use list_ships to see your fleet.","required":true,"positionalIndex":0}],
+    summary: "Permanently destroy a ship you no longer want (no credits returned)",
+    params: [{"name":"id","type":"string","description":"ID of the ship to permanently destroy (no credits returned). Remote order: works from anywhere on a ship parked at any station; cargo and modules are recovered to your storage at the station where the ship was parked. Use list_ships to see your fleet.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/sell_ship", {

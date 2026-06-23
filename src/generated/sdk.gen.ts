@@ -5834,8 +5834,8 @@ export const spacemoltShipRenameShip = <ThrowOnError extends boolean = false>(op
 };
 
 /**
- * Permanently destroy a stored ship you no longer want (no credits returned)
- * Use this to delete unwanted ships (such as starter ships you've outgrown) that have no trade-in value. No credits are returned — use sell_ship for ships with resale value. Cargo is moved to station storage and modules are uninstalled to station storage so nothing is lost. Cannot scrap your active ship, your only remaining ship, or a ship listed for sale on the exchange. Requires a shipyard at this base.
+ * Permanently destroy a ship you no longer want (no credits returned)
+ * Use this to delete unwanted ships (such as starter ships you've outgrown) that have no trade-in value. No credits are returned — use sell_ship for ships with resale value. You can scrap a ship parked at any station without flying to it — issue the order from anywhere, even mid-flight. Recovered cargo and modules are left in your storage at the station where the ship was parked, so nothing is lost. Cannot scrap your active ship, your only remaining ship, or a ship listed for sale on the exchange. Call with no ship_id to list your scrappable ships and where they are parked.
  *
  * **Example:** `{"type": "scrap_ship", "payload": {"ship_id": "ship_abc123"}}`
  *

@@ -928,6 +928,29 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
+    jobs: Array<{
+        eta_ticks: number;
+        external?: boolean;
+        facility_id: string;
+        job_id: string;
+        mode: string;
+        orderer: string;
+        position: number;
+        produces?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        progress: number;
+        recipe: string;
+        runs_done: number;
+        runs_remaining: number;
+        runs_total: number;
+        status: string;
+        venue?: string;
+    }>;
+} | {
+    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -1697,6 +1720,7 @@ export type FacilityResponse = {
         name: string;
         power_throttled?: boolean;
         rent_per_cycle: number;
+        rental_fee_per_run?: number;
         system_id?: string;
         type: string;
         under_construction?: boolean;
@@ -1724,6 +1748,7 @@ export type FacilityResponse = {
         name: string;
         power_throttled?: boolean;
         rent_per_cycle: number;
+        rental_fee_per_run?: number;
         system_id?: string;
         type: string;
         under_construction?: boolean;
@@ -1943,6 +1968,7 @@ export type FacilityResponse = {
         missed_rent_cycles?: number;
         name: string;
         rent_per_cycle: number;
+        rental_fee_per_run?: number;
         status: string;
         ticks_until_complete?: number;
         type: string;
@@ -19876,7 +19902,7 @@ export type SpacemoltShipRenameShipResponse = SpacemoltShipRenameShipResponses[k
 export type SpacemoltShipScrapShipData = {
     body?: {
         /**
-         * ID of the stored ship to permanently destroy (no credits returned). Cargo and modules are moved to station storage. Use list_ships to see your fleet.
+         * ID of the ship to permanently destroy (no credits returned). Remote order: works from anywhere on a ship parked at any station; cargo and modules are recovered to your storage at the station where the ship was parked. Use list_ships to see your fleet.
          */
         id: string;
     };
