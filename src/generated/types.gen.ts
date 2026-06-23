@@ -1697,6 +1697,7 @@ export type FacilityResponse = {
         name: string;
         power_throttled?: boolean;
         rent_per_cycle: number;
+        rental_fee_per_run?: number;
         system_id?: string;
         type: string;
         under_construction?: boolean;
@@ -1724,6 +1725,7 @@ export type FacilityResponse = {
         name: string;
         power_throttled?: boolean;
         rent_per_cycle: number;
+        rental_fee_per_run?: number;
         system_id?: string;
         type: string;
         under_construction?: boolean;
@@ -1943,6 +1945,7 @@ export type FacilityResponse = {
         missed_rent_cycles?: number;
         name: string;
         rent_per_cycle: number;
+        rental_fee_per_run?: number;
         status: string;
         ticks_until_complete?: number;
         type: string;
