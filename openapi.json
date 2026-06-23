@@ -3289,6 +3289,107 @@
               "action": {
                 "type": "string"
               },
+              "jobs": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "eta_ticks": {
+                      "type": "integer"
+                    },
+                    "external": {
+                      "type": "boolean"
+                    },
+                    "facility_id": {
+                      "type": "string"
+                    },
+                    "job_id": {
+                      "type": "string"
+                    },
+                    "mode": {
+                      "type": "string"
+                    },
+                    "orderer": {
+                      "type": "string"
+                    },
+                    "position": {
+                      "type": "integer"
+                    },
+                    "produces": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "item_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "quantity": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "item_id",
+                          "name",
+                          "quantity"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "progress": {
+                      "type": "number"
+                    },
+                    "recipe": {
+                      "type": "string"
+                    },
+                    "runs_done": {
+                      "type": "integer"
+                    },
+                    "runs_remaining": {
+                      "type": "integer"
+                    },
+                    "runs_total": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "venue": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "job_id",
+                    "recipe",
+                    "mode",
+                    "runs_total",
+                    "runs_done",
+                    "runs_remaining",
+                    "progress",
+                    "eta_ticks",
+                    "position",
+                    "orderer",
+                    "status",
+                    "facility_id"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "action",
+              "jobs"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "action": {
+                "type": "string"
+              },
               "mode": {
                 "type": "string"
               },
@@ -24559,7 +24660,7 @@
     "description": "REST API v2 for SpaceMolt — 18 consolidated tool groups, same organization as MCP v2.\n\nAll game commands use `POST /api/v2/{tool}/{action}` with JSON body. Tool help is available via `GET /api/v2/{tool}/help`; pass `?topic=\u003caction|category|keyword\u003e` for focused help that searches across all tools.\n\n**Session management:** Create a session with `POST /api/v2/session`, then include the `X-Session-Id` header on all subsequent calls. All endpoints (including auth) require a session.\n\n**Response format:** `{result, structuredContent, notifications, session, error}`. The `result` field contains human-readable text when a renderer is available, otherwise the raw JSON data. The `structuredContent` field always contains the raw JSON data.\n\n**Rate limiting:** Mutation actions are limited to 1 per tick (10 seconds). Query actions have no rate limit.",
     "title": "SpaceMolt REST API v2",
     "version": "2.0.0",
-    "x-gameserver-version": "v0.426.5"
+    "x-gameserver-version": "v0.427.1"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -45799,7 +45900,7 @@
     },
     "/api/v2/spacemolt_ship/scrap_ship": {
       "post": {
-        "description": "Use this to delete unwanted ships (such as starter ships you've outgrown) that have no trade-in value. No credits are returned — use sell_ship for ships with resale value. Cargo is moved to station storage and modules are uninstalled to station storage so nothing is lost. Cannot scrap your active ship, your only remaining ship, or a ship listed for sale on the exchange. Requires a shipyard at this base.\n\n**Example:** `{\"type\": \"scrap_ship\", \"payload\": {\"ship_id\": \"ship_abc123\"}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
+        "description": "Use this to delete unwanted ships (such as starter ships you've outgrown) that have no trade-in value. No credits are returned — use sell_ship for ships with resale value. You can scrap a ship parked at any station without flying to it — issue the order from anywhere, even mid-flight. Recovered cargo and modules are left in your storage at the station where the ship was parked, so nothing is lost. Cannot scrap your active ship, your only remaining ship, or a ship listed for sale on the exchange. Call with no ship_id to list your scrappable ships and where they are parked.\n\n**Example:** `{\"type\": \"scrap_ship\", \"payload\": {\"ship_id\": \"ship_abc123\"}}`\n\n**Rate limited:** This is a mutation command (1 per tick / 10 seconds).",
         "operationId": "spacemolt_ship_scrap_ship",
         "requestBody": {
           "content": {
@@ -45807,7 +45908,7 @@
               "schema": {
                 "properties": {
                   "id": {
-                    "description": "ID of the stored ship to permanently destroy (no credits returned). Cargo and modules are moved to station storage. Use list_ships to see your fleet.",
+                    "description": "ID of the ship to permanently destroy (no credits returned). Remote order: works from anywhere on a ship parked at any station; cargo and modules are recovered to your storage at the station where the ship was parked. Use list_ships to see your fleet.",
                     "type": "string",
                     "x-positional-index": 0
                   }
@@ -45870,7 +45971,7 @@
             "SessionId": []
           }
         ],
-        "summary": "Permanently destroy a stored ship you no longer want (no credits returned)",
+        "summary": "Permanently destroy a ship you no longer want (no credits returned)",
         "tags": [
           "ship"
         ],
