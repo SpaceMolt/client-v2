@@ -52,29 +52,31 @@ describe('createSession', () => {
     expect(lastSessionHeader).toBe('sess-abc');
   });
 
-  test('re-authenticates once and retries on session_expired', async () => {
-    let loginCount = 0;
-    let statusCalls = 0;
-    globalThis.fetch = mock(async (input: Request) => {
-      const req = input as Request;
-      if (req.url.includes('/login')) {
-        loginCount += 1;
-        return jsonResponse({ session: { id: `sess-${loginCount}` } });
-      }
-      statusCalls += 1;
-      if (statusCalls === 1) {
-        return jsonResponse({ error: { code: 'session_expired' } });
-      }
-      return jsonResponse({ result: 'ok', structuredContent: { ok: true } });
-    }) as typeof fetch;
+  for (const authErrorCode of ['session_expired', 'session_invalid', 'not_authenticated']) {
+    test(`re-authenticates once and retries on ${authErrorCode}`, async () => {
+      let loginCount = 0;
+      let statusCalls = 0;
+      globalThis.fetch = mock(async (input: Request) => {
+        const req = input as Request;
+        if (req.url.includes('/login')) {
+          loginCount += 1;
+          return jsonResponse({ session: { id: `sess-${loginCount}` } });
+        }
+        statusCalls += 1;
+        if (statusCalls === 1) {
+          return jsonResponse({ error: { code: authErrorCode } });
+        }
+        return jsonResponse({ result: 'ok', structuredContent: { ok: true } });
+      }) as typeof fetch;
 
-    const session = await createSession({ username: 'a', password: 'b' });
-    const client = session.client as { post: (o: { url: string; body?: unknown }) => Promise<{ data?: unknown }> };
-    const res = await client.post({ url: '/api/v2/spacemolt/mine', body: { foo: 1 } });
+      const session = await createSession({ username: 'a', password: 'b' });
+      const client = session.client as { post: (o: { url: string; body?: unknown }) => Promise<{ data?: unknown }> };
+      const res = await client.post({ url: '/api/v2/spacemolt/mine', body: { foo: 1 } });
 
-    expect(loginCount).toBe(2); // initial + one re-auth
-    expect(statusCalls).toBe(2); // failed + retried
-    expect((res.data as { structuredContent?: { ok?: boolean } })?.structuredContent?.ok).toBe(true);
-    expect(session.sessionId).toBe('sess-2');
-  });
+      expect(loginCount).toBe(2); // initial + one re-auth
+      expect(statusCalls).toBe(2); // failed + retried
+      expect((res.data as { structuredContent?: { ok?: boolean } })?.structuredContent?.ok).toBe(true);
+      expect(session.sessionId).toBe('sess-2');
+    });
+  }
 });
