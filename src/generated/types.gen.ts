@@ -509,6 +509,7 @@ export type CatalogResponse = {
         passive_recipes?: Array<string>;
         piloting_required?: number;
         power_capacity: number;
+        prestige_lock?: string;
         price: number;
         required_achievement?: string;
         required_faction_achievement?: string;
@@ -925,29 +926,6 @@ export type CraftJobResponse = {
     runs: number;
     venue: string;
     venue_type: string;
-} | {
-    action: string;
-    jobs: Array<{
-        eta_ticks: number;
-        external?: boolean;
-        facility_id: string;
-        job_id: string;
-        mode: string;
-        orderer: string;
-        position: number;
-        produces?: Array<{
-            item_id: string;
-            name: string;
-            quantity: number;
-        }>;
-        progress: number;
-        recipe: string;
-        runs_done: number;
-        runs_remaining: number;
-        runs_total: number;
-        status: string;
-        venue?: string;
-    }>;
 } | {
     action: string;
     mode: string;
@@ -5839,6 +5817,10 @@ export type ShipClass = {
      */
     piloting_required?: number;
     power_capacity?: number;
+    /**
+     * Catalog-only note naming the achievement to earn to unlock this prestige hull; present only for hulls the viewer hasn't unlocked
+     */
+    prestige_lock?: string;
     price: number;
     /**
      * Player achievement required to commission or buy this prestige hull (empty = none)
