@@ -12,6 +12,7 @@
       "import": "./dist/index.js"
     }
   },
+  "bin": { "spacemolt": "./dist/cli.js" },
   "files": ["dist"],
   "scripts": {
     "start": "bun run src/main.ts",
@@ -22,7 +23,8 @@
     "typecheck": "bun x tsc --noEmit",
     "test": "bun test",
     "build:lib": "rm -rf dist && bun build src/index.ts --outfile dist/index.js --target node --format esm && bun x tsc -p tsconfig.lib.json && bun run scripts/fix-dts-extensions.ts",
-    "pack:lib": "bun run build:lib && bun pm pack"
+    "build:cli": "bun build src/main.ts --target bun --outfile dist/cli.js && bun run scripts/prepend-shebang.ts",
+    "pack:lib": "bun run build:lib && bun run build:cli && bun pm pack"
   },
   "repository": {
     "type": "git",
