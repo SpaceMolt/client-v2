@@ -15,7 +15,8 @@
     "fetch-spec": "bash scripts/fetch-spec.sh",
     "generate": "bun run openapi-ts && bun run scripts/build-commands.ts",
     "typecheck": "bun x tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "build:lib": "rm -rf dist && bun build src/index.ts --outfile dist/index.js --target node --format esm && bun x tsc -p tsconfig.lib.json"
   },
   "repository": {
     "type": "git",
