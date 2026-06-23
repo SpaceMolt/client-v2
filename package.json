@@ -1,12 +1,20 @@
 {
   "name": "@spacemolt/client-v2",
-  "version": "1.4.69",
+  "version": "1.5.0",
   "description": "Typed CLI client for the SpaceMolt v2 REST API. Command registry and types are auto-generated from the live OpenAPI spec.",
   "type": "module",
   "private": true,
   "module": "src/main.ts",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
   "bin": {
-    "spacemolt": "./src/main.ts"
+    "spacemolt": "./dist/main.js"
   },
   "scripts": {
     "start": "bun run src/main.ts",
@@ -16,7 +24,8 @@
     "generate": "bun run openapi-ts && bun run scripts/build-commands.ts",
     "typecheck": "bun x tsc --noEmit",
     "test": "bun test",
-    "build:lib": "rm -rf dist && bun build src/index.ts --outfile dist/index.js --target node --format esm && bun x tsc -p tsconfig.lib.json"
+    "build:lib": "rm -rf dist && bun build src/index.ts --outfile dist/index.js --target node --format esm && bun build src/main.ts --outfile dist/main.js --target node --format esm && bun x tsc -p tsconfig.lib.json",
+    "pack:lib": "bun run build:lib && bun pm pack"
   },
   "repository": {
     "type": "git",
