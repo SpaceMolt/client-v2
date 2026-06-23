@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": false,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "types": [],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+  },
+  "include": ["src/index.ts", "src/sdk-session.ts", "src/generated/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/main.ts",
+    "src/dispatch.ts",
+    "src/commands.ts",
+    "src/args.ts",
+    "src/api.ts",
+    "src/session.ts",
+    "src/session-store.ts",
+    "src/config.ts",
+    "src/update-checker.ts",
+    "src/output/**/*",
+    "tests/**/*",
+    "scripts/**/*"
+  ]
+}

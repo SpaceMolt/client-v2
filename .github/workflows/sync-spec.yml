@@ -207,7 +207,12 @@ jobs:
           git config user.name "SpaceMolt DevTeam"
           git config user.email "devteam@spacemolt.com"
 
-          git add openapi.json src/generated/types.gen.ts src/commands.ts package.json
+          # Stage the entire generated tree, not a hand-picked subset: `bun run
+          # generate` rewrites all of src/generated/ (sdk.gen.ts, client/*, core/*,
+          # etc.), and the SDK surface now ships in the npm package, so any of those
+          # files can legitimately change on a spec sync. Listing files individually
+          # silently dropped those regenerated outputs and let them drift.
+          git add openapi.json src/commands.ts src/generated package.json
 
           # If only auto-generated files would change but git add staged
           # nothing (shouldn't happen given we already saw a diff, but
