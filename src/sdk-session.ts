@@ -58,8 +58,8 @@ export async function createSession(opts: SessionOptions): Promise<SpacemoltSess
   const pendingClones = new WeakMap<Request, Request>();
 
   client.interceptors.request.use((request: Request) => {
-    request.headers.set('X-Session-Id', sessionId);
     pendingClones.set(request, request.clone());
+    request.headers.set('X-Session-Id', sessionId);
     return request;
   });
 
