@@ -267,6 +267,44 @@ describe('tryCustomFormatter', () => {
     expect(output.some(l => l.includes('page=N'))).toBe(true);
   });
 
+  test('unwraps v2 delta envelope before formatting (craft job submit)', () => {
+    // On v2 transports the command result is nested under `details`; the
+    // formatter must read the inner payload, not the empty envelope top level.
+    const { result, output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt/craft', {
+        message: 'Crafting queued.',
+        player: { credits: 500 },
+        details: {
+          job_id: 'job_1',
+          est_completion_tick: 100,
+          message: 'Crafting queued: 1 run of Iron Plate.',
+        },
+      }),
+    );
+    expect(result).toBe(true);
+    expect(output.some(l => l.includes('Iron Plate'))).toBe(true);
+    expect(output.some(l => l.includes('job_1'))).toBe(true);
+    expect(output.some(l => l.includes('completes ~tick 100'))).toBe(true);
+  });
+
+  test('unwraps v2 delta envelope for craft queue list', () => {
+    const { result, output } = captureOutput(() =>
+      tryCustomFormatter('spacemolt/craft', {
+        message: 'Crafting queue.',
+        details: {
+          action: 'queue',
+          jobs: [
+            { position: 1, recipe: 'Iron Plate', produces: [{ quantity: 1, name: 'Iron Plate' }], runs_done: 0, runs_total: 3, progress: 0, status: 'active', job_id: 'job_9' },
+          ],
+        },
+      }),
+    );
+    expect(result).toBe(true);
+    expect(output.some(l => l.includes('Crafting queue'))).toBe(true);
+    expect(output.some(l => l.includes('Iron Plate'))).toBe(true);
+    expect(output.some(l => l.includes('job_9'))).toBe(true);
+  });
+
   test('catalog ship price handles undefined gracefully', () => {
     const { result, output } = captureOutput(() =>
       tryCustomFormatter('spacemolt_catalog/catalog', {

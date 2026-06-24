@@ -176,10 +176,12 @@ const formatters: Record<string, Formatter> = {
   },
 
   craft: (data) => {
-    // The command result is nested under `details` (CraftJobResponse), a 4-member
-    // oneOf: job-submit / queue-list / bulk-results / dry-run. Render from the
+    // The command result is the CraftJobResponse, a 4-member oneOf: job-submit /
+    // queue-list / bulk-results / dry-run. tryCustomFormatter unwraps the v2
+    // delta envelope, so it arrives directly as `data`; fall back to data.details
+    // in case this formatter is ever handed a raw envelope. Render from the
     // structured fields rather than the top-level `result` string.
-    const d = data.details as Record<string, unknown> | undefined;
+    const d = (data.details as Record<string, unknown> | undefined) ?? data;
     if (!d) return false;
 
     // queue-list: { action, jobs } (jobs may be null when the queue is empty)
@@ -317,6 +319,20 @@ function colorHealth(current: number | undefined, max: number | undefined): stri
 }
 
 /**
+ * On v2 transports a mutation response is wrapped in a state-delta envelope whose
+ * actual command result is nested under `details`. Formatters render the command
+ * result, so unwrap to the inner payload before dispatching. No-op for unwrapped
+ * (query / v1) responses, which carry no `details` object.
+ */
+function unwrapDelta(data: Record<string, unknown>): Record<string, unknown> {
+  const details = data.details;
+  if (details && typeof details === 'object' && !Array.isArray(details)) {
+    return details as Record<string, unknown>;
+  }
+  return data;
+}
+
+/**
  * Try to format structuredContent with a custom formatter.
  * Returns true if handled, false if not.
  */
@@ -328,7 +344,7 @@ export function tryCustomFormatter(command: string, data?: Record<string, unknow
   const formatter = formatters[action];
   if (formatter) {
     try {
-      return formatter(data);
+      return formatter(unwrapDelta(data));
     } catch {
       // Formatter crashed on malformed data — fall through to default display
       return false;
