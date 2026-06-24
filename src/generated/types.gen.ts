@@ -1062,6 +1062,8 @@ export type CreateBuyOrderResponse = {
     quantity_listed?: number;
     quantity_not_listed?: number;
     remaining_escrowed?: number;
+    self_clear_returned?: number;
+    self_cleared?: number;
     total_escrowed: number;
     total_spent?: number;
 } | {
@@ -1091,6 +1093,8 @@ export type CreateBuyOrderResponse = {
         quantity_listed?: number;
         quantity_not_listed?: number;
         remaining_escrowed?: number;
+        self_clear_returned?: number;
+        self_cleared?: number;
         success: boolean;
         total_escrowed?: number;
         total_spent?: number;
@@ -1138,6 +1142,8 @@ export type CreateSellOrderResponse = {
     quantity_filled?: number;
     quantity_listed?: number;
     returned_to_storage?: number;
+    self_clear_refund?: number;
+    self_cleared?: number;
     smuggling_level_up?: boolean;
     smuggling_xp?: number;
     total_earned?: number;
@@ -1168,6 +1174,8 @@ export type CreateSellOrderResponse = {
         quantity_filled?: number;
         quantity_listed?: number;
         returned_to_storage?: number;
+        self_clear_refund?: number;
+        self_cleared?: number;
         success: boolean;
         total_earned?: number;
     }>;
