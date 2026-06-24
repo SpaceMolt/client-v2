@@ -928,6 +928,29 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
+    jobs: Array<{
+        eta_ticks: number;
+        external?: boolean;
+        facility_id: string;
+        job_id: string;
+        mode: string;
+        orderer: string;
+        position: number;
+        produces?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        progress: number;
+        recipe: string;
+        runs_done: number;
+        runs_remaining: number;
+        runs_total: number;
+        status: string;
+        venue?: string;
+    }>;
+} | {
+    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -1198,6 +1221,7 @@ export type DepositItemsResponse = {
 } | {
     action: string;
     bucket?: string;
+    dest_bucket?: string;
     dest_total: number;
     destination: string;
     item_id: string;
@@ -2859,7 +2883,9 @@ export type FleetResponse = {
         }>;
         fuel_per_jump?: number;
         is_leader: boolean;
+        passenger?: boolean;
         player_id: string;
+        riding_ship_id?: string;
         username: string;
     }>;
     pending_invite?: boolean;
@@ -2917,7 +2943,9 @@ export type FleetStatusResponse = {
         }>;
         fuel_per_jump?: number;
         is_leader: boolean;
+        passenger?: boolean;
         player_id: string;
+        riding_ship_id?: string;
         username: string;
     }>;
     pending_invite?: boolean;
@@ -3641,103 +3669,6 @@ export type GetNotificationsResponse = {
     timestamp: number;
 };
 
-export type GetPoiResponse = {
-    active_battle?: {
-        battle_id: string;
-        participants: Array<{
-            faction_id?: string;
-            is_npc?: boolean;
-            player_id: string;
-            ship_class?: string;
-            side_id: number;
-            username: string;
-        }>;
-        sides: Array<{
-            faction_id?: string;
-            player_count: number;
-            side_id: number;
-        }>;
-    };
-    base?: {
-        allow_outsider_facilities?: boolean;
-        allowed_factions?: Array<string>;
-        allowed_players?: Array<string>;
-        banned_players?: Array<string>;
-        defense_level: number;
-        description: string;
-        empire?: string;
-        facilities?: Array<string>;
-        faction_id?: string;
-        fuel: number;
-        has_drones: boolean;
-        id: string;
-        market_fee_bps?: number;
-        max_fuel: number;
-        name: string;
-        owner_id?: string;
-        pirate_rep_required?: number;
-        poi_id: string;
-        public_access: boolean;
-        refuel_price_each?: number;
-        repair_price_per_hull?: number;
-        service_access?: {
-            [key: string]: string;
-        };
-        type?: string;
-    };
-    faction_fuel_capacity?: number;
-    faction_fuel_reserve?: number;
-    fuel_price?: number;
-    fuel_price_all_in?: number;
-    fuel_tax_per_unit?: number;
-    poi: {
-        base_id?: string;
-        class?: string;
-        description: string;
-        expires_at?: string;
-        hidden?: boolean;
-        id: string;
-        name: string;
-        position: {
-            x: number;
-            y: number;
-        };
-        resources?: Array<{
-            max_remaining?: number;
-            remaining: number;
-            resource_id: string;
-            richness: number;
-        }>;
-        reveal_difficulty?: number;
-        system_id: string;
-        type: string;
-    };
-    resources?: Array<{
-        depletion_percent?: number;
-        max_remaining?: number;
-        name: string;
-        remaining: number;
-        remaining_display: string;
-        resource_id: string;
-        richness: number;
-    }>;
-    services?: Array<string>;
-    wormhole_destination?: string;
-    wormhole_destination_id?: string;
-    wormhole_expires_in?: string;
-    wormhole_prediction_hint?: string;
-} | {
-    action: string;
-    from_poi?: string;
-    from_system?: string;
-    in_transit: boolean;
-    message: string;
-    ticks_remaining: number;
-    to_poi?: string;
-    to_system?: string;
-    transit_type: string;
-};
-
 export type GetSystemAgentsResponse = {
     agents: Array<{
         clan_tag?: string;
@@ -3828,6 +3759,10 @@ export type GetSystemResponse = {
         police_level: number;
         security_status?: string;
     };
+    wormhole_destination?: string;
+    wormhole_destination_id?: string;
+    wormhole_expires_in?: string;
+    wormhole_prediction_hint?: string;
 } | {
     action: string;
     from_system: string;
@@ -4161,6 +4096,7 @@ export type LoginResponse = {
         revealed_pois?: {
             [key: string]: boolean;
         };
+        riding_ship_id?: string;
         secondary_color: string;
         skill_xp: {
             [key: string]: number;
@@ -4912,6 +4848,10 @@ export type Player = {
         [key: string]: number;
     };
     /**
+     * Ship ID the player is riding aboard as a passenger (empty if piloting their own ship)
+     */
+    riding_ship_id?: string;
+    /**
      * Hex color
      */
     secondary_color?: string;
@@ -5084,6 +5024,122 @@ export type RecallDroneResponse = {
     skipped: number;
 };
 
+export type RecycleJobResponse = {
+    action: string;
+    effective_time_per_run: number;
+    escrowed: {
+        fee?: number;
+        inputs?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        labor?: number;
+    };
+    est_completion_tick: number;
+    external?: boolean;
+    facility_id: string;
+    job_id: string;
+    message: string;
+    mode: string;
+    produces?: Array<{
+        item_id: string;
+        name: string;
+        quantity: number;
+    }>;
+    recipe: string;
+    runs: number;
+    venue: string;
+    venue_type: string;
+} | {
+    action: string;
+    mode: string;
+    results: Array<{
+        error?: string;
+        error_code?: string;
+        index: number;
+        job_id?: string;
+        message?: string;
+        recipe?: string;
+        runs?: number;
+        success: boolean;
+        venue?: string;
+    }>;
+    summary: {
+        failed: number;
+        succeeded: number;
+        total: number;
+    };
+} | {
+    action: string;
+    cost: {
+        fee?: number;
+        inputs?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        labor?: number;
+    };
+    credits_total: number;
+    dry_run: boolean;
+    effective_time_per_run: number;
+    est_completion_tick: number;
+    external?: boolean;
+    facility_id: string;
+    have_credits: boolean;
+    have_inputs: boolean;
+    message: string;
+    mode: string;
+    produces?: Array<{
+        item_id: string;
+        name: string;
+        quantity: number;
+    }>;
+    quantity: number;
+    recipe: string;
+    runs: number;
+    venue: string;
+    venue_type: string;
+} | {
+    action: string;
+    job_id: string;
+    message: string;
+    refunded: {
+        fee?: number;
+        inputs?: Array<{
+            item_id: string;
+            name: string;
+            quantity: number;
+        }>;
+        labor?: number;
+    };
+} | {
+    action: string;
+    message: string;
+    mode: string;
+    results: Array<{
+        error?: string;
+        error_code?: string;
+        job_id: string;
+        refunded?: {
+            fee?: number;
+            inputs?: Array<{
+                item_id: string;
+                name: string;
+                quantity: number;
+            }>;
+            labor?: number;
+        };
+        success: boolean;
+    }>;
+    summary: {
+        failed: number;
+        succeeded: number;
+        total: number;
+    };
+};
+
 export type RefitShipResponse = {
     cargo_returned: number;
     class_id: string;
@@ -5217,6 +5273,7 @@ export type RegisterResponse = {
         revealed_pois?: {
             [key: string]: boolean;
         };
+        riding_ship_id?: string;
         secondary_color: string;
         skill_xp: {
             [key: string]: number;
@@ -6038,6 +6095,7 @@ export type StorageResponse = {
 } | {
     action: string;
     bucket?: string;
+    dest_bucket?: string;
     dest_total: number;
     destination: string;
     item_id: string;
@@ -6844,6 +6902,19 @@ export type V2GameState = {
          */
         has_pending?: boolean;
     };
+    /**
+     * Present when the player is riding as a passenger aboard another player's ship (no ship of their own); the ship/modules/cargo blocks are omitted in that state.
+     */
+    riding?: {
+        /**
+         * Username of the carrier piloting that ship
+         */
+        carrier?: string;
+        /**
+         * ID of the ship being ridden
+         */
+        ship_id?: string;
+    };
     ship?: {
         armor?: number;
         cargo_capacity?: number;
@@ -7131,6 +7202,7 @@ export type WithdrawItemsResponse = {
 } | {
     action: string;
     bucket?: string;
+    dest_bucket?: string;
     dest_total: number;
     destination: string;
     item_id: string;
@@ -7650,12 +7722,10 @@ export type SpacemoltCraftErrors = {
 
 export type SpacemoltCraftResponses = {
     /**
-     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CraftJobResponse)
+     * Result. structuredContent type: CraftJobResponse
      */
     200: V2Response & {
-        structuredContent?: V2GameState & {
-            details?: CraftJobResponse;
-        };
+        structuredContent?: CraftJobResponse;
     };
 };
 
@@ -8354,11 +8424,9 @@ export type SpacemoltGetPoiErrors = {
 
 export type SpacemoltGetPoiResponses = {
     /**
-     * Result. structuredContent type: GetPOIResponse
+     * Command result with rendered text and structured data
      */
-    200: V2Response & {
-        structuredContent?: GetPoiResponse;
-    };
+    200: V2Response;
 };
 
 export type SpacemoltGetPoiResponse = SpacemoltGetPoiResponses[keyof SpacemoltGetPoiResponses];
@@ -9145,11 +9213,11 @@ export type SpacemoltRecycleErrors = {
 
 export type SpacemoltRecycleResponses = {
     /**
-     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CraftJobResponse)
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (RecycleJobResponse)
      */
     200: V2Response & {
         structuredContent?: V2GameState & {
-            details?: CraftJobResponse;
+            details?: RecycleJobResponse;
         };
     };
 };
@@ -11421,7 +11489,7 @@ export type SpacemoltFacilityBrowseForSaleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -11551,7 +11619,7 @@ export type SpacemoltFacilityBuildData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -11683,7 +11751,7 @@ export type SpacemoltFacilityBuyListingData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -11855,7 +11923,7 @@ export type SpacemoltFacilityCancelListingData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -12027,7 +12095,7 @@ export type SpacemoltFacilityDismantleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -12159,7 +12227,7 @@ export type SpacemoltFacilityFactionBuildData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -12291,7 +12359,7 @@ export type SpacemoltFacilityFactionDismantleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -12423,7 +12491,7 @@ export type SpacemoltFacilityFactionListData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -12553,7 +12621,7 @@ export type SpacemoltFacilityFactionOwnedData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -12683,7 +12751,7 @@ export type SpacemoltFacilityFactionUpgradeData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -12901,7 +12969,7 @@ export type SpacemoltFacilityJobAddData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -13033,7 +13101,7 @@ export type SpacemoltFacilityJobCancelData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -13165,7 +13233,7 @@ export type SpacemoltFacilityJobListData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -13295,7 +13363,7 @@ export type SpacemoltFacilityJobReorderData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -13427,7 +13495,7 @@ export type SpacemoltFacilityListData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -13557,7 +13625,7 @@ export type SpacemoltFacilityListForSaleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -13689,7 +13757,7 @@ export type SpacemoltFacilityOwnedData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -13819,7 +13887,7 @@ export type SpacemoltFacilityPersonalBuildData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -13951,7 +14019,7 @@ export type SpacemoltFacilityPersonalDecorateData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -14083,7 +14151,7 @@ export type SpacemoltFacilityPersonalVisitData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -14365,7 +14433,7 @@ export type SpacemoltFacilitySetAccessData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -14725,7 +14793,7 @@ export type SpacemoltFacilitySetNameData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -14857,7 +14925,7 @@ export type SpacemoltFacilitySetOutputPriceData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -15441,7 +15509,7 @@ export type SpacemoltFacilityTransferData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -15573,7 +15641,7 @@ export type SpacemoltFacilityTypesData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -15779,7 +15847,7 @@ export type SpacemoltFacilityUpgradeData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -15911,7 +15979,7 @@ export type SpacemoltFacilityUpgradesData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.
          */
         price?: number;
         /**
@@ -17642,6 +17710,46 @@ export type SpacemoltFleetAcceptResponses = {
 
 export type SpacemoltFleetAcceptResponse = SpacemoltFleetAcceptResponses[keyof SpacemoltFleetAcceptResponses];
 
+export type SpacemoltFleetBoardData = {
+    body?: {
+        /**
+         * Player name or ID (for invite/kick)
+         */
+        id?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_fleet/board';
+};
+
+export type SpacemoltFleetBoardErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFleetBoardResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FleetResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: FleetResponse;
+        };
+    };
+};
+
+export type SpacemoltFleetBoardResponse = SpacemoltFleetBoardResponses[keyof SpacemoltFleetBoardResponses];
+
 export type SpacemoltFleetCreateData = {
     body?: {
         /**
@@ -17761,6 +17869,46 @@ export type SpacemoltFleetDisbandResponses = {
 };
 
 export type SpacemoltFleetDisbandResponse = SpacemoltFleetDisbandResponses[keyof SpacemoltFleetDisbandResponses];
+
+export type SpacemoltFleetDisembarkData = {
+    body?: {
+        /**
+         * Player name or ID (for invite/kick)
+         */
+        player_id?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_fleet/disembark';
+};
+
+export type SpacemoltFleetDisembarkErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFleetDisembarkResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FleetResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: FleetResponse;
+        };
+    };
+};
+
+export type SpacemoltFleetDisembarkResponse = SpacemoltFleetDisembarkResponses[keyof SpacemoltFleetDisembarkResponses];
 
 export type SpacemoltFleetHelpData = {
     body?: never;
@@ -20570,9 +20718,9 @@ export type SpacemoltSocialForumUpvoteResponse = SpacemoltSocialForumUpvoteRespo
 export type SpacemoltSocialGetActionLogData = {
     body?: {
         /**
-         * Filter by category (combat, trading, ship, crafting, faction, mission, skill, salvage, storage, other)
+         * Filter by category (combat, trading, ship, crafting, faction, mission, skill, salvage, storage, achievement, mining, navigation, exploration, reputation, drone, session, other)
          */
-        category?: 'combat' | 'trading' | 'ship' | 'crafting' | 'faction' | 'mission' | 'skill' | 'salvage' | 'storage' | 'other';
+        category?: 'combat' | 'trading' | 'ship' | 'crafting' | 'faction' | 'mission' | 'skill' | 'salvage' | 'storage' | 'achievement' | 'mining' | 'navigation' | 'exploration' | 'reputation' | 'drone' | 'session' | 'other';
         /**
          * Filter to an exact event_type (e.g. faction.production_cycle for faction production-run history)
          */
@@ -20972,9 +21120,13 @@ export type SpacemoltSocialWriteNoteResponse = SpacemoltSocialWriteNoteResponses
 export type SpacemoltStorageDepositData = {
     body?: {
         /**
-         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. See bucket names in action=view target=faction.
+         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. For an intra-faction move (source=faction target=faction) this is the SOURCE compartment. Empty means the main store. See bucket names in action=view target=faction.
          */
         bucket?: string;
+        /**
+         * Optional destination compartment for an intra-faction move (source=faction target=faction): items go from 'bucket' into 'dest_bucket'. Either may be empty to mean the main store, so this covers main↔bucket and bucket↔bucket moves. Requires manage_treasury.
+         */
+        dest_bucket?: string;
         /**
          * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
          */
@@ -20995,7 +21147,7 @@ export type SpacemoltStorageDepositData = {
          */
         quantity?: number;
         /**
-         * Optional source for deposit/withdraw: 'cargo' (default — your ship's cargo hold or wallet), 'storage' (personal storage; use with target=faction or a player name to transfer directly, bypassing cargo), or 'faction' (faction storage; use with target=self to transfer faction→personal directly, requires manage_treasury).
+         * Optional source for deposit/withdraw: 'cargo' (default — your ship's cargo hold or wallet), 'storage' (personal storage; use with target=faction or a player name to transfer directly, bypassing cargo), or 'faction' (faction storage; use with target=self to transfer faction→personal, or with target=faction to move items between faction compartments — both require manage_treasury).
          */
         source?: string;
         /**
@@ -21181,9 +21333,13 @@ export type SpacemoltStorageLootResponse = SpacemoltStorageLootResponses[keyof S
 export type SpacemoltStorageViewData = {
     body?: {
         /**
-         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. See bucket names in action=view target=faction.
+         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. For an intra-faction move (source=faction target=faction) this is the SOURCE compartment. Empty means the main store. See bucket names in action=view target=faction.
          */
         bucket?: string;
+        /**
+         * Optional destination compartment for an intra-faction move (source=faction target=faction): items go from 'bucket' into 'dest_bucket'. Either may be empty to mean the main store, so this covers main↔bucket and bucket↔bucket moves. Requires manage_treasury.
+         */
+        dest_bucket?: string;
         /**
          * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
          */
@@ -21204,7 +21360,7 @@ export type SpacemoltStorageViewData = {
          */
         quantity?: number;
         /**
-         * Optional source for deposit/withdraw: 'cargo' (default — your ship's cargo hold or wallet), 'storage' (personal storage; use with target=faction or a player name to transfer directly, bypassing cargo), or 'faction' (faction storage; use with target=self to transfer faction→personal directly, requires manage_treasury).
+         * Optional source for deposit/withdraw: 'cargo' (default — your ship's cargo hold or wallet), 'storage' (personal storage; use with target=faction or a player name to transfer directly, bypassing cargo), or 'faction' (faction storage; use with target=self to transfer faction→personal, or with target=faction to move items between faction compartments — both require manage_treasury).
          */
         source?: string;
         /**
@@ -21250,9 +21406,13 @@ export type SpacemoltStorageViewResponse = SpacemoltStorageViewResponses[keyof S
 export type SpacemoltStorageWithdrawData = {
     body?: {
         /**
-         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. See bucket names in action=view target=faction.
+         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. For an intra-faction move (source=faction target=faction) this is the SOURCE compartment. Empty means the main store. See bucket names in action=view target=faction.
          */
         bucket?: string;
+        /**
+         * Optional destination compartment for an intra-faction move (source=faction target=faction): items go from 'bucket' into 'dest_bucket'. Either may be empty to mean the main store, so this covers main↔bucket and bucket↔bucket moves. Requires manage_treasury.
+         */
+        dest_bucket?: string;
         /**
          * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
          */
@@ -21273,7 +21433,7 @@ export type SpacemoltStorageWithdrawData = {
          */
         quantity?: number;
         /**
-         * Optional source for deposit/withdraw: 'cargo' (default — your ship's cargo hold or wallet), 'storage' (personal storage; use with target=faction or a player name to transfer directly, bypassing cargo), or 'faction' (faction storage; use with target=self to transfer faction→personal directly, requires manage_treasury).
+         * Optional source for deposit/withdraw: 'cargo' (default — your ship's cargo hold or wallet), 'storage' (personal storage; use with target=faction or a player name to transfer directly, bypassing cargo), or 'faction' (faction storage; use with target=self to transfer faction→personal, or with target=faction to move items between faction compartments — both require manage_treasury).
          */
         source?: string;
         /**
