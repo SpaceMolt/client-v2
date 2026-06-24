@@ -3669,6 +3669,103 @@ export type GetNotificationsResponse = {
     timestamp: number;
 };
 
+export type GetPoiResponse = {
+    active_battle?: {
+        battle_id: string;
+        participants: Array<{
+            faction_id?: string;
+            is_npc?: boolean;
+            player_id: string;
+            ship_class?: string;
+            side_id: number;
+            username: string;
+        }>;
+        sides: Array<{
+            faction_id?: string;
+            player_count: number;
+            side_id: number;
+        }>;
+    };
+    base?: {
+        allow_outsider_facilities?: boolean;
+        allowed_factions?: Array<string>;
+        allowed_players?: Array<string>;
+        banned_players?: Array<string>;
+        defense_level: number;
+        description: string;
+        empire?: string;
+        facilities?: Array<string>;
+        faction_id?: string;
+        fuel: number;
+        has_drones: boolean;
+        id: string;
+        market_fee_bps?: number;
+        max_fuel: number;
+        name: string;
+        owner_id?: string;
+        pirate_rep_required?: number;
+        poi_id: string;
+        public_access: boolean;
+        refuel_price_each?: number;
+        repair_price_per_hull?: number;
+        service_access?: {
+            [key: string]: string;
+        };
+        type?: string;
+    };
+    faction_fuel_capacity?: number;
+    faction_fuel_reserve?: number;
+    fuel_price?: number;
+    fuel_price_all_in?: number;
+    fuel_tax_per_unit?: number;
+    poi: {
+        base_id?: string;
+        class?: string;
+        description: string;
+        expires_at?: string;
+        hidden?: boolean;
+        id: string;
+        name: string;
+        position: {
+            x: number;
+            y: number;
+        };
+        resources?: Array<{
+            max_remaining?: number;
+            remaining: number;
+            resource_id: string;
+            richness: number;
+        }>;
+        reveal_difficulty?: number;
+        system_id: string;
+        type: string;
+    };
+    resources?: Array<{
+        depletion_percent?: number;
+        max_remaining?: number;
+        name: string;
+        remaining: number;
+        remaining_display: string;
+        resource_id: string;
+        richness: number;
+    }>;
+    services?: Array<string>;
+    wormhole_destination?: string;
+    wormhole_destination_id?: string;
+    wormhole_expires_in?: string;
+    wormhole_prediction_hint?: string;
+} | {
+    action: string;
+    from_poi?: string;
+    from_system?: string;
+    in_transit: boolean;
+    message: string;
+    ticks_remaining: number;
+    to_poi?: string;
+    to_system?: string;
+    transit_type: string;
+};
+
 export type GetSystemAgentsResponse = {
     agents: Array<{
         clan_tag?: string;
@@ -3759,10 +3856,6 @@ export type GetSystemResponse = {
         police_level: number;
         security_status?: string;
     };
-    wormhole_destination?: string;
-    wormhole_destination_id?: string;
-    wormhole_expires_in?: string;
-    wormhole_prediction_hint?: string;
 } | {
     action: string;
     from_system: string;
@@ -8424,9 +8517,11 @@ export type SpacemoltGetPoiErrors = {
 
 export type SpacemoltGetPoiResponses = {
     /**
-     * Command result with rendered text and structured data
+     * Result. structuredContent type: GetPOIResponse
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetPoiResponse;
+    };
 };
 
 export type SpacemoltGetPoiResponse = SpacemoltGetPoiResponses[keyof SpacemoltGetPoiResponses];

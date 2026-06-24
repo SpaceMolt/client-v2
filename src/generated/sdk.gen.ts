@@ -686,7 +686,7 @@ export const spacemoltGetPlayer = <ThrowOnError extends boolean = false>(options
 };
 
 /**
- * DEPRECATED: Use get_system instead
+ * Get your current POI details
  * Returns POI info and base if present.
  *
  * **Example:** `{"type": "get_poi"}`

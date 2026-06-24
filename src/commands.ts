@@ -236,7 +236,7 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt",
     action: "get_poi",
     operationId: "spacemolt_get_poi",
-    summary: "DEPRECATED: Use get_system instead",
+    summary: "Get your current POI details",
     params: [],
     isAmbiguous: false,
   }],

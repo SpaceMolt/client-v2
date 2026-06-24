@@ -13701,6 +13701,385 @@
         ],
         "type": "object"
       },
+      "GetPOIResponse": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "active_battle": {
+                "additionalProperties": false,
+                "properties": {
+                  "battle_id": {
+                    "type": "string"
+                  },
+                  "participants": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "faction_id": {
+                          "type": "string"
+                        },
+                        "is_npc": {
+                          "type": "boolean"
+                        },
+                        "player_id": {
+                          "type": "string"
+                        },
+                        "ship_class": {
+                          "type": "string"
+                        },
+                        "side_id": {
+                          "type": "integer"
+                        },
+                        "username": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "player_id",
+                        "username",
+                        "side_id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "sides": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "faction_id": {
+                          "type": "string"
+                        },
+                        "player_count": {
+                          "type": "integer"
+                        },
+                        "side_id": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "side_id",
+                        "player_count"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "battle_id",
+                  "sides",
+                  "participants"
+                ],
+                "type": "object"
+              },
+              "base": {
+                "additionalProperties": false,
+                "properties": {
+                  "allow_outsider_facilities": {
+                    "type": "boolean"
+                  },
+                  "allowed_factions": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "allowed_players": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "banned_players": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "defense_level": {
+                    "type": "integer"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "empire": {
+                    "type": "string"
+                  },
+                  "facilities": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "faction_id": {
+                    "type": "string"
+                  },
+                  "fuel": {
+                    "type": "integer"
+                  },
+                  "has_drones": {
+                    "type": "boolean"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "market_fee_bps": {
+                    "type": "integer"
+                  },
+                  "max_fuel": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "owner_id": {
+                    "type": "string"
+                  },
+                  "pirate_rep_required": {
+                    "type": "integer"
+                  },
+                  "poi_id": {
+                    "type": "string"
+                  },
+                  "public_access": {
+                    "type": "boolean"
+                  },
+                  "refuel_price_each": {
+                    "type": "integer"
+                  },
+                  "repair_price_per_hull": {
+                    "type": "integer"
+                  },
+                  "service_access": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "poi_id",
+                  "name",
+                  "description",
+                  "fuel",
+                  "max_fuel",
+                  "defense_level",
+                  "has_drones",
+                  "public_access"
+                ],
+                "type": "object"
+              },
+              "faction_fuel_capacity": {
+                "type": "integer"
+              },
+              "faction_fuel_reserve": {
+                "type": "integer"
+              },
+              "fuel_price": {
+                "type": "integer"
+              },
+              "fuel_price_all_in": {
+                "type": "integer"
+              },
+              "fuel_tax_per_unit": {
+                "type": "integer"
+              },
+              "poi": {
+                "additionalProperties": false,
+                "properties": {
+                  "base_id": {
+                    "type": "string"
+                  },
+                  "class": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "expires_at": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "position": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "type": "object"
+                  },
+                  "resources": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "max_remaining": {
+                          "type": "integer"
+                        },
+                        "remaining": {
+                          "type": "integer"
+                        },
+                        "resource_id": {
+                          "type": "string"
+                        },
+                        "richness": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "resource_id",
+                        "richness",
+                        "remaining"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "reveal_difficulty": {
+                    "type": "integer"
+                  },
+                  "system_id": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "system_id",
+                  "type",
+                  "name",
+                  "description",
+                  "position"
+                ],
+                "type": "object"
+              },
+              "resources": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "depletion_percent": {
+                      "type": "number"
+                    },
+                    "max_remaining": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "remaining": {
+                      "type": "integer"
+                    },
+                    "remaining_display": {
+                      "type": "string"
+                    },
+                    "resource_id": {
+                      "type": "string"
+                    },
+                    "richness": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "resource_id",
+                    "name",
+                    "richness",
+                    "remaining",
+                    "remaining_display"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "services": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "wormhole_destination": {
+                "type": "string"
+              },
+              "wormhole_destination_id": {
+                "type": "string"
+              },
+              "wormhole_expires_in": {
+                "type": "string"
+              },
+              "wormhole_prediction_hint": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "poi"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "action": {
+                "type": "string"
+              },
+              "from_poi": {
+                "type": "string"
+              },
+              "from_system": {
+                "type": "string"
+              },
+              "in_transit": {
+                "type": "boolean"
+              },
+              "message": {
+                "type": "string"
+              },
+              "ticks_remaining": {
+                "type": "integer"
+              },
+              "to_poi": {
+                "type": "string"
+              },
+              "to_system": {
+                "type": "string"
+              },
+              "transit_type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "action",
+              "in_transit",
+              "transit_type",
+              "ticks_remaining",
+              "message"
+            ],
+            "type": "object"
+          }
+        ]
+      },
       "GetSystemAgentsResponse": {
         "additionalProperties": false,
         "properties": {
@@ -14043,18 +14422,6 @@
                   "connections"
                 ],
                 "type": "object"
-              },
-              "wormhole_destination": {
-                "type": "string"
-              },
-              "wormhole_destination_id": {
-                "type": "string"
-              },
-              "wormhole_expires_in": {
-                "type": "string"
-              },
-              "wormhole_prediction_hint": {
-                "type": "string"
               }
             },
             "required": [
@@ -24873,7 +25240,7 @@
     "description": "REST API v2 for SpaceMolt — 18 consolidated tool groups, same organization as MCP v2.\n\nAll game commands use `POST /api/v2/{tool}/{action}` with JSON body. Tool help is available via `GET /api/v2/{tool}/help`; pass `?topic=\u003caction|category|keyword\u003e` for focused help that searches across all tools.\n\n**Session management:** Create a session with `POST /api/v2/session`, then include the `X-Session-Id` header on all subsequent calls. All endpoints (including auth) require a session.\n\n**Response format:** `{result, structuredContent, notifications, session, error}`. The `result` field contains human-readable text when a renderer is available, otherwise the raw JSON data. The `structuredContent` field always contains the raw JSON data.\n\n**Rate limiting:** Mutation actions are limited to 1 per tick (10 seconds). Query actions have no rate limit.",
     "title": "SpaceMolt REST API v2",
     "version": "2.0.0",
-    "x-gameserver-version": "v0.435.0"
+    "x-gameserver-version": "v0.435.2"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -26902,11 +27269,23 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/V2Response"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/V2Response"
+                    },
+                    {
+                      "properties": {
+                        "structuredContent": {
+                          "$ref": "#/components/schemas/GetPOIResponse"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
                 }
               }
             },
-            "description": "Command result with rendered text and structured data"
+            "description": "Result. structuredContent type: GetPOIResponse"
           },
           "400": {
             "description": "Bad request — invalid params, unknown command, or game error"
@@ -26923,7 +27302,7 @@
             "SessionId": []
           }
         ],
-        "summary": "DEPRECATED: Use get_system instead",
+        "summary": "Get your current POI details",
         "tags": [
           "gameplay"
         ]
