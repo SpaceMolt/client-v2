@@ -928,29 +928,6 @@ export type CraftJobResponse = {
     venue_type: string;
 } | {
     action: string;
-    jobs: Array<{
-        eta_ticks: number;
-        external?: boolean;
-        facility_id: string;
-        job_id: string;
-        mode: string;
-        orderer: string;
-        position: number;
-        produces?: Array<{
-            item_id: string;
-            name: string;
-            quantity: number;
-        }>;
-        progress: number;
-        recipe: string;
-        runs_done: number;
-        runs_remaining: number;
-        runs_total: number;
-        status: string;
-        venue?: string;
-    }>;
-} | {
-    action: string;
     mode: string;
     results: Array<{
         error?: string;
@@ -2256,7 +2233,6 @@ export type FacilityResponse = {
 } | {
     action: string;
     facility_id: string;
-    item_id: string;
     message: string;
     price: number;
 } | {
@@ -4026,6 +4002,17 @@ export type ListShipsResponse = {
     active_ship_class?: string;
     active_ship_id?: string;
     count: number;
+    faction_garage?: Array<{
+        class_id: string;
+        class_name?: string;
+        custom_name?: string;
+        deposited_tick: number;
+        depositor_id: string;
+        depositor_name?: string;
+        ship_id: string;
+    }>;
+    faction_garage_capacity?: number;
+    faction_garage_used?: number;
     ships: Array<{
         cargo_used?: number;
         class_id: string;
@@ -4327,6 +4314,7 @@ export type LoginResponse = {
         hull: number;
         ice_cargo_efficiency: number;
         id: string;
+        in_faction_garage?: string;
         last_process_tick?: number;
         loaded_on_carrier_id?: string;
         loadout_version?: number;
@@ -5378,6 +5366,7 @@ export type RegisterResponse = {
         hull: number;
         ice_cargo_efficiency: number;
         id: string;
+        in_faction_garage?: string;
         last_process_tick?: number;
         loaded_on_carrier_id?: string;
         loadout_version?: number;
@@ -5716,6 +5705,10 @@ export type Ship = {
      */
     ice_cargo_efficiency?: number;
     id: string;
+    /**
+     * Faction ID whose ship garage is holding this ship (empty when not garaged); a garaged ship is an inert shared-pool asset claimable by faction members
+     */
+    in_faction_garage?: string;
     /**
      * Last tick passive recipes were processed
      */
@@ -6301,6 +6294,7 @@ export type SwitchShipResponse = {
         name: string;
         quantity: number;
     }>;
+    claimed_from_faction_garage?: boolean;
     message: string;
     stored_ship_class: string;
     stored_ship_id: string;
@@ -11391,10 +11385,6 @@ export type SpacemoltFacilityBrowseForSaleData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -11431,7 +11421,7 @@ export type SpacemoltFacilityBrowseForSaleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -11525,10 +11515,6 @@ export type SpacemoltFacilityBuildData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -11565,7 +11551,7 @@ export type SpacemoltFacilityBuildData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -11661,10 +11647,6 @@ export type SpacemoltFacilityBuyListingData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -11701,7 +11683,7 @@ export type SpacemoltFacilityBuyListingData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -11837,10 +11819,6 @@ export type SpacemoltFacilityCancelListingData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -11877,7 +11855,7 @@ export type SpacemoltFacilityCancelListingData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12013,10 +11991,6 @@ export type SpacemoltFacilityDismantleData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -12053,7 +12027,7 @@ export type SpacemoltFacilityDismantleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12149,10 +12123,6 @@ export type SpacemoltFacilityFactionBuildData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -12189,7 +12159,7 @@ export type SpacemoltFacilityFactionBuildData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12285,10 +12255,6 @@ export type SpacemoltFacilityFactionDismantleData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -12325,7 +12291,7 @@ export type SpacemoltFacilityFactionDismantleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12421,10 +12387,6 @@ export type SpacemoltFacilityFactionListData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -12461,7 +12423,7 @@ export type SpacemoltFacilityFactionListData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12555,10 +12517,6 @@ export type SpacemoltFacilityFactionOwnedData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -12595,7 +12553,7 @@ export type SpacemoltFacilityFactionOwnedData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12689,10 +12647,6 @@ export type SpacemoltFacilityFactionUpgradeData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -12729,7 +12683,7 @@ export type SpacemoltFacilityFactionUpgradeData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -12911,10 +12865,6 @@ export type SpacemoltFacilityJobAddData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -12951,7 +12901,7 @@ export type SpacemoltFacilityJobAddData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13047,10 +12997,6 @@ export type SpacemoltFacilityJobCancelData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -13087,7 +13033,7 @@ export type SpacemoltFacilityJobCancelData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13183,10 +13129,6 @@ export type SpacemoltFacilityJobListData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -13223,7 +13165,7 @@ export type SpacemoltFacilityJobListData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13317,10 +13259,6 @@ export type SpacemoltFacilityJobReorderData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -13357,7 +13295,7 @@ export type SpacemoltFacilityJobReorderData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13453,10 +13391,6 @@ export type SpacemoltFacilityListData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -13493,7 +13427,7 @@ export type SpacemoltFacilityListData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13587,10 +13521,6 @@ export type SpacemoltFacilityListForSaleData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -13627,7 +13557,7 @@ export type SpacemoltFacilityListForSaleData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13723,10 +13653,6 @@ export type SpacemoltFacilityOwnedData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -13763,7 +13689,7 @@ export type SpacemoltFacilityOwnedData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13857,10 +13783,6 @@ export type SpacemoltFacilityPersonalBuildData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -13897,7 +13819,7 @@ export type SpacemoltFacilityPersonalBuildData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -13993,10 +13915,6 @@ export type SpacemoltFacilityPersonalDecorateData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -14033,7 +13951,7 @@ export type SpacemoltFacilityPersonalDecorateData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -14129,10 +14047,6 @@ export type SpacemoltFacilityPersonalVisitData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -14169,7 +14083,7 @@ export type SpacemoltFacilityPersonalVisitData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -14415,10 +14329,6 @@ export type SpacemoltFacilitySetAccessData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -14455,7 +14365,7 @@ export type SpacemoltFacilitySetAccessData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -14779,10 +14689,6 @@ export type SpacemoltFacilitySetNameData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -14819,7 +14725,7 @@ export type SpacemoltFacilitySetNameData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -14915,10 +14821,6 @@ export type SpacemoltFacilitySetOutputPriceData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -14955,7 +14857,7 @@ export type SpacemoltFacilitySetOutputPriceData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -15503,10 +15405,6 @@ export type SpacemoltFacilityTransferData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -15543,7 +15441,7 @@ export type SpacemoltFacilityTransferData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -15639,10 +15537,6 @@ export type SpacemoltFacilityTypesData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -15679,7 +15573,7 @@ export type SpacemoltFacilityTypesData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -15849,10 +15743,6 @@ export type SpacemoltFacilityUpgradeData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -15889,7 +15779,7 @@ export type SpacemoltFacilityUpgradeData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
@@ -15985,10 +15875,6 @@ export type SpacemoltFacilityUpgradesData = {
          */
         faction?: boolean;
         /**
-         * Output item ID for 'set_output_price'.
-         */
-        item_id?: string;
-        /**
          * Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.
          */
         job_id?: string;
@@ -16025,7 +15911,7 @@ export type SpacemoltFacilityUpgradesData = {
          */
         position?: number;
         /**
-         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay to output this item — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
+         * For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit; 0 clears.
          */
         price?: number;
         /**
