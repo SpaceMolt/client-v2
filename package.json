@@ -25,6 +25,7 @@
     "fetch-spec": "bash scripts/fetch-spec.sh",
     "generate": "bun run openapi-ts && bun run scripts/build-commands.ts",
     "typecheck": "bun x tsc --noEmit",
+    "typecheck:socket": "bun x tsc --noEmit -p tsconfig.socket-types.test.json",
     "test": "bun test",
     "build:lib": "rm -rf dist && bun build src/index.ts --outfile dist/index.js --target node --format esm && bun x tsc -p tsconfig.lib.json && bun run scripts/fix-dts-extensions.ts",
     "build:cli": "bun build src/main.ts --target bun --outfile dist/cli.js && bun run scripts/prepend-shebang.ts",
@@ -38,7 +39,8 @@
   "license": "MIT",
   "devDependencies": {
     "@hey-api/openapi-ts": "^0.73.0",
-    "@types/bun": "^1.3.9"
+    "@types/bun": "^1.3.9",
+    "ws": "^8.18.0"
   },
   "peerDependencies": {
     "typescript": "^5"

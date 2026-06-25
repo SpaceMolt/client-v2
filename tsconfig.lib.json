@@ -10,7 +10,7 @@
     "types": [],
     "lib": ["ESNext", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/index.ts", "src/sdk-session.ts", "src/generated/**/*.ts"],
+  "include": ["src/index.ts", "src/sdk-session.ts", "src/sdk-socket.ts", "src/socket-types.ts", "src/generated/**/*.ts"],
   "exclude": [
     "node_modules",
     "dist",
