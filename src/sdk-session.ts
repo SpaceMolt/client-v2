@@ -1,4 +1,4 @@
-import { spacemoltAuthLogin } from './generated';
+import { spacemoltAuthLogin, createSession as createApiSession } from './generated';
 import { createClient } from './generated/client';
 
 /** Default API origin. Generated request URLs already include the /api/v2 prefix. */
@@ -38,34 +38,54 @@ export async function createSession(opts: SessionOptions): Promise<SpacemoltSess
   const client = createClient({ baseUrl });
 
   let sessionId = '';
+  let authenticating = false;
 
-  async function login(): Promise<string> {
-    const res = await spacemoltAuthLogin({
-      client,
-      body: { username: opts.username, password: opts.password },
-    });
-    const id = extractSessionId(res.data);
-    if (!id) {
+  // Mint a fresh API session, then authenticate against it. The login endpoint
+  // requires the X-Session-Id header of a freshly-minted session
+  // (POST /api/v2/session); without it the server replies `session_required` and
+  // returns no session id. We publish the minted id before logging in so the
+  // request interceptor stamps it on the login call.
+  async function authenticate(): Promise<void> {
+    authenticating = true;
+    try {
+      const created = await createApiSession({ client });
+      const minted = extractSessionId(created.data);
+      if (!minted) {
+        const code = (created.data as { error?: { code?: string } } | undefined)?.error?.code;
+        throw new Error(`Session creation failed${code ? ` (${code})` : ''}: no session id returned`);
+      }
+      sessionId = minted;
+
+      const res = await spacemoltAuthLogin({
+        client,
+        body: { username: opts.username, password: opts.password },
+      });
       const code = (res.data as { error?: { code?: string } } | undefined)?.error?.code;
-      throw new Error(`Login failed${code ? ` (${code})` : ''}: no session id returned`);
+      if (code) {
+        throw new Error(`Login failed (${code}): no session id returned`);
+      }
+      // Login may rotate the session id; otherwise keep the freshly minted one.
+      sessionId = extractSessionId(res.data) ?? minted;
+    } finally {
+      authenticating = false;
     }
-    return id;
   }
-
-  sessionId = await login();
 
   // Pristine request clones, captured before the body is consumed, keyed by the live request.
   const pendingClones = new WeakMap<Request, Request>();
 
   client.interceptors.request.use((request: Request) => {
     pendingClones.set(request, request.clone());
-    request.headers.set('X-Session-Id', sessionId);
+    if (sessionId) request.headers.set('X-Session-Id', sessionId);
     return request;
   });
 
   client.interceptors.response.use(async (response: Response, request: Request) => {
     const original = pendingClones.get(request);
     pendingClones.delete(request);
+
+    // Don't re-enter authentication on the session-mint / login traffic it generates.
+    if (authenticating) return response;
 
     let body: { error?: { code?: string } } | undefined;
     try {
@@ -76,7 +96,7 @@ export async function createSession(opts: SessionOptions): Promise<SpacemoltSess
 
     const code = body?.error?.code;
     if (code && AUTH_ERROR_CODES.has(code) && original) {
-      sessionId = await login();
+      await authenticate();
       const retry = original.clone();
       retry.headers.set('X-Session-Id', sessionId);
       // Bypass interceptors on the retry to avoid recursion.
@@ -85,6 +105,8 @@ export async function createSession(opts: SessionOptions): Promise<SpacemoltSess
 
     return response;
   });
+
+  await authenticate();
 
   return {
     client,

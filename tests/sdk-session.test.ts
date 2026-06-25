@@ -24,14 +24,42 @@ describe('createSession', () => {
         sessionHeader: req.headers.get('X-Session-Id'),
         body: await req.clone().text(),
       });
+      if (req.url.includes('/api/v2/session') && !req.url.includes('login')) {
+        return jsonResponse({ session: { id: 'sess-123' } });
+      }
       return jsonResponse({ session: { id: 'sess-123' }, structuredContent: {} });
     }) as typeof fetch;
 
     const session = await createSession({ username: 'alice', password: 'pw' });
 
     expect(session.sessionId).toBe('sess-123');
-    expect(calls[0].url).toContain('/api/v2/spacemolt_auth/login');
-    expect(JSON.parse(calls[0].body)).toEqual({ username: 'alice', password: 'pw' });
+    const loginCall = calls.find((c) => c.url.includes('/login'))!;
+    expect(JSON.parse(loginCall.body)).toEqual({ username: 'alice', password: 'pw' });
+  });
+
+  test('mints a session before login (login requires X-Session-Id header)', async () => {
+    const calls: Array<{ url: string; sessionHeader: string | null }> = [];
+    globalThis.fetch = mock(async (input: Request) => {
+      const req = input as Request;
+      const sessionHeader = req.headers.get('X-Session-Id');
+      calls.push({ url: req.url, sessionHeader });
+      if (req.url.includes('/api/v2/session') && !req.url.includes('login')) {
+        return jsonResponse({ session: { id: 'minted-1' } });
+      }
+      if (req.url.includes('/login')) {
+        // Server rejects a login that arrives without a session header.
+        if (!sessionHeader) return jsonResponse({ error: { code: 'session_required' } }, 401);
+        return jsonResponse({ session: { id: 'minted-1' } });
+      }
+      return jsonResponse({ result: 'ok' });
+    }) as typeof fetch;
+
+    const session = await createSession({ username: 'alice', password: 'pw' });
+
+    expect(session.sessionId).toBe('minted-1');
+    expect(calls[0].url).toContain('/api/v2/session');
+    const loginCall = calls.find((c) => c.url.includes('/login'));
+    expect(loginCall?.sessionHeader).toBe('minted-1');
   });
 
   test('injects X-Session-Id on subsequent requests', async () => {
@@ -39,6 +67,9 @@ describe('createSession', () => {
     globalThis.fetch = mock(async (input: Request) => {
       const req = input as Request;
       lastSessionHeader = req.headers.get('X-Session-Id');
+      if (req.url.includes('/api/v2/session') && !req.url.includes('login')) {
+        return jsonResponse({ session: { id: 'sess-abc' } });
+      }
       if (req.url.includes('/login')) {
         return jsonResponse({ session: { id: 'sess-abc' } });
       }
@@ -58,6 +89,9 @@ describe('createSession', () => {
       let statusCalls = 0;
       globalThis.fetch = mock(async (input: Request) => {
         const req = input as Request;
+        if (req.url.includes('/api/v2/session') && !req.url.includes('login')) {
+          return jsonResponse({ session: { id: `minted-${loginCount + 1}` } });
+        }
         if (req.url.includes('/login')) {
           loginCount += 1;
           return jsonResponse({ session: { id: `sess-${loginCount}` } });
