@@ -149,6 +149,7 @@ export type ServerEvent =
   | { type: 'logged_in'; payload: LoggedInPayload }
   | { type: 'registered'; payload: RegisteredPayload }
   | { type: 'ok'; payload: Record<string, unknown>; request_id?: string }
+  | { type: 'result'; payload: Record<string, unknown>; request_id?: string }
   | { type: 'error'; payload: ErrorPayload; request_id?: string }
   | { type: 'action_result'; payload: Record<string, unknown>; request_id?: string }
   | { type: 'action_error'; payload: ErrorPayload; request_id?: string }

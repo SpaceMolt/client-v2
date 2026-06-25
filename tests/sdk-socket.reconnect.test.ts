@@ -302,6 +302,75 @@ describe('createSocket reconnect + request correlation', () => {
     expect((res as any).payload).toEqual({ command: 'travel', tick: 5 });
   });
 
+  test('request(): v2 query resolves on result frame', async () => {
+    let echoedRid: string | undefined;
+    const harness = await startServer({
+      onMessage: (frame, send) => {
+        if (isLogin(frame)) {
+          send(LOGGED_IN);
+        } else if (typeof frame.request_id === 'string') {
+          echoedRid = frame.request_id;
+          send({
+            type: 'result',
+            payload: { structuredContent: { ok: true } },
+            request_id: frame.request_id,
+          });
+        }
+      },
+    });
+    activeHarness = harness;
+
+    const socket = await withTimeout(
+      createSocket({
+        auth: { username: 'alice', password: 'pw' },
+        endpoint: 'v2',
+        wsUrl: harness.url,
+        WebSocketImpl: WsClient as any,
+        reconnect: SMALL_RECONNECT,
+      }),
+    );
+    activeSocket = socket;
+
+    const res = await withTimeout(socket.request({ tool: 'spacemolt', action: 'get_status' }));
+    expect(res.type).toBe('result');
+    expect((res as any).request_id).toBe(echoedRid);
+    expect(typeof echoedRid).toBe('string');
+  });
+
+  test('request(): v2 mutation skips pending result, resolves on action_result', async () => {
+    const harness = await startServer({
+      onMessage: (frame, send) => {
+        if (isLogin(frame)) {
+          send(LOGGED_IN);
+        } else if (typeof frame.request_id === 'string') {
+          const rid = frame.request_id;
+          send({ type: 'result', payload: { pending: true, command: 'jump' }, request_id: rid });
+          setTimeout(() => {
+            send({ type: 'action_result', payload: { command: 'jump', tick: 7 }, request_id: rid });
+          }, 20);
+        }
+      },
+    });
+    activeHarness = harness;
+
+    const socket = await withTimeout(
+      createSocket({
+        auth: { username: 'alice', password: 'pw' },
+        endpoint: 'v2',
+        wsUrl: harness.url,
+        WebSocketImpl: WsClient as any,
+        reconnect: SMALL_RECONNECT,
+      }),
+    );
+    activeSocket = socket;
+
+    const res = await withTimeout(
+      socket.request({ tool: 'spacemolt', action: 'jump', payload: { target_system: 'sol' } }),
+    );
+    expect(res.type).toBe('action_result');
+    expect((res as any).payload).toEqual({ command: 'jump', tick: 7 });
+  });
+
   test('request(): times out when server stays silent', async () => {
     const harness = await startServer({
       onMessage: (frame, send) => {

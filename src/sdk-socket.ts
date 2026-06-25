@@ -210,9 +210,9 @@ export async function createSocket(opts: SocketOptions): Promise<SpacemoltSocket
   function resolvePending(rid: string, ev: ServerEvent): void {
     const t = ev.type;
     const payload = (ev as { payload?: { pending?: unknown } }).payload;
-    const isPendingAck = t === 'ok' && !!payload && (payload as { pending?: unknown }).pending === true;
+    const isPendingAck = (t === 'ok' || t === 'result') && !!payload && (payload as { pending?: unknown }).pending === true;
     const terminal =
-      t === 'action_result' || t === 'action_error' || t === 'error' || (t === 'ok' && !isPendingAck);
+      t === 'action_result' || t === 'action_error' || t === 'error' || ((t === 'ok' || t === 'result') && !isPendingAck);
     if (!terminal) return; // pending ack: keep waiting for the post-tick result
     const entry = pending.get(rid);
     if (!entry) return;
