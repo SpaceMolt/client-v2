@@ -991,7 +991,7 @@ export const spacemoltInstallMod = <ThrowOnError extends boolean = false>(option
 
 /**
  * Jettison items from cargo into space
- * Creates a floating container at your location. Other players can loot it. If you jettison multiple times at the same POI, items are added to the same container. AllowInTransit is set so a mid-flight call fails fast with a clear in_transit error rather than sitting queued until arrival — the container needs a POI to anchor to.
+ * Creates a floating container at your location. Other players can loot it. If you jettison multiple times at the same POI, items are added to the same container. Pass items=[{item_id, quantity}, ...] (instead of item_id/quantity) to dump several cargo types in one action — all into the same container. AllowInTransit is set so a mid-flight call fails fast with a clear in_transit error rather than sitting queued until arrival — the container needs a POI to anchor to.
  *
  * **Example:** `{"type": "jettison", "payload": {"item_id": "iron_ore", "quantity": 50}}`
  *
@@ -1483,7 +1483,7 @@ export const spacemoltUninstallMod = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Put a passenger (or everyone) off the ship at the current station
- * You must be docked. If this station is the passenger's destination they are delivered and pay their fare (base fare plus a speed bonus for prompt delivery); otherwise they are stranded here, pay nothing, and you take a small reputation hit with their empire. Pass name "all" to put every passenger off at once (delivered ones pay, the rest are stranded) in a single combined operation. Use 'list_passengers' to see who is aboard.
+ * You must be docked. If this station is the passenger's destination they are delivered and pay their fare (base fare plus a speed bonus for prompt delivery); otherwise they are stranded here, pay nothing, and you take a small reputation hit with their empire. Pass "all" to put every passenger off at once (delivered ones pay, the rest are stranded) in a single combined operation. Use 'list_passengers' to see who is aboard.
  *
  * **Example:** `{"type": "unload_passenger", "payload": {"name": "<passenger name or citizen id, or \"all\">"}}`
  *
@@ -4432,7 +4432,7 @@ export const spacemoltFactionAdminWriteRoom = <ThrowOnError extends boolean = fa
 
 /**
  * Create a buy order on behalf of your faction (credits from faction treasury)
- * Credits are escrowed from the faction treasury. Purchased items go to faction storage. Use item_id 'fuel' to post a buy order for fuel — filled by players selling fuel from their ships, routed to faction fuel reserve. Requires `manage_treasury` permission. Accepts item_id or item name. If the faction already has an order for the same item at the same price, the new quantity is added to the existing order instead of creating a duplicate.
+ * Credits are escrowed from the faction treasury. Purchased items go to faction storage. Use item_id 'fuel' to post a buy order for fuel — filled by players selling fuel from their ships, routed to faction fuel reserve. Requires `manage_treasury` permission. Accepts item_id or item name. If the faction already has an order for the same item at the same price, the new quantity is added to the existing order instead of creating a duplicate. Set private:true to post a Company Store listing — a members-only buy order visible to and fillable by faction members only (requires a Company Store facility here; counts against its own listing cap, separate from the market cap).
  *
  * **Example:** `{"type": "faction_create_buy_order", "payload": {"item_id": "iron_ore", "quantity": 100, "price_each": 4}}`
  *
@@ -4457,7 +4457,7 @@ export const spacemoltFactionCommerceCreateBuyOrder = <ThrowOnError extends bool
 
 /**
  * Create a sell order on behalf of your faction (items from faction storage)
- * Items are escrowed from faction storage. Credits from fills go to the faction treasury. Listing fee deducted from faction credits. Requires `manage_treasury` permission. Accepts item_id or item name. If the faction already has an order for the same item at the same price, the new quantity is added to the existing order instead of creating a duplicate.
+ * Items are escrowed from faction storage. Credits from fills go to the faction treasury. Listing fee deducted from faction credits. Requires `manage_treasury` permission. Accepts item_id or item name. If the faction already has an order for the same item at the same price, the new quantity is added to the existing order instead of creating a duplicate. Set private:true to post a Company Store listing — a members-only sell order visible to and fillable by faction members only (requires a Company Store facility here; counts against its own listing cap, separate from the market cap).
  *
  * **Example:** `{"type": "faction_create_sell_order", "payload": {"item_id": "iron_ore", "quantity": 100, "price_each": 6}}`
  *
@@ -5275,7 +5275,7 @@ export const spacemoltMarketUnsubscribeMarket = <ThrowOnError extends boolean = 
 
 /**
  * View the market at the current station
- * Without item_id: returns a compact summary (best prices, quantities) for all items — use category to filter (e.g. 'ore', 'commodity', 'module'). With item_id: returns full order book depth for that item. Accepts item_id or item name (e.g. 'Iron Ore'). Every response includes current_tick. Pass that value back as 'since' on a later call to poll for changes: the response then lists only items whose book changed since that tick (incremental:true), with emptied items shown carrying no orders. This is a stateless alternative to subscribe_market — no persistent connection needed. Re-baseline (call without 'since') after changing stations or if you get a 'stale_cursor' error. Fuel and contraband are excluded from incremental diffs.
+ * Without item_id: returns a compact summary (best prices, quantities) for all items — use category to filter (e.g. 'ore', 'commodity', 'module'). With item_id: returns full order book depth for that item. Accepts item_id or item name (e.g. 'Iron Ore'). Every response includes current_tick. Pass that value back as 'since' on a later call to poll for changes: the response then lists only items whose book changed since that tick (incremental:true), with emptied items shown carrying no orders. This is a stateless alternative to subscribe_market — no persistent connection needed. Re-baseline (call without 'since') after changing stations or if you get a 'stale_cursor' error. Fuel and contraband are excluded from incremental diffs. Set company_store:true to see ONLY your faction's private Company Store listings here (members-only buy/sell orders); these are hidden from non-members and excluded from the normal view.
  *
  * **Example:** `{"type": "view_market", "payload": {"category": "ore"}}`
  */
@@ -6600,7 +6600,7 @@ export const spacemoltStorageHelpPost = <ThrowOnError extends boolean = false>(o
 
 /**
  * Jettison items from cargo into space
- * Creates a floating container at your location. Other players can loot it. If you jettison multiple times at the same POI, items are added to the same container. AllowInTransit is set so a mid-flight call fails fast with a clear in_transit error rather than sitting queued until arrival — the container needs a POI to anchor to.
+ * Creates a floating container at your location. Other players can loot it. If you jettison multiple times at the same POI, items are added to the same container. Pass items=[{item_id, quantity}, ...] (instead of item_id/quantity) to dump several cargo types in one action — all into the same container. AllowInTransit is set so a mid-flight call fails fast with a clear in_transit error rather than sitting queued until arrival — the container needs a POI to anchor to.
  *
  * **Example:** `{"type": "jettison", "payload": {"item_id": "iron_ore", "quantity": 50}}`
  *

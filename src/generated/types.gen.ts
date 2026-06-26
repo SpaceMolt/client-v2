@@ -1396,13 +1396,13 @@ export type DockResponse = {
     open_orders_truncated?: boolean;
     passenger_arrivals?: {
         delivered?: Array<{
+            base_fare: number;
             bio: string;
             citizen_id: string;
             class: string;
             destination: string;
             destination_name: string;
             destination_system?: string;
-            fare: number;
             name: string;
             speed_bonus?: number;
             ticks_remaining: number;
@@ -1412,13 +1412,13 @@ export type DockResponse = {
             [key: string]: number;
         };
         stranded?: Array<{
+            base_fare: number;
             bio: string;
             citizen_id: string;
             class: string;
             destination: string;
             destination_name: string;
             destination_system?: string;
-            fare: number;
             name: string;
             speed_bonus?: number;
             ticks_remaining: number;
@@ -2311,7 +2311,9 @@ export type FactionCreateBuyOrderResponse = {
     price_each: number;
     quantity: number;
     quantity_filled?: number;
+    quantity_listed?: number;
     total_escrowed: number;
+    total_spent?: number;
 };
 
 export type FactionCreateRoleResponse = {
@@ -3977,6 +3979,21 @@ export type JettisonResponse = {
     item_name: string;
     message: string;
     quantity: number;
+} | {
+    action: string;
+    container_id?: string;
+    failed: number;
+    message: string;
+    requested: number;
+    results: Array<{
+        error?: string;
+        item_id: string;
+        item_name?: string;
+        message?: string;
+        quantity: number;
+        success: boolean;
+    }>;
+    succeeded: number;
 };
 
 export type JoinFactionResponse = {
@@ -4012,13 +4029,13 @@ export type ListPassengersResponse = {
     economy_berths: string;
     first_berths: string;
     passengers: Array<{
+        base_fare: number;
         bio: string;
         citizen_id: string;
         class: string;
         destination: string;
         destination_name: string;
         destination_system?: string;
-        fare: number;
         name: string;
         speed_bonus?: number;
         ticks_remaining: number;
@@ -4080,13 +4097,13 @@ export type LoadDroneResponse = {
 export type LoadPassengersResponse = {
     count: number;
     loaded: Array<{
+        base_fare: number;
         bio: string;
         citizen_id: string;
         class: string;
         destination: string;
         destination_name: string;
         destination_system?: string;
-        fare: number;
         name: string;
         speed_bonus?: number;
         ticks_remaining: number;
@@ -6667,13 +6684,13 @@ export type UnloadPassengerResponse = {
     speed_bonus?: number;
 } | {
     delivered: Array<{
+        base_fare: number;
         bio: string;
         citizen_id: string;
         class: string;
         destination: string;
         destination_name: string;
         destination_system?: string;
-        fare: number;
         name: string;
         speed_bonus?: number;
         ticks_remaining: number;
@@ -6684,13 +6701,13 @@ export type UnloadPassengerResponse = {
         [key: string]: number;
     };
     stranded: Array<{
+        base_fare: number;
         bio: string;
         citizen_id: string;
         class: string;
         destination: string;
         destination_name: string;
         destination_system?: string;
-        fare: number;
         name: string;
         speed_bonus?: number;
         ticks_remaining: number;
@@ -8982,13 +8999,20 @@ export type SpacemoltInstallModResponse = SpacemoltInstallModResponses[keyof Spa
 export type SpacemoltJettisonData = {
     body?: {
         /**
-         * ID of the item to jettison (e.g., iron_ore, steel_plate)
+         * ID of the item to jettison (e.g., iron_ore, steel_plate). Required for single mode.
          */
-        id: string;
+        id?: string;
         /**
-         * Quantity to jettison
+         * Bulk mode: array of cargo items to dump in one action (max 100), all into one container. Each entry needs item_id and quantity. When provided, the top-level item_id/quantity are ignored.
          */
-        quantity: number;
+        items?: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
+        /**
+         * Quantity to jettison. Required for single mode.
+         */
+        quantity?: number;
     };
     path?: never;
     query?: never;
@@ -13020,13 +13044,13 @@ export type SpacemoltFacilityJobAddData = {
          */
         description?: string;
         /**
-         * Transfer direction for 'transfer' action ('to_faction' or 'to_player'), or job direction for 'job_add' ('forward' or 'reverse').
+         * Job direction: 'forward' runs the recipe normally (craft); 'reverse' recycles existing items back to inputs.
          */
-        direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
+        direction?: 'forward' | 'reverse';
         /**
          * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
-        facility_id?: string;
+        facility_id: string;
         /**
          * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
          */
@@ -13082,7 +13106,7 @@ export type SpacemoltFacilityJobAddData = {
         /**
          * Recipe ID to run (for 'job_add' action).
          */
-        recipe_id?: string;
+        recipe_id: string;
         /**
          * Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.
          */
@@ -15560,13 +15584,13 @@ export type SpacemoltFacilityTransferData = {
          */
         description?: string;
         /**
-         * Transfer direction for 'transfer' action ('to_faction' or 'to_player'), or job direction for 'job_add' ('forward' or 'reverse').
+         * Transfer direction: 'to_faction' moves the facility to faction ownership; 'to_player' transfers it to a specific player.
          */
-        direction?: 'to_faction' | 'to_player' | 'forward' | 'reverse';
+        direction: 'to_faction' | 'to_player';
         /**
          * Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name' actions). Use action 'list' to see facility IDs.
          */
-        facility_id?: string;
+        facility_id: string;
         /**
          * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
          */
@@ -17642,6 +17666,10 @@ export type SpacemoltFactionCommerceCreateBuyOrderData = {
          */
         price_each: number;
         /**
+         * Optional: post a Company Store listing — a members-only buy order visible to and fillable by faction members only. Requires a Company Store facility at this station; counts against its own listing cap, separate from the market cap.
+         */
+        private?: boolean;
+        /**
          * Number of items to buy
          */
         quantity: number;
@@ -17693,6 +17721,10 @@ export type SpacemoltFactionCommerceCreateSellOrderData = {
          * Price per unit in credits
          */
         price_each: number;
+        /**
+         * Optional: post a Company Store listing — a members-only sell order visible to and fillable by faction members only. Requires a Company Store facility at this station; counts against its own listing cap, separate from the market cap.
+         */
+        private?: boolean;
         /**
          * Number of items to list for sale
          */
@@ -18976,6 +19008,10 @@ export type SpacemoltMarketViewMarketData = {
          * Optional: filter summary by category (e.g., ore, commodity, weapon, module). Use without item_id.
          */
         category?: string;
+        /**
+         * Optional: show ONLY your faction's private Company Store listings (members-only buy/sell orders, hidden from non-members). Requires faction membership.
+         */
+        company_store?: boolean;
         /**
          * Optional: filter to a specific item for full order book depth (e.g., iron_ore)
          */
@@ -21340,13 +21376,20 @@ export type SpacemoltStorageHelpPostResponse = SpacemoltStorageHelpPostResponses
 export type SpacemoltStorageJettisonData = {
     body?: {
         /**
-         * ID of the item to jettison (e.g., iron_ore, steel_plate)
+         * ID of the item to jettison (e.g., iron_ore, steel_plate). Required for single mode.
          */
-        item_id: string;
+        item_id?: string;
         /**
-         * Quantity to jettison
+         * Bulk mode: array of cargo items to dump in one action (max 100), all into one container. Each entry needs item_id and quantity. When provided, the top-level item_id/quantity are ignored.
          */
-        quantity: number;
+        items?: Array<{
+            item_id: string;
+            quantity: number;
+        }>;
+        /**
+         * Quantity to jettison. Required for single mode.
+         */
+        quantity?: number;
     };
     path?: never;
     query?: never;
