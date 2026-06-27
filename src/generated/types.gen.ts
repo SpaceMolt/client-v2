@@ -3843,6 +3843,7 @@ export type GetSystemResponse = {
         description?: string;
         empire?: string;
         id: string;
+        is_stronghold: boolean;
         name: string;
         pois: Array<{
             base_id?: string;
@@ -4397,6 +4398,7 @@ export type LoginResponse = {
         description?: string;
         empire?: string;
         id: string;
+        is_stronghold: boolean;
         name: string;
         pois: Array<{
             base_id?: string;
@@ -5570,6 +5572,7 @@ export type RegisterResponse = {
         description?: string;
         empire?: string;
         id: string;
+        is_stronghold: boolean;
         name: string;
         pois: Array<{
             base_id?: string;
@@ -6496,6 +6499,7 @@ export type SystemInfo = {
     description?: string;
     empire?: string;
     id: string;
+    is_stronghold?: boolean;
     name: string;
     pois: Array<SystemPoi>;
     police_level: number;
@@ -6678,6 +6682,7 @@ export type UnloadDroneResponse = {
 export type UnloadPassengerResponse = {
     base_fare?: number;
     delivered: boolean;
+    fare_collected: number;
     fare_paid: number;
     message: string;
     name: string;
