@@ -10,6 +10,12 @@
 // reconnect policy is exhausted/disabled. A failure on the FIRST connection (or a
 // rejected credential at any time) is terminal and rejects/ends rather than looping.
 //
+// Observed close codes (game.spacemolt.com 0.436.x): 1000 normal (deploy/idle/logout),
+// 4001 session_replaced (a second connection for the same account kicked this one), and
+// 4002 auth_timeout (no valid credential in time). Only 1000 is documented in api-docs;
+// 4001/4002 are observed-but-undocumented. Reconnect keys off "non-user, non-1000 close"
+// rather than a specific code, so e.g. a 4001 kick reconnects cleanly.
+//
 // Keepalive: there is no app-level heartbeat frame (the server pushes none); we rely
 // on the transport answering protocol pings (automatic with `ws` and browsers).
 import type {
