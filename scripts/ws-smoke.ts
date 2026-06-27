@@ -166,7 +166,7 @@ async function main(): Promise<void> {
   for await (const ev of socket as AsyncIterable<ServerEvent>) {
     tally.set(ev.type, (tally.get(ev.type) ?? 0) + 1);
     if (ev.type === 'welcome') {
-      const p = (ev.payload ?? {}) as Record<string, unknown>;
+      const p = (ev.payload ?? {}) as unknown as Record<string, unknown>;
       console.log(`welcome: version=${String(p.version)} tick_rate=${String(p.tick_rate)} current_tick=${String(p.current_tick)}`);
     } else if (ev.type === 'logged_in') {
       console.log('logged_in: ✓ feed is live');

@@ -17,6 +17,7 @@ export type {
   SocketLoginToken,
   SocketAnonymous,
   ServerEvent,
+  RawServerFrame,
   OutboundFrame,
   OutboundFrameV1,
   OutboundFrameV2,

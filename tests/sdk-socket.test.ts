@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import type {
   ServerEvent,
+  RawServerFrame,
   WelcomePayload,
   LoggedInPayload,
   RegisteredPayload,
@@ -51,16 +52,20 @@ type _registered = Expect<Equal<PayloadOf<'registered'>, RegisteredPayload>>;
 type _error = Expect<Equal<PayloadOf<'error'>, ErrorPayload>>;
 type _actionError = Expect<Equal<PayloadOf<'action_error'>, ErrorPayload>>;
 
-// forward-compat: an unknown frame type is still a valid ServerEvent (never dropped).
+// forward-compat: unknown frame types are typed via RawServerFrame (the runtime still
+// delivers them); they are intentionally NOT part of the closed ServerEvent union.
 type _forwardCompat = Expect<
-  { type: 'totally_new_frame_type'; payload?: unknown } extends ServerEvent ? true : false
+  { type: 'totally_new_frame_type'; payload?: unknown } extends RawServerFrame ? true : false
+>;
+type _closedUnion = Expect<
+  { type: 'totally_new_frame_type'; payload?: unknown } extends ServerEvent ? false : true
 >;
 
 // Reference the alias types so tsc treats them as used (they are the real test).
 export type _SocketTypeAssertions = [
   _combat, _died, _scanResult, _scanDetected, _pilotless, _reconnected, _mining,
   _chat, _trade, _skill, _market, _observation, _crafting,
-  _welcome, _loggedIn, _registered, _error, _actionError, _forwardCompat,
+  _welcome, _loggedIn, _registered, _error, _actionError, _forwardCompat, _closedUnion,
 ];
 
 describe('socket-types', () => {

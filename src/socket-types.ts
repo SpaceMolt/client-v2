@@ -141,7 +141,8 @@ export type SocketStatus =
 /**
  * The discriminated union the caller consumes. Notification payloads reuse the
  * generated Notification* types; control frames are hand-written above. The
- * trailing open member keeps unknown/future frames flowing (never dropped).
+ * union is closed for clean discriminated-union narrowing; unknown/future
+ * frames fall outside it and are typed via `RawServerFrame` (see below).
  */
 export type ServerEvent =
   // connection / auth control
@@ -166,9 +167,22 @@ export type ServerEvent =
   | { type: 'skill_level_up'; payload: NotificationSkillLevelUp }
   | { type: 'market_update'; payload: NotificationMarketUpdate }
   | { type: 'observation_update'; payload: NotificationObservationUpdate }
-  | { type: 'crafting_update'; payload: NotificationCraftingUpdate }
-  // forward-compat: unknown/future types pass through untyped, never dropped
-  | { type: string; payload?: unknown; request_id?: string };
+  | { type: 'crafting_update'; payload: NotificationCraftingUpdate };
+
+/**
+ * The raw shape of any frame the socket may yield, including unknown/future `type`s.
+ * The runtime never drops a frame with a string `type`; unknown ones are still
+ * delivered through the event stream, but they fall OUTSIDE the discriminated
+ * `ServerEvent` union above — handle them in a `default:` branch by treating the
+ * value as `RawServerFrame`. A `{ type: string }` member cannot live inside
+ * `ServerEvent` itself: under TypeScript 6 it collapses every case's `payload` to
+ * `unknown` and breaks discriminated-union narrowing.
+ */
+export interface RawServerFrame {
+  type: string;
+  payload?: unknown;
+  request_id?: string;
+}
 
 /** v1 flat outbound frame: {type, payload?, request_id?}. */
 export interface OutboundFrameV1 {
