@@ -6683,7 +6683,6 @@ export type UnloadPassengerResponse = {
     base_fare?: number;
     delivered: boolean;
     fare_collected: number;
-    fare_paid: number;
     message: string;
     name: string;
     speed_bonus?: number;
@@ -7845,10 +7844,12 @@ export type SpacemoltCraftErrors = {
 
 export type SpacemoltCraftResponses = {
     /**
-     * Result. structuredContent type: CraftJobResponse
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (CraftJobResponse)
      */
     200: V2Response & {
-        structuredContent?: CraftJobResponse;
+        structuredContent?: V2GameState & {
+            details?: CraftJobResponse;
+        };
     };
 };
 
