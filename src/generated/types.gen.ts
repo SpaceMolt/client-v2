@@ -19440,46 +19440,6 @@ export type SpacemoltSalvageReleaseResponses = {
 
 export type SpacemoltSalvageReleaseResponse = SpacemoltSalvageReleaseResponses[keyof SpacemoltSalvageReleaseResponses];
 
-export type SpacemoltSalvageSalvageData = {
-    body?: {
-        /**
-         * UUID of the wreck to salvage
-         */
-        id: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v2/spacemolt_salvage/salvage';
-};
-
-export type SpacemoltSalvageSalvageErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
-export type SpacemoltSalvageSalvageResponses = {
-    /**
-     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ScrapWreckResponse)
-     */
-    200: V2Response & {
-        structuredContent?: V2GameState & {
-            details?: ScrapWreckResponse;
-        };
-    };
-};
-
-export type SpacemoltSalvageSalvageResponse = SpacemoltSalvageSalvageResponses[keyof SpacemoltSalvageSalvageResponses];
-
 export type SpacemoltSalvageScrapData = {
     body?: {
         [key: string]: unknown;

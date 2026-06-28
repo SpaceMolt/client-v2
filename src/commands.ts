@@ -1745,14 +1745,6 @@ const entries: [string, CommandMeta][] = [
     params: [],
     isAmbiguous: false,
   }],
-  ["spacemolt_salvage/salvage", {
-    toolGroup: "spacemolt_salvage",
-    action: "salvage",
-    operationId: "spacemolt_salvage_salvage",
-    summary: "Salvage a wreck for raw materials",
-    params: [{"name":"id","type":"string","description":"UUID of the wreck to salvage","required":true,"positionalIndex":0}],
-    isAmbiguous: false,
-  }],
   ["spacemolt_salvage/scrap", {
     toolGroup: "spacemolt_salvage",
     action: "scrap",
