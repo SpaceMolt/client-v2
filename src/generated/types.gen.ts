@@ -1229,7 +1229,9 @@ export type DepositItemsResponse = {
 } | {
     action: string;
     bucket?: string;
+    bucket_id?: string;
     dest_bucket?: string;
+    dest_bucket_id?: string;
     dest_total: number;
     destination: string;
     item_id: string;
@@ -1294,6 +1296,7 @@ export type DepositItemsResponse = {
 } | {
     action: string;
     bucket?: string;
+    bucket_id?: string;
     cargo_remaining: number;
     cargo_space: number;
     item_id: string;
@@ -1313,6 +1316,9 @@ export type DepositItemsResponse = {
 } | {
     action: string;
     bucket?: string;
+    bucket_id?: string;
+    dest_bucket?: string;
+    dest_bucket_id?: string;
     failed: number;
     requested: number;
     results: Array<{
@@ -2396,6 +2402,27 @@ export type FactionEditRoleResponse = {
             promote: boolean;
         };
     };
+};
+
+export type FactionGaragesResponse = {
+    station_count: number;
+    stations: Array<{
+        base_id: string;
+        base_name?: string;
+        capacity: number;
+        ships: Array<{
+            class_id: string;
+            class_name?: string;
+            custom_name?: string;
+            deposited_tick: number;
+            depositor_id: string;
+            depositor_name?: string;
+            ship_id: string;
+        }>;
+        system_name?: string;
+        used: number;
+    }>;
+    total_ships: number;
 };
 
 export type FactionGetInvitesResponse = {
@@ -6216,7 +6243,9 @@ export type StorageResponse = {
 } | {
     action: string;
     bucket?: string;
+    bucket_id?: string;
     dest_bucket?: string;
+    dest_bucket_id?: string;
     dest_total: number;
     destination: string;
     item_id: string;
@@ -6281,6 +6310,7 @@ export type StorageResponse = {
 } | {
     action: string;
     bucket?: string;
+    bucket_id?: string;
     cargo_remaining: number;
     cargo_space: number;
     item_id: string;
@@ -6300,6 +6330,7 @@ export type StorageResponse = {
 } | {
     action: string;
     bucket?: string;
+    bucket_id?: string;
     cargo_space: number;
     cargo_total: number;
     item_id: string;
@@ -6313,6 +6344,9 @@ export type StorageResponse = {
 } | {
     action: string;
     bucket?: string;
+    bucket_id?: string;
+    dest_bucket?: string;
+    dest_bucket_id?: string;
     failed: number;
     requested: number;
     results: Array<{
@@ -7324,7 +7358,9 @@ export type WithdrawItemsResponse = {
 } | {
     action: string;
     bucket?: string;
+    bucket_id?: string;
     dest_bucket?: string;
+    dest_bucket_id?: string;
     dest_total: number;
     destination: string;
     item_id: string;
@@ -7341,6 +7377,7 @@ export type WithdrawItemsResponse = {
 } | {
     action: string;
     bucket?: string;
+    bucket_id?: string;
     cargo_space: number;
     cargo_total: number;
     item_id: string;
@@ -7354,6 +7391,9 @@ export type WithdrawItemsResponse = {
 } | {
     action: string;
     bucket?: string;
+    bucket_id?: string;
+    dest_bucket?: string;
+    dest_bucket_id?: string;
     failed: number;
     requested: number;
     results: Array<{
@@ -16524,6 +16564,41 @@ export type SpacemoltFactionDeleteRoomResponses = {
 };
 
 export type SpacemoltFactionDeleteRoomResponse = SpacemoltFactionDeleteRoomResponses[keyof SpacemoltFactionDeleteRoomResponses];
+
+export type SpacemoltFactionGaragesData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_faction/garages';
+};
+
+export type SpacemoltFactionGaragesErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFactionGaragesResponses = {
+    /**
+     * Result. structuredContent type: FactionGaragesResponse
+     */
+    200: V2Response & {
+        structuredContent?: FactionGaragesResponse;
+    };
+};
+
+export type SpacemoltFactionGaragesResponse = SpacemoltFactionGaragesResponses[keyof SpacemoltFactionGaragesResponses];
 
 export type SpacemoltFactionGetInvitesData = {
     body?: {

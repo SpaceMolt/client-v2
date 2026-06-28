@@ -1217,6 +1217,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"ID of the room to delete","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
+  ["spacemolt_faction/garages", {
+    toolGroup: "spacemolt_faction",
+    action: "garages",
+    operationId: "spacemolt_faction_garages",
+    summary: "View your faction's full ship-garage roster across all stations",
+    params: [],
+    isAmbiguous: false,
+  }],
   ["spacemolt_faction/get_invites", {
     toolGroup: "spacemolt_faction",
     action: "get_invites",
