@@ -71,7 +71,7 @@ export const createSession = <ThrowOnError extends boolean = false>(options?: Op
 
 /**
  * Abandon an active mission
- * Removes the mission from your active list. No penalty. Any cargo obtained for the mission remains in your hold.
+ * Removes the mission from your active list. Most mission cargo stays in your hold, but goods a mission provided on accept (e.g. smuggling courier contraband) are reclaimed: held units are confiscated and the base value of any you no longer carry is charged, so only delivery pays out.
  *
  * **Example:** `{"type": "abandon_mission", "payload": {"mission_id": "mission_uuid"}}`
  *
