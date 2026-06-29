@@ -1,4 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
+
+const isRoot = process.getuid?.() === 0;
 import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync, chmodSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -586,7 +588,8 @@ describe('SessionManager - credential warning', () => {
 });
 
 describe('SessionStore - save error handling', () => {
-  test('throws descriptive error when directory is not writable', () => {
+  // chmod doesn't restrict root, so this test only runs as a non-root user
+  test.skipIf(isRoot)('throws descriptive error when directory is not writable', () => {
     const dir = join(TEST_DIR, 'save-fail');
     mkdirSync(dir, { recursive: true });
     const store = new SessionStore(join(dir, 'session.json'), false);
