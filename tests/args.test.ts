@@ -126,6 +126,26 @@ describe('coerceValue', () => {
   test('NaN number throws ArgError', () => {
     expect(() => coerceValue('abc', 'number')).toThrow('Invalid number value');
   });
+
+  test('array type parses JSON array', () => {
+    expect(coerceValue('[1,2,3]', 'array')).toEqual([1, 2, 3]);
+  });
+
+  test('array type parses JSON array of objects', () => {
+    expect(coerceValue('[{"recipe_id":"r1","quantity":5}]', 'array')).toEqual([{ recipe_id: 'r1', quantity: 5 }]);
+  });
+
+  test('invalid array JSON throws ArgError', () => {
+    expect(() => coerceValue('not json', 'array')).toThrow('Invalid array value');
+  });
+
+  test('object type parses JSON object', () => {
+    expect(coerceValue('{"read":true,"write":false}', 'object')).toEqual({ read: true, write: false });
+  });
+
+  test('invalid object JSON throws ArgError', () => {
+    expect(() => coerceValue('{bad}', 'object')).toThrow('Invalid object value');
+  });
 });
 
 describe('parseArgs required param validation', () => {

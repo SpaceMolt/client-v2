@@ -117,6 +117,14 @@ export function coerceValue(value: string, type: string): unknown {
       if (value === 'true') return true;
       if (value === 'false') return false;
       throw new ArgError(`Invalid boolean value: "${value}" (use "true" or "false")`);
+    case 'array':
+    case 'object': {
+      try {
+        return JSON.parse(value);
+      } catch {
+        throw new ArgError(`Invalid ${type} value: "${value}" (expected JSON)`);
+      }
+    }
     default:
       return value;
   }
