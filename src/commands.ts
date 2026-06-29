@@ -328,6 +328,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
+  ["spacemolt/hunt", {
+    toolGroup: "spacemolt",
+    action: "hunt",
+    operationId: "spacemolt_hunt",
+    summary: "Hunt a wildlife creature to start a battle",
+    params: [{"name":"id","type":"string","description":"Creature ID to hunt (from the 'creatures' list in get_nearby)","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
   ["spacemolt/install_mod", {
     toolGroup: "spacemolt",
     action: "install_mod",

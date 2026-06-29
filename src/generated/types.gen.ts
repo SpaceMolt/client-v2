@@ -3634,6 +3634,16 @@ export type GetMissionsResponse = {
 
 export type GetNearbyResponse = {
     count: number;
+    creature_count: number;
+    creatures: Array<{
+        creature_id: string;
+        hull: number;
+        in_combat: boolean;
+        max_hull: number;
+        name: string;
+        role: string;
+        species: string;
+    }>;
     empire_npc_count: number;
     empire_npcs: Array<{
         empire: string;
@@ -3989,6 +3999,12 @@ export type GetWrecksResponse = {
         victim_id: string;
         victim_name: string;
     }>;
+};
+
+export type HuntResponse = {
+    command: string;
+    message: string;
+    pending: boolean;
 };
 
 export type InstallModResponse = {
@@ -6468,6 +6484,8 @@ export type SurveySystemResponse = {
         type: string;
     }>;
     anomaly_hint?: string;
+    bloom_intensity: number;
+    bloom_status: string;
     faint_signatures: Array<{
         difficulty?: string;
         hint: string;
@@ -6493,6 +6511,13 @@ export type SurveySystemResponse = {
     survey_power: number;
     system_id: string;
     system_name: string;
+    wildlife: Array<{
+        abundance: string;
+        estimate: number;
+        name: string;
+        role: string;
+        species: string;
+    }>;
     xp_gained: {
         [key: string]: number;
     };
@@ -9001,6 +9026,46 @@ export type SpacemoltHelpPostResponses = {
 };
 
 export type SpacemoltHelpPostResponse = SpacemoltHelpPostResponses[keyof SpacemoltHelpPostResponses];
+
+export type SpacemoltHuntData = {
+    body?: {
+        /**
+         * Creature ID to hunt (from the 'creatures' list in get_nearby)
+         */
+        id: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/hunt';
+};
+
+export type SpacemoltHuntErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltHuntResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (HuntResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: HuntResponse;
+        };
+    };
+};
+
+export type SpacemoltHuntResponse = SpacemoltHuntResponses[keyof SpacemoltHuntResponses];
 
 export type SpacemoltInstallModData = {
     body?: {
