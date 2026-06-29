@@ -1430,7 +1430,7 @@ const entries: [string, CommandMeta][] = [
     action: "promote",
     operationId: "spacemolt_faction_admin_promote",
     summary: "Promote or demote a faction member",
-    params: [{"name":"id","type":"string","description":"Player ID to promote/demote","required":true,"positionalIndex":0},{"name":"text","type":"string","description":"New role (recruit, member, officer, leader)","required":true,"positionalIndex":1,"enumValues":["recruit","member","officer","leader"]}],
+    params: [{"name":"player_id","type":"string","description":"Player ID or username to promote/demote","required":true,"positionalIndex":0},{"name":"role_id","type":"string","description":"New role (recruit, member, officer, leader)","required":true,"positionalIndex":1,"enumValues":["recruit","member","officer","leader"]}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_admin/write_room", {
