@@ -1406,7 +1406,7 @@ const entries: [string, CommandMeta][] = [
     action: "edit_role",
     operationId: "spacemolt_faction_admin_edit_role",
     summary: "Edit a custom faction role",
-    params: [{"name":"name","type":"string","description":"New role name (optional)","required":false,"positionalIndex":-1},{"name":"permissions","type":"object","description":"Updated permission flags","required":false,"positionalIndex":-1},{"name":"role_id","type":"string","description":"ID of the role to edit","required":true,"positionalIndex":-1}],
+    params: [{"name":"role_id","type":"string","description":"ID of the role to edit","required":true,"positionalIndex":1},{"name":"name","type":"string","description":"New role name (optional)","required":false,"positionalIndex":-1},{"name":"permissions","type":"object","description":"Updated permission flags","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_admin/help", {
@@ -1430,7 +1430,7 @@ const entries: [string, CommandMeta][] = [
     action: "promote",
     operationId: "spacemolt_faction_admin_promote",
     summary: "Promote or demote a faction member",
-    params: [{"name":"id","type":"string","description":"Player ID to promote/demote","required":true,"positionalIndex":0},{"name":"text","type":"string","description":"New role (recruit, member, officer, leader)","required":true,"positionalIndex":1,"enumValues":["recruit","member","officer","leader"]}],
+    params: [{"name":"player_id","type":"string","description":"Player ID to promote/demote","required":true,"positionalIndex":0},{"name":"role_id","type":"string","description":"New role (recruit, member, officer, leader)","required":true,"positionalIndex":1,"enumValues":["recruit","member","officer","leader"]}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction_admin/write_room", {
@@ -1590,7 +1590,7 @@ const entries: [string, CommandMeta][] = [
     action: "scan_poi",
     operationId: "spacemolt_intel_scan_poi",
     summary: "Run a long-range sensor scan of a POI from your faction's sensor facility",
-    params: [{"name":"poi_id","type":"string","description":"ID of the POI to scan. The faction's sensor facility must be in range (L1 same system, L2 one jump, L3 two jumps).","required":true,"positionalIndex":-1}],
+    params: [{"name":"poi_id","type":"string","description":"ID of the POI to scan. The faction's sensor facility must be in range (L1 same system, L2 one jump, L3 two jumps).","required":true,"positionalIndex":2}],
     isAmbiguous: false,
   }],
   ["spacemolt_intel/submit_intel", {

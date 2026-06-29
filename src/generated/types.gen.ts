@@ -17708,11 +17708,11 @@ export type SpacemoltFactionAdminPromoteData = {
         /**
          * Player ID to promote/demote
          */
-        id: string;
+        player_id: string;
         /**
          * New role (recruit, member, officer, leader)
          */
-        text: 'recruit' | 'member' | 'officer' | 'leader';
+        role_id: 'recruit' | 'member' | 'officer' | 'leader';
     };
     path?: never;
     query?: never;
