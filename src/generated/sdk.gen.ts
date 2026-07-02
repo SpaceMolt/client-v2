@@ -1114,7 +1114,7 @@ export const spacemoltLoadPassenger = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Mine resources from asteroids, ice fields, or gas clouds
- * Requires appropriate equipment: mining laser for asteroids, ice harvester for ice fields, gas harvester for gas clouds. Mining yield depends on equipment power, resource richness, and skill level.
+ * Requires appropriate equipment: mining laser for asteroids, ice harvester for ice fields, gas harvester for gas clouds. Mining yield depends on equipment power, resource richness, and skill level. Depleted deposits support limited beam power (shown as supported_power in get_poi): power above that is capped, and an array more than 4x over a heavily depleted deposit's supported power cannot extract at all (deposit_too_sparse) — relocate or fit smaller/finer modules.
  *
  * **Example:** `{"type": "mine"}`
  *
