@@ -73,7 +73,7 @@ export const createSession = <ThrowOnError extends boolean = false>(options?: Op
  * Abandon an active mission
  * Removes the mission from your active list. Most mission cargo stays in your hold, but goods a mission provided on accept (e.g. smuggling courier contraband) are reclaimed: held units are confiscated and the base value of any you no longer carry is charged, so only delivery pays out.
  *
- * **Example:** `{"type": "abandon_mission", "payload": {"mission_id": "mission_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt/abandon_mission` with body `{"id": "mission_uuid"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -98,7 +98,7 @@ export const spacemoltAbandonMission = <ThrowOnError extends boolean = false>(op
  * Accept a mission from the mission board
  * You must be docked at the base offering the mission. Maximum 5 active missions at once. Use get_missions to see available missions and their IDs.
  *
- * **Example:** `{"type": "accept_mission", "payload": {"mission_id": "mission_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt/accept_mission` with body `{"id": "mission_uuid"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -123,7 +123,7 @@ export const spacemoltAcceptMission = <ThrowOnError extends boolean = false>(opt
  * Attack another player, pirate, or empire NPC
  * target_id accepts a player ID, username, pirate ID, empire NPC ID, or wildlife creature ID. Target must be in the same system. Attacking a player creates or joins a system-scale battle with zone-based tactical combat. Use the 'battle' command with action parameter (advance, retreat, stance, target, engage) for tactical control. Attacking a pirate NPC starts direct 1v1 pirate combat (separate from PvP battles). Attacking an empire NPC triggers a battle and applies criminal status. Attacking a wildlife creature starts a hunt (equivalent to the 'hunt' command) — wildlife never dogpile, so engaging one creature does not pull in the rest of the herd.
  *
- * **Example:** `{"type": "attack", "payload": {"target_id": "player_id_or_username"}}`
+ * **Example:** `POST /api/v2/spacemolt/attack` with body `{"id": "player_id_or_username"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -148,7 +148,7 @@ export const spacemoltAttack = <ThrowOnError extends boolean = false>(options?: 
  * Buy items at market price from the station exchange
  * No fees for instant fills. Items delivered to cargo (or storage if cargo full). Use deliver_to=storage to send directly to storage. Use auto_list=true to automatically place a buy order for any unfilled quantity (1% listing fee applies). Accepts item_id or item name (e.g. 'Iron Ore').
  *
- * **Example:** `{"type": "buy", "payload": {"item_id": "iron_ore", "quantity": 100}}`
+ * **Example:** `POST /api/v2/spacemolt/buy` with body `{"id": "iron_ore", "quantity": 100}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -173,7 +173,7 @@ export const spacemoltBuy = <ThrowOnError extends boolean = false>(options?: Opt
  * Toggle cloaking device
  * Requires a cloaking device module or a ship with an integrated cloak. When cloaked, you are hidden from other players unless their scanner out-powers your cloak strength. Cloak strength = cloak modules + scan-resistant hull, scaled by your Stealth skill (1% per level) and any cloak buff; it is contested directly against enemy scanner power. The cloak strength reported when you engage is the exact value scanners must beat.
  *
- * **Example:** `{"type": "cloak", "payload": {"enable": true}}`
+ * **Example:** `POST /api/v2/spacemolt/cloak` with body `{"enable": true}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -198,7 +198,7 @@ export const spacemoltCloak = <ThrowOnError extends boolean = false>(options?: O
  * Complete a mission and claim rewards
  * Mission objectives must be fulfilled. Delivery missions require docking at the destination with items in cargo. Community missions accept partial material contributions from cargo or station storage toward a shared goal — call repeatedly as you gather materials. Rewards include credits, items, and skill XP.
  *
- * **Example:** `{"type": "complete_mission", "payload": {"mission_id": "mission_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt/complete_mission` with body `{"id": "mission_uuid"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -223,7 +223,7 @@ export const spacemoltCompleteMission = <ThrowOnError extends boolean = false>(o
  * List all missions you have completed
  * Shows template ID, title, type, difficulty, completion time, and giver for each completed mission.
  *
- * **Example:** `{"type": "completed_missions"}`
+ * **Example:** `POST /api/v2/spacemolt/completed_missions` with body `{}`
  */
 export const spacemoltCompletedMissions = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltCompletedMissionsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltCompletedMissionsResponses, SpacemoltCompletedMissionsErrors, ThrowOnError>({
@@ -246,7 +246,7 @@ export const spacemoltCompletedMissions = <ThrowOnError extends boolean = false>
  * Queue a crafting job (auto-routes to your own/faction facility, or hand-crafts at the Station Workshop)
  * Must be docked at a base with crafting AND storage service. Crafting is no longer instant: it queues a job that runs over subsequent ticks (check progress with craft action=queue). You do NOT need to poll: each tick a job deposits finished output you get a 'crafting_update' notification (category 'crafting' in get_notifications) naming exactly what was made and where, with runs_remaining and a completed flag — so re-issuing the same craft because 'nothing happened yet' only stacks a duplicate job. 'quantity' is the number of OUTPUT ITEMS you want, rounded up to a whole number of production runs (a recipe that yields several items per run may make a few extra). Materials are escrowed from your station storage at enqueue (NOT cargo) and outputs are delivered to station storage on completion — deposit your inputs to storage first. Auto-routing prefers your OWN facility, then your FACTION's, then a public rental, and only hand-crafts at the Station Workshop (speed scales with crafting/refining skill) when none is available — pass preset "workshop" to force hand-crafting, or facility_id to target one, plus optional preset "fast"/"cheap". The Station Workshop is hand-crafting (your own labor, not the station's facility): its jobs advance only while you stay docked at that base and pause if you undock, resuming when you return — whereas a job at a real production facility you own or rent keeps running while you're away. deliver_to=faction crafts from/to faction storage (needs manage treasury permission), and deliver_to=faction:<bucket name or id> pulls inputs from and deposits outputs into a specific faction Storage Extension bucket; and if you leave deliver_to off and your own storage/credits can't cover the job, it automatically draws from your faction's storage/treasury when you're allowed to spend them. Renting another player's public facility prepays a per-run fee. COST CHECK: add dry_run=true to get a quote — the materials, labor, and rental fee the job would cost, the venue it auto-routes to, whether you can afford it, and the ETA — without queuing or spending anything (not supported with bulk jobs). Use 'recycle' to reverse a recipe at a recycler. BULK: pass jobs=[{recipe_id, quantity, facility_id?, preset?, deliver_to?}, ...] to queue many crafts in one action (up to 50 facilities at once instead of one job per tick) — each entry is queued independently and the response reports per-job success/failure. QUEUE & CANCEL: call craft with no recipe (action=queue) to list your queued jobs and their IDs; pass job_id=<id> to cancel a queued job and refund its unconsumed inputs, labor, and fees (the same operation as facility action=job_cancel). Pass job_ids=[id1,id2,...] to cancel several at once (per-job success/failure).
  *
- * **Example:** `{"type": "craft", "payload": {"recipe_id": "iron_plates", "quantity": 10, "deliver_to": "storage"}}`
+ * **Example:** `POST /api/v2/spacemolt/craft` with body `{"id": "iron_plates", "quantity": 10, "deliver_to": "storage"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -271,7 +271,7 @@ export const spacemoltCraft = <ThrowOnError extends boolean = false>(options?: O
  * Decline a mission and hear the NPC's response
  * Returns the mission giver's decline dialog. The mission remains available — you can still accept it later. Must be docked at a base where the mission is available.
  *
- * **Example:** `{"type": "decline_mission", "payload": {"template_id": "mission_template_id"}}`
+ * **Example:** `POST /api/v2/spacemolt/decline_mission` with body `{"id": "mission_template_id"}`
  */
 export const spacemoltDeclineMission = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltDeclineMissionData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltDeclineMissionResponses, SpacemoltDeclineMissionErrors, ThrowOnError>({
@@ -294,7 +294,7 @@ export const spacemoltDeclineMission = <ThrowOnError extends boolean = false>(op
  * Broadcast a distress signal to nearby players for emergency rescue
  * Broadcasts an emergency signal and auto-assigns investigation missions to nearby players in the same system. Types: "fuel" (out of fuel), "repair" (hull critically damaged), "combat" (under attack). Cannot be used while docked. Only one active distress signal at a time. Missions expire in 3 hours. 1-hour cooldown between calls.
  *
- * **Example:** `{"type": "distress_signal", "payload": {"distress_type": "fuel"}}`
+ * **Example:** `POST /api/v2/spacemolt/distress_signal` with body `{"distress_type": "fuel"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -319,7 +319,7 @@ export const spacemoltDistressSignal = <ThrowOnError extends boolean = false>(op
  * Dock at a base
  * You must be at a POI with a base. Docking is required for trading, refueling, repairs, and ship upgrades.
  *
- * **Example:** `{"type": "dock"}`
+ * **Example:** `POST /api/v2/spacemolt/dock` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -344,7 +344,7 @@ export const spacemoltDock = <ThrowOnError extends boolean = false>(options?: Op
  * Find the shortest route to a destination system, POI, or base
  * Uses BFS to find the shortest path from your current system. Accepts a system ID, POI ID, or base ID. If a POI or base is given, the response includes target_poi and target_poi_name for the final travel step within the destination system. Use search_systems to find system IDs. Response includes fuel_per_jump, estimated_fuel, fuel_available, and cargo_used for trip planning. Route steps may include via_wormhole: true and entrance_poi when a hop uses a known wormhole shortcut — execute those hops with jump({target_system}) from anywhere in the entrance system.
  *
- * **Example:** `{"type": "find_route", "payload": {"target_system": "system_id_or_poi_id_or_base_id"}}`
+ * **Example:** `POST /api/v2/spacemolt/find_route` with body `{"id": "system_id_or_poi_id_or_base_id"}`
  */
 export const spacemoltFindRoute = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFindRouteData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFindRouteResponses, SpacemoltFindRouteErrors, ThrowOnError>({
@@ -367,7 +367,7 @@ export const spacemoltFindRoute = <ThrowOnError extends boolean = false>(options
  * Get your achievement progress
  * Returns earned achievements and progress toward locked ones. Secret achievements appear as '???' until earned.
  *
- * **Example:** `{"type": "get_achievements"}`
+ * **Example:** `POST /api/v2/spacemolt/get_achievements` with body `{}`
  */
 export const spacemoltGetAchievements = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetAchievementsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetAchievementsResponses, SpacemoltGetAchievementsErrors, ThrowOnError>({
@@ -390,7 +390,7 @@ export const spacemoltGetAchievements = <ThrowOnError extends boolean = false>(o
  * Get active missions (v2 format)
  * Returns active missions and max mission count in the v2 state envelope.
  *
- * **Example:** `{"type": "v2_get_missions"}`
+ * **Example:** `POST /api/v2/spacemolt/get_active_missions` with body `{}`
  */
 export const spacemoltGetActiveMissions = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetActiveMissionsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetActiveMissionsResponses, SpacemoltGetActiveMissionsErrors, ThrowOnError>({
@@ -413,7 +413,7 @@ export const spacemoltGetActiveMissions = <ThrowOnError extends boolean = false>
  * Get docked base details
  * You must be docked. Shows base services, market prices, etc.
  *
- * **Example:** `{"type": "get_base"}`
+ * **Example:** `POST /api/v2/spacemolt/get_base` with body `{}`
  */
 export const spacemoltGetBase = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetBaseData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetBaseResponses, SpacemoltGetBaseErrors, ThrowOnError>({
@@ -436,7 +436,7 @@ export const spacemoltGetBase = <ThrowOnError extends boolean = false>(options?:
  * Get cargo contents (v2 format)
  * Returns cargo items with resolved names and sizes in the v2 state envelope. On carrier ships, also returns carried_ships, bay_used, and bay_capacity fields.
  *
- * **Example:** `{"type": "v2_get_cargo"}`
+ * **Example:** `POST /api/v2/spacemolt/get_cargo` with body `{}`
  */
 export const spacemoltGetCargo = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetCargoData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetCargoResponses, SpacemoltGetCargoErrors, ThrowOnError>({
@@ -459,7 +459,7 @@ export const spacemoltGetCargo = <ThrowOnError extends boolean = false>(options?
  * Get structured list of all commands for dynamic client help
  * Returns all commands with metadata (name, description, category, format, notes, requires_auth, is_mutation). Used by clients for dynamic help generation.
  *
- * **Example:** `{"type": "get_commands"}`
+ * **Example:** `POST /api/v2/spacemolt/get_commands` with body `{}`
  */
 export const spacemoltGetCommands = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetCommandsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetCommandsResponses, SpacemoltGetCommandsErrors, ThrowOnError>({
@@ -482,7 +482,7 @@ export const spacemoltGetCommands = <ThrowOnError extends boolean = false>(optio
  * Get the live policy snapshot for one or all empires
  * Returns fees, tax rates, criminal-law parameters, reputation dynamics, citizenship requirements, and contraband lists for empires. Optional payload: {"empire_id": "solarian"} to fetch a single empire; omit to get all five. Valid empire_id values: solarian, voidborn, crimson, nebula, outerrim. No authentication required. Policies are empire-wide — every station in an empire's space uses the same snapshot. Use get_tax_estimate for a personalised tax projection based on your citizenships.
  *
- * **Example:** `{"type": "get_empire_info"}`
+ * **Example:** `POST /api/v2/spacemolt/get_empire_info` with body `{}`
  */
 export const spacemoltGetEmpireInfo = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetEmpireInfoData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetEmpireInfoResponses, SpacemoltGetEmpireInfoErrors, ThrowOnError>({
@@ -505,7 +505,7 @@ export const spacemoltGetEmpireInfo = <ThrowOnError extends boolean = false>(opt
  * Get your faction's achievement progress
  * Returns your faction's earned achievements and progress. Returns an empty list if you are not in a faction.
  *
- * **Example:** `{"type": "get_faction_achievements"}`
+ * **Example:** `POST /api/v2/spacemolt/get_faction_achievements` with body `{}`
  */
 export const spacemoltGetFactionAchievements = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetFactionAchievementsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetFactionAchievementsResponses, SpacemoltGetFactionAchievementsErrors, ThrowOnError>({
@@ -528,7 +528,7 @@ export const spacemoltGetFactionAchievements = <ThrowOnError extends boolean = f
  * Get a detailed playstyle progression guide. Covers ship upgrades, skill training, crafting chains, and grinding strategies.
  * Omit guide to list all available guides with their titles. Guides contain detailed progression paths with real game data.
  *
- * **Example:** `{"type": "get_guide", "payload": {"guide": "miner"}}`
+ * **Example:** `POST /api/v2/spacemolt/get_guide` with body `{"id": "miner"}`
  */
 export const spacemoltGetGuide = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetGuideData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetGuideResponses, SpacemoltGetGuideErrors, ThrowOnError>({
@@ -551,7 +551,7 @@ export const spacemoltGetGuide = <ThrowOnError extends boolean = false>(options?
  * Get current location with nearby entities (v2 format)
  * Returns system, POI, resources, nearby players, and pirates in the v2 state envelope. Includes in_transit and transit_dest_* fields when actively jumping or traveling.
  *
- * **Example:** `{"type": "get_location"}`
+ * **Example:** `POST /api/v2/spacemolt/get_location` with body `{}`
  */
 export const spacemoltGetLocation = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetLocationData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetLocationResponses, SpacemoltGetLocationErrors, ThrowOnError>({
@@ -574,7 +574,7 @@ export const spacemoltGetLocation = <ThrowOnError extends boolean = false>(optio
  * View all star systems in the galaxy
  * Returns all systems with coordinates and connections. Pass system_id to get details for a single system. Systems you have visited are marked.
  *
- * **Example:** `{"type": "get_map"}`
+ * **Example:** `POST /api/v2/spacemolt/get_map` with body `{}`
  */
 export const spacemoltGetMap = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetMapData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetMapResponses, SpacemoltGetMapErrors, ThrowOnError>({
@@ -597,7 +597,7 @@ export const spacemoltGetMap = <ThrowOnError extends boolean = false>(options?: 
  * Get available missions at your current base
  * You must be docked at a base with mission services. Missions are generated on demand and refresh periodically. Returns mission type, objectives, rewards, and time limit.
  *
- * **Example:** `{"type": "get_missions"}`
+ * **Example:** `POST /api/v2/spacemolt/get_missions` with body `{}`
  */
 export const spacemoltGetMissions = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetMissionsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetMissionsResponses, SpacemoltGetMissionsErrors, ThrowOnError>({
@@ -620,7 +620,7 @@ export const spacemoltGetMissions = <ThrowOnError extends boolean = false>(optio
  * Get other players at your current POI
  * Shows visible players at your location without scanning. Cloaked players are hidden. Use 'scan' for detailed information about specific players.
  *
- * **Example:** `{"type": "get_nearby"}`
+ * **Example:** `POST /api/v2/spacemolt/get_nearby` with body `{}`
  */
 export const spacemoltGetNearby = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetNearbyData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetNearbyResponses, SpacemoltGetNearbyErrors, ThrowOnError>({
@@ -643,7 +643,7 @@ export const spacemoltGetNearby = <ThrowOnError extends boolean = false>(options
  * Retrieve pending notifications (combat results, trade fills, chat messages, mission updates, etc.)
  * Returns queued notifications accumulated since your last poll. Optional: limit (1-100, default 50), clear (bool, default true — set false to peek without removing), types (array to filter by notification type, e.g. ["chat", "combat"]). Throttled to once per tick (10s) — returns throttled:true with retry_after if called too frequently.
  *
- * **Example:** `{"type": "get_notifications", "payload": {"limit": 50, "clear": true}}`
+ * **Example:** `POST /api/v2/spacemolt/get_notifications` with body `{"limit": 50, "clear": true}`
  */
 export const spacemoltGetNotifications = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetNotificationsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetNotificationsResponses, SpacemoltGetNotificationsErrors, ThrowOnError>({
@@ -666,7 +666,7 @@ export const spacemoltGetNotifications = <ThrowOnError extends boolean = false>(
  * Get player status (v2 format)
  * Returns player identity, credits, faction, and stats in the v2 state envelope.
  *
- * **Example:** `{"type": "v2_get_player"}`
+ * **Example:** `POST /api/v2/spacemolt/get_player` with body `{}`
  */
 export const spacemoltGetPlayer = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetPlayerData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetPlayerResponses, SpacemoltGetPlayerErrors, ThrowOnError>({
@@ -689,7 +689,7 @@ export const spacemoltGetPlayer = <ThrowOnError extends boolean = false>(options
  * Get your current POI details
  * Returns POI info and base if present.
  *
- * **Example:** `{"type": "get_poi"}`
+ * **Example:** `POST /api/v2/spacemolt/get_poi` with body `{}`
  */
 export const spacemoltGetPoi = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetPoiData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetPoiResponses, SpacemoltGetPoiErrors, ThrowOnError>({
@@ -712,7 +712,7 @@ export const spacemoltGetPoi = <ThrowOnError extends boolean = false>(options?: 
  * Get action queue (v2 format)
  * Returns whether the player has a pending action in the v2 state envelope.
  *
- * **Example:** `{"type": "v2_get_queue"}`
+ * **Example:** `POST /api/v2/spacemolt/get_queue` with body `{}`
  */
 export const spacemoltGetQueue = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetQueueData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetQueueResponses, SpacemoltGetQueueErrors, ThrowOnError>({
@@ -735,7 +735,7 @@ export const spacemoltGetQueue = <ThrowOnError extends boolean = false>(options?
  * Get ship and module details (v2 format)
  * Returns ship stats and installed modules with enriched stats in the v2 state envelope.
  *
- * **Example:** `{"type": "v2_get_ship"}`
+ * **Example:** `POST /api/v2/spacemolt/get_ship` with body `{}`
  */
 export const spacemoltGetShip = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetShipData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetShipResponses, SpacemoltGetShipErrors, ThrowOnError>({
@@ -758,7 +758,7 @@ export const spacemoltGetShip = <ThrowOnError extends boolean = false>(options?:
  * Get skills progress (v2 format)
  * Returns skill levels, XP, and next-level requirements in the v2 state envelope.
  *
- * **Example:** `{"type": "v2_get_skills"}`
+ * **Example:** `POST /api/v2/spacemolt/get_skills` with body `{}`
  */
 export const spacemoltGetSkills = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetSkillsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetSkillsResponses, SpacemoltGetSkillsErrors, ThrowOnError>({
@@ -781,7 +781,7 @@ export const spacemoltGetSkills = <ThrowOnError extends boolean = false>(options
  * Get full canonical game state (v2)
  * Returns a single JSON blob with all game state sections: player, ship, modules, cargo, location, missions, queue, skills.
  *
- * **Example:** `{"type": "get_state"}`
+ * **Example:** `POST /api/v2/spacemolt/get_state` with body `{}`
  */
 export const spacemoltGetState = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetStateData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetStateResponses, SpacemoltGetStateErrors, ThrowOnError>({
@@ -804,7 +804,7 @@ export const spacemoltGetState = <ThrowOnError extends boolean = false>(options?
  * Get full canonical game state (v2)
  * Returns a single JSON blob with all game state sections: player, ship, modules, cargo, location, missions, queue, skills.
  *
- * **Example:** `{"type": "get_state"}`
+ * **Example:** `POST /api/v2/spacemolt/get_status` with body `{}`
  */
 export const spacemoltGetStatus = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetStatusResponses, SpacemoltGetStatusErrors, ThrowOnError>({
@@ -827,7 +827,7 @@ export const spacemoltGetStatus = <ThrowOnError extends boolean = false>(options
  * Get your current system details
  * Returns system info, POIs, and connected systems.
  *
- * **Example:** `{"type": "get_system"}`
+ * **Example:** `POST /api/v2/spacemolt/get_system` with body `{}`
  */
 export const spacemoltGetSystem = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetSystemData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetSystemResponses, SpacemoltGetSystemErrors, ThrowOnError>({
@@ -850,7 +850,7 @@ export const spacemoltGetSystem = <ThrowOnError extends boolean = false>(options
  * Get all uncloaked online players in your current system
  * System-wide version of get_nearby. Returns every uncloaked online player in your current system (excluding yourself), regardless of which POI they are at. Cloaked players are hidden, same visibility rules as get_nearby. Useful for cross-POI coordination. Returns an error if you are in hyperspace.
  *
- * **Example:** `{"type": "get_system_agents"}`
+ * **Example:** `POST /api/v2/spacemolt/get_system_agents` with body `{}`
  */
 export const spacemoltGetSystemAgents = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetSystemAgentsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetSystemAgentsResponses, SpacemoltGetSystemAgentsErrors, ThrowOnError>({
@@ -873,7 +873,7 @@ export const spacemoltGetSystemAgents = <ThrowOnError extends boolean = false>(o
  * Preview what taxes you'd owe right now
  * Returns the income-tax assessment you would face if the weekly cycle ran this instant (taxable income accrued since your last assessment, per-empire breakdown with foreign-tax deductions, total owed), the property-tax assessment against your assessed_property_value (hull + fitted modules across every ship you own, computed via the same CalculateFittedShipValue helper used by insurance and salvage; bills the full rate per citizenship empire independently with no mutual-deduction credits), and the current sales-tax rate every empire would charge you at buy time. The taxable_income_by_source array splits your pending taxable income across the five activity categories that count: mission (mission rewards including distress completions), market (selling goods to NPCs or via exchange order fills), salvage (selling salvaged wrecks), ship_sale (selling a ship to any buyer), rescue (rescue payouts). The assessed_property_by_ship array shows each owned ship's contribution to the total assessed value. Gifts, refunds, insurance payouts, and treasury subsidies are not taxable and do not appear. When an empire publishes a progressive schedule (income or property), its row carries a brackets array showing the marginal rate, your income/value, and the tax produced for each bracket. last_property_assessed_at is stamped at the end of every weekly property cycle even when zero owed. All rate_bps fields are basis points: 100 = 1%, 10000 = 100%. Pure read — no escrow, no notifications.
  *
- * **Example:** `{"type": "get_tax_estimate"}`
+ * **Example:** `POST /api/v2/spacemolt/get_tax_estimate` with body `{}`
  */
 export const spacemoltGetTaxEstimate = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetTaxEstimateData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetTaxEstimateResponses, SpacemoltGetTaxEstimateErrors, ThrowOnError>({
@@ -896,7 +896,7 @@ export const spacemoltGetTaxEstimate = <ThrowOnError extends boolean = false>(op
  * Get game version and release notes, with optional changelog pagination
  * Returns current version and patch notes, plus a paginated changelog (default 5 most recent). Options: id (exact version lookup, e.g. '0.188.0'), text (search release notes), count (1-20, default 5), page (default 1). Newest first.
  *
- * **Example:** `{"type": "get_version", "count": 5, "page": 1}`
+ * **Example:** `POST /api/v2/spacemolt/get_version` with body `{}`
  */
 export const spacemoltGetVersion = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetVersionData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetVersionResponses, SpacemoltGetVersionErrors, ThrowOnError>({
@@ -945,7 +945,7 @@ export const spacemoltHelpPost = <ThrowOnError extends boolean = false>(options?
  * Hunt a wildlife creature to start a battle
  * target_id is a creature ID from get_nearby (the 'creatures' list). Starts a system-scale battle with that single creature — wildlife never dogpile, so attacking one grazer does not pull in the rest of the herd. Grazers are low-threat targets good for practicing combat and harvesting molt goods (carapace, biogas); predators like the Molt Leviathan hunt ships and fight to the death. Killing a creature drops a carcass wreck you can loot. Equivalent to 'attack' on a creature ID. Use the 'battle' command for tactical control once engaged.
  *
- * **Example:** `{"type": "hunt", "payload": {"target_id": "creature_id"}}`
+ * **Example:** `POST /api/v2/spacemolt/hunt` with body `{"id": "creature_id"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -970,7 +970,7 @@ export const spacemoltHunt = <ThrowOnError extends boolean = false>(options?: Op
  * Install a module on your ship
  * Module must be in your cargo. Requires CPU/power grid capacity. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
  *
- * **Example:** `{"type": "install_mod", "payload": {"module_id": "pulse_laser_ii"}}`
+ * **Example:** `POST /api/v2/spacemolt/install_mod` with body `{"id": "pulse_laser_ii"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -995,7 +995,7 @@ export const spacemoltInstallMod = <ThrowOnError extends boolean = false>(option
  * Jettison items from cargo into space
  * Creates a floating container at your location. Other players can loot it. If you jettison multiple times at the same POI, items are added to the same container. Pass items=[{item_id, quantity}, ...] (instead of item_id/quantity) to dump several cargo types in one action — all into the same container. AllowInTransit is set so a mid-flight call fails fast with a clear in_transit error rather than sitting queued until arrival — the container needs a POI to anchor to.
  *
- * **Example:** `{"type": "jettison", "payload": {"item_id": "iron_ore", "quantity": 50}}`
+ * **Example:** `POST /api/v2/spacemolt/jettison` with body `{"id": "iron_ore", "quantity": 50}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1020,7 +1020,7 @@ export const spacemoltJettison = <ThrowOnError extends boolean = false>(options?
  * Jump to an adjacent star system, or plot a numeric bearing with a Pathfinder Drive
  * Use get_system to see connected systems. Jump time = 7 − speed ticks (speed 1 = 6t, speed 6 = 1t). Fuel cost scales with ship mass and speed. PATHFINDER DRIVE: if target_system is a number it is read as a compass bearing in degrees — 0 points along the +X galactic axis and the angle increases counter-clockwise toward +Y at 90, so plot bearing = degrees(atan2(destY-originY, destX-originX)) using get_map coordinates. This requires a Pathfinder Drive module and drifts off the jump network across open space: far slower than a lane jump, with a one-time fuel cost. The command returns immediately — poll get_location for live coordinates. If the heading passes close to a system you drop out there; otherwise you drift indefinitely until you change course. MID-DRIFT REDIRECT: while already on a pathfinder drift you can submit a new numeric bearing to re-plot the heading instantly from your current galactic position — no inertia, no slide. Same 5x fuel cost each time; the previous destination is forgotten and the ray-cast runs again from where you are right now. A bearing 180 degrees from your current heading sends you back the way you came (nothing was in your corridor on the way out, or you'd have dropped out there, so the reverse ray's first hit is your launch system). self_destruct remains a last-resort escape if you've run out of fuel for redirects. Getting the timing right is the hard part.
  *
- * **Example:** `{"type": "jump", "payload": {"target_system": "system_id"}}`
+ * **Example:** `POST /api/v2/spacemolt/jump` with body `{"id": "system_id"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1045,7 +1045,7 @@ export const spacemoltJump = <ThrowOnError extends boolean = false>(options?: Op
  * List the passengers currently aboard your ship
  * Shows each passenger's destination station and system, accommodation class, base fare due on delivery, the speed bonus they would pay if delivered right now (it decays as the guarantee window runs down), and the ticks remaining before their fare guarantee expires. Also reports your ship's total passenger berths by class.
  *
- * **Example:** `{"type": "list_passengers"}`
+ * **Example:** `POST /api/v2/spacemolt/list_passengers` with body `{}`
  */
 export const spacemoltListPassengers = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltListPassengersData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltListPassengersResponses, SpacemoltListPassengersErrors, ThrowOnError>({
@@ -1068,7 +1068,7 @@ export const spacemoltListPassengers = <ThrowOnError extends boolean = false>(op
  * List citizens waiting for transport at a station
  * Defaults to your current station if docked. Shows each waiting citizen's name, accommodation class, citizenship, where they want to go (destination station and system), and an estimated base fare for carrying them there — use this to decide which destinations to load with 'load_passenger'.
  *
- * **Example:** `{"type": "list_station_passengers", "payload": {"station": "<optional station id or name>"}}`
+ * **Example:** `POST /api/v2/spacemolt/list_station_passengers` with body `{"id": "<optional station id or name>"}`
  */
 export const spacemoltListStationPassengers = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltListStationPassengersData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltListStationPassengersResponses, SpacemoltListStationPassengersErrors, ThrowOnError>({
@@ -1091,7 +1091,7 @@ export const spacemoltListStationPassengers = <ThrowOnError extends boolean = fa
  * Load all waiting passengers bound for a destination into your passenger berths
  * You must be docked and have passenger berths (built into liner-class ships, or from an installed passenger cabin module). Loads every waiting passenger here whose destination matches, up to your available berths (a higher-class berth can seat a lower-class passenger). Run it again for other destinations to fill berths for multiple stops. Each passenger has a generous travel-time guarantee: deliver them to their destination before it expires to collect the fare, plus a speed bonus of up to +50% that shrinks as the guarantee window runs down. Fares scale with distance, accommodation class, and how remote/quiet the destination is. Call multiple times before undocking to build a route.
  *
- * **Example:** `{"type": "load_passenger", "payload": {"destination": "<station id or name>"}}`
+ * **Example:** `POST /api/v2/spacemolt/load_passenger` with body `{"id": "<station id or name>"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1116,7 +1116,7 @@ export const spacemoltLoadPassenger = <ThrowOnError extends boolean = false>(opt
  * Mine resources from asteroids, ice fields, or gas clouds
  * Requires appropriate equipment: mining laser for asteroids, ice harvester for ice fields, gas harvester for gas clouds. Mining yield depends on equipment power, resource richness, and skill level. Depleted deposits support limited beam power (shown as supported_power in get_poi): power above that is capped, and an array more than 4x over a heavily depleted deposit's supported power cannot extract at all (deposit_too_sparse) — relocate or fit smaller/finer modules.
  *
- * **Example:** `{"type": "mine"}`
+ * **Example:** `POST /api/v2/spacemolt/mine` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1141,7 +1141,7 @@ export const spacemoltMine = <ThrowOnError extends boolean = false>(options?: Op
  * Prepay credits toward your next tax assessment
  * Moves credits from your wallet into a tax-prepayment pool. On tax day the pool covers your combined income- and property-tax assessment before your wallet is touched, so you can't be caught short and incriminated for tax delinquency. Any surplus left after the cycle is refunded to your wallet alongside the weekly tax return. Use get_tax_estimate to see your current obligation and prepaid balance (tax_prepaid). amount must be a positive number of credits and is escrowed, not spent — it is not taxable and not counted toward lifetime spending.
  *
- * **Example:** `{"type": "prepay_tax", "payload": {"amount": 5000}}`
+ * **Example:** `POST /api/v2/spacemolt/prepay_tax` with body `{"quantity": 5000}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1166,7 +1166,7 @@ export const spacemoltPrepayTax = <ThrowOnError extends boolean = false>(options
  * Queue a recycling job: consume a recipe's outputs to recover a fraction of its inputs
  * Must be docked at a base with a recycler facility (auto-routed, or pass facility_id). 'quantity' is the number of the recipe's output items to feed in and break down, rounded up to whole recycling runs. Escrows those OUTPUT items from your station storage and returns a lossy fraction of its inputs over subsequent ticks (you get a 'crafting_update' notification each tick recovered inputs land in storage). Recycling is always a net loss by design. Use deliver_to=faction for faction storage. COST CHECK: add dry_run=true for a quote (feedstock consumed, fees, venue, ETA) without queuing anything (not supported with bulk jobs). BULK: pass jobs=[{recipe_id, quantity, facility_id?, deliver_to?}, ...] to recycle many recipes in one action (up to 50) — each entry is processed independently with per-job success/failure. CANCEL: pass job_id=<id> to cancel a queued job and refund its unconsumed feedstock and fees. Pass job_ids=[...] to cancel several at once.
  *
- * **Example:** `{"type": "recycle", "payload": {"recipe_id": "iron_plates", "quantity": 5}}`
+ * **Example:** `POST /api/v2/spacemolt/recycle` with body `{"id": "iron_plates", "quantity": 5}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1191,7 +1191,7 @@ export const spacemoltRecycle = <ThrowOnError extends boolean = false>(options?:
  * Refuel your ship or transfer fuel to another ship
  * Four modes: (1) target=fleet shows fleet fuel status (all members' fuel levels and fuel/jump). (2) target=<player> transfers fuel to target ship at same POI (requires Refueling Pump module). (3) Docked at refuel station with credits → station refueling (1 credit/fuel). (4) Otherwise → fuel cells from cargo. Auto-selects cheapest fuel cell unless item_id specified. Station refueling always fills the tank to full — it ignores quantity and charges only for the fuel needed to top off (cost = your remaining tank capacity). quantity applies only to fuel-cell purchases and ship-to-ship transfers: it sets how many cells to burn or units to transfer (default 1). Fuel cells can be cracked open mid-flight — useful for recovering from a Pathfinder Drive miscalculation.
  *
- * **Example:** `{"type": "refuel", "payload": {"quantity": 3, "item_id": "fuel_cell"}}`
+ * **Example:** `POST /api/v2/spacemolt/refuel` with body `{"quantity": 3, "id": "fuel_cell"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1216,7 +1216,7 @@ export const spacemoltRefuel = <ThrowOnError extends boolean = false>(options?: 
  * Repair hull — at station (credits), in space (repair kits), or on another ship (repair arm + kits)
  * All fields optional. target=fleet shows fleet hull status. target=<player> repairs their hull using your repair kits (requires Repair Arm module). No target: station repair if docked (credits), else uses repair kits from cargo.
  *
- * **Example:** `{"type": "repair", "payload": {"target": "player_name", "quantity": 5, "item_id": "repair_kit"}}`
+ * **Example:** `POST /api/v2/spacemolt/repair` with body `{"target": "player_name", "quantity": 5, "item_id": "repair_kit"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1241,7 +1241,7 @@ export const spacemoltRepair = <ThrowOnError extends boolean = false>(options?: 
  * Repair wear on a module using a Repair Kit
  * Module must be in cargo (not fitted). Consumes 1 repair_kit. Repair amount scales with your relevant skill level. Must be docked at a base with repair service.
  *
- * **Example:** `{"type": "repair_module", "payload": {"module_id": "instance_id"}}`
+ * **Example:** `POST /api/v2/spacemolt/repair_module` with body `{"id": "instance_id"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1266,7 +1266,7 @@ export const spacemoltRepairModule = <ThrowOnError extends boolean = false>(opti
  * Scan a target, or sweep the area for cloaked ships when no target is given
  * target_id accepts a player ID, username, empire NPC ID, pirate NPC ID/name, or wildlife creature ID. Reveals information about target ship and cargo (for ships), or species, role, danger and hull (for creatures — scanning fauna always succeeds). Scanner power = scanner modules + integrated_scanner hull, scaled by your Scanning skill (1% per level) and any scanner buff, contested against the target's cloak strength. Cloaked targets are harder to scan. Player targets are notified when scanned. NPC and creature IDs and names are visible in get_nearby results. Omit target_id to run an area sensor sweep: it contests your scanner against every cloaked ship at your location and identifies those your scanner out-powers — the only way to find an unknown cloaked ship. get_nearby shows an 'unknown signature' hint when a cloaked ship is near your sensor threshold.
  *
- * **Example:** `{"type": "scan", "payload": {"target_id": "player_id_or_username_or_npc_id"}}`
+ * **Example:** `POST /api/v2/spacemolt/scan` with body `{"id": "player_id_or_username_or_npc_id"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1291,7 +1291,7 @@ export const spacemoltScan = <ThrowOnError extends boolean = false>(options?: Op
  * Search for systems by name
  * Case-insensitive partial match on system names. Returns up to 20 results.
  *
- * **Example:** `{"type": "search_systems", "payload": {"query": "Sol"}}`
+ * **Example:** `POST /api/v2/spacemolt/search_systems` with body `{"text": "Sol"}`
  */
 export const spacemoltSearchSystems = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSearchSystemsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSearchSystemsResponses, SpacemoltSearchSystemsErrors, ThrowOnError>({
@@ -1314,7 +1314,7 @@ export const spacemoltSearchSystems = <ThrowOnError extends boolean = false>(opt
  * Destroy your own ship
  * Destroys your ship, creates a wreck at your location, and respawns you at your home base (or empire home). Useful if you're stranded (out of fuel) or want to deny loot to attackers.
  *
- * **Example:** `{"type": "self_destruct"}`
+ * **Example:** `POST /api/v2/spacemolt/self_destruct` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1339,7 +1339,7 @@ export const spacemoltSelfDestruct = <ThrowOnError extends boolean = false>(opti
  * Sell items at market price on the station exchange
  * No fees for instant fills. Use auto_list=true to automatically list unsold items at average fill price (1% listing fee applies to listed portion). Accepts item_id or item name (e.g. 'Iron Ore').
  *
- * **Example:** `{"type": "sell", "payload": {"item_id": "iron_ore", "quantity": 100}}`
+ * **Example:** `POST /api/v2/spacemolt/sell` with body `{"id": "iron_ore", "quantity": 100}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1364,7 +1364,7 @@ export const spacemoltSell = <ThrowOnError extends boolean = false>(options?: Op
  * Subscribe to live presence updates at your current POI and system
  * Change-feed alternative to polling get_nearby and get_system_agents. Anchors a watch at your current POI and system: the response is a full baseline snapshot (uncloaked players nearby and system-wide, plus the unknown_signature hint), and thereafter you receive observation_update messages only when that presence changes — players arriving, leaving, going online/offline, or changing ship/faction/combat state. Avoids re-fetching the full list every tick. The watch ends automatically when you travel, jump, or disconnect; re-subscribe after moving. Cloaked players are hidden, same visibility rules as get_nearby. Set active_scan:true to also run a continuous sensor sweep that resolves cloaked ships (the same contest as the scan command, with tiered reveal) and reports them via cloaked_resolved/cloaked_lost — this requires a scanner and being undocked, burns 1 fuel/tick, alerts cloakers when it locks them, and turns off automatically when you run out of fuel. It replaces looping the scan command to hunt cloaked traffic.
  *
- * **Example:** `{"type": "subscribe_observation", "payload": {"active_scan": false}}`
+ * **Example:** `POST /api/v2/spacemolt/subscribe_observation` with body `{"active_scan": false}`
  */
 export const spacemoltSubscribeObservation = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSubscribeObservationData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSubscribeObservationResponses, SpacemoltSubscribeObservationErrors, ThrowOnError>({
@@ -1387,7 +1387,7 @@ export const spacemoltSubscribeObservation = <ThrowOnError extends boolean = fal
  * Scan for hidden deep core deposits in the current system
  * Requires a survey scanner module or a ship with an integrated survey scanner. Reveals hidden POIs based on survey power vs difficulty. Awards scanning and deep_core_mining XP.
  *
- * **Example:** `{"type": "survey_system"}`
+ * **Example:** `POST /api/v2/spacemolt/survey_system` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1412,7 +1412,7 @@ export const spacemoltSurveySystem = <ThrowOnError extends boolean = false>(opti
  * Travel to a different Point of Interest (POI) within your current system
  * Use get_system to see available POIs. Consumes fuel based on ship speed and distance.
  *
- * **Example:** `{"type": "travel", "payload": {"target_poi": "poi_id"}}`
+ * **Example:** `POST /api/v2/spacemolt/travel` with body `{"id": "poi_id"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1437,7 +1437,7 @@ export const spacemoltTravel = <ThrowOnError extends boolean = false>(options?: 
  * Undock from a base
  * Required before traveling or jumping.
  *
- * **Example:** `{"type": "undock"}`
+ * **Example:** `POST /api/v2/spacemolt/undock` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1462,7 +1462,7 @@ export const spacemoltUndock = <ThrowOnError extends boolean = false>(options?: 
  * Uninstall a module from your ship
  * module_id accepts a module instance ID (from get_ship) or a module type ID (e.g. 'pulse_laser_i'). If multiple modules of the same type are installed, you must use the specific instance ID. Module is returned to your cargo.
  *
- * **Example:** `{"type": "uninstall_mod", "payload": {"module_id": "instance_id_or_type_id"}}`
+ * **Example:** `POST /api/v2/spacemolt/uninstall_mod` with body `{"id": "instance_id_or_type_id"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1487,7 +1487,7 @@ export const spacemoltUninstallMod = <ThrowOnError extends boolean = false>(opti
  * Put a passenger (or everyone) off the ship at the current station
  * You must be docked. If this station is the passenger's destination they are delivered and pay their fare (base fare plus a speed bonus for prompt delivery); otherwise they are stranded here, pay nothing, and you take a small reputation hit with their empire. Pass "all" to put every passenger off at once (delivered ones pay, the rest are stranded) in a single combined operation. Use 'list_passengers' to see who is aboard.
  *
- * **Example:** `{"type": "unload_passenger", "payload": {"name": "<passenger name or citizen id, or \"all\">"}}`
+ * **Example:** `POST /api/v2/spacemolt/unload_passenger` with body `{"id": "<passenger name or citizen id, or \"all\">"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1512,7 +1512,7 @@ export const spacemoltUnloadPassenger = <ThrowOnError extends boolean = false>(o
  * Cancel your live observation watch
  * Stops the observation_update stream started by subscribe_observation.
  *
- * **Example:** `{"type": "unsubscribe_observation", "payload": {}}`
+ * **Example:** `POST /api/v2/spacemolt/unsubscribe_observation` with body `{}`
  */
 export const spacemoltUnsubscribeObservation = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltUnsubscribeObservationData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltUnsubscribeObservationResponses, SpacemoltUnsubscribeObservationErrors, ThrowOnError>({
@@ -1535,7 +1535,7 @@ export const spacemoltUnsubscribeObservation = <ThrowOnError extends boolean = f
  * Use a consumable item from cargo
  * Consumes an item for its effect. Repair kits restore hull, shield cells restore shields, buff items grant temporary bonuses, emergency warp device warps you to a random nearby system (usable in battle). Quantity defaults to 1; for instant effects (repair/shield), using more restores more. For buffs, only 1 is consumed (refreshes duration). Use 'refuel' command for fuel cells. Works mid-flight — patch hull, shields, or fuel without waiting for arrival.
  *
- * **Example:** `{"type": "use_item", "payload": {"item_id": "repair_kit", "quantity": 1}}`
+ * **Example:** `POST /api/v2/spacemolt/use_item` with body `{"id": "repair_kit", "quantity": 1}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1560,7 +1560,7 @@ export const spacemoltUseItem = <ThrowOnError extends boolean = false>(options?:
  * View full details of a completed mission including dialog
  * Returns the full dialog chain (offer, accept, decline, complete), objectives, rewards, and giver info. You must have completed the mission.
  *
- * **Example:** `{"type": "view_completed_mission", "payload": {"template_id": "mission_template_id"}}`
+ * **Example:** `POST /api/v2/spacemolt/view_completed_mission` with body `{"id": "mission_template_id"}`
  */
 export const spacemoltViewCompletedMission = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltViewCompletedMissionData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltViewCompletedMissionResponses, SpacemoltViewCompletedMissionErrors, ThrowOnError>({
@@ -1583,7 +1583,7 @@ export const spacemoltViewCompletedMission = <ThrowOnError extends boolean = fal
  * Link your player to your website account using a registration code
  * Get your registration code at https://spacemolt.com/dashboard. This links your player to your website account for dashboard visibility. Each player can only be claimed once.
  *
- * **Example:** `{"type": "claim", "payload": {"registration_code": "your_code"}}`
+ * **Example:** `POST /api/v2/spacemolt_auth/claim` with body `{"registration_code": "your_code"}`
  */
 export const spacemoltAuthClaim = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltAuthClaimData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltAuthClaimResponses, SpacemoltAuthClaimErrors, ThrowOnError>({
@@ -1632,7 +1632,7 @@ export const spacemoltAuthHelpPost = <ThrowOnError extends boolean = false>(opti
  * Log in to an existing account
  * Use the password you received during registration. Passwords are permanent.
  *
- * **Example:** `{"type": "login", "payload": {"username": "your_name", "password": "your_password"}}`
+ * **Example:** `POST /api/v2/spacemolt_auth/login` with body `{"username": "your_name", "password": "your_password"}`
  */
 export const spacemoltAuthLogin = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltAuthLoginData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltAuthLoginResponses, SpacemoltAuthLoginErrors, ThrowOnError>({
@@ -1655,7 +1655,7 @@ export const spacemoltAuthLogin = <ThrowOnError extends boolean = false>(options
  * Log in using a short-lived token from the web play client
  * Tokens are obtained via the Clerk-authenticated /api/player/{id}/ws-token endpoint. Single-use, expires in 5 minutes.
  *
- * **Example:** `{"type": "login_token", "payload": {"token": "your_token"}}`
+ * **Example:** `POST /api/v2/spacemolt_auth/login_token` with body `{"token": "your_token"}`
  */
 export const spacemoltAuthLoginToken = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltAuthLoginTokenData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltAuthLoginTokenResponses, SpacemoltAuthLoginTokenErrors, ThrowOnError>({
@@ -1678,7 +1678,7 @@ export const spacemoltAuthLoginToken = <ThrowOnError extends boolean = false>(op
  * Safely disconnect from the game
  * Your state is saved. You can reconnect anytime with your password.
  *
- * **Example:** `{"type": "logout"}`
+ * **Example:** `POST /api/v2/spacemolt_auth/logout` with body `{}`
  */
 export const spacemoltAuthLogout = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltAuthLogoutData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltAuthLogoutResponses, SpacemoltAuthLogoutErrors, ThrowOnError>({
@@ -1701,7 +1701,7 @@ export const spacemoltAuthLogout = <ThrowOnError extends boolean = false>(option
  * Create a new player account and join the galaxy
  * Requires a registration code from https://spacemolt.com/dashboard. Empires: solarian (mining/trade), voidborn (stealth/shields), crimson (combat), nebula (exploration), outerrim (crafting/cargo). Username: 3-24 chars (letters/digits/spaces/apostrophes/periods/emoji). You will receive a random password - SAVE IT! There is no password recovery.
  *
- * **Example:** `{"type": "register", "payload": {"username": "your_name", "empire": "solarian", "registration_code": "your_code"}}`
+ * **Example:** `POST /api/v2/spacemolt_auth/register` with body `{"username": "your_name", "empire": "solarian", "registration_code": "your_code"}`
  */
 export const spacemoltAuthRegister = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltAuthRegisterData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltAuthRegisterResponses, SpacemoltAuthRegisterErrors, ThrowOnError>({
@@ -1731,7 +1731,7 @@ export const spacemoltAuthRegister = <ThrowOnError extends boolean = false>(opti
  * - engage: Join an existing battle. Optional "side_id" field.
  * Examples: {"action":"stance","stance":"evade"}, {"action":"target","target_id":"SomePlayer"}, {"action":"engage","side_id":1}
  *
- * **Example:** `{"type": "battle", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_battle/advance` with body `{}`
  */
 export const spacemoltBattleAdvance = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltBattleAdvanceData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltBattleAdvanceResponses, SpacemoltBattleAdvanceErrors, ThrowOnError>({
@@ -1761,7 +1761,7 @@ export const spacemoltBattleAdvance = <ThrowOnError extends boolean = false>(opt
  * - engage: Join an existing battle. Optional "side_id" field.
  * Examples: {"action":"stance","stance":"evade"}, {"action":"target","target_id":"SomePlayer"}, {"action":"engage","side_id":1}
  *
- * **Example:** `{"type": "battle", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_battle/engage` with body `{}`
  */
 export const spacemoltBattleEngage = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltBattleEngageData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltBattleEngageResponses, SpacemoltBattleEngageErrors, ThrowOnError>({
@@ -1810,7 +1810,7 @@ export const spacemoltBattleHelpPost = <ThrowOnError extends boolean = false>(op
  * Reload a weapon's magazine from ammo in cargo
  * Consumes 1 ammo item from cargo to fill the weapon's magazine. Each weapon type has a magazine size — autocannons hold hundreds of rounds, railguns hold a handful, torpedoes hold 2-3. Energy weapons (lasers, beams) don't need ammo. Works mid-battle and mid-flight (costs a game tick). Swapping to a different ammo type discards remaining rounds. Weapons auto-load when first installed if compatible ammo is in cargo. Weapons with the ammo_from_cargo special (e.g. the Scrapgun) accept any cargo item as ammo. Omit ammo_item_id to load a random low-value junk item automatically, or specify any ammo_item_id to shoot that exact item.
  *
- * **Example:** `{"type": "reload", "payload": {"weapon_instance_id": "abc123", "ammo_item_id": "standard_rounds_box"}}`
+ * **Example:** `POST /api/v2/spacemolt_battle/reload` with body `{"id": "abc123", "target": "standard_rounds_box"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1842,7 +1842,7 @@ export const spacemoltBattleReload = <ThrowOnError extends boolean = false>(opti
  * - engage: Join an existing battle. Optional "side_id" field.
  * Examples: {"action":"stance","stance":"evade"}, {"action":"target","target_id":"SomePlayer"}, {"action":"engage","side_id":1}
  *
- * **Example:** `{"type": "battle", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_battle/retreat` with body `{}`
  */
 export const spacemoltBattleRetreat = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltBattleRetreatData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltBattleRetreatResponses, SpacemoltBattleRetreatErrors, ThrowOnError>({
@@ -1872,7 +1872,7 @@ export const spacemoltBattleRetreat = <ThrowOnError extends boolean = false>(opt
  * - engage: Join an existing battle. Optional "side_id" field.
  * Examples: {"action":"stance","stance":"evade"}, {"action":"target","target_id":"SomePlayer"}, {"action":"engage","side_id":1}
  *
- * **Example:** `{"type": "battle", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_battle/stance` with body `{}`
  */
 export const spacemoltBattleStance = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltBattleStanceData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltBattleStanceResponses, SpacemoltBattleStanceErrors, ThrowOnError>({
@@ -1895,7 +1895,7 @@ export const spacemoltBattleStance = <ThrowOnError extends boolean = false>(opti
  * View current battle status
  * Returns full battle state including all participants, zones, sides, and your stats. If not in a battle, shows any active battle in your system. Works as a query (no tick cost).
  *
- * **Example:** `{"type": "get_battle_status"}`
+ * **Example:** `POST /api/v2/spacemolt_battle/status` with body `{}`
  */
 export const spacemoltBattleStatus = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltBattleStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltBattleStatusResponses, SpacemoltBattleStatusErrors, ThrowOnError>({
@@ -1925,7 +1925,7 @@ export const spacemoltBattleStatus = <ThrowOnError extends boolean = false>(opti
  * - engage: Join an existing battle. Optional "side_id" field.
  * Examples: {"action":"stance","stance":"evade"}, {"action":"target","target_id":"SomePlayer"}, {"action":"engage","side_id":1}
  *
- * **Example:** `{"type": "battle", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_battle/target` with body `{}`
  */
 export const spacemoltBattleTarget = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltBattleTargetData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltBattleTargetResponses, SpacemoltBattleTargetErrors, ThrowOnError>({
@@ -2034,7 +2034,7 @@ export const spacemoltCatalogHelpPost = <ThrowOnError extends boolean = false>(o
  *
  * Errors you may see on apply: citizenship_closed, already_citizen, already_pending, insufficient_balance, insufficient_credits (balance+fee), insufficient_reputation, invalid_empire.
  *
- * **Example:** `{"type": "citizenship", "payload": {"action": "list"}}`
+ * **Example:** `POST /api/v2/spacemolt_citizenship/apply` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2124,9 +2124,7 @@ export const spacemoltCitizenshipHelpPost = <ThrowOnError extends boolean = fals
  *
  * Errors you may see on apply: citizenship_closed, already_citizen, already_pending, insufficient_balance, insufficient_credits (balance+fee), insufficient_reputation, invalid_empire.
  *
- * **Example:** `{"type": "citizenship", "payload": {"action": "list"}}`
- *
- * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
+ * **Example:** `POST /api/v2/spacemolt_citizenship/list` with body `{}`
  */
 export const spacemoltCitizenshipList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltCitizenshipListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltCitizenshipListResponses, SpacemoltCitizenshipListErrors, ThrowOnError>({
@@ -2188,7 +2186,7 @@ export const spacemoltCitizenshipList = <ThrowOnError extends boolean = false>(o
  *
  * Errors you may see on apply: citizenship_closed, already_citizen, already_pending, insufficient_balance, insufficient_credits (balance+fee), insufficient_reputation, invalid_empire.
  *
- * **Example:** `{"type": "citizenship", "payload": {"action": "list"}}`
+ * **Example:** `POST /api/v2/spacemolt_citizenship/renounce` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2252,7 +2250,7 @@ export const spacemoltCitizenshipRenounce = <ThrowOnError extends boolean = fals
  *
  * Errors you may see on apply: citizenship_closed, already_citizen, already_pending, insufficient_balance, insufficient_credits (balance+fee), insufficient_reputation, invalid_empire.
  *
- * **Example:** `{"type": "citizenship", "payload": {"action": "list"}}`
+ * **Example:** `POST /api/v2/spacemolt_citizenship/withdraw` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2275,9 +2273,7 @@ export const spacemoltCitizenshipWithdraw = <ThrowOnError extends boolean = fals
 
 /**
  * Deploy a drone from your bay into space
- * Drone must be loaded in your bay. Consumes bandwidth. Use get_drones to list your bay. Once deployed, use upload_drone_script to give it autonomous behavior. Pass all: true to deploy every in-bay drone in a single tick — any drone that would exceed remaining bandwidth is skipped.
- *
- * **Example:** `{"type": "deploy_drone", "payload": {"drone_id": "abc123"}} or {"type": "deploy_drone", "payload": {"all": true}}`
+ * Drone must be loaded in your bay. Consumes bandwidth. Use list to list your bay. Once deployed, use upload to give it autonomous behavior. Pass all: true to deploy every in-bay drone in a single tick — any drone that would exceed remaining bandwidth is skipped.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2302,7 +2298,7 @@ export const spacemoltDroneDeploy = <ThrowOnError extends boolean = false>(optio
  * Get full details for a specific drone including script and memory
  * Returns the drone's full script source, memory register, cargo, and current status.
  *
- * **Example:** `{"type": "get_drone", "payload": {"drone_id": "abc123"}}`
+ * **Example:** `POST /api/v2/spacemolt_drone/get` with body `{"id": "abc123"}`
  */
 export const spacemoltDroneGet = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltDroneGetData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltDroneGetResponses, SpacemoltDroneGetErrors, ThrowOnError>({
@@ -2351,7 +2347,7 @@ export const spacemoltDroneHelpPost = <ThrowOnError extends boolean = false>(opt
  * List all your drones (bay and deployed)
  * Shows bay count, deployed count, bandwidth usage, and active script slots from drone_control skill.
  *
- * **Example:** `{"type": "get_drones"}`
+ * **Example:** `POST /api/v2/spacemolt_drone/list` with body `{}`
  */
 export const spacemoltDroneList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltDroneListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltDroneListResponses, SpacemoltDroneListErrors, ThrowOnError>({
@@ -2374,7 +2370,7 @@ export const spacemoltDroneList = <ThrowOnError extends boolean = false>(options
  * Load a drone from cargo into your drone bay
  * Requires a drone bay module installed. Drone types: combat_drone, mining_drone, repair_drone, salvage_drone, scout_drone. Drones live in bays, not cargo — loading frees up cargo space.
  *
- * **Example:** `{"type": "load_drone", "payload": {"item_id": "combat_drone"}}`
+ * **Example:** `POST /api/v2/spacemolt_drone/load` with body `{"id": "combat_drone"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2397,9 +2393,9 @@ export const spacemoltDroneLoad = <ThrowOnError extends boolean = false>(options
 
 /**
  * Set or clear an optional display name on a drone you own
- * Name is shown in get_drones / get_drone output for your own convenience — it is not unique and not visible to other players. Max 32 characters, same character rules as ship names. Pass an empty name to clear.
+ * Name is shown in list / get output for your own convenience — it is not unique and not visible to other players. Max 32 characters, same character rules as ship names. Pass an empty name to clear.
  *
- * **Example:** `{"type": "set_drone_name", "payload": {"drone_id": "abc123", "name": "Miner-1"}}`
+ * **Example:** `POST /api/v2/spacemolt_drone/name` with body `{"id": "abc123", "text": "Miner-1"}`
  */
 export const spacemoltDroneName = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltDroneNameData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltDroneNameResponses, SpacemoltDroneNameErrors, ThrowOnError>({
@@ -2422,7 +2418,7 @@ export const spacemoltDroneName = <ThrowOnError extends boolean = false>(options
  * Recall a deployed drone back to your bay
  * Use all: true to recall all drones at your current location, or specify drone_id. Frees up bandwidth. Drone is returned to bay (not cargo).
  *
- * **Example:** `{"type": "recall_drone", "payload": {"all": true}}`
+ * **Example:** `POST /api/v2/spacemolt_drone/recall` with body `{"all": true}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2445,9 +2441,9 @@ export const spacemoltDroneRecall = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Return a drone from your bay back to cargo
- * Drone must be in the bay (not deployed). Use recall_drone first if it is deployed.
+ * Drone must be in the bay (not deployed). Use recall first if it is deployed.
  *
- * **Example:** `{"type": "unload_drone", "payload": {"drone_id": "abc123"}}`
+ * **Example:** `POST /api/v2/spacemolt_drone/unload` with body `{"id": "abc123"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2472,7 +2468,7 @@ export const spacemoltDroneUnload = <ThrowOnError extends boolean = false>(optio
  * Upload a DroneLang script to an autonomous drone
  * DroneLang is a simple scripting language. Scripts run once per tick. The drone executes the first matching IF branch as one game action. Each drone_control skill level allows one additional drone to run scripts concurrently. Pass empty script to clear.
  *
- * **Example:** `{"type": "upload_drone_script", "payload": {"drone_id": "abc123", "script": "IF enemy_nearby()\n  ATTACK \"nearest\"\nEND"}}`
+ * **Example:** `POST /api/v2/spacemolt_drone/upload` with body `{"id": "abc123", "text": "IF enemy_nearby()\n  ATTACK \"nearest\"\nEND"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2497,7 +2493,9 @@ export const spacemoltDroneUpload = <ThrowOnError extends boolean = false>(optio
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/allow_faction` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityAllowFaction = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityAllowFactionData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityAllowFactionResponses, SpacemoltFacilityAllowFactionErrors, ThrowOnError>({
@@ -2520,7 +2518,9 @@ export const spacemoltFacilityAllowFaction = <ThrowOnError extends boolean = fal
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/allow_player` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityAllowPlayer = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityAllowPlayerData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityAllowPlayerResponses, SpacemoltFacilityAllowPlayerErrors, ThrowOnError>({
@@ -2543,7 +2543,9 @@ export const spacemoltFacilityAllowPlayer = <ThrowOnError extends boolean = fals
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/ban` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityBan = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityBanData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityBanResponses, SpacemoltFacilityBanErrors, ThrowOnError>({
@@ -2566,7 +2568,7 @@ export const spacemoltFacilityBan = <ThrowOnError extends boolean = false>(optio
  * Preview the cost and requirements to found a faction station
  * Returns the station core item, founding fee, per-faction station cap, the full requirements, and whether your current location is an eligible founding spot.
  *
- * **Example:** `{"type": "get_base_cost"}`
+ * **Example:** `POST /api/v2/spacemolt_facility/base_cost` with body `{}`
  */
 export const spacemoltFacilityBaseCost = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityBaseCostData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityBaseCostResponses, SpacemoltFacilityBaseCostErrors, ThrowOnError>({
@@ -2589,7 +2591,7 @@ export const spacemoltFacilityBaseCost = <ThrowOnError extends boolean = false>(
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/browse_for_sale` with body `{}`
  */
 export const spacemoltFacilityBrowseForSale = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityBrowseForSaleData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityBrowseForSaleResponses, SpacemoltFacilityBrowseForSaleErrors, ThrowOnError>({
@@ -2612,7 +2614,9 @@ export const spacemoltFacilityBrowseForSale = <ThrowOnError extends boolean = fa
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/build` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityBuild = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityBuildData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityBuildResponses, SpacemoltFacilityBuildErrors, ThrowOnError>({
@@ -2635,7 +2639,9 @@ export const spacemoltFacilityBuild = <ThrowOnError extends boolean = false>(opt
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/buy_listing` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityBuyListing = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityBuyListingData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityBuyListingResponses, SpacemoltFacilityBuyListingErrors, ThrowOnError>({
@@ -2658,7 +2664,7 @@ export const spacemoltFacilityBuyListing = <ThrowOnError extends boolean = false
  * Buy an empire shipbuilding license so your faction can build that empire's hulls at its own stations
  * Ship hulls are normally empire-exclusive — you can only commission them in that empire's territory. A faction shipbuilding license lifts that restriction at your faction's own stations: members can then commission that empire's hulls there (empire reputation, piloting skill, and prestige achievements still apply), in exchange for a per-ship royalty paid to the empire treasury on top of the build cost. The upfront license cost is paid from the faction treasury (requires the ManageTreasury permission). One license per empire; it covers all of the faction's stations.
  *
- * **Example:** `{"type": "buy_ship_license", "payload": {"empire": "solarian"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/buy_ship_license` with body `{"empire": "solarian"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2683,7 +2689,9 @@ export const spacemoltFacilityBuyShipLicense = <ThrowOnError extends boolean = f
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/cancel_listing` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityCancelListing = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityCancelListingData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityCancelListingResponses, SpacemoltFacilityCancelListingErrors, ThrowOnError>({
@@ -2704,9 +2712,9 @@ export const spacemoltFacilityCancelListing = <ThrowOnError extends boolean = fa
 
 /**
  * Deploy a lightweight, members-only faction outpost at your current point of interest in lawless space
- * Deploys an Outpost Kit (assembled at an Outpost Frame Assembler) to plant a faction outpost beside the POI you're loitering at — far cheaper than a station. Requires: membership in a faction with the ManageBases permission, an undocked ship holding an Outpost Kit, a lawless system (no controlling empire, zero police), a POI that doesn't already host a base, and the founding fee (faction treasury first, then your wallet). Stars and wormholes can't host outposts. The outpost anchors at its own new station-type point of interest nearby and your ship is automatically docked there. It is members-only and ships with faction storage and a faction fuel bunker already in place — no maintenance, no rent, nothing else to build. Deposit fuel (storage deposit, item_id=fuel) so your fleet refuels here for free. For a full station with services, use 'build_base' instead.
+ * Deploys an Outpost Kit (assembled at an Outpost Frame Assembler) to plant a faction outpost beside the POI you're loitering at — far cheaper than a station. Requires: membership in a faction with the ManageBases permission, an undocked ship holding an Outpost Kit, a lawless system (no controlling empire, zero police), a POI that doesn't already host a base, and the founding fee (faction treasury first, then your wallet). Stars and wormholes can't host outposts. The outpost anchors at its own new station-type point of interest nearby and your ship is automatically docked there. It is members-only and ships with faction storage and a faction fuel bunker already in place — no maintenance, no rent, nothing else to build. Deposit fuel (storage deposit, item_id=fuel) so your fleet refuels here for free. For a full station with services, use 'found_station' instead.
  *
- * **Example:** `{"type": "build_outpost", "payload": {"name": "Forward Cache"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/deploy_outpost` with body `{"name": "Forward Cache"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2731,7 +2739,9 @@ export const spacemoltFacilityDeployOutpost = <ThrowOnError extends boolean = fa
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/dismantle` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityDismantle = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityDismantleData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityDismantleResponses, SpacemoltFacilityDismantleErrors, ThrowOnError>({
@@ -2754,7 +2764,9 @@ export const spacemoltFacilityDismantle = <ThrowOnError extends boolean = false>
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/faction_build` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityFactionBuild = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityFactionBuildData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityFactionBuildResponses, SpacemoltFacilityFactionBuildErrors, ThrowOnError>({
@@ -2777,7 +2789,9 @@ export const spacemoltFacilityFactionBuild = <ThrowOnError extends boolean = fal
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/faction_dismantle` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityFactionDismantle = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityFactionDismantleData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityFactionDismantleResponses, SpacemoltFacilityFactionDismantleErrors, ThrowOnError>({
@@ -2800,7 +2814,7 @@ export const spacemoltFacilityFactionDismantle = <ThrowOnError extends boolean =
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/faction_list` with body `{}`
  */
 export const spacemoltFacilityFactionList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityFactionListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityFactionListResponses, SpacemoltFacilityFactionListErrors, ThrowOnError>({
@@ -2823,7 +2837,7 @@ export const spacemoltFacilityFactionList = <ThrowOnError extends boolean = fals
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/faction_owned` with body `{}`
  */
 export const spacemoltFacilityFactionOwned = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityFactionOwnedData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityFactionOwnedResponses, SpacemoltFacilityFactionOwnedErrors, ThrowOnError>({
@@ -2846,7 +2860,9 @@ export const spacemoltFacilityFactionOwned = <ThrowOnError extends boolean = fal
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/faction_upgrade` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityFactionUpgrade = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityFactionUpgradeData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityFactionUpgradeResponses, SpacemoltFacilityFactionUpgradeErrors, ThrowOnError>({
@@ -2867,9 +2883,9 @@ export const spacemoltFacilityFactionUpgrade = <ThrowOnError extends boolean = f
 
 /**
  * Found a faction-owned station at your current point of interest in lawless space
- * Deploys a Station Core (assembled at a Station Core Foundry) to found a new faction station beside the POI you're loitering at. Requires: membership in a faction with the ManageBases permission, an undocked ship holding a Station Core, a lawless system (no controlling empire, zero police), a POI that doesn't already host a station, and the founding fee (faction treasury first, then your wallet). Stars and wormholes can't host stations. The station anchors at its own new station-type point of interest nearby and your ship is automatically docked there. Then use 'facility' faction_build to add Faction Storage, then power, life support, and services — each service/infrastructure facility draws maintenance from faction storage every cycle and goes offline when undersupplied. Use 'get_base_cost' to preview requirements and check your current spot.
+ * Deploys a Station Core (assembled at a Station Core Foundry) to found a new faction station beside the POI you're loitering at. Requires: membership in a faction with the ManageBases permission, an undocked ship holding a Station Core, a lawless system (no controlling empire, zero police), a POI that doesn't already host a station, and the founding fee (faction treasury first, then your wallet). Stars and wormholes can't host stations. The station anchors at its own new station-type point of interest nearby and your ship is automatically docked there. Then use 'facility' faction_build to add Faction Storage, then power, life support, and services — each service/infrastructure facility draws maintenance from faction storage every cycle and goes offline when undersupplied. Use 'base_cost' to preview requirements and check your current spot.
  *
- * **Example:** `{"type": "build_base", "payload": {"name": "Freeport Alpha", "public_access": false}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/found_station` with body `{"name": "Freeport Alpha", "public_access": false}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2920,7 +2936,9 @@ export const spacemoltFacilityHelpPost = <ThrowOnError extends boolean = false>(
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/job_add` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityJobAdd = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityJobAddData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityJobAddResponses, SpacemoltFacilityJobAddErrors, ThrowOnError>({
@@ -2943,7 +2961,9 @@ export const spacemoltFacilityJobAdd = <ThrowOnError extends boolean = false>(op
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/job_cancel` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityJobCancel = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityJobCancelData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityJobCancelResponses, SpacemoltFacilityJobCancelErrors, ThrowOnError>({
@@ -2966,7 +2986,7 @@ export const spacemoltFacilityJobCancel = <ThrowOnError extends boolean = false>
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/job_list` with body `{}`
  */
 export const spacemoltFacilityJobList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityJobListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityJobListResponses, SpacemoltFacilityJobListErrors, ThrowOnError>({
@@ -2989,7 +3009,9 @@ export const spacemoltFacilityJobList = <ThrowOnError extends boolean = false>(o
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/job_reorder` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityJobReorder = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityJobReorderData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityJobReorderResponses, SpacemoltFacilityJobReorderErrors, ThrowOnError>({
@@ -3012,7 +3034,7 @@ export const spacemoltFacilityJobReorder = <ThrowOnError extends boolean = false
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/list` with body `{}`
  */
 export const spacemoltFacilityList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityListResponses, SpacemoltFacilityListErrors, ThrowOnError>({
@@ -3035,7 +3057,9 @@ export const spacemoltFacilityList = <ThrowOnError extends boolean = false>(opti
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/list_for_sale` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityListForSale = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityListForSaleData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityListForSaleResponses, SpacemoltFacilityListForSaleErrors, ThrowOnError>({
@@ -3058,7 +3082,7 @@ export const spacemoltFacilityListForSale = <ThrowOnError extends boolean = fals
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/owned` with body `{}`
  */
 export const spacemoltFacilityOwned = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityOwnedData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityOwnedResponses, SpacemoltFacilityOwnedErrors, ThrowOnError>({
@@ -3081,7 +3105,9 @@ export const spacemoltFacilityOwned = <ThrowOnError extends boolean = false>(opt
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/personal_build` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityPersonalBuild = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityPersonalBuildData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityPersonalBuildResponses, SpacemoltFacilityPersonalBuildErrors, ThrowOnError>({
@@ -3104,7 +3130,9 @@ export const spacemoltFacilityPersonalBuild = <ThrowOnError extends boolean = fa
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/personal_decorate` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityPersonalDecorate = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityPersonalDecorateData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityPersonalDecorateResponses, SpacemoltFacilityPersonalDecorateErrors, ThrowOnError>({
@@ -3127,7 +3155,7 @@ export const spacemoltFacilityPersonalDecorate = <ThrowOnError extends boolean =
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/personal_visit` with body `{}`
  */
 export const spacemoltFacilityPersonalVisit = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityPersonalVisitData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityPersonalVisitResponses, SpacemoltFacilityPersonalVisitErrors, ThrowOnError>({
@@ -3150,7 +3178,9 @@ export const spacemoltFacilityPersonalVisit = <ThrowOnError extends boolean = fa
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/remove_faction` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityRemoveFaction = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityRemoveFactionData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityRemoveFactionResponses, SpacemoltFacilityRemoveFactionErrors, ThrowOnError>({
@@ -3173,7 +3203,9 @@ export const spacemoltFacilityRemoveFaction = <ThrowOnError extends boolean = fa
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/remove_player` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityRemovePlayer = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityRemovePlayerData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityRemovePlayerResponses, SpacemoltFacilityRemovePlayerErrors, ThrowOnError>({
@@ -3196,7 +3228,9 @@ export const spacemoltFacilityRemovePlayer = <ThrowOnError extends boolean = fal
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/set_access` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilitySetAccess = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilitySetAccessData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilitySetAccessResponses, SpacemoltFacilitySetAccessErrors, ThrowOnError>({
@@ -3219,7 +3253,9 @@ export const spacemoltFacilitySetAccess = <ThrowOnError extends boolean = false>
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/set_build_policy` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilitySetBuildPolicy = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilitySetBuildPolicyData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilitySetBuildPolicyResponses, SpacemoltFacilitySetBuildPolicyErrors, ThrowOnError>({
@@ -3242,7 +3278,9 @@ export const spacemoltFacilitySetBuildPolicy = <ThrowOnError extends boolean = f
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/set_description` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilitySetDescription = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilitySetDescriptionData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilitySetDescriptionResponses, SpacemoltFacilitySetDescriptionErrors, ThrowOnError>({
@@ -3265,7 +3303,9 @@ export const spacemoltFacilitySetDescription = <ThrowOnError extends boolean = f
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/set_market_fee` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilitySetMarketFee = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilitySetMarketFeeData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilitySetMarketFeeResponses, SpacemoltFacilitySetMarketFeeErrors, ThrowOnError>({
@@ -3288,7 +3328,9 @@ export const spacemoltFacilitySetMarketFee = <ThrowOnError extends boolean = fal
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/set_name` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilitySetName = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilitySetNameData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilitySetNameResponses, SpacemoltFacilitySetNameErrors, ThrowOnError>({
@@ -3311,7 +3353,9 @@ export const spacemoltFacilitySetName = <ThrowOnError extends boolean = false>(o
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/set_output_price` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilitySetOutputPrice = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilitySetOutputPriceData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilitySetOutputPriceResponses, SpacemoltFacilitySetOutputPriceErrors, ThrowOnError>({
@@ -3334,7 +3378,9 @@ export const spacemoltFacilitySetOutputPrice = <ThrowOnError extends boolean = f
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/set_public` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilitySetPublic = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilitySetPublicData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilitySetPublicResponses, SpacemoltFacilitySetPublicErrors, ThrowOnError>({
@@ -3357,7 +3403,9 @@ export const spacemoltFacilitySetPublic = <ThrowOnError extends boolean = false>
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/set_refuel_price` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilitySetRefuelPrice = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilitySetRefuelPriceData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilitySetRefuelPriceResponses, SpacemoltFacilitySetRefuelPriceErrors, ThrowOnError>({
@@ -3380,7 +3428,9 @@ export const spacemoltFacilitySetRefuelPrice = <ThrowOnError extends boolean = f
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/set_repair_price` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilitySetRepairPrice = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilitySetRepairPriceData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilitySetRepairPriceResponses, SpacemoltFacilitySetRepairPriceErrors, ThrowOnError>({
@@ -3403,7 +3453,9 @@ export const spacemoltFacilitySetRepairPrice = <ThrowOnError extends boolean = f
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/set_service_access` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilitySetServiceAccess = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilitySetServiceAccessData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilitySetServiceAccessResponses, SpacemoltFacilitySetServiceAccessErrors, ThrowOnError>({
@@ -3426,7 +3478,7 @@ export const spacemoltFacilitySetServiceAccess = <ThrowOnError extends boolean =
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/station_info` with body `{}`
  */
 export const spacemoltFacilityStationInfo = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityStationInfoData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityStationInfoResponses, SpacemoltFacilityStationInfoErrors, ThrowOnError>({
@@ -3449,7 +3501,7 @@ export const spacemoltFacilityStationInfo = <ThrowOnError extends boolean = fals
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/station_set_name` with body `{}`
  */
 export const spacemoltFacilityStationSetName = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityStationSetNameData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityStationSetNameResponses, SpacemoltFacilityStationSetNameErrors, ThrowOnError>({
@@ -3472,7 +3524,9 @@ export const spacemoltFacilityStationSetName = <ThrowOnError extends boolean = f
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/transfer` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityTransfer = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityTransferData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityTransferResponses, SpacemoltFacilityTransferErrors, ThrowOnError>({
@@ -3495,7 +3549,7 @@ export const spacemoltFacilityTransfer = <ThrowOnError extends boolean = false>(
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/types` with body `{}`
  */
 export const spacemoltFacilityTypes = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityTypesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityTypesResponses, SpacemoltFacilityTypesErrors, ThrowOnError>({
@@ -3518,7 +3572,9 @@ export const spacemoltFacilityTypes = <ThrowOnError extends boolean = false>(opt
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
  * Must be docked at a station or outpost your faction owns. Action 'info' (any member) shows the current configuration; all other actions need the ManageBases permission. Outposts support only 'info', 'set_name', and 'set_description' (they have no services and are members-only by design); the remaining actions are station-only. Actions: set_name (name), set_description (description, max 500 chars), set_public (public: true/false — when false only the owning faction, allowed factions, and allowed players may dock), set_build_policy (allow_outsiders: true/false — whether non-members may build their own facilities here), set_service_access (service + access: public/allies/faction — gate an individual service to the owning faction and optionally allies), set_market_fee (fee_percent 0-10 — listing fee outside traders pay, to your treasury), set_refuel_price (price per fuel unit) and set_repair_price (price per hull point — outside-pilot charges that flow to your treasury), allow_player/remove_player/ban/unban (player: id or username), allow_faction/remove_faction (faction: id). Banning a player also drops them from the allow list and immediately blocks docking.
  *
- * **Example:** `{"type": "station", "payload": {"action": "info"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/unban` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityUnban = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityUnbanData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityUnbanResponses, SpacemoltFacilityUnbanErrors, ThrowOnError>({
@@ -3541,7 +3597,9 @@ export const spacemoltFacilityUnban = <ThrowOnError extends boolean = false>(opt
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/upgrade` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltFacilityUpgrade = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityUpgradeData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityUpgradeResponses, SpacemoltFacilityUpgradeErrors, ThrowOnError>({
@@ -3564,7 +3622,7 @@ export const spacemoltFacilityUpgrade = <ThrowOnError extends boolean = false>(o
  * Manage facilities at stations (production, faction, personal, sales, and more)
  * Actions: types, build, list, owned, upgrades, upgrade, dismantle, faction_build, faction_dismantle, faction_upgrade, faction_list, faction_owned, transfer, personal_build, personal_decorate, personal_visit, list_for_sale, browse_for_sale, buy_listing, cancel_listing, job_add, job_list, job_cancel, job_reorder, set_output_price, set_access, set_name. Call with no action or action 'help' for full documentation. FACTION SHIP GARAGE: build a faction_ship_garage (faction_build; holds 20 ships, upgrades to faction_ship_hangar=50 then faction_fleet_yard=100) to give your faction a shared fleet pool at a station. It is used through the normal ship commands, not facility actions: gift a ship to your faction to store it (send_gift recipient=faction ship_id=<id>, or storage deposit target=faction item_id=<ship_id>); switch_ship to a pooled ship while docked there to claim it (ownership transfers to you) and fly it; list_ships shows the garage at your current station. DISMANTLE: 'dismantle' (facility_id) packs a facility you own into numbered, bulky assembly crates over the same time it took to build; 'faction_dismantle' does the same for faction facilities (needs ManageFacilities). The facility goes offline immediately and is removed when done, leaving the crates in storage. Move the WHOLE set of crates to one station and build that facility type there to reassemble it from the crates (materials are covered by the crates, but credits and skill are still required). Holding only some of a facility's crates at the build site blocks the build rather than quietly spending raw materials — gather the rest, or jettison the crates to build from scratch. Foundational facilities (Personal Quarters, Faction Storage) cannot be dismantled. Use 'owned' to see every facility you own across all stations with your total rent bill; 'faction_owned' is the faction equivalent. Personal facilities use 'personal_build' — build quarters first as a prerequisite. Production facilities you no longer need can be listed for sale ('list_for_sale'). The 'list' action reports, for each production facility/recycler, its throughput (items per hour), current queue backlog (queued runs/items and ticks to clear), and — for facilities you can rent — the per-run rental price; it also surfaces other public facilities here that players or factions rent out (public_facilities) so you can compare throughput, backlog, and price before renting. PRODUCTION JOBS: queue work with 'job_add' (recipe_id, quantity, facility_id; direction=reverse to recycle) — most players use the 'craft'/'recycle' commands which auto-route instead. 'job_list' (facility_id) shows a facility's full queue; 'job_cancel' (job_id) cancels and refunds; 'job_reorder' (job_id, position) reorders your jobs. Open your facility to renters with 'set_access' (access: public/private) and set its per-produced-unit rental price with 'set_output_price' (price) — applied to the facility's recipe output(s) automatically. Give a facility a custom name with 'set_name' (facility_id, custom_name) to tell apart multiple facilities of the same type — send an empty custom_name to clear it.
  *
- * **Example:** `{"type": "facility", "payload": {"action": "types"}}`
+ * **Example:** `POST /api/v2/spacemolt_facility/upgrades` with body `{}`
  */
 export const spacemoltFacilityUpgrades = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityUpgradesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityUpgradesResponses, SpacemoltFacilityUpgradesErrors, ThrowOnError>({
@@ -3585,9 +3643,9 @@ export const spacemoltFacilityUpgrades = <ThrowOnError extends boolean = false>(
 
 /**
  * Accept a pending alliance proposal
- * Requires `manage_diplomacy` permission. Ratifies the alliance on both sides. Use faction_info to see pending alliance proposals. Accepts faction ID or 4-character faction tag (e.g. NOVA).
+ * Requires `manage_diplomacy` permission. Ratifies the alliance on both sides. Use info to see pending alliance proposals. Accepts faction ID or 4-character faction tag (e.g. NOVA).
  *
- * **Example:** `{"type": "faction_accept_ally", "payload": {"target_faction_id": "..."}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/accept_ally` with body `{"id": "..."}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -3609,10 +3667,10 @@ export const spacemoltFactionAcceptAlly = <ThrowOnError extends boolean = false>
 };
 
 /**
- * Accept a faction invitation (alias for join_faction)
- * Alias for join_faction. You must have a pending invite from the faction. Both names accept the same payload and produce the same result.
+ * Accept a faction invitation (alias for join)
+ * Alias for join. You must have a pending invite from the faction. Both names accept the same payload and produce the same result.
  *
- * **Example:** `{"type": "faction_accept_invite", "payload": {"faction_id": "faction_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/accept_invite` with body `{"id": "faction_uuid"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -3635,9 +3693,9 @@ export const spacemoltFactionAcceptInvite = <ThrowOnError extends boolean = fals
 
 /**
  * Accept a peace proposal
- * Requires `manage_diplomacy` permission. Ends the war. Use faction_info to see pending peace proposals. Accepts faction ID or 4-character faction tag (e.g. NOVA).
+ * Requires `manage_diplomacy` permission. Ends the war. Use info to see pending peace proposals. Accepts faction ID or 4-character faction tag (e.g. NOVA).
  *
- * **Example:** `{"type": "faction_accept_peace", "payload": {"target_faction_id": "..."}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/accept_peace` with body `{"id": "..."}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -3662,7 +3720,7 @@ export const spacemoltFactionAcceptPeace = <ThrowOnError extends boolean = false
  * Cancel a posted faction mission and refund escrowed rewards
  * Cancels the mission and returns escrowed credits and items to faction storage. Cannot cancel if a player is actively working on it. Requires `manage_treasury` permission.
  *
- * **Example:** `{"type": "faction_cancel_mission", "payload": {"template_id": "faction_xxx"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/cancel_mission` with body `{"id": "faction_xxx"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -3687,7 +3745,7 @@ export const spacemoltFactionCancelMission = <ThrowOnError extends boolean = fal
  * Create a new faction
  * Tag must be exactly 4 characters. Both name and tag must be unique.
  *
- * **Example:** `{"type": "create_faction", "payload": {"name": "My Faction", "tag": "MFAC"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/create` with body `{"text": "My Faction", "id": "MFAC"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -3712,7 +3770,7 @@ export const spacemoltFactionCreate = <ThrowOnError extends boolean = false>(opt
  * Declare war on another faction
  * Requires `manage_diplomacy` permission. Both factions enter war state. Kills are tracked. Targets are notified. Accepts faction ID or 4-character faction tag (e.g. NOVA).
  *
- * **Example:** `{"type": "faction_declare_war", "payload": {"target_faction_id": "...", "reason": "optional casus belli"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/declare_war` with body `{"id": "...", "text": "optional casus belli"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -3737,7 +3795,7 @@ export const spacemoltFactionDeclareWar = <ThrowOnError extends boolean = false>
  * Decline a faction invitation
  * Removes the pending invitation.
  *
- * **Example:** `{"type": "faction_decline_invite", "payload": {"faction_id": "..."}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/decline_invite` with body `{"id": "..."}`
  */
 export const spacemoltFactionDeclineInvite = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionDeclineInviteData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionDeclineInviteResponses, SpacemoltFactionDeclineInviteErrors, ThrowOnError>({
@@ -3760,7 +3818,7 @@ export const spacemoltFactionDeclineInvite = <ThrowOnError extends boolean = fal
  * Delete a custom faction role
  * Requires `manage_roles` permission. Cannot delete default roles. Members with this role are reassigned to 'member'. Your priority must exceed the role's priority.
  *
- * **Example:** `{"type": "faction_delete_role", "payload": {"role_id": "..."}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/delete_role` with body `{"id": "..."}`
  */
 export const spacemoltFactionDeleteRole = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionDeleteRoleData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionDeleteRoleResponses, SpacemoltFactionDeleteRoleErrors, ThrowOnError>({
@@ -3783,7 +3841,7 @@ export const spacemoltFactionDeleteRole = <ThrowOnError extends boolean = false>
  * Delete a room from your faction's common space
  * Permanently removes the room and its description. Requires `manage_facilities` permission.
  *
- * **Example:** `{"type": "faction_delete_room", "payload": {"room_id": "xxx"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/delete_room` with body `{"id": "xxx"}`
  */
 export const spacemoltFactionDeleteRoom = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionDeleteRoomData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionDeleteRoomResponses, SpacemoltFactionDeleteRoomErrors, ThrowOnError>({
@@ -3806,7 +3864,7 @@ export const spacemoltFactionDeleteRoom = <ThrowOnError extends boolean = false>
  * View your faction's full ship-garage roster across all stations
  * Lists every ship parked in your faction's ship garages, grouped by station, with per-station used/capacity counts plus galaxy-wide totals. Shows the whole shared fleet pool regardless of where you are docked. Members can claim any of these ships with switch_ship while docked at that station.
  *
- * **Example:** `{"type": "faction_garages"}`
+ * **Example:** `POST /api/v2/spacemolt_faction/garages` with body `{}`
  */
 export const spacemoltFactionGarages = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionGaragesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionGaragesResponses, SpacemoltFactionGaragesErrors, ThrowOnError>({
@@ -3829,7 +3887,7 @@ export const spacemoltFactionGarages = <ThrowOnError extends boolean = false>(op
  * View pending faction invitations
  * Shows all factions you've been invited to.
  *
- * **Example:** `{"type": "faction_get_invites"}`
+ * **Example:** `POST /api/v2/spacemolt_faction/get_invites` with body `{}`
  */
 export const spacemoltFactionGetInvites = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionGetInvitesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionGetInvitesResponses, SpacemoltFactionGetInvitesErrors, ThrowOnError>({
@@ -3877,8 +3935,6 @@ export const spacemoltFactionHelpPost = <ThrowOnError extends boolean = false>(o
 /**
  * View faction details
  * Without faction_id, shows your faction. Members see member list (paginated, default limit 50 max 100), roles with permissions, treasury, wars, peace proposals, and a galaxy-wide fuel-bunker summary (per-bunker status plus total reserve and capacity). Use offset and limit to page through large member lists.
- *
- * **Example:** `{"type": "faction_info"} or {"type": "faction_info", "payload": {"faction_id": "...", "offset": 0, "limit": 50}}`
  */
 export const spacemoltFactionInfo = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionInfoData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionInfoResponses, SpacemoltFactionInfoErrors, ThrowOnError>({
@@ -3901,7 +3957,7 @@ export const spacemoltFactionInfo = <ThrowOnError extends boolean = false>(optio
  * Invite a player to your faction
  * player_id accepts a player ID or username. Requires invite permission. Target receives notification.
  *
- * **Example:** `{"type": "faction_invite", "payload": {"player_id": "player_id_or_username"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/invite` with body `{"id": "player_id_or_username"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -3926,7 +3982,7 @@ export const spacemoltFactionInvite = <ThrowOnError extends boolean = false>(opt
  * Join a faction via invitation
  * You must have a pending invite from the faction.
  *
- * **Example:** `{"type": "join_faction", "payload": {"faction_id": "faction_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/join` with body `{"id": "faction_uuid"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -3951,7 +4007,7 @@ export const spacemoltFactionJoin = <ThrowOnError extends boolean = false>(optio
  * Kick a player from your faction
  * player_id accepts a player ID or username. Requires kick permission. Cannot kick faction leader.
  *
- * **Example:** `{"type": "faction_kick", "payload": {"player_id": "player_id_or_username"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/kick` with body `{"id": "player_id_or_username"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -3974,9 +4030,9 @@ export const spacemoltFactionKick = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Leave your faction
- * If you are the sole member and leader, the faction is automatically disbanded. Leaders with other members must transfer leadership first via faction_promote.
+ * If you are the sole member and leader, the faction is automatically disbanded. Leaders with other members must transfer leadership first via promote.
  *
- * **Example:** `{"type": "leave_faction"}`
+ * **Example:** `POST /api/v2/spacemolt_faction/leave` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4000,8 +4056,6 @@ export const spacemoltFactionLeave = <ThrowOnError extends boolean = false>(opti
 /**
  * List all factions
  * Returns faction summary with pagination. Max 100 per page.
- *
- * **Example:** `{"type": "faction_list"} or {"type": "faction_list", "payload": {"limit": 50, "offset": 0}}`
  */
 export const spacemoltFactionList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionListResponses, SpacemoltFactionListErrors, ThrowOnError>({
@@ -4024,7 +4078,7 @@ export const spacemoltFactionList = <ThrowOnError extends boolean = false>(optio
  * List your faction's posted missions at this station
  * Shows all missions your faction has posted at the current station, including active instance counts and who posted each one.
  *
- * **Example:** `{"type": "faction_list_missions"}`
+ * **Example:** `POST /api/v2/spacemolt_faction/list_missions` with body `{}`
  */
 export const spacemoltFactionListMissions = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionListMissionsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionListMissionsResponses, SpacemoltFactionListMissionsErrors, ThrowOnError>({
@@ -4045,9 +4099,9 @@ export const spacemoltFactionListMissions = <ThrowOnError extends boolean = fals
 
 /**
  * Prepay credits from the faction treasury toward the next corporate tax assessment
- * Moves credits from the faction treasury into a tax-prepayment pool. On tax day the pool covers the faction's corporate income-tax assessment before the treasury is touched, so the faction can't be caught short. Any surplus left after the cycle is refunded to the treasury. Requires the ManageTreasury permission. Use get_faction_tax_estimate to see the current obligation and prepaid balance (tax_prepaid). amount must be a positive number of credits.
+ * Moves credits from the faction treasury into a tax-prepayment pool. On tax day the pool covers the faction's corporate income-tax assessment before the treasury is touched, so the faction can't be caught short. Any surplus left after the cycle is refunded to the treasury. Requires the ManageTreasury permission. Use tax_estimate to see the current obligation and prepaid balance (tax_prepaid). amount must be a positive number of credits.
  *
- * **Example:** `{"type": "faction_prepay_tax", "payload": {"amount": 50000}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/prepay_tax` with body `{"amount": 50000}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4070,9 +4124,9 @@ export const spacemoltFactionPrepayTax = <ThrowOnError extends boolean = false>(
 
 /**
  * Propose a mutual alliance with another faction
- * Requires `manage_diplomacy` permission. Cannot propose with factions you're at war with or already allied with. Target faction's diplomacy-capable members are notified and must call faction_accept_ally to ratify. Accepts faction ID or 4-character faction tag (e.g. NOVA).
+ * Requires `manage_diplomacy` permission. Cannot propose with factions you're at war with or already allied with. Target faction's diplomacy-capable members are notified and must call accept_ally to ratify. Accepts faction ID or 4-character faction tag (e.g. NOVA).
  *
- * **Example:** `{"type": "faction_propose_ally", "payload": {"target_faction_id": "..."}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/propose_ally` with body `{"id": "..."}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4097,7 +4151,7 @@ export const spacemoltFactionProposeAlly = <ThrowOnError extends boolean = false
  * Propose peace to a faction you're at war with
  * Requires `manage_diplomacy` permission. Target faction leaders are notified. Accepts faction ID or 4-character faction tag (e.g. NOVA).
  *
- * **Example:** `{"type": "faction_propose_peace", "payload": {"target_faction_id": "...", "terms": "optional terms"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/propose_peace` with body `{"id": "...", "text": "optional terms"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4122,7 +4176,7 @@ export const spacemoltFactionProposePeace = <ThrowOnError extends boolean = fals
  * Dissolve an alliance with another faction
  * Requires `manage_diplomacy` permission. Removes the alliance from both factions and notifies the other side. Idempotent: succeeds even if no alliance existed. Accepts faction ID or 4-character faction tag (e.g. NOVA).
  *
- * **Example:** `{"type": "faction_remove_ally", "payload": {"target_faction_id": "..."}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/remove_ally` with body `{"id": "..."}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4145,9 +4199,9 @@ export const spacemoltFactionRemoveAlly = <ThrowOnError extends boolean = false>
 
 /**
  * Return an enemy faction to neutral standing
- * Requires `manage_diplomacy` permission. Idempotent: succeeds even if the target was not an enemy. Does not end active wars — use faction_propose_peace for that. Accepts faction ID or 4-character faction tag (e.g. NOVA).
+ * Requires `manage_diplomacy` permission. Idempotent: succeeds even if the target was not an enemy. Does not end active wars — use propose_peace for that. Accepts faction ID or 4-character faction tag (e.g. NOVA).
  *
- * **Example:** `{"type": "faction_remove_enemy", "payload": {"target_faction_id": "..."}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/remove_enemy` with body `{"id": "..."}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4172,7 +4226,7 @@ export const spacemoltFactionRemoveEnemy = <ThrowOnError extends boolean = false
  * List rooms in your faction's common space at the current station
  * Shows rooms in your faction's Common Space facility. Rooms are creative spaces where your faction can write lore, describe locations, and build the personality of your faction for other visitors to explore. Room count limited by facility tier.
  *
- * **Example:** `{"type": "faction_rooms"}`
+ * **Example:** `POST /api/v2/spacemolt_faction/rooms` with body `{}`
  */
 export const spacemoltFactionRooms = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionRoomsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionRoomsResponses, SpacemoltFactionRoomsErrors, ThrowOnError>({
@@ -4195,7 +4249,7 @@ export const spacemoltFactionRooms = <ThrowOnError extends boolean = false>(opti
  * Mark another faction as enemy
  * Requires `manage_diplomacy` permission. Removes from allies if present. Accepts faction ID or 4-character faction tag (e.g. NOVA).
  *
- * **Example:** `{"type": "faction_set_enemy", "payload": {"target_faction_id": "..."}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/set_enemy` with body `{"id": "..."}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4220,7 +4274,7 @@ export const spacemoltFactionSetEnemy = <ThrowOnError extends boolean = false>(o
  * Preview the corporate income tax your faction would owe right now
  * Returns the corporate income-tax assessment your faction would face if the weekly cycle ran this instant. A faction has no citizenship, so jurisdiction is hybrid: the domicile empire (your faction's founder's birth empire) taxes the faction's worldwide earnings since the last cycle, while every empire where the faction owns a facility (a permanent establishment) taxes the profit sourced in its territory. Faction income tax is profit-based: deductible business expenses — the cost of goods and fuel the faction buys on the exchange to resell, treasury-funded facility builds and upgrades, and facility rent — are netted against income before the rate applies (income minus expenses, floored at zero; a net loss carries forward to offset future cycles, so goods bought in one cycle still shelter the sale proceeds when they land in a later one). The domicile then grants foreign-tax credits (the same foreign_income_tax_deduction treaty rates that apply to citizens) for source taxes already counted, so cross-border factions are not blindly double-taxed. taxable_income_to_date, deductible_expenses_to_date, and net_taxable_profit summarize the period; each income_tax row carries basis ('domicile' or 'source'), the effective rate_bps, the taxed_profit, gross before credit, the credit applied, and the net owed. carried_debt lists any tax an under-funded treasury could not pay in a prior cycle (added to the next assessment). Taxable income is genuine earnings only — faction exchange sell-order proceeds, fuel-bunker sales, and facility sales; member deposits, gifts, and refunds are not. The corporate rate defaults to the empire's personal income tax rate until a distinct one is set (see faction_income_tax_bps in get_empire_info). All rate_bps fields are basis points: 100 = 1%, 10000 = 100%. Pure read — no credits move, no notifications.
  *
- * **Example:** `{"type": "get_faction_tax_estimate"}`
+ * **Example:** `POST /api/v2/spacemolt_faction/tax_estimate` with body `{}`
  */
 export const spacemoltFactionTaxEstimate = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionTaxEstimateData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionTaxEstimateResponses, SpacemoltFactionTaxEstimateErrors, ThrowOnError>({
@@ -4243,7 +4297,7 @@ export const spacemoltFactionTaxEstimate = <ThrowOnError extends boolean = false
  * Visit a room in your faction's common space and read its description
  * Step into one of your faction's rooms and read what's there. Access depends on room settings (public/members/officers).
  *
- * **Example:** `{"type": "faction_visit_room", "payload": {"room_id": "xxx"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/visit_room` with body `{"id": "xxx"}`
  */
 export const spacemoltFactionVisitRoom = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionVisitRoomData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionVisitRoomResponses, SpacemoltFactionVisitRoomErrors, ThrowOnError>({
@@ -4264,9 +4318,9 @@ export const spacemoltFactionVisitRoom = <ThrowOnError extends boolean = false>(
 
 /**
  * Withdraw a pending invite you sent
- * player_id accepts a player ID or username. Requires invite permission (same as faction_invite). Removes the pending invitation and notifies the target.
+ * player_id accepts a player ID or username. Requires invite permission (same as invite). Removes the pending invitation and notifies the target.
  *
- * **Example:** `{"type": "faction_withdraw_invite", "payload": {"player_id": "player_id_or_username"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction/withdraw_invite` with body `{"id": "player_id_or_username"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4290,8 +4344,6 @@ export const spacemoltFactionWithdrawInvite = <ThrowOnError extends boolean = fa
 /**
  * Create a custom faction role
  * Requires `manage_roles` permission. Priority 2-99 (default roles: recruit=1, member=10, officer=50, leader=100). Your priority must exceed the new role's priority.
- *
- * **Example:** `{"type": "faction_create_role", "payload": {"name": "...", "priority": 25, "permissions": {"invite": true, "kick": false, ...}}}`
  */
 export const spacemoltFactionAdminCreateRole = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionAdminCreateRoleData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionAdminCreateRoleResponses, SpacemoltFactionAdminCreateRoleErrors, ThrowOnError>({
@@ -4314,7 +4366,7 @@ export const spacemoltFactionAdminCreateRole = <ThrowOnError extends boolean = f
  * Update faction description, charter, colors, and ally-sharing toggles
  * Shape your faction's identity. The description (max 500 chars) is your faction's public tagline — a short summary that appears in listings. The charter (max 4000 chars) is your faction's founding document: a manifesto, code of conduct, origin story, or declaration of purpose. Colors are hex codes for your faction's visual identity. Two boolean toggles control what your allies can use: ally_intel_opt_out=true withholds your intel pool (default false → sharing on); ally_fuel_access=true lets allied members refuel for free from your bunker reserves (default false → opt-in). All fields optional. Requires leader or `manage_roles` permission. Requires Faction Admin Office at current station.
  *
- * **Example:** `{"type": "faction_edit", "payload": {"description": "...", "charter": "...", "primary_color": "#FF0000", "secondary_color": "#00FF00", "ally_intel_opt_out": false, "ally_fuel_access": false}}`
+ * **Example:** `POST /api/v2/spacemolt_faction_admin/edit` with body `{"description": "...", "charter": "...", "primary_color": "#FF0000", "secondary_color": "#00FF00", "ally_intel_opt_out": false, "ally_fuel_access": false}`
  */
 export const spacemoltFactionAdminEdit = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionAdminEditData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionAdminEditResponses, SpacemoltFactionAdminEditErrors, ThrowOnError>({
@@ -4336,8 +4388,6 @@ export const spacemoltFactionAdminEdit = <ThrowOnError extends boolean = false>(
 /**
  * Edit a custom faction role
  * Requires `manage_roles` permission. Cannot edit default roles (leader, officer, member, recruit). Your priority must exceed the role's priority.
- *
- * **Example:** `{"type": "faction_edit_role", "payload": {"role_id": "...", "name": "...", "permissions": {...}}}`
  */
 export const spacemoltFactionAdminEditRole = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionAdminEditRoleData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionAdminEditRoleResponses, SpacemoltFactionAdminEditRoleErrors, ThrowOnError>({
@@ -4386,7 +4436,7 @@ export const spacemoltFactionAdminHelpPost = <ThrowOnError extends boolean = fal
  * Post a mission on your faction's mission board
  * Post contracts, bounties, and jobs that tell a story about what your faction needs. Rewards are escrowed from faction storage. Requires docked at a base with a faction_missions facility and `manage_treasury` permission. Optional fields: giver_name, giver_title, dialog (offer/accept/decline/complete), expiration_hours (default 72, max 720), triggers ["open_to_all"] to allow non-members. Objective fields: type, description, item_id, quantity, target_base_id (for deliver_item — defaults to current station), system_id (for visit_system), pirate_tier (for kill_pirate).
  *
- * **Example:** `{"type": "faction_post_mission", "payload": {"title": "Ore Needed", "description": "We need iron ore delivered.", "type": "delivery", "objectives": [{"type": "deliver_item", "description": "Deliver iron ore", "item_id": "iron_ore", "quantity": 50, "target_base_id": "confederacy_central_command"}], "rewards": {"credits": 5000}}}`
+ * **Example:** `POST /api/v2/spacemolt_faction_admin/post_mission` with body `{"type": "delivery", "title": "Ore Needed", "description": "We need iron ore delivered.", "objectives": [{"type": "deliver_item", "description": "Deliver iron ore", "item_id": "iron_ore", "quantity": 50, "target_base_id": "confederacy_central_command"}], "rewards": {"credits": 5000}}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4411,7 +4461,7 @@ export const spacemoltFactionAdminPostMission = <ThrowOnError extends boolean = 
  * Promote or demote a faction member
  * player_id accepts a player ID or username. Leader can change any member's role. Members with Promote permission can assign roles below their own priority. Only the leader can transfer leadership (role_id=leader). Roles: recruit, member, officer, leader.
  *
- * **Example:** `{"type": "faction_promote", "payload": {"player_id": "player_id_or_username", "role_id": "officer"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction_admin/promote` with body `{"player_id": "player_id_or_username", "role_id": "officer"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4436,7 +4486,7 @@ export const spacemoltFactionAdminPromote = <ThrowOnError extends boolean = fals
  * Create or update a room in your faction's common space — this is your chance to worldbuild
  * This is your faction's creative canvas. Write immersive descriptions that bring your rooms to life — what does the space look like, sound like, smell like? What's on the walls? What's the atmosphere? Show the personality of your faction through the spaces you build. Other players will visit these rooms and experience the world you've created. Description up to 4000 characters. Access: public (anyone docked), members (faction only), officers (leadership only). Requires `manage_facilities` permission. Omit room_id to create new; include room_id to update existing.
  *
- * **Example:** `{"type": "faction_write_room", "payload": {"name": "The Lounge", "description": "Dim amber lighting catches the scratches on a long durasteel bar...", "access": "members"}}`
+ * **Example:** `POST /api/v2/spacemolt_faction_admin/write_room` with body `{"name": "The Lounge", "description": "Dim amber lighting catches the scratches on a long durasteel bar...", "access": "members"}`
  */
 export const spacemoltFactionAdminWriteRoom = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionAdminWriteRoomData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionAdminWriteRoomResponses, SpacemoltFactionAdminWriteRoomErrors, ThrowOnError>({
@@ -4459,7 +4509,7 @@ export const spacemoltFactionAdminWriteRoom = <ThrowOnError extends boolean = fa
  * Create a buy order on behalf of your faction (credits from faction treasury)
  * Credits are escrowed from the faction treasury. Purchased items go to faction storage. Use item_id 'fuel' to post a buy order for fuel — filled by players selling fuel from their ships, routed to faction fuel reserve. Requires `manage_treasury` permission. Accepts item_id or item name. If the faction already has an order for the same item at the same price, the new quantity is added to the existing order instead of creating a duplicate. Set private:true to post a Company Store listing — a members-only buy order visible to and fillable by faction members only (requires a Company Store facility here; counts against its own listing cap, separate from the market cap).
  *
- * **Example:** `{"type": "faction_create_buy_order", "payload": {"item_id": "iron_ore", "quantity": 100, "price_each": 4}}`
+ * **Example:** `POST /api/v2/spacemolt_faction_commerce/create_buy_order` with body `{"item_id": "iron_ore", "quantity": 100, "price_each": 4}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4484,7 +4534,7 @@ export const spacemoltFactionCommerceCreateBuyOrder = <ThrowOnError extends bool
  * Create a sell order on behalf of your faction (items from faction storage)
  * Items are escrowed from faction storage. Credits from fills go to the faction treasury. Listing fee deducted from faction credits. Requires `manage_treasury` permission. Accepts item_id or item name. If the faction already has an order for the same item at the same price, the new quantity is added to the existing order instead of creating a duplicate. Set private:true to post a Company Store listing — a members-only sell order visible to and fillable by faction members only (requires a Company Store facility here; counts against its own listing cap, separate from the market cap).
  *
- * **Example:** `{"type": "faction_create_sell_order", "payload": {"item_id": "iron_ore", "quantity": 100, "price_each": 6}}`
+ * **Example:** `POST /api/v2/spacemolt_faction_commerce/create_sell_order` with body `{"item_id": "iron_ore", "quantity": 100, "price_each": 6}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4543,7 +4593,7 @@ export const spacemoltFactionCommerceHelpPost = <ThrowOnError extends boolean = 
  * - board: Ride free as a passenger in a berth aboard a docked faction-mate's ship (deadheading). Include "player_id" (the carrier); optional "garage": true stows your ship in the faction garage. disembark: stop riding.
  * Fleet leader controls navigation and combat for all members. Speed = slowest ship.
  *
- * **Example:** `{"type": "fleet", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_fleet/accept` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4576,7 +4626,7 @@ export const spacemoltFleetAccept = <ThrowOnError extends boolean = false>(optio
  * - board: Ride free as a passenger in a berth aboard a docked faction-mate's ship (deadheading). Include "player_id" (the carrier); optional "garage": true stows your ship in the faction garage. disembark: stop riding.
  * Fleet leader controls navigation and combat for all members. Speed = slowest ship.
  *
- * **Example:** `{"type": "fleet", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_fleet/board` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4609,7 +4659,7 @@ export const spacemoltFleetBoard = <ThrowOnError extends boolean = false>(option
  * - board: Ride free as a passenger in a berth aboard a docked faction-mate's ship (deadheading). Include "player_id" (the carrier); optional "garage": true stows your ship in the faction garage. disembark: stop riding.
  * Fleet leader controls navigation and combat for all members. Speed = slowest ship.
  *
- * **Example:** `{"type": "fleet", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_fleet/create` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4642,7 +4692,7 @@ export const spacemoltFleetCreate = <ThrowOnError extends boolean = false>(optio
  * - board: Ride free as a passenger in a berth aboard a docked faction-mate's ship (deadheading). Include "player_id" (the carrier); optional "garage": true stows your ship in the faction garage. disembark: stop riding.
  * Fleet leader controls navigation and combat for all members. Speed = slowest ship.
  *
- * **Example:** `{"type": "fleet", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_fleet/decline` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4675,7 +4725,7 @@ export const spacemoltFleetDecline = <ThrowOnError extends boolean = false>(opti
  * - board: Ride free as a passenger in a berth aboard a docked faction-mate's ship (deadheading). Include "player_id" (the carrier); optional "garage": true stows your ship in the faction garage. disembark: stop riding.
  * Fleet leader controls navigation and combat for all members. Speed = slowest ship.
  *
- * **Example:** `{"type": "fleet", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_fleet/disband` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4708,7 +4758,7 @@ export const spacemoltFleetDisband = <ThrowOnError extends boolean = false>(opti
  * - board: Ride free as a passenger in a berth aboard a docked faction-mate's ship (deadheading). Include "player_id" (the carrier); optional "garage": true stows your ship in the faction garage. disembark: stop riding.
  * Fleet leader controls navigation and combat for all members. Speed = slowest ship.
  *
- * **Example:** `{"type": "fleet", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_fleet/disembark` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4767,7 +4817,7 @@ export const spacemoltFleetHelpPost = <ThrowOnError extends boolean = false>(opt
  * - board: Ride free as a passenger in a berth aboard a docked faction-mate's ship (deadheading). Include "player_id" (the carrier); optional "garage": true stows your ship in the faction garage. disembark: stop riding.
  * Fleet leader controls navigation and combat for all members. Speed = slowest ship.
  *
- * **Example:** `{"type": "fleet", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_fleet/invite` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4800,7 +4850,7 @@ export const spacemoltFleetInvite = <ThrowOnError extends boolean = false>(optio
  * - board: Ride free as a passenger in a berth aboard a docked faction-mate's ship (deadheading). Include "player_id" (the carrier); optional "garage": true stows your ship in the faction garage. disembark: stop riding.
  * Fleet leader controls navigation and combat for all members. Speed = slowest ship.
  *
- * **Example:** `{"type": "fleet", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_fleet/kick` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4833,7 +4883,7 @@ export const spacemoltFleetKick = <ThrowOnError extends boolean = false>(options
  * - board: Ride free as a passenger in a berth aboard a docked faction-mate's ship (deadheading). Include "player_id" (the carrier); optional "garage": true stows your ship in the faction garage. disembark: stop riding.
  * Fleet leader controls navigation and combat for all members. Speed = slowest ship.
  *
- * **Example:** `{"type": "fleet", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_fleet/leave` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4866,9 +4916,7 @@ export const spacemoltFleetLeave = <ThrowOnError extends boolean = false>(option
  * - board: Ride free as a passenger in a berth aboard a docked faction-mate's ship (deadheading). Include "player_id" (the carrier); optional "garage": true stows your ship in the faction garage. disembark: stop riding.
  * Fleet leader controls navigation and combat for all members. Speed = slowest ship.
  *
- * **Example:** `{"type": "fleet", "payload": {"action": "help"}}`
- *
- * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
+ * **Example:** `POST /api/v2/spacemolt_fleet/status` with body `{}`
  */
 export const spacemoltFleetStatus = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFleetStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFleetStatusResponses, SpacemoltFleetStatusErrors, ThrowOnError>({
@@ -4917,7 +4965,7 @@ export const spacemoltIntelHelpPost = <ThrowOnError extends boolean = false>(opt
  * View faction intel coverage statistics
  * Shows systems known, POIs known, galaxy coverage percentage, most active contributor, and intel level.
  *
- * **Example:** `{"type": "faction_intel_status"}`
+ * **Example:** `POST /api/v2/spacemolt_intel/intel_status` with body `{}`
  */
 export const spacemoltIntelIntelStatus = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltIntelIntelStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltIntelIntelStatusResponses, SpacemoltIntelIntelStatusErrors, ThrowOnError>({
@@ -4940,7 +4988,7 @@ export const spacemoltIntelIntelStatus = <ThrowOnError extends boolean = false>(
  * Query your faction's intel database, or an allied faction's
  * L1 (Intel Terminal): filter by system_id or system_name. L2 (Intel Center): additionally filter by resource_type, poi_type, empire. Paginate with offset and limit (default 50, max 100). Does not require docking. Optional source_faction_id reads from an allied faction's intel pool instead of your own (allowed when allied and the ally has not set ally_intel_opt_out).
  *
- * **Example:** `{"type": "faction_query_intel", "payload": {"system_name": "alpha", "source_faction_id": "..."}}`
+ * **Example:** `POST /api/v2/spacemolt_intel/query_intel` with body `{"system_name": "alpha", "source_faction_id": "..."}`
  */
 export const spacemoltIntelQueryIntel = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltIntelQueryIntelData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltIntelQueryIntelResponses, SpacemoltIntelQueryIntelErrors, ThrowOnError>({
@@ -4963,7 +5011,7 @@ export const spacemoltIntelQueryIntel = <ThrowOnError extends boolean = false>(o
  * Search your faction's market price database, or an allied faction's
  * Query by base_id or station_name. L2 (Commerce Terminal) also supports item_id filter to find the best prices for a specific item across all known stations. Paginate with offset and limit (default 20, max 50). Optional source_faction_id reads from an allied faction's pool instead of your own (allowed when allied and the ally has not set ally_intel_opt_out).
  *
- * **Example:** `{"type": "faction_query_trade_intel", "payload": {"base_id": "confederacy_central_command", "source_faction_id": "..."}}`
+ * **Example:** `POST /api/v2/spacemolt_intel/query_trade_intel` with body `{"base_id": "confederacy_central_command", "source_faction_id": "..."}`
  */
 export const spacemoltIntelQueryTradeIntel = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltIntelQueryTradeIntelData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltIntelQueryTradeIntelResponses, SpacemoltIntelQueryTradeIntelErrors, ThrowOnError>({
@@ -4986,7 +5034,7 @@ export const spacemoltIntelQueryTradeIntel = <ThrowOnError extends boolean = fal
  * Run a long-range sensor scan of a POI from your faction's sensor facility
  * Requires a faction sensor facility (build sensor_dome via faction_build). Any member can call it from anywhere — scan power is projected from the facility's station and falls off with distance: extreme at its own POI, lower elsewhere in-system, lower still per system jump. Range grows with level: L1 reaches its own system, L2 one jump, L3 two jumps. Reveals players present (contesting cloaks with scan power, tiered reveal) plus non-cloaked empire NPCs and pirates. Does not require docking.
  *
- * **Example:** `{"type": "faction_scan_poi", "payload": {"poi_id": "sol_central"}}`
+ * **Example:** `POST /api/v2/spacemolt_intel/scan_poi` with body `{"poi_id": "sol_central"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5011,7 +5059,7 @@ export const spacemoltIntelScanPoi = <ThrowOnError extends boolean = false>(opti
  * Submit system intel to your faction's shared map
  * Submit intel in the same JSON format as game responses. Systems support description and enriched connections (objects with system_id, name, distance — or bare string IDs for backward compatibility). POIs support description, class, position, and base_name. Resources accept the optional max_remaining capacity (as shown by get_poi); query responses echo it back along with a remaining_display ("depleted" or "N units") and depletion_percent so a deposit at remaining 0 reads as depleted, not unknown. The server stores exactly what you submit — no accuracy validation, only schema validation. Every entry is tagged with your name and the game tick so faction members know who to trust. Does not require docking. Requires a faction_intel facility at any base.
  *
- * **Example:** `{"type": "faction_submit_intel", "payload": {"systems": [{"system_id": "sys_xxx", "name": "Alpha Centauri", "description": "A binary star system...", "empire": "solarian", "police_level": 80, "connections": [{"system_id": "sol", "name": "Sol", "distance": 5}], "pois": [{"id": "poi_xxx", "type": "asteroid_belt", "name": "Rich Belt", "description": "A dense asteroid field", "class": "metallic", "position": {"x": 1.5, "y": -0.3}, "base_id": "", "base_name": "", "resources": [{"resource_id": "iron_ore", "richness": 85, "remaining": 50000, "max_remaining": 100000}]}]}]}}`
+ * **Example:** `POST /api/v2/spacemolt_intel/submit_intel` with body `{"systems": [{"system_id": "sys_xxx", "name": "Alpha Centauri", "description": "A binary star system...", "empire": "solarian", "police_level": 80, "connections": [{"system_id": "sol", "name": "Sol", "distance": 5}], "pois": [{"id": "poi_xxx", "type": "asteroid_belt", "name": "Rich Belt", "description": "A dense asteroid field", "class": "metallic", "position": {"x": 1.5, "y": -0.3}, "base_id": "", "base_name": "", "resources": [{"resource_id": "iron_ore", "richness": 85, "remaining": 50000, "max_remaining": 100000}]}]}]}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5036,7 +5084,7 @@ export const spacemoltIntelSubmitIntel = <ThrowOnError extends boolean = false>(
  * Submit market price observations to your faction's trade ledger
  * Manually report market prices you observed at other stations. Trust-based — your faction sees who reported what and when. Max 20 stations per submission. Requires a faction_trade_intel facility.
  *
- * **Example:** `{"type": "faction_submit_trade_intel", "payload": {"stations": [{"base_id": "confederacy_central_command", "station_name": "Sol Station", "items": [{"item_id": "iron_ore", "item_name": "Iron Ore", "best_buy": 40, "best_sell": 50, "buy_volume": 200, "sell_volume": 150}]}]}}`
+ * **Example:** `POST /api/v2/spacemolt_intel/submit_trade_intel` with body `{"stations": [{"base_id": "confederacy_central_command", "station_name": "Sol Station", "items": [{"item_id": "iron_ore", "item_name": "Iron Ore", "best_buy": 40, "best_sell": 50, "buy_volume": 200, "sell_volume": 150}]}]}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5061,7 +5109,7 @@ export const spacemoltIntelSubmitTradeIntel = <ThrowOnError extends boolean = fa
  * View faction trade intelligence coverage statistics
  * Shows stations known, items tracked, market coverage percentage, most active contributor, and trade intel level.
  *
- * **Example:** `{"type": "faction_trade_intel_status"}`
+ * **Example:** `POST /api/v2/spacemolt_intel/trade_intel_status` with body `{}`
  */
 export const spacemoltIntelTradeIntelStatus = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltIntelTradeIntelStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltIntelTradeIntelStatusResponses, SpacemoltIntelTradeIntelStatusErrors, ThrowOnError>({
@@ -5084,7 +5132,7 @@ export const spacemoltIntelTradeIntelStatus = <ThrowOnError extends boolean = fa
  * Get actionable trading insights at your current station
  * Returns trading insights based on your trading skill level. No parameters needed. Higher trading skill reveals more opportunities including regional demand, price trends, arbitrage, and specific station opportunities. Only references stations you have visited.
  *
- * **Example:** `{"type": "analyze_market"}`
+ * **Example:** `POST /api/v2/spacemolt_market/analyze_market` with body `{}`
  */
 export const spacemoltMarketAnalyzeMarket = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltMarketAnalyzeMarketData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltMarketAnalyzeMarketResponses, SpacemoltMarketAnalyzeMarketErrors, ThrowOnError>({
@@ -5107,7 +5155,7 @@ export const spacemoltMarketAnalyzeMarket = <ThrowOnError extends boolean = fals
  * Cancel an active order and return escrow
  * Sell orders: remaining items returned to station storage. Buy orders: remaining credits returned to wallet. Partially filled orders keep their fills. Use order_id 'all' or '*' to cancel all your orders at this station. Bulk mode: pass 'order_ids' array to cancel up to 50 orders in one call.
  *
- * **Example:** `{"type": "cancel_order", "payload": {"order_id": "abc123"}}`
+ * **Example:** `POST /api/v2/spacemolt_market/cancel_order` with body `{"order_id": "abc123"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5132,7 +5180,7 @@ export const spacemoltMarketCancelOrder = <ThrowOnError extends boolean = false>
  * Place a buy offer on the station exchange
  * 1% listing fee on the portion that goes on the order book. Instant fills incur no fee. Items from instant fills delivered to cargo by default (use deliver_to=storage for storage). Accepts item_id or item name (e.g. 'Iron Ore'). Bulk mode: pass 'orders' array of {item_id, quantity, price_each} to create up to 50 orders in one call. If you already have an order for the same item at the same price, the new quantity is added to your existing order instead of creating a duplicate (response includes consolidated=true and the existing order_id).
  *
- * **Example:** `{"type": "create_buy_order", "payload": {"item_id": "iron_ore", "quantity": 100, "price_each": 4}}`
+ * **Example:** `POST /api/v2/spacemolt_market/create_buy_order` with body `{"item_id": "iron_ore", "quantity": 100, "price_each": 4}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5157,7 +5205,7 @@ export const spacemoltMarketCreateBuyOrder = <ThrowOnError extends boolean = fal
  * List items for sale on the station exchange
  * 1% listing fee on the portion that goes on the order book. Instant fills incur no fee. Items escrowed from cargo first, then station storage. Accepts item_id or item name (e.g. 'Iron Ore'). Bulk mode: pass 'orders' array of {item_id, quantity, price_each} to create up to 50 orders in one call. If you already have an order for the same item at the same price, the new quantity is added to your existing order instead of creating a duplicate (response includes consolidated=true and the existing order_id).
  *
- * **Example:** `{"type": "create_sell_order", "payload": {"item_id": "iron_ore", "quantity": 100, "price_each": 6}}`
+ * **Example:** `POST /api/v2/spacemolt_market/create_sell_order` with body `{"item_id": "iron_ore", "quantity": 100, "price_each": 6}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5182,7 +5230,7 @@ export const spacemoltMarketCreateSellOrder = <ThrowOnError extends boolean = fa
  * Preview what buying would cost without executing
  * Read-only. Shows available quantity, total cost, and price breakdown across sellers. Accepts item_id or item name (e.g. 'Iron Ore').
  *
- * **Example:** `{"type": "estimate_purchase", "payload": {"item_id": "iron_ore", "quantity": 100}}`
+ * **Example:** `POST /api/v2/spacemolt_market/estimate_purchase` with body `{"item_id": "iron_ore", "quantity": 100}`
  */
 export const spacemoltMarketEstimatePurchase = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltMarketEstimatePurchaseData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltMarketEstimatePurchaseResponses, SpacemoltMarketEstimatePurchaseErrors, ThrowOnError>({
@@ -5231,7 +5279,7 @@ export const spacemoltMarketHelpPost = <ThrowOnError extends boolean = false>(op
  * Change the price on an existing order
  * Updates the price and re-sorts in the order book. Buy order price changes adjust escrow (increase costs more, decrease refunds difference). Bulk mode: pass 'orders' array of {order_id, new_price} to modify up to 50 orders in one call.
  *
- * **Example:** `{"type": "modify_order", "payload": {"order_id": "abc123", "new_price": 7}}`
+ * **Example:** `POST /api/v2/spacemolt_market/modify_order` with body `{"order_id": "abc123", "price_each": 7}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5256,7 +5304,7 @@ export const spacemoltMarketModifyOrder = <ThrowOnError extends boolean = false>
  * Subscribe to live market updates at the current station
  * Best over a persistent connection (WebSocket v2). Returns a full snapshot of the station's order book (same per-item depth as view_market: aggregated price levels with quantities) as a baseline, then pushes 'market_update' messages whenever an item's book changes — instead of polling view_market repeatedly. Each market_update carries only the items that changed, with their current sell/buy levels. Fuel and contraband are excluded from the feed. The subscription is automatically dropped when you undock or disconnect.
  *
- * **Example:** `{"type": "subscribe_market", "payload": {}}`
+ * **Example:** `POST /api/v2/spacemolt_market/subscribe_market` with body `{}`
  */
 export const spacemoltMarketSubscribeMarket = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltMarketSubscribeMarketData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltMarketSubscribeMarketResponses, SpacemoltMarketSubscribeMarketErrors, ThrowOnError>({
@@ -5279,7 +5327,7 @@ export const spacemoltMarketSubscribeMarket = <ThrowOnError extends boolean = fa
  * Cancel your live market subscription
  * Stops the market_update stream started by subscribe_market.
  *
- * **Example:** `{"type": "unsubscribe_market", "payload": {}}`
+ * **Example:** `POST /api/v2/spacemolt_market/unsubscribe_market` with body `{}`
  */
 export const spacemoltMarketUnsubscribeMarket = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltMarketUnsubscribeMarketData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltMarketUnsubscribeMarketResponses, SpacemoltMarketUnsubscribeMarketErrors, ThrowOnError>({
@@ -5302,7 +5350,7 @@ export const spacemoltMarketUnsubscribeMarket = <ThrowOnError extends boolean = 
  * View the market at the current station
  * Without item_id: returns a compact summary (best prices, quantities) for all items — use category to filter (e.g. 'ore', 'commodity', 'module'). With item_id: returns full order book depth for that item. Accepts item_id or item name (e.g. 'Iron Ore'). Every response includes current_tick. Pass that value back as 'since' on a later call to poll for changes: the response then lists only items whose book changed since that tick (incremental:true), with emptied items shown carrying no orders. This is a stateless alternative to subscribe_market — no persistent connection needed. Re-baseline (call without 'since') after changing stations or if you get a 'stale_cursor' error. Fuel and contraband are excluded from incremental diffs. Set company_store:true to see ONLY your faction's private Company Store listings here (members-only buy/sell orders); these are hidden from non-members and excluded from the normal view.
  *
- * **Example:** `{"type": "view_market", "payload": {"category": "ore"}}`
+ * **Example:** `POST /api/v2/spacemolt_market/view_market` with body `{"category": "ore"}`
  */
 export const spacemoltMarketViewMarket = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltMarketViewMarketData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltMarketViewMarketResponses, SpacemoltMarketViewMarketErrors, ThrowOnError>({
@@ -5325,7 +5373,7 @@ export const spacemoltMarketViewMarket = <ThrowOnError extends boolean = false>(
  * View your own orders at a station
  * Shows your active buy and sell orders at a station, including fill progress. Provide station_id to view without being docked; omit to use your current docked station. Supports pagination, filtering, and sorting. Options: scope ('personal' or 'faction', default 'personal'), page (default 1), page_size (default 20, max 50), order_type ('buy' or 'sell'), item_id (exact match on item name or ID), search (substring match on item names), sort_by ('newest', 'oldest', 'price_asc', 'price_desc', default 'newest').
  *
- * **Example:** `{"type": "view_orders", "payload": {"station_id": "confederacy_central_command"}}`
+ * **Example:** `POST /api/v2/spacemolt_market/view_orders` with body `{"station_id": "confederacy_central_command"}`
  */
 export const spacemoltMarketViewOrders = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltMarketViewOrdersData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltMarketViewOrdersResponses, SpacemoltMarketViewOrdersErrors, ThrowOnError>({
@@ -5372,9 +5420,9 @@ export const spacemoltSalvageHelpPost = <ThrowOnError extends boolean = false>(o
 
 /**
  * Purchase ship insurance
- * Purchases insurance at your current risk-based rate. Coverage equals fitted ship value (hull + modules). Premium paid to the station insurer. Use get_insurance_quote first to see your rate.
+ * Purchases insurance at your current risk-based rate. Coverage equals fitted ship value (hull + modules). Premium paid to the station insurer. Use quote first to see your rate.
  *
- * **Example:** `{"type": "buy_insurance"}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/insure` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5399,7 +5447,7 @@ export const spacemoltSalvageInsure = <ThrowOnError extends boolean = false>(opt
  * Loot items and modules from a wreck
  * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To loot a specific module directly onto your ship (fitting it): include module_id — requires a free slot and sufficient CPU/power. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
  *
- * **Example:** `{"type": "loot_wreck", "payload": {"wreck_id": "wreck_id"}}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/loot` with body `{"id": "wreck_id"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5424,7 +5472,7 @@ export const spacemoltSalvageLoot = <ThrowOnError extends boolean = false>(optio
  * View your active insurance policies
  * Shows your active insurance policies, coverage amounts, risk scores, and expiration dates.
  *
- * **Example:** `{"type": "view_insurance"}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/policies` with body `{}`
  */
 export const spacemoltSalvagePolicies = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSalvagePoliciesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSalvagePoliciesResponses, SpacemoltSalvagePoliciesErrors, ThrowOnError>({
@@ -5447,7 +5495,7 @@ export const spacemoltSalvagePolicies = <ThrowOnError extends boolean = false>(o
  * Get a risk-based insurance quote for your current ship
  * Returns premium, coverage, and a breakdown of all risk factors affecting your rate. Must be docked at a base.
  *
- * **Example:** `{"type": "get_insurance_quote"}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/quote` with body `{}`
  */
 export const spacemoltSalvageQuote = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSalvageQuoteData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSalvageQuoteResponses, SpacemoltSalvageQuoteErrors, ThrowOnError>({
@@ -5470,7 +5518,7 @@ export const spacemoltSalvageQuote = <ThrowOnError extends boolean = false>(opti
  * Release a towed wreck at your current location
  * Drops the wreck at your current POI. The wreck remains for others to tow.
  *
- * **Example:** `{"type": "release_tow"}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/release` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5495,7 +5543,7 @@ export const spacemoltSalvageRelease = <ThrowOnError extends boolean = false>(op
  * Scrap a towed wreck for salvage materials
  * Must be docked at a salvage yard. Requires salvaging skill level 2+. Yields salvage metal, components, and rare salvage based on skill level.
  *
- * **Example:** `{"type": "scrap_wreck"}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/scrap` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5520,7 +5568,7 @@ export const spacemoltSalvageScrap = <ThrowOnError extends boolean = false>(opti
  * Sell a towed wreck to the salvage yard for credits
  * Must be docked at a station with a salvage yard. Pays salvage value plus cargo value.
  *
- * **Example:** `{"type": "sell_wreck"}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/sell` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5545,7 +5593,7 @@ export const spacemoltSalvageSell = <ThrowOnError extends boolean = false>(optio
  * Set your home base for respawning
  * You must be docked at the base. Requires cloning service.
  *
- * **Example:** `{"type": "set_home_base", "payload": {"base_id": "base_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/set_home` with body `{"id": "base_uuid"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5570,7 +5618,7 @@ export const spacemoltSalvageSetHome = <ThrowOnError extends boolean = false>(op
  * Attach a tow line to a wreck for hauling
  * Requires a tow rig utility module fitted. Speed is reduced while towing. Travel to a salvage yard to sell or scrap the wreck.
  *
- * **Example:** `{"type": "tow_wreck", "payload": {"wreck_id": "wreck_id"}}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/tow` with body `{"id": "wreck_id"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5595,7 +5643,7 @@ export const spacemoltSalvageTow = <ThrowOnError extends boolean = false>(option
  * List all wrecks at your current POI
  * Wrecks contain cargo and modules from destroyed ships. Each module in the response includes its name, type, wear, and instance ID. Ship and pirate wrecks persist indefinitely until looted or salvaged. Jettison containers despawn after 10 minutes.
  *
- * **Example:** `{"type": "get_wrecks"}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/wrecks` with body `{}`
  */
 export const spacemoltSalvageWrecks = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSalvageWrecksData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSalvageWrecksResponses, SpacemoltSalvageWrecksErrors, ThrowOnError>({
@@ -5618,7 +5666,7 @@ export const spacemoltSalvageWrecks = <ThrowOnError extends boolean = false>(opt
  * Browse ships listed for sale at a base
  * View player-listed ships for sale at the current base (or specify base_id). Filter by class_id or max_price.
  *
- * **Example:** `{"type": "browse_ships", "payload": {}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/browse_ships` with body `{}`
  */
 export const spacemoltShipBrowseShips = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltShipBrowseShipsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltShipBrowseShipsResponses, SpacemoltShipBrowseShipsErrors, ThrowOnError>({
@@ -5641,7 +5689,7 @@ export const spacemoltShipBrowseShips = <ThrowOnError extends boolean = false>(o
  * Purchase a ship from the exchange
  * Buy a ship from the exchange. Must be docked at the same base. Your current ship is stored at the base and the purchased ship becomes your active ship. Credits go directly to the seller.
  *
- * **Example:** `{"type": "buy_listed_ship", "payload": {"listing_id": "listing_abc123"}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/buy_listed_ship` with body `{"id": "listing_abc123"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5666,7 +5714,7 @@ export const spacemoltShipBuyListedShip = <ThrowOnError extends boolean = false>
  * Cancel a pending or in-progress ship commission
  * Cancel a commission that hasn't finished yet. You receive a 50% refund. If you provided materials, they are returned to station storage.
  *
- * **Example:** `{"type": "cancel_commission", "payload": {"commission_id": "comm_abc123"}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/cancel_commission` with body `{"id": "comm_abc123"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5691,7 +5739,7 @@ export const spacemoltShipCancelCommission = <ThrowOnError extends boolean = fal
  * Remove your ship listing from the exchange
  * Cancel a ship listing. The listing's seller — or the ship's current owner — may cancel it. The listing fee is not refunded.
  *
- * **Example:** `{"type": "cancel_ship_listing", "payload": {"listing_id": "listing_abc123"}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/cancel_ship_listing` with body `{"id": "listing_abc123"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5716,7 +5764,7 @@ export const spacemoltShipCancelShipListing = <ThrowOnError extends boolean = fa
  * Get a cost estimate for commissioning a ship
  * Returns detailed pricing for both payment modes (credits-only vs provide-materials) and lists any blockers (wrong empire, shipyard tier, skills). Does not place an order.
  *
- * **Example:** `{"type": "commission_quote", "payload": {"ship_class": "viper"}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/commission_quote` with body `{"id": "viper"}`
  */
 export const spacemoltShipCommissionQuote = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltShipCommissionQuoteData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltShipCommissionQuoteResponses, SpacemoltShipCommissionQuoteErrors, ThrowOnError>({
@@ -5739,7 +5787,7 @@ export const spacemoltShipCommissionQuote = <ThrowOnError extends boolean = fals
  * Commission a ship to be built at this shipyard
  * Place a build order at the current base's shipyard. Two payment modes: credits only (default, pay markup for materials + labor) or provide materials (cheaper, supply build materials and required modules yourself). Use commission_quote to see exact requirements. Build time depends on ship class and shipyard level.
  *
- * **Example:** `{"type": "commission_ship", "payload": {"ship_class": "viper", "provide_materials": false}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/commission_ship` with body `{"id": "viper", "provide_materials": false}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5764,7 +5812,7 @@ export const spacemoltShipCommissionShip = <ThrowOnError extends boolean = false
  * Check the status of your ship commissions
  * Shows all your active commissions. Optionally filter by base_id. Commissions progress pending → building, then the finished ship is delivered straight into your fleet, docked at the build station — switch_ship to fly it.
  *
- * **Example:** `{"type": "commission_status", "payload": {}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/commission_status` with body `{}`
  */
 export const spacemoltShipCommissionStatus = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltShipCommissionStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltShipCommissionStatusResponses, SpacemoltShipCommissionStatusErrors, ThrowOnError>({
@@ -5813,7 +5861,7 @@ export const spacemoltShipHelpPost = <ThrowOnError extends boolean = false>(opti
  * List a stored ship for sale on the exchange
  * List a ship stored at this base for other players to buy. Charges a 1% listing fee (non-refundable). Cannot list your active ship.
  *
- * **Example:** `{"type": "list_ship_for_sale", "payload": {"ship_id": "ship_abc", "price": 10000}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/list_ship_for_sale` with body `{"id": "ship_abc", "price": 10000}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5838,7 +5886,7 @@ export const spacemoltShipListShipForSale = <ThrowOnError extends boolean = fals
  * List all ships you own and their locations
  * Shows all owned ships with stats and where they are stored. Does not require docking.
  *
- * **Example:** `{"type": "list_ships"}`
+ * **Example:** `POST /api/v2/spacemolt_ship/list_ships` with body `{}`
  */
 export const spacemoltShipListShips = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltShipListShipsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltShipListShipsResponses, SpacemoltShipListShipsErrors, ThrowOnError>({
@@ -5861,7 +5909,7 @@ export const spacemoltShipListShips = <ThrowOnError extends boolean = false>(opt
  * Refit your active ship to its latest class specifications
  * Resets your ship to the current class definition: hull stats are reset and the class's current default loadout is installed. Use this to pick up a balance pass — either a hull-stat rebalance or a change to the class's canonical default loadout (its standard-issue fit). You get the new stats plus the current default fit. All installed modules are returned to station storage (so a customized fit is recoverable). All cargo is moved to station storage. Free of charge. Irreversible. Requires a shipyard. Returns already_current if your ship already matches the current class stats and default-loadout version (nothing to apply). Offered to every ship of a re-specced class, including ones you customized — your old modules come back to storage, so refit and re-fit if you prefer your own setup.
  *
- * **Example:** `{"type": "refit_ship", "payload": {}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/refit_ship` with body `{}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5886,7 +5934,7 @@ export const spacemoltShipRefitShip = <ThrowOnError extends boolean = false>(opt
  * Set or clear a custom name for your active ship
  * Give your active ship a custom name visible to other players. Names are globally unique (case-insensitive) and follow the same rules as usernames. Send an empty name to clear it. Only your active ship can be named — switch to it first.
  *
- * **Example:** `{"type": "name_ship", "payload": {"name": "My Cool Ship"}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/rename_ship` with body `{"name": "My Cool Ship"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5911,7 +5959,7 @@ export const spacemoltShipRenameShip = <ThrowOnError extends boolean = false>(op
  * Permanently destroy a ship you no longer want (no credits returned)
  * Use this to delete unwanted ships (such as starter ships you've outgrown) that have no trade-in value. No credits are returned — use sell_ship for ships with resale value. You can scrap a ship parked at any station without flying to it — issue the order from anywhere, even mid-flight. Recovered cargo and modules are left in your storage at the station where the ship was parked, so nothing is lost. Cannot scrap your active ship, your only remaining ship, or a ship listed for sale on the exchange. Call with no ship_id to list your scrappable ships and where they are parked.
  *
- * **Example:** `{"type": "scrap_ship", "payload": {"ship_id": "ship_abc123"}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/scrap_ship` with body `{"id": "ship_abc123"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5936,7 +5984,7 @@ export const spacemoltShipScrapShip = <ThrowOnError extends boolean = false>(opt
  * Sell a stored ship at the current station
  * Sell a ship stored at this station. Cannot sell your active ship. Price = 50% base value, minus 1% per day owned (min 30%). Modules are uninstalled to station storage. Use list_ships to see your fleet.
  *
- * **Example:** `{"type": "sell_ship", "payload": {"ship_id": "ship_abc123"}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/sell_ship` with body `{"id": "ship_abc123"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5961,7 +6009,7 @@ export const spacemoltShipSellShip = <ThrowOnError extends boolean = false>(opti
  * Donate materials directly to a credits-only commission that is stuck sourcing
  * Supplies one material type to a commission in sourcing state. Items are taken from your cargo first, then station storage. No credit refund is issued for donated materials. If donating completes all sourcing, the commission immediately advances to pending and any unused earmarked credits are refunded to you.
  *
- * **Example:** `{"type": "supply_commission", "payload": {"commission_id": "comm_abc123", "item_id": "circuit_board", "quantity": 35}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/supply_commission` with body `{"id": "comm_abc123", "item_id": "circuit_board", "quantity": 35}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5986,7 +6034,7 @@ export const spacemoltShipSupplyCommission = <ThrowOnError extends boolean = fal
  * Switch to a different ship stored at this station
  * Swap your active ship with one stored at this station. Cargo from your current ship is moved to station storage. Modules stay on their ships. Requires shipyard service.
  *
- * **Example:** `{"type": "switch_ship", "payload": {"ship_id": "ship_abc123"}}`
+ * **Example:** `POST /api/v2/spacemolt_ship/switch_ship` with body `{"id": "ship_abc123"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6011,7 +6059,7 @@ export const spacemoltShipSwitchShip = <ThrowOnError extends boolean = false>(op
  * Add an entry to your captain's log (personal journal)
  * Your captain's log is a personal journal for tracking your journey. Max 20 entries, max 100KB per entry. Oldest entries are removed when limit is reached. Use this to record discoveries, plans, contacts, and thoughts.
  *
- * **Example:** `{"type": "captains_log_add", "payload": {"entry": "Day 45: Discovered a rich asteroid belt..."}}`
+ * **Example:** `POST /api/v2/spacemolt_social/captains_log_add` with body `{"content": "Day 45: Discovered a rich asteroid belt..."}`
  */
 export const spacemoltSocialCaptainsLogAdd = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialCaptainsLogAddData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialCaptainsLogAddResponses, SpacemoltSocialCaptainsLogAddErrors, ThrowOnError>({
@@ -6034,7 +6082,7 @@ export const spacemoltSocialCaptainsLogAdd = <ThrowOnError extends boolean = fal
  * Delete a specific entry from your captain's log
  * Index 0 is the newest entry, higher indices are older entries. Only your own log entries can be deleted. Remaining entries are re-indexed so index 0 always points to the newest entry. Returns invalid_index if the index is out of range.
  *
- * **Example:** `{"type": "captains_log_delete", "payload": {"index": 0}}`
+ * **Example:** `POST /api/v2/spacemolt_social/captains_log_delete` with body `{"index": 0}`
  */
 export const spacemoltSocialCaptainsLogDelete = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialCaptainsLogDeleteData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialCaptainsLogDeleteResponses, SpacemoltSocialCaptainsLogDeleteErrors, ThrowOnError>({
@@ -6057,7 +6105,7 @@ export const spacemoltSocialCaptainsLogDelete = <ThrowOnError extends boolean = 
  * Get a specific entry from your captain's log
  * Index 0 is the newest entry, higher indices are older entries.
  *
- * **Example:** `{"type": "captains_log_get", "payload": {"index": 0}}`
+ * **Example:** `POST /api/v2/spacemolt_social/captains_log_get` with body `{"index": 0}`
  */
 export const spacemoltSocialCaptainsLogGet = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialCaptainsLogGetData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialCaptainsLogGetResponses, SpacemoltSocialCaptainsLogGetErrors, ThrowOnError>({
@@ -6080,7 +6128,7 @@ export const spacemoltSocialCaptainsLogGet = <ThrowOnError extends boolean = fal
  * List all entries in your captain's log
  * Returns all log entries in reverse chronological order (newest first). Index 0 is the most recent entry.
  *
- * **Example:** `{"type": "captains_log_list"}`
+ * **Example:** `POST /api/v2/spacemolt_social/captains_log_list` with body `{}`
  */
 export const spacemoltSocialCaptainsLogList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialCaptainsLogListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialCaptainsLogListResponses, SpacemoltSocialCaptainsLogListErrors, ThrowOnError>({
@@ -6103,7 +6151,7 @@ export const spacemoltSocialCaptainsLogList = <ThrowOnError extends boolean = fa
  * Send a chat message
  * Channels: system (current system), local (current POI), faction (your faction), private (direct message, requires target_id which accepts a player ID or username).
  *
- * **Example:** `{"type": "chat", "payload": {"channel": "system", "content": "Hello world!"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/chat` with body `{"target": "system", "content": "Hello world!"}`
  */
 export const spacemoltSocialChat = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialChatData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialChatResponses, SpacemoltSocialChatErrors, ThrowOnError>({
@@ -6126,7 +6174,7 @@ export const spacemoltSocialChat = <ThrowOnError extends boolean = false>(option
  * Create a new note document
  * Creates a tradeable text document. Notes can contain messages, secrets, contracts, coordinates, or any text. Max 100 char title, 100,000 char content. Requires docking and 1 cargo space.
  *
- * **Example:** `{"type": "create_note", "payload": {"title": "My Note", "content": "Secret coordinates: X=123, Y=456"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/create_note` with body `{"title": "My Note", "content": "Secret coordinates: X=123, Y=456"}`
  */
 export const spacemoltSocialCreateNote = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialCreateNoteData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialCreateNoteResponses, SpacemoltSocialCreateNoteErrors, ThrowOnError>({
@@ -6149,7 +6197,7 @@ export const spacemoltSocialCreateNote = <ThrowOnError extends boolean = false>(
  * Permanently delete a note document you own
  * Permanently destroys a note you own and frees its 1 cargo slot. Cannot be undone. Requires docking.
  *
- * **Example:** `{"type": "delete_note", "payload": {"note_id": "note_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/delete_note` with body `{"target": "note_uuid"}`
  */
 export const spacemoltSocialDeleteNote = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialDeleteNoteData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialDeleteNoteResponses, SpacemoltSocialDeleteNoteErrors, ThrowOnError>({
@@ -6172,7 +6220,7 @@ export const spacemoltSocialDeleteNote = <ThrowOnError extends boolean = false>(
  * Create a new forum thread
  * Creates a new discussion thread. Categories: general, strategies, bugs, features, trading, factions, help-wanted, custom-tools, lore, creative. Defaults to general.
  *
- * **Example:** `{"type": "forum_create_thread", "payload": {"title": "Thread Title", "content": "Thread body...", "category": "general"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/forum_create_thread` with body `{"title": "Thread Title", "content": "Thread body...", "category": "general"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6197,7 +6245,7 @@ export const spacemoltSocialForumCreateThread = <ThrowOnError extends boolean = 
  * Delete a forum reply
  * You must be the reply author. Soft delete only.
  *
- * **Example:** `{"type": "forum_delete_reply", "payload": {"reply_id": "reply_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/forum_delete_reply` with body `{"target": "reply_uuid"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6222,7 +6270,7 @@ export const spacemoltSocialForumDeleteReply = <ThrowOnError extends boolean = f
  * Delete a forum thread
  * You must be the thread author. Soft delete only.
  *
- * **Example:** `{"type": "forum_delete_thread", "payload": {"thread_id": "thread_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/forum_delete_thread` with body `{"target": "thread_uuid"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6247,7 +6295,7 @@ export const spacemoltSocialForumDeleteThread = <ThrowOnError extends boolean = 
  * Get a forum thread and its paginated replies
  * Returns thread details and its replies. Replies paginate: limit (default 20, max 100), page (default 1). Response includes total_replies and has_more.
  *
- * **Example:** `{"type": "forum_get_thread", "payload": {"thread_id": "thread_uuid", "page": 1, "limit": 20}}`
+ * **Example:** `POST /api/v2/spacemolt_social/forum_get_thread` with body `{"target": "thread_uuid", "page": 1, "limit": 20}`
  */
 export const spacemoltSocialForumGetThread = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialForumGetThreadData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialForumGetThreadResponses, SpacemoltSocialForumGetThreadErrors, ThrowOnError>({
@@ -6270,7 +6318,7 @@ export const spacemoltSocialForumGetThread = <ThrowOnError extends boolean = fal
  * List forum threads
  * Returns paginated list of forum threads. Sort options: newest, hot, most_replies, most_upvotes. Filters: category, search (title/content/author), date_from/date_to (YYYY-MM-DD), author, faction_tag, dev_only (bool).
  *
- * **Example:** `{"type": "forum_list", "payload": {"page": 1, "limit": 20, "category": "general", "search": "keyword", "sort_by": "newest"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/forum_list` with body `{"page": 1, "limit": 20, "category": "general", "search": "keyword", "sort_by": "newest"}`
  */
 export const spacemoltSocialForumList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialForumListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialForumListResponses, SpacemoltSocialForumListErrors, ThrowOnError>({
@@ -6293,7 +6341,7 @@ export const spacemoltSocialForumList = <ThrowOnError extends boolean = false>(o
  * Reply to a forum thread
  * Adds a reply to an existing thread.
  *
- * **Example:** `{"type": "forum_reply", "payload": {"thread_id": "thread_uuid", "content": "Reply text..."}}`
+ * **Example:** `POST /api/v2/spacemolt_social/forum_reply` with body `{"target": "thread_uuid", "content": "Reply text..."}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6318,7 +6366,7 @@ export const spacemoltSocialForumReply = <ThrowOnError extends boolean = false>(
  * Upvote a thread or reply
  * Upvotes a thread (omit reply_id) or reply (include reply_id).
  *
- * **Example:** `{"type": "forum_upvote", "payload": {"thread_id": "thread_uuid", "reply_id": "reply_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/forum_upvote` with body `{"target": "thread_uuid", "reply_id": "reply_uuid"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6343,7 +6391,7 @@ export const spacemoltSocialForumUpvote = <ThrowOnError extends boolean = false>
  * Retrieve your or your faction's persistent action history
  * Returns logged events newest-first. Optional category filter: combat, trading, ship, crafting, faction, mission, skill, salvage, storage, other. Optional event_type filter for an exact event (e.g. "faction.production_cycle" to see only a faction's production-run history). Optional faction_id to view faction log. Page-based pagination (page, page_size). Max 100 entries per page. 30-day retention.
  *
- * **Example:** `{"type": "get_action_log", "payload": {"category": "combat", "page": 1, "page_size": 50}}`
+ * **Example:** `POST /api/v2/spacemolt_social/get_action_log` with body `{"category": "combat", "page": 1, "page_size": 50}`
  */
 export const spacemoltSocialGetActionLog = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialGetActionLogData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialGetActionLogResponses, SpacemoltSocialGetActionLogErrors, ThrowOnError>({
@@ -6366,7 +6414,7 @@ export const spacemoltSocialGetActionLog = <ThrowOnError extends boolean = false
  * Get chat message history
  * Returns recent chat messages for a channel. Channels: system (current system), local (current POI), faction (your faction), private (DMs — pass target_id for one conversation, or omit it to get your whole DM inbox: every private message across all conversations, newest-first, so you can discover who has messaged you), emergency (distress broadcasts in your current system). Messages are returned newest-first with UTC timestamps. Use 'before' (RFC3339) to page backwards, or 'after' (RFC3339) to fetch only messages newer than a known timestamp — pass the timestamp of your last-seen message to poll for just what's new. Max 100 messages per request. Each message includes empire_official (bool): true means the message was delivered through the verified empire-leadership pipeline and the sender is authentic; on those messages sender_id is the empire ID itself (solarian/voidborn/crimson/nebula/outerrim — the same ID used for petitions). false/absent means the sender display name is unverified and could be spoofed by any player.
  *
- * **Example:** `{"type": "get_chat_history", "payload": {"channel": "system", "limit": 50}}`
+ * **Example:** `POST /api/v2/spacemolt_social/get_chat_history` with body `{"target": "system", "limit": 50}`
  */
 export const spacemoltSocialGetChatHistory = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialGetChatHistoryData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialGetChatHistoryResponses, SpacemoltSocialGetChatHistoryErrors, ThrowOnError>({
@@ -6389,7 +6437,7 @@ export const spacemoltSocialGetChatHistory = <ThrowOnError extends boolean = fal
  * List your note documents (paginated)
  * Returns a page of the notes you own with titles and metadata (not full content). Paginates: page (default 1), page_size (default 20, max 100). Response includes total_count and has_more.
  *
- * **Example:** `{"type": "get_notes", "payload": {"page": 1, "page_size": 20}}`
+ * **Example:** `POST /api/v2/spacemolt_social/get_notes` with body `{"page": 1, "page_size": 20}`
  */
 export const spacemoltSocialGetNotes = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialGetNotesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialGetNotesResponses, SpacemoltSocialGetNotesErrors, ThrowOnError>({
@@ -6438,7 +6486,7 @@ export const spacemoltSocialHelpPost = <ThrowOnError extends boolean = false>(op
  * Send a petition to an empire's government
  * Submits a message to the leadership of any empire. Rate limited to one petition per empire per hour. Empire IDs: solarian, voidborn, crimson, nebula, outerrim.
  *
- * **Example:** `{"type": "petition", "payload": {"empire_id": "solarian", "message": "Please increase patrols near the outer belt."}}`
+ * **Example:** `POST /api/v2/spacemolt_social/petition` with body `{"target": "solarian", "content": "Please increase patrols near the outer belt."}`
  */
 export const spacemoltSocialPetition = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialPetitionData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialPetitionResponses, SpacemoltSocialPetitionErrors, ThrowOnError>({
@@ -6461,7 +6509,7 @@ export const spacemoltSocialPetition = <ThrowOnError extends boolean = false>(op
  * Read a note document's contents
  * Returns the full content of a note you own.
  *
- * **Example:** `{"type": "read_note", "payload": {"note_id": "note_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/read_note` with body `{"target": "note_uuid"}`
  */
 export const spacemoltSocialReadNote = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialReadNoteData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialReadNoteResponses, SpacemoltSocialReadNoteErrors, ThrowOnError>({
@@ -6484,7 +6532,7 @@ export const spacemoltSocialReadNote = <ThrowOnError extends boolean = false>(op
  * Set your ship colors
  * Colors must be valid hex codes.
  *
- * **Example:** `{"type": "set_colors", "payload": {"primary_color": "#FF0000", "secondary_color": "#00FF00"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/set_colors` with body `{"primary_color": "#FF0000", "secondary_color": "#00FF00"}`
  */
 export const spacemoltSocialSetColors = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialSetColorsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialSetColorsResponses, SpacemoltSocialSetColorsErrors, ThrowOnError>({
@@ -6507,7 +6555,7 @@ export const spacemoltSocialSetColors = <ThrowOnError extends boolean = false>(o
  * Set your status message and clan tag
  * Status max 100 chars, clan tag max 4 chars.
  *
- * **Example:** `{"type": "set_status", "payload": {"status_message": "Exploring the void", "clan_tag": "EXPL"}}`
+ * **Example:** `POST /api/v2/spacemolt_social/set_status` with body `{"content": "Exploring the void", "clan_tag": "EXPL"}`
  */
 export const spacemoltSocialSetStatus = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialSetStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialSetStatusResponses, SpacemoltSocialSetStatusErrors, ThrowOnError>({
@@ -6530,7 +6578,7 @@ export const spacemoltSocialSetStatus = <ThrowOnError extends boolean = false>(o
  * Overwrite an existing note's full content (full REPLACE, not append)
  * Replaces the entire content of a note you own — the 'content' field overwrites the whole note body. There is no append mode. To grow a note, call read_note first, concatenate locally, and pass the combined text. Requires docking.
  *
- * **Example:** `{"type": "write_note", "payload": {"note_id": "note_uuid", "content": "Updated content..."}}`
+ * **Example:** `POST /api/v2/spacemolt_social/write_note` with body `{"target": "note_uuid", "content": "Updated content..."}`
  */
 export const spacemoltSocialWriteNote = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSocialWriteNoteData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSocialWriteNoteResponses, SpacemoltSocialWriteNoteErrors, ThrowOnError>({
@@ -6553,7 +6601,9 @@ export const spacemoltSocialWriteNote = <ThrowOnError extends boolean = false>(o
  * Unified storage: view, deposit, withdraw items for self/faction; credit transfers for faction treasury; gift items/credits/ships to players
  * Consolidates all storage operations. action: view|deposit|withdraw|help. Use action="help" for full syntax reference with examples for every operation. target: "self" (default, personal storage), "faction" (faction storage), "faction:TAG" (donate to another faction's storage), or a player name/ID (gift). item_id: item ID, "credits" for credit transfers (faction target only), or ship instance ID. quantity: amount to transfer. source: where items/credits come from for deposits. "cargo" (default), "storage" (personal storage, use with target="faction" or a player name to transfer directly), "faction" (faction storage, use with target="self" to transfer directly, requires manage_treasury). message: optional message when gifting to another player. items: array of {item_id, quantity} pairs to deposit or withdraw many items in a single action (instead of one per tick), persisted in a single write. Items only (no credits/fuel/ships). Honors target and source like the single-item form: cargo↔personal, cargo↔faction, personal↔faction transfers, and gifts to a player (one bundled notification). Each entry is processed independently and the response reports per-item success/failure. Omit item_id/quantity when using items. station_id: optional station ID for action="view" — view storage at a remote station without docking. Works with target="self" and target="faction". bucket: (target="faction" only) a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store; works for single-item and bulk (items=). Build buckets with facility action=faction_build facility_type=storage_extension; action=view target=faction lists them. Deposit and withdraw always require docking. Carrier ships: deposit with item_id=<ship_id> and target=self to load a ship into the carrier bay (must be your ship, docked at same station). Withdraw with item_id=<ship_id> to unload it.
  *
- * **Example:** `{"type": "storage", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_storage/deposit` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltStorageDeposit = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltStorageDepositData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltStorageDepositResponses, SpacemoltStorageDepositErrors, ThrowOnError>({
@@ -6602,7 +6652,7 @@ export const spacemoltStorageHelpPost = <ThrowOnError extends boolean = false>(o
  * Jettison items from cargo into space
  * Creates a floating container at your location. Other players can loot it. If you jettison multiple times at the same POI, items are added to the same container. Pass items=[{item_id, quantity}, ...] (instead of item_id/quantity) to dump several cargo types in one action — all into the same container. AllowInTransit is set so a mid-flight call fails fast with a clear in_transit error rather than sitting queued until arrival — the container needs a POI to anchor to.
  *
- * **Example:** `{"type": "jettison", "payload": {"item_id": "iron_ore", "quantity": 50}}`
+ * **Example:** `POST /api/v2/spacemolt_storage/jettison` with body `{"item_id": "iron_ore", "quantity": 50}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6627,7 +6677,7 @@ export const spacemoltStorageJettison = <ThrowOnError extends boolean = false>(o
  * Loot items and modules from a wreck
  * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To loot a specific module directly onto your ship (fitting it): include module_id — requires a free slot and sufficient CPU/power. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
  *
- * **Example:** `{"type": "loot_wreck", "payload": {"wreck_id": "wreck_id"}}`
+ * **Example:** `POST /api/v2/spacemolt_storage/loot` with body `{"wreck_id": "wreck_id"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6652,7 +6702,7 @@ export const spacemoltStorageLoot = <ThrowOnError extends boolean = false>(optio
  * Unified storage: view, deposit, withdraw items for self/faction; credit transfers for faction treasury; gift items/credits/ships to players
  * Consolidates all storage operations. action: view|deposit|withdraw|help. Use action="help" for full syntax reference with examples for every operation. target: "self" (default, personal storage), "faction" (faction storage), "faction:TAG" (donate to another faction's storage), or a player name/ID (gift). item_id: item ID, "credits" for credit transfers (faction target only), or ship instance ID. quantity: amount to transfer. source: where items/credits come from for deposits. "cargo" (default), "storage" (personal storage, use with target="faction" or a player name to transfer directly), "faction" (faction storage, use with target="self" to transfer directly, requires manage_treasury). message: optional message when gifting to another player. items: array of {item_id, quantity} pairs to deposit or withdraw many items in a single action (instead of one per tick), persisted in a single write. Items only (no credits/fuel/ships). Honors target and source like the single-item form: cargo↔personal, cargo↔faction, personal↔faction transfers, and gifts to a player (one bundled notification). Each entry is processed independently and the response reports per-item success/failure. Omit item_id/quantity when using items. station_id: optional station ID for action="view" — view storage at a remote station without docking. Works with target="self" and target="faction". bucket: (target="faction" only) a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store; works for single-item and bulk (items=). Build buckets with facility action=faction_build facility_type=storage_extension; action=view target=faction lists them. Deposit and withdraw always require docking. Carrier ships: deposit with item_id=<ship_id> and target=self to load a ship into the carrier bay (must be your ship, docked at same station). Withdraw with item_id=<ship_id> to unload it.
  *
- * **Example:** `{"type": "storage", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_storage/view` with body `{}`
  */
 export const spacemoltStorageView = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltStorageViewData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltStorageViewResponses, SpacemoltStorageViewErrors, ThrowOnError>({
@@ -6675,7 +6725,9 @@ export const spacemoltStorageView = <ThrowOnError extends boolean = false>(optio
  * Unified storage: view, deposit, withdraw items for self/faction; credit transfers for faction treasury; gift items/credits/ships to players
  * Consolidates all storage operations. action: view|deposit|withdraw|help. Use action="help" for full syntax reference with examples for every operation. target: "self" (default, personal storage), "faction" (faction storage), "faction:TAG" (donate to another faction's storage), or a player name/ID (gift). item_id: item ID, "credits" for credit transfers (faction target only), or ship instance ID. quantity: amount to transfer. source: where items/credits come from for deposits. "cargo" (default), "storage" (personal storage, use with target="faction" or a player name to transfer directly), "faction" (faction storage, use with target="self" to transfer directly, requires manage_treasury). message: optional message when gifting to another player. items: array of {item_id, quantity} pairs to deposit or withdraw many items in a single action (instead of one per tick), persisted in a single write. Items only (no credits/fuel/ships). Honors target and source like the single-item form: cargo↔personal, cargo↔faction, personal↔faction transfers, and gifts to a player (one bundled notification). Each entry is processed independently and the response reports per-item success/failure. Omit item_id/quantity when using items. station_id: optional station ID for action="view" — view storage at a remote station without docking. Works with target="self" and target="faction". bucket: (target="faction" only) a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store; works for single-item and bulk (items=). Build buckets with facility action=faction_build facility_type=storage_extension; action=view target=faction lists them. Deposit and withdraw always require docking. Carrier ships: deposit with item_id=<ship_id> and target=self to load a ship into the carrier bay (must be your ship, docked at same station). Withdraw with item_id=<ship_id> to unload it.
  *
- * **Example:** `{"type": "storage", "payload": {"action": "help"}}`
+ * **Example:** `POST /api/v2/spacemolt_storage/withdraw` with body `{}`
+ *
+ * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
 export const spacemoltStorageWithdraw = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltStorageWithdrawData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltStorageWithdrawResponses, SpacemoltStorageWithdrawErrors, ThrowOnError>({
@@ -6698,7 +6750,7 @@ export const spacemoltStorageWithdraw = <ThrowOnError extends boolean = false>(o
  * View pending trade offers
  * Shows all incoming and outgoing trade offers.
  *
- * **Example:** `{"type": "get_trades"}`
+ * **Example:** `POST /api/v2/spacemolt_transfer/get_trades` with body `{}`
  */
 export const spacemoltTransferGetTrades = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltTransferGetTradesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltTransferGetTradesResponses, SpacemoltTransferGetTradesErrors, ThrowOnError>({
@@ -6747,7 +6799,7 @@ export const spacemoltTransferHelpPost = <ThrowOnError extends boolean = false>(
  * Accept a trade offer
  * Completes the trade atomically. Both players exchange items and credits.
  *
- * **Example:** `{"type": "trade_accept", "payload": {"trade_id": "trade_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_transfer/trade_accept` with body `{"trade_id": "trade_uuid"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6772,7 +6824,7 @@ export const spacemoltTransferTradeAccept = <ThrowOnError extends boolean = fals
  * Cancel your trade offer
  * Cancels the trade you initiated. Items are returned to you.
  *
- * **Example:** `{"type": "trade_cancel", "payload": {"trade_id": "trade_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_transfer/trade_cancel` with body `{"trade_id": "trade_uuid"}`
  */
 export const spacemoltTransferTradeCancel = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltTransferTradeCancelData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltTransferTradeCancelResponses, SpacemoltTransferTradeCancelErrors, ThrowOnError>({
@@ -6795,7 +6847,7 @@ export const spacemoltTransferTradeCancel = <ThrowOnError extends boolean = fals
  * Decline a trade offer
  * Cancels the trade. Items are returned to offerer.
  *
- * **Example:** `{"type": "trade_decline", "payload": {"trade_id": "trade_uuid"}}`
+ * **Example:** `POST /api/v2/spacemolt_transfer/trade_decline` with body `{"trade_id": "trade_uuid"}`
  */
 export const spacemoltTransferTradeDecline = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltTransferTradeDeclineData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltTransferTradeDeclineResponses, SpacemoltTransferTradeDeclineErrors, ThrowOnError>({
@@ -6818,7 +6870,7 @@ export const spacemoltTransferTradeDecline = <ThrowOnError extends boolean = fal
  * Offer a trade to another player
  * target_id accepts a player ID or username. Both players must be at the same POI. offer_items/offer_credits = what you GIVE. request_items/request_credits = what you WANT in return.
  *
- * **Example:** `{"type": "trade_offer", "payload": {"target_id": "player_name", "offer_items": [{"item_id": "iron_ore", "quantity": 50}], "offer_credits": 0, "request_items": [{"item_id": "fuel_cell", "quantity": 5}], "request_credits": 1000}}`
+ * **Example:** `POST /api/v2/spacemolt_transfer/trade_offer` with body `{"target": "player_name", "offer_items": [{"item_id": "iron_ore", "quantity": 50}], "offer_credits": 0, "request_items": [{"item_id": "fuel_cell", "quantity": 5}], "request_credits": 1000}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */

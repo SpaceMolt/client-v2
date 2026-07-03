@@ -1157,7 +1157,7 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt_faction",
     action: "accept_invite",
     operationId: "spacemolt_faction_accept_invite",
-    summary: "Accept a faction invitation (alias for join_faction)",
+    summary: "Accept a faction invitation (alias for join)",
     params: [{"name":"id","type":"string","description":"UUID of faction to join (must have pending invite)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
