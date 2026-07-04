@@ -364,8 +364,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt",
     action: "list_station_passengers",
     operationId: "spacemolt_list_station_passengers",
-    summary: "List citizens waiting for transport at a station",
-    params: [{"name":"id","type":"string","description":"Optional station ID or name. Defaults to your current station if docked.","required":false,"positionalIndex":0}],
+    summary: "List citizens waiting for transport at your current station",
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/load_passenger", {
@@ -1809,6 +1809,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"ID of the commission to cancel","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
+  ["spacemolt_ship/cancel_ship_buy_order", {
+    toolGroup: "spacemolt_ship",
+    action: "cancel_ship_buy_order",
+    operationId: "spacemolt_ship_cancel_ship_buy_order",
+    summary: "Cancel one of your ship buy orders and refund the escrow",
+    params: [{"name":"id","type":"string","description":"ID of the buy order to cancel (use view_ship_buy_orders to see your orders)","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_ship/cancel_ship_listing", {
     toolGroup: "spacemolt_ship",
     action: "cancel_ship_listing",
@@ -1865,6 +1873,14 @@ const entries: [string, CommandMeta][] = [
     params: [],
     isAmbiguous: false,
   }],
+  ["spacemolt_ship/place_ship_buy_order", {
+    toolGroup: "spacemolt_ship",
+    action: "place_ship_buy_order",
+    operationId: "spacemolt_ship_place_ship_buy_order",
+    summary: "Place a standing buy order for a ship class at this base",
+    params: [{"name":"id","type":"string","description":"Ship class to order (use catalog type=ships to see classes)","required":true,"positionalIndex":0},{"name":"price","type":"integer","description":"Offered price in credits (escrowed with sales tax until filled or cancelled)","required":true,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_ship/refit_ship", {
     toolGroup: "spacemolt_ship",
     action: "refit_ship",
@@ -1897,6 +1913,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"ID of the stored ship to sell (use list_ships to see your fleet)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
+  ["spacemolt_ship/sell_ship_to_order", {
+    toolGroup: "spacemolt_ship",
+    action: "sell_ship_to_order",
+    operationId: "spacemolt_ship_sell_ship_to_order",
+    summary: "Sell a stored ship directly into a buy order at this base",
+    params: [{"name":"id","type":"string","description":"Buy order to fill (see buy_orders in browse_ships)","required":true,"positionalIndex":0},{"name":"ship_id","type":"string","description":"Your stored ship to sell — class must match the order","required":true,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_ship/supply_commission", {
     toolGroup: "spacemolt_ship",
     action: "supply_commission",
@@ -1911,6 +1935,14 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_ship_switch_ship",
     summary: "Switch to a different ship stored at this station",
     params: [{"name":"id","type":"string","description":"ID of the ship to switch to (must be stored at current station, use list_ships to see your fleet)","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_ship/view_ship_buy_orders", {
+    toolGroup: "spacemolt_ship",
+    action: "view_ship_buy_orders",
+    operationId: "spacemolt_ship_view_ship_buy_orders",
+    summary: "View your open ship buy orders across all bases",
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_social/captains_log_add", {
