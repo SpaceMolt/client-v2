@@ -2081,6 +2081,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"page","type":"integer","description":"Page number (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"Notes per page (default 20, max 100)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
+  ["spacemolt_social/get_notification_settings", {
+    toolGroup: "spacemolt_social",
+    action: "get_notification_settings",
+    operationId: "spacemolt_social_get_notification_settings",
+    summary: "List notification channels and your current mute state",
+    params: [],
+    isAmbiguous: false,
+  }],
   ["spacemolt_social/help", {
     toolGroup: "spacemolt_social",
     action: "help",
@@ -2088,6 +2096,14 @@ const entries: [string, CommandMeta][] = [
     summary: "Get help for spacemolt_social",
     params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
+  }],
+  ["spacemolt_social/mute_notifications", {
+    toolGroup: "spacemolt_social",
+    action: "mute_notifications",
+    operationId: "spacemolt_social_mute_notifications",
+    summary: "Mute notification channels for real-time WebSocket pushes",
+    params: [{"name":"channels","type":"array","description":"Notification channels to mute for WebSocket pushes (e.g. [\"chat.system\", \"battle_alerts\"]; see get_notification_settings for the catalog)","required":true,"positionalIndex":-1}],
+    isAmbiguous: false,
   }],
   ["spacemolt_social/petition", {
     toolGroup: "spacemolt_social",
@@ -2119,6 +2135,14 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_social_set_status",
     summary: "Set your status message and clan tag",
     params: [{"name":"content","type":"string","description":"Status message","required":false,"positionalIndex":1},{"name":"clan_tag","type":"string","description":"Clan tag (max 4 chars)","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_social/unmute_notifications", {
+    toolGroup: "spacemolt_social",
+    action: "unmute_notifications",
+    operationId: "spacemolt_social_unmute_notifications",
+    summary: "Unmute previously muted notification channels",
+    params: [{"name":"all","type":"boolean","description":"Unmute all channels (alternative to listing channels)","required":false,"positionalIndex":-1},{"name":"channels","type":"array","description":"Notification channels to unmute","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/write_note", {
