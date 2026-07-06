@@ -31,9 +31,13 @@ import type {
   WebSocketCtor,
   WebSocketLike,
 } from './socket-types';
+import { VERSION } from './config';
 
 /** Default API origin (mirrors sdk-session.ts; duplicated to avoid coupling the modules). */
 const DEFAULT_BASE_URL = 'https://game.spacemolt.com';
+
+/** Identifies the package on the wire; prepended to any caller-supplied User-Agent. */
+const DEFAULT_USER_AGENT = `@spacemolt/client-v2/${VERSION}`;
 
 const WS_PATH: Record<SocketEndpoint, string> = { v1: '/ws', v2: '/ws/v2' };
 
@@ -67,6 +71,29 @@ function backoffDelay(r: ResolvedReconnect, attempt: number): number {
 function deriveWsUrl(baseUrl: string, endpoint: SocketEndpoint): string {
   // http->ws, https->wss; then append the endpoint path.
   return `${baseUrl.replace(/^http/, 'ws')}${WS_PATH[endpoint]}`;
+}
+
+/**
+ * Build the WebSocket ctor's 2nd-arg options, always setting a canonical
+ * `User-Agent`. A caller-supplied UA (any header casing) is prepended to the
+ * package default; other headers/options pass through. Pure: neither the passed
+ * wsOptions nor its nested headers object is mutated.
+ */
+function buildWsCtorOptions(wsOptions: Record<string, unknown> | undefined): Record<string, unknown> {
+  const cloned = { ...(wsOptions ?? {}) };
+  const rawHeaders = cloned.headers;
+  const headers: Record<string, unknown> =
+    typeof rawHeaders === 'object' && rawHeaders !== null ? { ...(rawHeaders as Record<string, unknown>) } : {};
+  let callerUA: string | undefined;
+  for (const key of Object.keys(headers)) {
+    if (key.toLowerCase() === 'user-agent') {
+      const v = headers[key];
+      if (typeof v === 'string' && v.length > 0) callerUA = v;
+      delete headers[key];
+    }
+  }
+  headers['User-Agent'] = callerUA ? `${callerUA} ${DEFAULT_USER_AGENT}` : DEFAULT_USER_AGENT;
+  return { ...cloned, headers };
 }
 
 async function resolveWebSocketImpl(injected?: WebSocketCtor): Promise<WebSocketCtor> {
@@ -155,6 +182,7 @@ export async function createSocket(opts: SocketOptions): Promise<SpacemoltSocket
   const authMode = authModeOf(opts.auth);
   const reconnectPolicy = normalizeReconnect(opts.reconnect);
   const Ctor = await resolveWebSocketImpl(opts.WebSocketImpl);
+  const wsCtorOptions = buildWsCtorOptions(opts.wsOptions);
 
   const queue = new EventQueue();
   const frameListeners = new Map<string, Set<(arg: any) => void>>();
@@ -381,7 +409,7 @@ export async function createSocket(opts: SocketOptions): Promise<SpacemoltSocket
     let authed = false;
     let ws: WebSocketLike;
     try {
-      ws = new Ctor(wsUrl);
+      ws = new Ctor(wsUrl, wsCtorOptions);
     } catch (e) {
       const err = e instanceof Error ? e : new Error(String(e));
       if (!everReady) rejectFirst(err);

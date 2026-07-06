@@ -2,6 +2,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { WebSocketServer, WebSocket as WsClient } from 'ws';
 import { createSocket } from '../src/sdk-socket.ts';
 import type { SpacemoltSocket } from '../src/socket-types.ts';
+import { VERSION } from '../src/config.ts';
 
 type Json = Record<string, any>;
 type OnMessage = (
@@ -19,6 +20,8 @@ const WELCOME: Json = {
 interface Harness {
   url: string;
   received: Json[];
+  /** On-the-wire upgrade request headers per connection (ws lowercases header names). */
+  headers: Record<string, string | string[] | undefined>[];
   close(): Promise<void>;
 }
 
@@ -28,8 +31,10 @@ async function startServer(onMessage?: OnMessage): Promise<Harness> {
   const addr = wss.address();
   const port = typeof addr === 'object' && addr ? addr.port : 0;
   const received: Json[] = [];
+  const headers: Record<string, string | string[] | undefined>[] = [];
 
-  wss.on('connection', (sock) => {
+  wss.on('connection', (sock, request) => {
+    headers.push(request.headers);
     const send = (obj: Json) => sock.send(JSON.stringify(obj));
     send(WELCOME);
     sock.on('message', (data) => {
@@ -47,6 +52,7 @@ async function startServer(onMessage?: OnMessage): Promise<Harness> {
   return {
     url: `ws://127.0.0.1:${port}`,
     received,
+    headers,
     close: () =>
       new Promise<void>((resolve) => {
         for (const c of wss.clients) {
@@ -450,5 +456,102 @@ describe('createSocket runtime', () => {
     for (const line of captured) {
       expect(line.includes(secret)).toBe(false);
     }
+  });
+
+  test('default User-Agent header when no wsOptions', async () => {
+    const harness = await startServer((frame, send) => {
+      if (isLogin(frame)) send(LOGGED_IN);
+    });
+    activeHarness = harness;
+
+    const socket = await withTimeout(
+      createSocket({
+        auth: { username: 'alice', password: 'pw' },
+        wsUrl: harness.url,
+        WebSocketImpl: WsClient as any,
+      }),
+    );
+    activeSocket = socket;
+
+    expect(harness.headers[0]?.['user-agent']).toBe(`@spacemolt/client-v2/${VERSION}`);
+  });
+
+  test('caller User-Agent prepends the default', async () => {
+    const harness = await startServer((frame, send) => {
+      if (isLogin(frame)) send(LOGGED_IN);
+    });
+    activeHarness = harness;
+
+    const socket = await withTimeout(
+      createSocket({
+        auth: { username: 'alice', password: 'pw' },
+        wsUrl: harness.url,
+        WebSocketImpl: WsClient as any,
+        wsOptions: { headers: { 'User-Agent': 'roci' } },
+      }),
+    );
+    activeSocket = socket;
+
+    expect(harness.headers[0]?.['user-agent']).toBe(`roci @spacemolt/client-v2/${VERSION}`);
+  });
+
+  test('caller User-Agent match is case-insensitive (no duplicate header)', async () => {
+    const harness = await startServer((frame, send) => {
+      if (isLogin(frame)) send(LOGGED_IN);
+    });
+    activeHarness = harness;
+
+    const socket = await withTimeout(
+      createSocket({
+        auth: { username: 'alice', password: 'pw' },
+        wsUrl: harness.url,
+        WebSocketImpl: WsClient as any,
+        wsOptions: { headers: { 'user-agent': 'roci' } },
+      }),
+    );
+    activeSocket = socket;
+
+    // A single, correctly prepended UA (not an array of two values).
+    expect(harness.headers[0]?.['user-agent']).toBe(`roci @spacemolt/client-v2/${VERSION}`);
+  });
+
+  test('arbitrary caller headers pass through alongside the default UA', async () => {
+    const harness = await startServer((frame, send) => {
+      if (isLogin(frame)) send(LOGGED_IN);
+    });
+    activeHarness = harness;
+
+    const socket = await withTimeout(
+      createSocket({
+        auth: { username: 'alice', password: 'pw' },
+        wsUrl: harness.url,
+        WebSocketImpl: WsClient as any,
+        wsOptions: { headers: { 'X-Trace-Id': 'abc' } },
+      }),
+    );
+    activeSocket = socket;
+
+    expect(harness.headers[0]?.['x-trace-id']).toBe('abc');
+    expect(harness.headers[0]?.['user-agent']).toBe(`@spacemolt/client-v2/${VERSION}`);
+  });
+
+  test('non-string caller User-Agent falls back to the bare default', async () => {
+    const harness = await startServer((frame, send) => {
+      if (isLogin(frame)) send(LOGGED_IN);
+    });
+    activeHarness = harness;
+
+    const socket = await withTimeout(
+      createSocket({
+        auth: { username: 'alice', password: 'pw' },
+        wsUrl: harness.url,
+        WebSocketImpl: WsClient as any,
+        // e.g. `process.env.CUSTOM_UA` when unset — must not become "undefined <default>".
+        wsOptions: { headers: { 'User-Agent': undefined } },
+      }),
+    );
+    activeSocket = socket;
+
+    expect(harness.headers[0]?.['user-agent']).toBe(`@spacemolt/client-v2/${VERSION}`);
   });
 });

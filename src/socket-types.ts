@@ -60,7 +60,10 @@ export interface WebSocketLike {
   removeEventListener(type: string, listener: (event: any) => void): void;
 }
 /** Injected WebSocket constructor (defaults to global WebSocket, then lazy `import("ws")`). */
-export type WebSocketCtor = new (url: string, protocols?: string | string[]) => WebSocketLike;
+export type WebSocketCtor = new (
+  url: string,
+  optionsOrProtocols?: string | string[] | Record<string, unknown>,
+) => WebSocketLike;
 
 export interface SocketOptions {
   /** How to authenticate the socket. */
@@ -75,6 +78,10 @@ export interface SocketOptions {
   reconnect?: ReconnectOptions | false;
   /** Injected WebSocket constructor (testing / runtime choice). */
   WebSocketImpl?: WebSocketCtor;
+  /** Options passed to the underlying WebSocket constructor's 2nd argument
+   *  (Bun global WebSocket / `ws` package form: `new WebSocket(url, options)`).
+   *  Carries `headers`, `protocols`, TLS opts, etc. Browser WebSocket ignores it. */
+  wsOptions?: Record<string, unknown>;
 }
 
 // --- Hand-written control-frame payloads (no generated counterpart) ---
