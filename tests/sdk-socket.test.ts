@@ -9,7 +9,7 @@ import type {
 } from '../src/socket-types.ts';
 import type {
   NotificationChatMessage,
-  NotificationCombatUpdate,
+  NotificationBattleUpdate,
   NotificationCraftingUpdate,
   NotificationMarketUpdate,
   NotificationMiningYield,
@@ -18,7 +18,6 @@ import type {
   NotificationPlayerDied,
   NotificationReconnected,
   NotificationScanDetected,
-  NotificationScanResult,
   NotificationSkillLevelUp,
   NotificationTradeOfferReceived,
 } from '../src/generated';
@@ -31,9 +30,8 @@ type PayloadOf<K extends string> = Extract<ServerEvent, { type: K }>['payload'];
 
 // §7 game-event mapping: each payload is EXACTLY the generated Notification* type.
 // A drift in the generated types turns these into `bun run typecheck:socket` errors.
-type _combat = Expect<Equal<PayloadOf<'combat_update'>, NotificationCombatUpdate>>;
+type _battle = Expect<Equal<PayloadOf<'battle_update'>, NotificationBattleUpdate>>;
 type _died = Expect<Equal<PayloadOf<'player_died'>, NotificationPlayerDied>>;
-type _scanResult = Expect<Equal<PayloadOf<'scan_result'>, NotificationScanResult>>;
 type _scanDetected = Expect<Equal<PayloadOf<'scan_detected'>, NotificationScanDetected>>;
 type _pilotless = Expect<Equal<PayloadOf<'pilotless_ship'>, NotificationPilotlessShip>>;
 type _reconnected = Expect<Equal<PayloadOf<'reconnected'>, NotificationReconnected>>;
@@ -63,7 +61,7 @@ type _closedUnion = Expect<
 
 // Reference the alias types so tsc treats them as used (they are the real test).
 export type _SocketTypeAssertions = [
-  _combat, _died, _scanResult, _scanDetected, _pilotless, _reconnected, _mining,
+  _battle, _died, _scanDetected, _pilotless, _reconnected, _mining,
   _chat, _trade, _skill, _market, _observation, _crafting,
   _welcome, _loggedIn, _registered, _error, _actionError, _forwardCompat, _closedUnion,
 ];

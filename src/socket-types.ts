@@ -4,7 +4,7 @@
 // Notification* types; connection/auth control frames are defined by hand.
 import type {
   NotificationChatMessage,
-  NotificationCombatUpdate,
+  NotificationBattleUpdate,
   NotificationCraftingUpdate,
   NotificationMarketUpdate,
   NotificationMiningYield,
@@ -13,7 +13,6 @@ import type {
   NotificationPlayerDied,
   NotificationReconnected,
   NotificationScanDetected,
-  NotificationScanResult,
   NotificationSkillLevelUp,
   NotificationTradeOfferReceived,
 } from './generated';
@@ -162,9 +161,8 @@ export type ServerEvent =
   | { type: 'action_result'; payload: Record<string, unknown>; request_id?: string }
   | { type: 'action_error'; payload: ErrorPayload; request_id?: string }
   // game-event pushes (payloads = generated Notification* types)
-  | { type: 'combat_update'; payload: NotificationCombatUpdate }
+  | { type: 'battle_update'; payload: NotificationBattleUpdate }
   | { type: 'player_died'; payload: NotificationPlayerDied }
-  | { type: 'scan_result'; payload: NotificationScanResult }
   | { type: 'scan_detected'; payload: NotificationScanDetected }
   | { type: 'pilotless_ship'; payload: NotificationPilotlessShip }
   | { type: 'reconnected'; payload: NotificationReconnected }
