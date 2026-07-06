@@ -225,6 +225,195 @@ const client = createClient({ baseUrl: 'https://game.spacemolt.com' });
 The SDK is ESM-only and targets Node 18+ (native fetch).
 The default base URL is `https://game.spacemolt.com`.
 
+## WebSocket client (`createSocket`)
+
+A framework-agnostic, dependency-free WebSocket client that mirrors `createSession`.
+It opens a connection, runs the handshake, and gives you a typed stream of server
+events plus helpers for sending and request/response correlation.
+
+The socket is a **separate API from the REST `X-Session-Id` session**: it does not
+reuse a REST session token. It authenticates directly with the account password (or a
+single-use login token). There is **one connection per account** — connecting kicks
+any other live connection for that account (you'll see a `4001 session_replaced` close
+on the connection that was kicked).
+
+### Quick start
+
+```ts
+import { createSocket, type RawServerFrame } from '@spacemolt/client-v2';
+
+const socket = await createSocket({
+  auth: { username: 'you', password: 'secret' },
+  endpoint: 'v1', // 'v1' (default) | 'v2' — only OUTBOUND framing differs
+});
+
+for await (const ev of socket) {
+  switch (ev.type) {
+    case 'combat_update':
+      // ev.payload is the generated NotificationCombatUpdate
+      console.log('combat', ev.payload);
+      break;
+    case 'market_update':
+      // ev.payload is the generated NotificationMarketUpdate
+      console.log('market', ev.payload);
+      break;
+    default:
+      // unknown/future frame types are still delivered — see "Unknown frames"
+      console.log('frame', (ev as RawServerFrame).type);
+  }
+}
+```
+
+`createSocket` resolves once the connection is open AND `logged_in` (or on `welcome`
+for anonymous auth). Server→client frames are **identical on `v1` and `v2`**; only the
+shape of frames you send out differs.
+
+### `createSocket(opts)` options
+
+`SocketOptions`:
+
+| Option          | Type                          | Default                       | Notes |
+| --------------- | ----------------------------- | ----------------------------- | ----- |
+| `auth`          | `SocketAuth`                  | _(required)_                  | Exactly one of `{ username, password }`, `{ loginToken, username? }`, or `{ anonymous: true }`. |
+| `endpoint?`     | `'v1' \| 'v2'`                | `'v1'`                        | Selects outbound framing only. |
+| `baseUrl?`      | `string`                      | `https://game.spacemolt.com`  | API origin; `http(s)` is rewritten to `ws(s)`. |
+| `wsUrl?`        | `string`                      | derived from `baseUrl`        | Full WS URL override (else `baseUrl` + `/ws` or `/ws/v2`). |
+| `reconnect?`    | `ReconnectOptions \| false`   | enabled (exponential backoff) | `false` disables; see "Reconnect". |
+| `WebSocketImpl?`| `WebSocketCtor`               | global `WebSocket`, else `ws` | Inject a constructor (testing / older runtimes). |
+
+`ReconnectOptions`: `initialDelayMs` (500), `maxDelayMs` (30_000), `factor` (2),
+`jitter` (true), `maxAttempts` (Infinity).
+
+The returned promise rejects if the **first** connection fails or the credential is
+rejected.
+
+### Two consumption surfaces
+
+**Async iterable (primary).** `for await (const ev of socket)`, or `socket.events()`
+for an explicit `AsyncIterable<ServerEvent>`:
+
+```ts
+for await (const ev of socket.events()) {
+  if (ev.type === 'mining_yield') console.log(ev.payload);
+}
+```
+
+**Emitter.** `socket.on(type, cb)` is additive to the iterator and returns an
+unsubscribe function. Frame-type listeners narrow `e.payload`:
+
+```ts
+const off = socket.on('combat_update', (e) => {
+  console.log(e.payload); // narrowed to NotificationCombatUpdate
+});
+off(); // unsubscribe
+
+// Connection-lifecycle names deliver a ConnectionEvent instead of a frame:
+socket.on('open',      (info) => console.log(info.type));
+socket.on('close',     (info) => console.log('closed', info.code, info.reason));
+socket.on('reconnect', (info) => console.log('reconnected after', info.attempt));
+socket.on('error',     (info) => console.error(info.error));
+```
+
+### Sending & subscriptions
+
+`socket.send(frame)` sends a raw `OutboundFrame`. The caller picks the shape per the
+configured `endpoint` — v1 `{ type, payload?, request_id? }` vs v2
+`{ tool, action, payload?, request_id? }`:
+
+```ts
+// v1
+socket.send({ type: 'subscribe_market' });
+// v2
+socket.send({ tool: 'spacemolt_market', action: 'subscribe_market' });
+```
+
+Convenience wrappers build the right framing for the configured endpoint automatically:
+
+```ts
+socket.subscribeMarket();                       // NOTE: requires being DOCKED
+socket.unsubscribeMarket();
+socket.subscribeObservation({ activeScan: true });
+socket.unsubscribeObservation();
+```
+
+### Request/response correlation
+
+`socket.request(frame, { timeoutMs? })` attaches (or echoes) a `request_id` and
+resolves on the **terminal** response. It skips the `ok`/`result` `{ pending: true }`
+ack and resolves on the post-tick `action_result` / `action_error` for mutations, or on
+the synchronous `ok` (v1) / `result` (v2) for queries.
+
+```ts
+const res = await socket.request({ tool: 'spacemolt', action: 'get_status' });
+console.log(res.type, res.payload);
+```
+
+Default timeout is `600_000` ms; pass `timeoutMs: 0` or `Infinity` to disable it.
+
+### Reconnect & close behavior
+
+After the **first** successful auth, an unexpected close triggers a transparent
+backoff reconnect that re-runs the full handshake (`welcome` → login → `logged_in`).
+The event stream **stays live** across reconnects — it only ends on `close()` or when
+the reconnect policy is exhausted/disabled.
+
+Reconnect keys off "any non-user, non-`1000` close" rather than a specific code.
+Observed close codes:
+
+| Code   | Meaning             | Notes |
+| ------ | ------------------- | ----- |
+| `1000` | normal              | documented in api-docs (deploy / idle / logout). |
+| `4001` | `session_replaced`  | a second connection for the account kicked this one — observed but undocumented. |
+| `4002` | `auth_timeout`      | no valid credential in time — observed but undocumented. |
+
+A failure on the **first** connection, or a rejected credential at any time, is
+terminal — the `createSocket` promise rejects rather than looping.
+
+```ts
+await socket.close();        // clean shutdown (default code 1000), ends the stream
+console.log(socket.status);  // 'connecting' | 'open' | 'authenticated' | 'reconnecting' | 'closed'
+```
+
+### Unknown frames (forward-compat)
+
+`ServerEvent` is a **closed** discriminated union, so `switch (ev.type)` narrows
+`ev.payload` cleanly under TypeScript 6. Unknown / future frame `type`s are **never
+dropped** — the runtime still delivers them; they simply fall outside the union.
+Handle them in a `default:` branch by treating the value as the exported
+`RawServerFrame`:
+
+```ts
+for await (const ev of socket) {
+  switch (ev.type) {
+    case 'scan_result':
+      handleScan(ev.payload);
+      break;
+    default: {
+      const raw = ev as RawServerFrame; // { type: string; payload?: unknown; request_id?: string }
+      console.log('unhandled frame', raw.type, raw.payload);
+    }
+  }
+}
+```
+
+### Runtime requirements
+
+The socket is dependency-free. It uses `opts.WebSocketImpl` if given, else a global
+`WebSocket` (Node ≥ 22 / browsers), else a lazy `import("ws")` if the package is
+installed. So Node 22+ needs nothing; on older Node, pass `WebSocketImpl` or install
+`ws`:
+
+```ts
+import WebSocket from 'ws';
+const socket = await createSocket({
+  auth: { loginToken: '…' },
+  WebSocketImpl: WebSocket,
+});
+```
+
+Credentials are passed in explicitly — the package **never** reads env/disk, **never**
+prompts, and **never** logs the secret.
+
 ## License
 
 [MIT](./LICENSE)
