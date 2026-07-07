@@ -13,4 +13,8 @@ describe('library entry exports', () => {
   test('exports the session helper', () => {
     expect(typeof lib.createSession).toBe('function');
   });
+
+  test('exports the socket helper', () => {
+    expect(typeof lib.createSocket).toBe('function');
+  });
 });
