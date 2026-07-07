@@ -31,7 +31,7 @@ import type {
   WebSocketCtor,
   WebSocketLike,
 } from './socket-types';
-import { VERSION } from './config';
+import { VERSION } from './version';
 
 /** Default API origin (mirrors sdk-session.ts; duplicated to avoid coupling the modules). */
 const DEFAULT_BASE_URL = 'https://game.spacemolt.com';

@@ -1,8 +1,8 @@
 import { join } from 'path';
 
-// Version inlined at build time from package.json (single source of truth)
-import pkg from '../package.json';
-export const VERSION: string = pkg.version;
+// Version inlined from package.json — single source of truth in ./version
+// (kept node-free so the library declaration build can include it).
+export { VERSION } from './version';
 
 export const API_BASE = process.env.SPACEMOLT_URL || 'https://game.spacemolt.com/api/v2';
 
