@@ -1553,6 +1553,14 @@ const entries: [string, CommandMeta][] = [
     params: [],
     isAmbiguous: true,
   }],
+  ["spacemolt_intel/espionage", {
+    toolGroup: "spacemolt_intel",
+    action: "espionage",
+    operationId: "spacemolt_intel_espionage",
+    summary: "Send a spy to gather intelligence on the station you're docked at, using your faction's Espionage HQ",
+    params: [],
+    isAmbiguous: false,
+  }],
   ["spacemolt_intel/help", {
     toolGroup: "spacemolt_intel",
     action: "help",
