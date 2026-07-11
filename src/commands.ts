@@ -1025,6 +1025,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters. For 'set_access': 'public' opens your facility to renters, 'private' closes it.","required":true,"positionalIndex":-1,"enumValues":["private","public"]}],
     isAmbiguous: false,
   }],
+  ["spacemolt_facility/set_auto_buy_fuel", {
+    toolGroup: "spacemolt_facility",
+    action: "set_auto_buy_fuel",
+    operationId: "spacemolt_facility_set_auto_buy_fuel",
+    summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
+    params: [{"name":"auto_buy_fuel","type":"boolean","description":"Whether the station automatically buys fuel from docked pilots at live scarcity-based prices, funded by the station economy (set_auto_buy_fuel; off by default)","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_facility/set_build_policy", {
     toolGroup: "spacemolt_facility",
     action: "set_build_policy",
