@@ -500,8 +500,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt",
     action: "unload_passenger",
     operationId: "spacemolt_unload_passenger",
-    summary: "Put a passenger (or everyone) off the ship at the current station",
-    params: [{"name":"id","type":"string","description":"Name (or citizen ID) of the passenger to put off the ship at the current station, or \"all\" to put every passenger off at once.","required":true,"positionalIndex":0}],
+    summary: "Put a passenger (or everyone) off the ship here — or hand them off to another ship or your faction's transit lounge for a connecting flight",
+    params: [{"name":"id","type":"string","description":"Name (or citizen ID) of the passenger to put off the ship at the current station, or \"all\" to put every passenger off at once.","required":true,"positionalIndex":0},{"name":"target","type":"string","description":"Optional connecting-flight handoff: \"lounge\" checks the passenger(s) into your faction's Transit Lounge here, or a ship ID/name transfers them to that docked ship (yours or a faction mate's, needs free berths). Fares and deadlines continue unchanged. Omit for a normal delivery/strand.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt/unsubscribe_observation", {
