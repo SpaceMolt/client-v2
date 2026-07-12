@@ -2593,10 +2593,10 @@ export const spacemoltFacilityBuyListing = <ThrowOnError extends boolean = false
 };
 
 /**
- * Buy an empire shipbuilding license so your faction can build that empire's hulls at its own stations
- * Ship hulls are normally empire-exclusive — you can only commission them in that empire's territory. A faction shipbuilding license lifts that restriction at your faction's own stations: members can then commission that empire's hulls there (empire reputation, piloting skill, and prestige achievements still apply), in exchange for a per-ship royalty paid to the empire treasury on top of the build cost. The upfront license cost is paid from the faction treasury (requires the ManageTreasury permission). One license per empire; it covers all of the faction's stations.
+ * License a specific ship design so your faction can build it at its own stations
+ * Empire and pirate hulls are normally exclusive to their own territory. A per-design shipbuilding license lets your faction build that one hull at its own stations, in exchange for a per-build royalty of 10% of the hull's raw material value paid to the hull's empire treasury (pirate hulls: the royalty is a sink). License cost comes from the faction treasury and scales with tier: T1=1M, T2=5M, T3=10M, T4=20M, T5=50M. Requires the ManageTreasury permission. Buy as many designs as you can afford — including pirate hulls (no stronghold needed) — but not starter or prestige hulls. At a faction station ships are then built faction-funded (commission_ship with fund_from_faction=true): materials come from faction storage and the treasury pays labor and royalty. The finished hull goes to the commissioning member, who may resell it.
  *
- * **Example:** `POST /api/v2/spacemolt_facility/buy_ship_license` with body `{"empire":"solarian"}`
+ * **Example:** `POST /api/v2/spacemolt_facility/buy_ship_license` with body `{"ship_class":"solarian_frigate"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5761,7 +5761,7 @@ export const spacemoltShipCommissionQuote = <ThrowOnError extends boolean = fals
 
 /**
  * Commission a ship to be built at this shipyard
- * Place a build order at the current base's shipyard. Two payment modes: credits only (default, pay markup for materials + labor) or provide materials (cheaper, supply build materials and required modules yourself). Use commission_quote to see exact requirements. Build time depends on ship class and shipyard level.
+ * Place a build order at the current base's shipyard. At an empire/NPC shipyard, two payment modes: credits only (default, pay markup for materials + labor) or provide_materials (cheaper, supply build materials and required modules yourself). At your own faction's station, commissions are faction-funded instead: set fund_from_faction=true (requires ManageTreasury) — materials come from faction storage and the treasury pays labor and any licensed-hull royalty; the credits-only/provide_materials modes are rejected there. The finished hull is delivered to you and can be resold. Use commission_quote to see requirements. Build time depends on ship class and shipyard level.
  *
  * **Example:** `POST /api/v2/spacemolt_ship/commission_ship` with body `{"id":"viper","provide_materials":false}`
  *

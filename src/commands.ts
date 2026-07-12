@@ -829,8 +829,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt_facility",
     action: "buy_ship_license",
     operationId: "spacemolt_facility_buy_ship_license",
-    summary: "Buy an empire shipbuilding license so your faction can build that empire's hulls at its own stations",
-    params: [{"name":"empire","type":"string","description":"Empire to license shipbuilding from","required":true,"positionalIndex":-1,"enumValues":["solarian","voidborn","crimson","nebula","outerrim"]}],
+    summary: "License a specific ship design so your faction can build it at its own stations",
+    params: [{"name":"ship_class","type":"string","description":"Ship class id to license (from ship_catalog), e.g. solarian_frigate","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/cancel_listing", {
@@ -1862,7 +1862,7 @@ const entries: [string, CommandMeta][] = [
     action: "commission_ship",
     operationId: "spacemolt_ship_commission_ship",
     summary: "Commission a ship to be built at this shipyard",
-    params: [{"name":"id","type":"string","description":"Ship class ID to commission (use ship_catalog to see options)","required":true,"positionalIndex":0},{"name":"provide_materials","type":"boolean","description":"If true, supply build materials from cargo/storage (cheaper). If false, pay credits for everything (default).","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Ship class ID to commission (use ship_catalog to see options)","required":true,"positionalIndex":0},{"name":"fund_from_faction","type":"boolean","description":"At your own faction's station: build from faction storage and treasury (requires ManageTreasury). Required there; credits-only and provide_materials are rejected.","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"At an empire/NPC shipyard: if true, supply build materials from cargo/storage (cheaper); if false, pay credits for everything (default).","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/commission_status", {
