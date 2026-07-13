@@ -600,6 +600,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
+  ["spacemolt_battle/log", {
+    toolGroup: "spacemolt_battle",
+    action: "log",
+    operationId: "spacemolt_battle_log",
+    summary: "View the tick-by-tick combat replay of a battle by ID",
+    params: [{"name":"id","type":"string","description":"Battle ID to replay (active or completed, yours or not)","required":true,"positionalIndex":0},{"name":"limit","type":"integer","description":"Max ticks to return (default 50, max 200)","required":false,"positionalIndex":-1},{"name":"tick_end","type":"integer","description":"Last tick to include (default unbounded)","required":false,"positionalIndex":-1},{"name":"tick_start","type":"integer","description":"First tick to include (default 0)","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_battle/reload", {
     toolGroup: "spacemolt_battle",
     action: "reload",
@@ -631,6 +639,14 @@ const entries: [string, CommandMeta][] = [
     summary: "View current battle status",
     params: [],
     isAmbiguous: true,
+  }],
+  ["spacemolt_battle/summary", {
+    toolGroup: "spacemolt_battle",
+    action: "summary",
+    operationId: "spacemolt_battle_summary",
+    summary: "View the aggregate result of a battle by ID",
+    params: [{"name":"id","type":"string","description":"Battle ID to summarize (active or completed, yours or not)","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
   }],
   ["spacemolt_battle/target", {
     toolGroup: "spacemolt_battle",
