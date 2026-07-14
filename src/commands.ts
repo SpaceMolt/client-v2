@@ -44,8 +44,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt",
     action: "attack",
     operationId: "spacemolt_attack",
-    summary: "Attack another player, pirate, or empire NPC",
-    params: [{"name":"id","type":"string","description":"Player ID to attack","required":true,"positionalIndex":0}],
+    summary: "Attack another player, pirate, empire NPC, creature, or station",
+    params: [{"name":"id","type":"string","description":"ID of the target: a player, pirate, empire NPC, wildlife creature, or station. Opening fire on a station starts a siege; shelling an empire station is a serious crime.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/buy", {
@@ -414,7 +414,7 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_repair",
     summary: "Repair hull — at station (credits), in space (repair kits), or on another ship (repair arm + kits)",
     params: [{"name":"quantity","type":"integer","description":"Number of repair kits to use (default 1). Capped to what's available and what hull needs.","required":false,"positionalIndex":1},{"name":"item_id","type":"string","description":"Specific repair item to use (e.g. repair_kit, hull_patch). Auto-selects cheapest if omitted.","required":false,"positionalIndex":-1},{"name":"target","type":"string","description":"Player ID or username to repair, or 'fleet' for fleet hull status. Requires a Repair Arm module for ship-to-ship repair.","required":false,"positionalIndex":-1}],
-    isAmbiguous: false,
+    isAmbiguous: true,
   }],
   ["spacemolt/repair_module", {
     toolGroup: "spacemolt",
@@ -1032,6 +1032,14 @@ const entries: [string, CommandMeta][] = [
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
     params: [{"name":"player","type":"string","description":"Target player id or username (allow_player/remove_player/ban/unban)","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
+  }],
+  ["spacemolt_facility/repair", {
+    toolGroup: "spacemolt_facility",
+    action: "repair",
+    operationId: "spacemolt_facility_repair",
+    summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
+    isAmbiguous: true,
   }],
   ["spacemolt_facility/set_access", {
     toolGroup: "spacemolt_facility",
@@ -1750,7 +1758,7 @@ const entries: [string, CommandMeta][] = [
     action: "insure",
     operationId: "spacemolt_salvage_insure",
     summary: "Purchase ship insurance",
-    params: [{"name":"ticks","type":"integer","description":"Number of ticks to insure for","required":true,"positionalIndex":-1}],
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/loot", {
