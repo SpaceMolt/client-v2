@@ -328,6 +328,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"Creature ID to hunt (from the 'creatures' list in get_nearby)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
+  ["spacemolt/inspect", {
+    toolGroup: "spacemolt",
+    action: "inspect",
+    operationId: "spacemolt_inspect",
+    summary: "Inspect an item, module, ship class, system, visible POI, or docked base by ID",
+    params: [{"name":"id","type":"string","description":"Item, module, ship class, system, POI, or base ID to inspect","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
   ["spacemolt/install_mod", {
     toolGroup: "spacemolt",
     action: "install_mod",
@@ -397,7 +405,7 @@ const entries: [string, CommandMeta][] = [
     action: "recycle",
     operationId: "spacemolt_recycle",
     summary: "Queue a recycling job: consume a recipe's outputs to recover a fraction of its inputs",
-    params: [{"name":"id","type":"string","description":"Recipe ID to recycle (the recycler consumes the recipe's outputs and returns a lossy fraction of its inputs). Use catalog with type=recipes to browse.","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of the recipe's output items to feed in and break down (default 1). Rounded up to a whole number of recycling runs.","required":false,"positionalIndex":1},{"name":"deliver_to","type":"string","description":"Output destination: 'storage' (default), 'faction' (faction main store — requires manage treasury permission), or 'faction:<bucket name or id>' for a specific Storage Extension bucket.","required":false,"positionalIndex":-1},{"name":"dry_run","type":"boolean","description":"Return a cost+time quote (feedstock consumed, fees, venue, ETA) without queuing anything. Not supported with bulk jobs.","required":false,"positionalIndex":-1},{"name":"facility_id","type":"string","description":"Route to a specific recycler facility ID (overrides auto-selection).","required":false,"positionalIndex":-1},{"name":"job_id","type":"string","description":"Cancel this queued job (refunding its unconsumed escrow) instead of recycling. Setting job_id implies cancel.","required":false,"positionalIndex":-1},{"name":"job_ids","type":"array","description":"Bulk cancel: cancel many queued jobs in one action. Each ID is cancelled independently with per-job success/failure, so one bad ID doesn't sink the batch. Refunds the unconsumed escrow of every cancelled job.","required":false,"positionalIndex":-1},{"name":"jobs","type":"array","description":"Bulk mode: recycle many recipes in one action. Each entry: {recipe_id, quantity, facility_id?, deliver_to?, source?}. When set, top-level recipe_id/quantity are ignored; each job is processed independently (partial success). Max 50.","required":false,"positionalIndex":-1},{"name":"source","type":"string","description":"Where feedstock (and labor/rental credits) are pulled FROM. Same values as deliver_to. Defaults to deliver_to.","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Recipe ID to recycle (the recycler consumes the recipe's outputs and returns a lossy fraction of its inputs). Use catalog with type=recipes to browse.","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Number of the recipe's output items to feed in and break down (default 1). Rounded up to a whole number of recycling runs.","required":false,"positionalIndex":1},{"name":"deliver_to","type":"string","description":"Output destination: 'storage' (default), 'faction' (faction main store — requires manage treasury permission), or 'faction:<bucket name or id>' for a specific Storage Extension bucket.","required":false,"positionalIndex":-1},{"name":"dry_run","type":"boolean","description":"Return a cost+time quote (feedstock consumed, fees, venue, ETA) without queuing anything. Not supported with bulk jobs.","required":false,"positionalIndex":-1},{"name":"facility_id","type":"string","description":"Route to a specific recycler facility ID (overrides auto-selection).","required":false,"positionalIndex":-1},{"name":"job_id","type":"string","description":"Cancel this queued job (refunding its unconsumed escrow) instead of recycling. Setting job_id implies cancel.","required":false,"positionalIndex":-1},{"name":"job_ids","type":"array","description":"Bulk cancel: cancel many queued jobs in one action. Each ID is cancelled independently with per-job success/failure, so one bad ID doesn't sink the batch. Refunds the unconsumed escrow of every cancelled job.","required":false,"positionalIndex":-1},{"name":"jobs","type":"array","description":"Bulk mode: recycle many recipes in one action. Each entry: {recipe_id, quantity, facility_id?, preset?, deliver_to?, source?}. When set, top-level recipe_id/quantity are ignored; each job is processed independently (partial success). Max 50.","required":false,"positionalIndex":-1},{"name":"preset","type":"string","description":"Auto-routing preset: 'fast' (fewest ticks, default) or 'cheap' (lowest fee) — both pick the best eligible recycler globally. Use 'prefer_own' to keep the job on your own (then faction) recycler whenever one can run it. 'workshop' doesn't apply — recycling always needs a real recycler facility.","required":false,"positionalIndex":-1,"enumValues":["fast","cheap","prefer_own"]},{"name":"source","type":"string","description":"Where feedstock (and labor/rental credits) are pulled FROM. Same values as deliver_to. Defaults to deliver_to.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt/refuel", {
@@ -1967,14 +1975,6 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_ship_scrap_ship",
     summary: "Permanently destroy a ship you no longer want (no credits returned)",
     params: [{"name":"id","type":"string","description":"ID of the ship to permanently destroy (no credits returned). Remote order: works from anywhere on a ship parked at any station; cargo and modules are recovered to your storage at the station where the ship was parked. Use list_ships to see your fleet.","required":true,"positionalIndex":0}],
-    isAmbiguous: false,
-  }],
-  ["spacemolt_ship/sell_ship", {
-    toolGroup: "spacemolt_ship",
-    action: "sell_ship",
-    operationId: "spacemolt_ship_sell_ship",
-    summary: "Sell a stored ship at the current station",
-    params: [{"name":"id","type":"string","description":"ID of the stored ship to sell (use list_ships to see your fleet)","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/sell_ship_to_order", {
