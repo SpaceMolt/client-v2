@@ -865,12 +865,20 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"name","type":"string","description":"Name for the new faction outpost","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
+  ["spacemolt_facility/disassemble", {
+    toolGroup: "spacemolt_facility",
+    action: "disassemble",
+    operationId: "spacemolt_facility_disassemble",
+    summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_facility/dismantle", {
     toolGroup: "spacemolt_facility",
     action: "dismantle",
     operationId: "spacemolt_facility_dismantle",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/facility_set_description", {
@@ -878,7 +886,7 @@ const entries: [string, CommandMeta][] = [
     action: "facility_set_description",
     operationId: "spacemolt_facility_facility_set_description",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel). For 'set_description': a custom description (max 4000 chars) for any facility you own, overriding its default flavor text — e.g. re-flavoring your faction's bar. Send empty to clear it.","required":false,"positionalIndex":-1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"description","type":"string","description":"For 'personal_decorate': a text description of your personal quarters (what visitors see, hear, and feel). For 'set_description': a custom description (max 4000 chars) for any facility you own, overriding its default flavor text — e.g. re-flavoring your faction's bar. Send empty to clear it.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/faction_build", {
@@ -889,12 +897,20 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":true,"positionalIndex":0},{"name":"bucket","type":"string","description":"For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
+  ["spacemolt_facility/faction_disassemble", {
+    toolGroup: "spacemolt_facility",
+    action: "faction_disassemble",
+    operationId: "spacemolt_facility_faction_disassemble",
+    summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_facility/faction_dismantle", {
     toolGroup: "spacemolt_facility",
     action: "faction_dismantle",
     operationId: "spacemolt_facility_faction_dismantle",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/faction_list", {
@@ -918,7 +934,7 @@ const entries: [string, CommandMeta][] = [
     action: "faction_upgrade",
     operationId: "spacemolt_facility_faction_upgrade",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":true,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"bucket","type":"string","description":"For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.","required":false,"positionalIndex":-1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":true,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"bucket","type":"string","description":"For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/found_station", {
@@ -942,7 +958,7 @@ const entries: [string, CommandMeta][] = [
     action: "job_add",
     operationId: "spacemolt_facility_job_add",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"deliver_to","type":"string","description":"Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Job direction: 'forward' runs the recipe normally (craft); 'reverse' recycles existing items back to inputs.","required":false,"positionalIndex":-1,"enumValues":["forward","reverse"]},{"name":"quantity","type":"integer","description":"For 'job_add': number of runs to queue.","required":false,"positionalIndex":-1},{"name":"recipe_id","type":"string","description":"Recipe ID to run (for 'job_add' action).","required":true,"positionalIndex":-1},{"name":"source","type":"string","description":"Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.","required":false,"positionalIndex":-1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"deliver_to","type":"string","description":"Output destination for 'job_add': 'storage' (default), 'faction' (faction main store), or 'faction:<bucket name or id>' for a Storage Extension bucket.","required":false,"positionalIndex":-1},{"name":"direction","type":"string","description":"Job direction: 'forward' runs the recipe normally (craft); 'reverse' recycles existing items back to inputs.","required":false,"positionalIndex":-1,"enumValues":["forward","reverse"]},{"name":"quantity","type":"integer","description":"For 'job_add': number of runs to queue.","required":false,"positionalIndex":-1},{"name":"recipe_id","type":"string","description":"Recipe ID to run (for 'job_add' action).","required":true,"positionalIndex":-1},{"name":"source","type":"string","description":"Input source for 'job_add': where inputs/credits are pulled from. Same values as deliver_to; defaults to deliver_to.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/job_cancel", {
@@ -958,7 +974,7 @@ const entries: [string, CommandMeta][] = [
     action: "job_list",
     operationId: "spacemolt_facility_job_list",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/job_reorder", {
@@ -966,7 +982,7 @@ const entries: [string, CommandMeta][] = [
     action: "job_reorder",
     operationId: "spacemolt_facility_job_reorder",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"job_id","type":"string","description":"Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.","required":true,"positionalIndex":-1},{"name":"position","type":"integer","description":"New queue position for 'job_reorder' (1-based).","required":false,"positionalIndex":-1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"job_id","type":"string","description":"Job ID (for 'job_cancel', 'job_reorder'). Use action 'job_list' to see job IDs.","required":true,"positionalIndex":-1},{"name":"position","type":"integer","description":"New queue position for 'job_reorder' (1-based).","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/list", {
@@ -982,7 +998,7 @@ const entries: [string, CommandMeta][] = [
     action: "list_for_sale",
     operationId: "spacemolt_facility_list_for_sale",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).","required":false,"positionalIndex":-1},{"name":"price","type":"number","description":"For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.","required":true,"positionalIndex":-1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"faction","type":"boolean","description":"For 'list_for_sale': set true to list a faction-owned facility (requires manage_facilities permission).","required":false,"positionalIndex":-1},{"name":"price","type":"number","description":"For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/owned", {
@@ -1038,7 +1054,7 @@ const entries: [string, CommandMeta][] = [
     action: "repair",
     operationId: "spacemolt_facility_repair",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
     isAmbiguous: true,
   }],
   ["spacemolt_facility/set_access", {
@@ -1046,7 +1062,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_access",
     operationId: "spacemolt_facility_set_access",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters. For 'set_access': 'public' opens your facility to renters, 'private' closes it.","required":true,"positionalIndex":-1,"enumValues":["private","public"]}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"access","type":"string","description":"For 'personal_decorate': who can visit your quarters. For 'set_access': 'public' opens your facility to renters, 'private' closes it.","required":true,"positionalIndex":-1,"enumValues":["private","public"]}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_auto_buy_fuel", {
@@ -1086,7 +1102,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_name",
     operationId: "spacemolt_facility_set_name",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"custom_name","type":"string","description":"For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.","required":false,"positionalIndex":-1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"custom_name","type":"string","description":"For 'set_name': a custom name for the facility (3-32 chars) so multiple facilities of the same type stand out. Send empty to clear it.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_output_price", {
@@ -1094,7 +1110,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_output_price",
     operationId: "spacemolt_facility_set_output_price",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"price","type":"number","description":"For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.","required":false,"positionalIndex":-1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"price","type":"number","description":"For 'list_for_sale': asking price in whole credits. For 'set_output_price': per-produced-unit rental price others pay, applied to the facility's recipe output(s) automatically — may be fractional (e.g. 0.25), the per-run fee is price × output quantity rounded to a whole credit. Used literally: 0 rents the facility out for free; negative is rejected.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_public", {
@@ -1150,7 +1166,7 @@ const entries: [string, CommandMeta][] = [
     action: "transfer",
     operationId: "spacemolt_facility_transfer",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"direction","type":"string","description":"Transfer direction: 'to_faction' moves the facility to faction ownership; 'to_player' transfers it to a specific player.","required":true,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1}],
+    params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"direction","type":"string","description":"Transfer direction: 'to_faction' moves the facility to faction ownership; 'to_player' transfers it to a specific player.","required":true,"positionalIndex":-1,"enumValues":["to_faction","to_player"]},{"name":"player_id","type":"string","description":"Target player ID for 'transfer' action with direction 'to_player'.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/types", {
@@ -1174,7 +1190,7 @@ const entries: [string, CommandMeta][] = [
     action: "upgrade",
     operationId: "spacemolt_facility_upgrade",
     summary: "Manage facilities at stations (production, faction, personal, sales, and more)",
-    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":true,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"bucket","type":"string","description":"For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.","required":false,"positionalIndex":-1}],
+    params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":true,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'disassemble', 'faction_dismantle', 'faction_disassemble', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"bucket","type":"string","description":"For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/upgrades", {
