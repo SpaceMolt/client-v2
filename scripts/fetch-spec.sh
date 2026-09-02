@@ -18,7 +18,7 @@ trap 'rm -f "$STAGING"' EXIT
 echo "Fetching $URL"
 # The spec endpoint rate-limits consecutive fetches (~35s window) with a 429.
 # curl treats 429 (and 408/5xx) as transient when --retry is set, so back off
-# and retry instead of failing — e.g. when a version probe just hit the URL.
+# and retry instead of failing on transient server or rate-limit responses.
 curl --fail --silent --show-error --retry 4 --retry-delay 40 "$URL" -o "$STAGING"
 
 # Verify it's actually a spec and not an error/rate-limit response.

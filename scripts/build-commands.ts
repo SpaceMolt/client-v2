@@ -36,11 +36,44 @@ interface OpenAPIOperation {
 }
 
 interface OpenAPIProperty {
-  type?: string;
+  type?: string | string[];
   description?: string;
   enum?: string[];
   'x-positional-index'?: number;
 }
+
+type ParamType = 'string' | 'integer' | 'boolean' | 'object' | 'array' | 'number';
+
+const PARAM_TYPES = new Set<ParamType>([
+  'string',
+  'integer',
+  'boolean',
+  'object',
+  'array',
+  'number',
+]);
+
+function normalizeParamType(type: unknown): ParamType {
+  if (typeof type === 'string') {
+    return PARAM_TYPES.has(type as ParamType) ? type as ParamType : 'string';
+  }
+  if (!Array.isArray(type)) return 'string';
+
+  const nonNullTypes = new Set<ParamType>();
+  for (const candidate of type) {
+    if (candidate === 'null') continue;
+    if (typeof candidate !== 'string' || !PARAM_TYPES.has(candidate as ParamType)) return 'string';
+    nonNullTypes.add(candidate as ParamType);
+  }
+
+  // ParamDef and the CLI coercion path represent one concrete type. OpenAPI
+  // 3.1 nullable unions have exactly one non-null member; ambiguous unions,
+  // empty arrays, and unknown types fall back to uncoerced string input.
+  if (nonNullTypes.size !== 1) return 'string';
+
+  return nonNullTypes.values().next().value as ParamType;
+}
+
 function main() {
   const spec: OpenAPISchema = JSON.parse(readFileSync(SPEC_PATH, 'utf-8'));
   const commands: CommandEntry[] = [];
@@ -94,7 +127,7 @@ function main() {
         for (const [name, prop] of Object.entries(bodySchema.properties)) {
           params.push({
             name,
-            type: prop.type || 'string',
+            type: normalizeParamType(prop.type),
             description: prop.description || '',
             required: required.has(name),
             positionalIndex: typeof prop['x-positional-index'] === 'number' ? prop['x-positional-index'] : -1,
@@ -138,7 +171,7 @@ function main() {
 
 interface ParamEntry {
   name: string;
-  type: string;
+  type: ParamType;
   description: string;
   required: boolean;
   positionalIndex: number;
