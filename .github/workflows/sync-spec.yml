@@ -6,10 +6,9 @@ name: Sync OpenAPI spec
 # release.yml to build and publish platform binaries).
 #
 # Triggers:
-# - repository_dispatch (gameserver-deployed): fired by the gameserver's
-#   deploy workflow right after it kicks off a Render deploy. Render deploys
-#   are asynchronous, so the sync first polls until the dispatched version
-#   is actually live.
+# - repository_dispatch (gameserver-deployed): fired after the gameserver's
+#   on-box deploy confirms the new version is healthy. The spec can be fetched
+#   immediately because the dispatch is already post-health-check.
 # - schedule: backstop in case a dispatch is missed. GitHub Actions cron is
 #   heavily throttled in practice — observed intervals of 80-100 minutes
 #   despite the 30-minute schedule.
@@ -55,30 +54,6 @@ jobs:
 
       - name: Install dependencies
         run: bun install
-
-      - name: Confirm dispatched gameserver version is live
-        if: github.event_name == 'repository_dispatch' && github.event.client_payload.version != null
-        run: |
-          # The gameserver's on-box deploy fires this dispatch only *after*
-          # /health confirms the new version is serving, so the public spec is
-          # essentially always already live — the first probe below matches. We
-          # keep a short bounded confirmation (not the old ~20-min poll, a leftover
-          # from the async-Render era) to absorb brief edge/CDN propagation. 30s
-          # spacing stays under the spec endpoint's rate limit.
-          TARGET="${{ github.event.client_payload.version }}"
-          TARGET="${TARGET#v}"
-          echo "Confirming gameserver v${TARGET} is live..."
-          for i in $(seq 1 5); do
-            LIVE=$(curl -sf https://game.spacemolt.com/api/v2/openapi.json | jq -r '.info["x-gameserver-version"] // empty' 2>/dev/null || true)
-            LIVE="${LIVE#v}"
-            if [ "$LIVE" = "$TARGET" ]; then
-              echo "Live version is v${LIVE} — proceeding with sync."
-              exit 0
-            fi
-            echo "Attempt ${i}/5: live=v${LIVE:-unknown}, want=v${TARGET}. Sleeping 30s."
-            sleep 30
-          done
-          echo "v${TARGET} not confirmed live yet; syncing whatever is live. The cron backstop will catch any miss."
 
       - name: Fetch live spec
         run: bun run fetch-spec

@@ -1,7 +1,8 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
-import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync, chmodSync, unlinkSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import { pathToFileURL } from 'url';
 import { SessionManager, type MultiSessionFile } from '../src/session.ts';
 import { SessionStore } from '../src/session-store.ts';
 
@@ -586,19 +587,15 @@ describe('SessionManager - credential warning', () => {
 });
 
 describe('SessionStore - save error handling', () => {
-  test('throws descriptive error when directory is not writable', () => {
-    const dir = join(TEST_DIR, 'save-fail');
-    mkdirSync(dir, { recursive: true });
-    const store = new SessionStore(join(dir, 'session.json'), false);
+  test('throws descriptive error when the parent path is not a directory', () => {
+    const parentPath = join(TEST_DIR, 'save-fail');
+    mkdirSync(TEST_DIR, { recursive: true });
+    writeFileSync(parentPath, 'not a directory');
+    const store = new SessionStore(join(parentPath, 'session.json'), false);
     store.load(); // initialize in-memory cache
 
-    // Make directory read-only so writeFileSync fails
-    chmodSync(dir, 0o555);
-    try {
-      expect(() => store.save()).toThrow('Session file write failed');
-    } finally {
-      chmodSync(dir, 0o755); // restore for cleanup
-    }
+    // A regular file cannot be used as a parent directory on any platform.
+    expect(() => store.save()).toThrow('Session file write failed');
   });
 
   test('concurrent saves from separate processes do not collide on the temp file', async () => {
@@ -609,9 +606,10 @@ describe('SessionStore - save error handling', () => {
     // Each subprocess loads and saves the store against the same path,
     // mimicking parallel CLI invocations creating a fresh session at once.
     // With a shared temp filename the loser's rename throws ENOENT.
+    const storeModuleUrl = pathToFileURL(join(import.meta.dir, '..', 'src', 'session-store.ts')).href;
     const script = `
-      const { SessionStore } = await import('${join(import.meta.dir, '..', 'src', 'session-store.ts')}');
-      const store = new SessionStore('${sessionPath}', false);
+      const { SessionStore } = await import(${JSON.stringify(storeModuleUrl)});
+      const store = new SessionStore(${JSON.stringify(sessionPath)}, false);
       store.load();
       for (let i = 0; i < 50; i++) store.save();
     `;

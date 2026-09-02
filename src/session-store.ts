@@ -1,6 +1,44 @@
 import { readFileSync, writeFileSync, mkdirSync, chmodSync, existsSync, unlinkSync, renameSync, copyFileSync, appendFileSync } from 'fs';
 import { dirname, basename, join } from 'path';
 
+const WINDOWS_REPLACE_RETRIES = 5;
+const WINDOWS_REPLACE_RETRY_MS = 10;
+const WINDOWS_REPLACE_ERROR_CODES = new Set(['EACCES', 'EBUSY', 'EEXIST', 'EPERM']);
+
+function isWindowsReplaceError(err: unknown): err is NodeJS.ErrnoException {
+  return process.platform === 'win32'
+    && err instanceof Error
+    && WINDOWS_REPLACE_ERROR_CODES.has((err as NodeJS.ErrnoException).code ?? '');
+}
+
+function sleepSync(ms: number): void {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+/** Replace destination with a completed temp file, tolerating Windows file races. */
+function replaceFileSync(source: string, destination: string): void {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      renameSync(source, destination);
+      return;
+    } catch (err) {
+      if (!isWindowsReplaceError(err) || attempt >= WINDOWS_REPLACE_RETRIES) throw err;
+
+      // Windows rename does not consistently replace an existing destination.
+      // Remove it and retry; another writer may recreate it before our rename,
+      // so keep the retry bounded rather than assuming one unlink is enough.
+      try {
+        unlinkSync(destination);
+      } catch (unlinkErr) {
+        if ((unlinkErr as NodeJS.ErrnoException).code !== 'ENOENT' && !isWindowsReplaceError(unlinkErr)) {
+          throw unlinkErr;
+        }
+      }
+      sleepSync(WINDOWS_REPLACE_RETRY_MS);
+    }
+  }
+}
+
 export interface SessionData {
   id: string;
   created_at: string;
@@ -109,7 +147,7 @@ export class SessionStore {
       } catch {
         // chmod may fail on some platforms (Windows)
       }
-      renameSync(tmpPath, this.path);
+      replaceFileSync(tmpPath, this.path);
     } catch (err) {
       throw new Error(`Session file write failed (${this.path}): ${err instanceof Error ? err.message : String(err)}`);
     }
