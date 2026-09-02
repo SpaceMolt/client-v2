@@ -7,6 +7,8 @@ export type AbandonMissionResponse = {
 };
 
 export type AcceptMissionResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     expires_at: string;
     message: string;
     mission_id: string;
@@ -61,7 +63,13 @@ export type ActiveBattleInfo = {
 
 export type ActiveBattleParticipantInfo = {
     faction_id?: string;
+    /**
+     * True for automated combatants: pirates, police, drones, creatures, stations, and intact prizes
+     */
     is_npc?: boolean;
+    /**
+     * Combatant type: player/pirate/police/drone/creature/station/prize
+     */
     kind?: string;
     player_id: string;
     ship_class?: string;
@@ -75,6 +83,42 @@ export type ActiveBuff = {
     item_id: string;
     stat: string;
     ticks_left: number;
+};
+
+export type ActiveMissionInfo = {
+    accepted_at: string;
+    /**
+     * True for community/faction-wide missions
+     */
+    community?: boolean;
+    /**
+     * Community missions only
+     */
+    community_percent?: number;
+    /**
+     * item_id → "current/target" (community missions only)
+     */
+    community_progress?: {
+        [key: string]: string;
+    };
+    description: string;
+    difficulty: number;
+    expires_in_ticks: number;
+    /**
+     * Present only when the mission has a named NPC giver
+     */
+    giver?: MissionGiverInfo;
+    issuing_base: string;
+    issuing_base_id?: string;
+    issuing_system_id?: string;
+    issuing_system_name?: string;
+    mission_id: string;
+    objectives?: Array<ObjectiveProgressInfo>;
+    percent_complete: number;
+    rewards: MissionRewardsInfo;
+    template_id?: string;
+    title: string;
+    type: string;
 };
 
 export type Alternate = {
@@ -104,7 +148,6 @@ export type AmmoStats = {
     shield_damage_mod?: number;
     splash_pct?: number;
     untraceable?: boolean;
-    wear_per_shot?: number;
 };
 
 export type AnalysisInput = {
@@ -130,6 +173,8 @@ export type AnalysisStep = {
 };
 
 export type AnalyzeMarketResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     insights: Array<MarketInsight>;
     message: string;
     skill_level: number;
@@ -139,24 +184,44 @@ export type AnalyzeMarketResponse = {
 export type AttackLogEntry = {
     after_def_buff?: number;
     after_stance?: number;
+    aoe_radius?: number;
+    armor_melt_applied_pct?: number;
     attacker_id: string;
     capital_bonus_pct?: number;
+    chain_targets?: number;
+    cpu_damage_pct?: number;
     damage_type: string;
     def_buff_pct?: number;
+    defense_components?: Array<DefenseComponentLog>;
     disrupted?: boolean;
+    dot_damage?: number;
+    dot_duration?: number;
+    dot_source_id?: string;
+    emergency_cloak_activated?: boolean;
+    emergency_cloak_duration?: number;
+    emergency_cloak_strength?: number;
     final_damage: number;
     flat_reduction_pct?: number;
     hit_chance: number;
     hit_roll: number;
     hit_success: boolean;
     hull_damage: number;
+    ignored_resistance_pct?: number;
+    lifesteal_pct?: number;
+    mine_duration?: number;
     off_buff_pct?: number;
     pre_hit_damage: number;
     raw_damage: number;
+    secondary_kind?: string;
     shield_damage: number;
+    shield_drain_requested?: number;
+    shield_drained?: number;
     shield_resist_pct?: number;
+    shield_transfer_pct?: number;
+    shield_transferred?: number;
     splash?: boolean;
     stance_mult?: number;
+    system_disable_ticks?: number;
     target_id: string;
     type_resist_pct?: number;
     weapon_skill_pct: number;
@@ -171,6 +236,9 @@ export type AttackNpcResponse = {
     kind: 'npc';
     target: string;
     target_name: string;
+    /**
+     * Target combatant type: pirate/empire_npc/creature/station/prize
+     */
     target_type: string;
     warning?: string;
 };
@@ -269,7 +337,7 @@ export type Base = {
     name: string;
     owner_id?: string;
     /**
-     * Minimum pirate reputation required to dock; 0 means no requirement
+     * Non-zero marks this base as a pirate stronghold. Docking is gated on non-negative standing with that stronghold's crew, not on this number.
      */
     pirate_rep_required?: number;
     poi_id: string;
@@ -305,7 +373,7 @@ export type BaseCostResponse = {
 
 export type BattleCombatState = {
     /**
-     * Whether you can flee at all. False only when warp disruption is holding you in place.
+     * Whether your ship can make escape progress. False when warp-disrupted or when no fit crew can operate the ship. True still requires flee stance and the required escape ticks.
      */
     can_escape: boolean;
     /**
@@ -313,7 +381,7 @@ export type BattleCombatState = {
      */
     disruption_ticks?: number;
     /**
-     * Your ship speed after disruption penalties. Higher than your pursuers means you can disengage; lower means you are pinned.
+     * Your ship speed after EM disruption penalties. Webifier penalties are reported separately and affect escape timing.
      */
     effective_speed: number;
     /**
@@ -329,7 +397,11 @@ export type BattleCombatState = {
      */
     flee_required?: number;
     /**
-     * Largest zone distance any of your fitted weapons can fire across. An enemy whose zone_distance exceeds this is out of your range.
+     * Always present in the requesting participant's combat_state. True means no fit crew can operate your ship; false means personnel can operate it. Independent of warp_disrupted: both may be true. When true can_escape is false and the ship cannot fire or move. Not included for observers or other participants. Injured crew may recover automatically while the ship remains intact and uncaptured; ship status reports the recovery timing.
+     */
+    incapacitated: boolean;
+    /**
+     * Largest zone distance any fitted weapon can fire against your selected target after its targeting-range reductions. A target whose zone_distance exceeds this is out of range.
      */
     max_weapon_reach: number;
     /**
@@ -341,32 +413,46 @@ export type BattleCombatState = {
      */
     warp_disrupted: boolean;
     /**
-     * An enemy stasis webifier is reducing your effective speed (slower escape and easier for enemies to hit you).
+     * Combined escape-speed penalty from enemy webifiers as a percentage. Webifier penalties add and cap at 75%.
+     */
+    web_strength_pct?: number;
+    /**
+     * An enemy stasis webifier is increasing the time you need to escape.
      */
     webbed: boolean;
 };
 
 export type BattleCommandResponse = ({
-    action: 'advance' | 'engage' | 'retreat' | 'stance' | 'target';
+    action: 'advance' | 'engage' | 'retreat' | 'self_destruct' | 'stance' | 'target';
 } & BattleResponse) | ({
     action: 'help';
 } & CommandHelpResponse);
 
 export type BattleEndLogEntry = {
+    captures?: Array<CaptureLogEntry>;
     category: string;
     duration: number;
-    outcome: string;
+    /**
+     * How the battle ended. victory means one side survived and took a kill. stalemate and mutual_destruction are both draws. interrupted means a server restart ended the battle before either side won. The WebSocket battle_ended frame calls this same field reason.
+     */
+    outcome: 'victory' | 'stalemate' | 'mutual_destruction' | 'interrupted';
     participant_names?: Array<string>;
     participants: Array<ParticipantSummary>;
+    ships_captured?: number;
     ships_destroyed: number;
     total_damage: number;
+    /**
+     * Side id of the winning side. Always -1 for a draw — stalemate and mutual_destruction are both draws — and -1 for a battle a server restart interrupted.
+     */
     winning_side: number;
 };
 
 export type BattleEndedParticipantInfo = {
     damage_dealt: number;
     damage_taken: number;
+    is_npc?: boolean;
     kill_count: number;
+    kind?: string;
     player_id: string;
     side_id: number;
     survived: boolean;
@@ -378,12 +464,16 @@ export type BattleLogEntry = {
     autopilot?: Array<AutoPilotLogEntry>;
     battle_ended?: BattleEndLogEntry;
     battle_id: string;
+    boarding?: Array<BoardingStateLogEntry>;
     burns?: Array<BurnLogEntry>;
+    captures?: Array<CaptureLogEntry>;
     commands?: Array<CommandLogEntry>;
     flee?: Array<FleeLogEntry>;
     fuel?: Array<FuelLogEntry>;
     joins?: Array<JoinLogEntry>;
     kills?: Array<KillLogEntry>;
+    personnel_casualties?: Array<PersonnelCasualtyLogEntry>;
+    recovered_summary?: RecoveredBattleSummary;
     regen?: Array<RegenLogEntry>;
     snapshots: Array<ParticipantSnapshot>;
     system_id: string;
@@ -406,9 +496,17 @@ export type BattleParticipant = {
      */
     hull_pct?: number;
     /**
+     * True for automated combatants: pirates, police, drones, creatures, stations, and intact prizes
+     */
+    is_npc?: boolean;
+    /**
      * Ships you have destroyed this battle (self only)
      */
     kill_count?: number;
+    /**
+     * Combatant type: player/pirate/police/drone/creature/station/prize
+     */
+    kind?: string;
     player_id: string;
     /**
      * Shield strength as a percentage of max (0-100)
@@ -418,7 +516,7 @@ export type BattleParticipant = {
     ship_name?: string;
     side_id: number;
     /**
-     * Combat stance this tick (self only): fire/evade/brace/flee
+     * Combat stance this tick (self only): fire/evade/brace/flee/board
      */
     stance?: string;
     /**
@@ -431,13 +529,21 @@ export type BattleParticipant = {
      */
     zone?: string;
     /**
-     * Zone separation from the requesting player (0 = same ring; higher = farther). Compare against your combat_state.max_weapon_reach to see if you can fire. Omitted when the requester is not a participant.
+     * Zone separation from the requesting player (0 = both ships at point blank; higher = farther). Compare against your combat_state.max_weapon_reach to see if you can fire. Omitted when the requester is not a participant.
      */
     zone_distance?: number;
 };
 
 export type BattleParticipantInfo = {
     hull_pct?: number;
+    /**
+     * True for server-controlled combatants including pirates
+     */
+    is_npc?: boolean;
+    /**
+     * Combatant kind: player
+     */
+    kind?: string;
     player_id: string;
     shield_pct?: number;
     ship_class?: string;
@@ -449,11 +555,25 @@ export type BattleParticipantInfo = {
 };
 
 export type BattleResponse = {
-    action: 'advance' | 'retreat' | 'stance' | 'target' | 'engage';
+    action: 'advance' | 'retreat' | 'stance' | 'target' | 'engage' | 'self_destruct';
     battle_id?: string;
+    marines_requested?: number;
     message: string;
+    operation_id?: string;
+    phase?: string;
+    progress?: string;
+    self_destruct_countdown?: number;
+    /**
+     * Resulting combat stance: fire/evade/brace/flee/board
+     */
     stance?: string;
     target_id?: string;
+};
+
+export type BattleSelfDestructState = {
+    battle_id: string;
+    detonate_tick: number;
+    started_tick: number;
 };
 
 export type BattleSide = {
@@ -479,14 +599,20 @@ export type BattleSideSummary = {
 
 export type BattleSummaryResponse = {
     battle_id: string;
+    captures?: Array<CaptureLogEntry>;
     category?: string;
     destroyed_names?: Array<string>;
     duration_ticks: number;
     ended_at?: string;
+    has_station: boolean;
     origin_poi?: string;
+    /**
+     * How the battle ended. victory means one side survived and took a kill. stalemate and mutual_destruction are both draws. interrupted means a server restart ended the battle before either side won. Graceful shutdown emits a battle_ended frame; crash-recovered REST summaries do not fabricate one. Null while status is active. The WebSocket battle_ended frame calls this same field reason.
+     */
     outcome: string;
     participant_count: number;
     player_names?: Array<string>;
+    ships_captured?: number;
     ships_destroyed: number;
     sides: Array<BattleSideSummary>;
     start_tick: number;
@@ -495,6 +621,9 @@ export type BattleSummaryResponse = {
     system_name: string;
     top_damage?: BattleTopDamage;
     total_damage: number;
+    /**
+     * Side id of the winning side. Always -1 for a draw — both stalemate and mutual_destruction report -1 — and -1 for a battle a server restart interrupted. Null while status is active.
+     */
     winning_side: number;
 };
 
@@ -504,14 +633,56 @@ export type BattleTopDamage = {
 };
 
 export type BerthCount = {
+    /**
+     * Berths of this class still free once citizens aboard are seated
+     */
     free: number;
+    /**
+     * Berths of this class on the hull plus fitted cabins
+     */
     total: number;
 };
 
 export type BerthsView = {
+    /**
+     * Total and free business berths
+     */
     business: BerthCount;
+    /**
+     * Total and free economy berths
+     */
     economy: BerthCount;
+    /**
+     * Total and free first berths
+     */
     first: BerthCount;
+};
+
+export type BoardingPublicStatus = {
+    attacker_id?: string;
+    operation_id: string;
+    phase: string;
+    progress?: string;
+    self_destruct_countdown?: number;
+    target_id?: string;
+};
+
+export type BoardingStateLogEntry = {
+    actor_id?: string;
+    attacker_casualties?: boolean;
+    casualties_occurred?: boolean;
+    defender_casualties?: boolean;
+    destroyed?: boolean;
+    /**
+     * Observable boarding transition. Terminal values include capture_ready; plundered; withdrawn; attacker_destroyed; attacker_incapacitated; target_destroyed; target_self_destructed; and restart_canceled. plundered means pirates removed eligible cargo and then disengaged without taking the hull.
+     */
+    event: string;
+    hull_damage?: number;
+    operation_id: string;
+    phase: string;
+    reason?: string;
+    self_destruct_countdown?: number;
+    target_id?: string;
 };
 
 export type BrowseShipsResponse = {
@@ -523,6 +694,8 @@ export type BrowseShipsResponse = {
 };
 
 export type BuildBaseResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     base_id: string;
     fee_paid: number;
     hint: string;
@@ -571,6 +744,8 @@ export type BulkCancelOrderResult = {
 
 export type BulkCancelOrdersResponse = {
     action: 'cancel_order';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     kind: 'bulk';
     mode: 'bulk';
     results: Array<BulkCancelOrderResult>;
@@ -585,6 +760,8 @@ export type BulkCancelReturns = {
 
 export type BulkCraftResponse = {
     action: 'craft' | 'recycle';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     kind: 'bulk_craft';
     mode: 'bulk';
     results: Array<BulkCraftResult>;
@@ -609,6 +786,8 @@ export type BulkCraftResult = {
 
 export type BulkCreateBuyOrdersResponse = {
     action: 'create_buy_order';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     kind: 'bulk';
     mode: 'bulk';
     results: Array<BulkBuyOrderResult>;
@@ -617,6 +796,8 @@ export type BulkCreateBuyOrdersResponse = {
 
 export type BulkCreateSellOrdersResponse = {
     action: 'create_sell_order';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     kind: 'bulk';
     mode: 'bulk';
     results: Array<BulkSellOrderResult>;
@@ -646,6 +827,8 @@ export type BulkFactionBuyOrderResult = {
 
 export type BulkFactionCreateBuyOrdersResponse = {
     action: 'faction_create_buy_order';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     kind: 'bulk';
     mode: 'bulk';
     results: Array<BulkFactionBuyOrderResult>;
@@ -654,6 +837,8 @@ export type BulkFactionCreateBuyOrdersResponse = {
 
 export type BulkFactionCreateSellOrdersResponse = {
     action: 'faction_create_sell_order';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     kind: 'bulk';
     mode: 'bulk';
     results: Array<BulkFactionSellOrderResult>;
@@ -681,6 +866,8 @@ export type BulkFactionSellOrderResult = {
 
 export type BulkJobCancelResponse = {
     action: 'job_cancel';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     kind: 'bulk_cancel';
     message: string;
     mode: 'bulk';
@@ -702,6 +889,8 @@ export type BulkModifyOrderResult = {
 
 export type BulkModifyOrdersResponse = {
     action: 'modify_order';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     kind: 'bulk';
     mode: 'bulk';
     results: Array<BulkModifyOrderResult>;
@@ -733,7 +922,7 @@ export type BulkSellOrderResult = {
 };
 
 /**
- * The single-item storage response for this entry (deposit, withdraw, gift, or faction/empire variant).
+ * The single-item storage response for this entry (deposit, withdraw, gift, or faction/empire variant). Successful station gifts use action=send_gift and canonical recipient=station:<base ID>; remaining source inventory reflects the completed bulk batch, including zero.
  */
 export type BulkStorageItemData = {
     [key: string]: unknown;
@@ -750,6 +939,8 @@ export type BulkStorageItemResult = {
 
 export type BulkStorageResponse = {
     action: 'bulk_deposit' | 'bulk_withdraw' | 'bulk_transfer';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     bucket?: string;
     bucket_id?: string;
     dest_bucket?: string;
@@ -758,6 +949,9 @@ export type BulkStorageResponse = {
     requested: number;
     results: Array<BulkStorageItemResult>;
     succeeded: number;
+    /**
+     * Storage destination or source. Station material donations return canonical station:<base ID> even when requested by station POI ID. Omitted when not applicable.
+     */
     target?: string;
 };
 
@@ -770,11 +964,14 @@ export type BulkSummary = {
 export type BurnLogEntry = {
     damage: number;
     destroyed?: boolean;
+    source_id?: string;
     target_id: string;
     ticks_remaining: number;
 };
 
 export type BuyInsuranceResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     coverage: number;
     expires_at: string;
     factors?: Array<RiskFactor>;
@@ -786,6 +983,8 @@ export type BuyInsuranceResponse = {
 };
 
 export type BuyListedShipResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     class_id: string;
     credits_left: number;
     message: string;
@@ -796,7 +995,9 @@ export type BuyListedShipResponse = {
 
 export type BuyResponse = {
     action: string;
+    auto_docked?: boolean;
     auto_listed?: AutoListedOrder;
+    auto_undocked?: boolean;
     delivered_to_cargo?: number;
     delivered_to_storage?: number;
     fills: Array<Fill>;
@@ -826,6 +1027,8 @@ export type CancelOrderCommandResponse = ({
 
 export type CancelOrderResponse = {
     action: 'cancel_order';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     delivered_to?: string;
     faction_order?: boolean;
     kind: 'single';
@@ -887,6 +1090,20 @@ export type CaptainsLogListResponse = {
     total_count: number;
 };
 
+export type CaptureLogEntry = {
+    boarding_operation_id: string;
+    captor_id: string;
+    /**
+     * Kind of combat actor identified by captor_id. Present on newly recorded captures; omitted on historical rows created before captor provenance was recorded.
+     */
+    captor_kind?: 'player' | 'pirate' | 'npc';
+    captor_username: string;
+    former_owner_id: string;
+    former_owner_username: string;
+    ship_class: string;
+    ship_id: string;
+};
+
 /**
  * An item stack in cargo or storage.
  */
@@ -923,6 +1140,7 @@ export type CarrierProfile = {
     delivered_value: number;
     last_consequence_at?: string;
     last_recovery_at?: string;
+    late_deliveries: number;
     outstanding_debt: number;
     priority_deliveries: number;
     returns: number;
@@ -1003,12 +1221,16 @@ export type CatalogShipSummary = {
     base_shield_recharge: number;
     base_speed: number;
     based_on?: string;
+    boarding_defense_bonus_pct?: number;
     build_materials?: Array<RecipeInput>;
     build_time: number;
+    capture_policy?: string;
+    capture_policy_reason?: string;
     cargo_capacity: number;
     category?: string;
     class: string;
     cpu_capacity: number;
+    crew_capacity: number;
     default_loadout_version?: number;
     default_modules?: Array<string>;
     defense_slots: number;
@@ -1018,8 +1240,11 @@ export type CatalogShipSummary = {
     hidden?: boolean;
     id: string;
     inherent_capabilities?: Array<InherentCapability>;
+    latch_resistance?: number;
     legacy?: boolean;
     lore?: string;
+    marine_capacity: number;
+    minimum_crew: number;
     name: string;
     npc_role?: string;
     passive_recipes?: Array<string>;
@@ -1126,6 +1351,22 @@ export type ClaimInsuranceResponse = {
     policies: Array<InsurancePolicy>;
 };
 
+export type ClaimPrizeResponse = {
+    crew_assigned: number;
+    /**
+     * Where the prize crew came from and returns to.
+     */
+    crew_disposition: 'aboard' | 'faction_reserve';
+    destination_base_id: string;
+    idempotent: boolean;
+    prize_id: string;
+    ship_id: string;
+    /**
+     * Recovery state of the prize. delivered / destroyed / expired / recaptured are terminal.
+     */
+    status: 'available' | 'claimed' | 'in_transit' | 'delivered' | 'destroyed' | 'expired' | 'recaptured';
+};
+
 export type ClientConnectionInfo = {
     distance?: number;
     name: string;
@@ -1162,6 +1403,8 @@ export type ClientSystemInfo = {
 };
 
 export type CloakResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     cloak_strength: number;
     enabled: boolean;
     message: string;
@@ -1179,6 +1422,43 @@ export type CombatLogSummary = {
     weapons_used?: {
         [key: string]: number;
     };
+};
+
+export type CombatSpecialEffects = {
+    anti_drone_pct?: number;
+    anti_missile_pct?: number;
+    aoe_radius?: number;
+    armor_melt_pct?: number;
+    auto_cloak_on_shield_failure?: boolean;
+    chain_targets?: number;
+    cpu_damage_pct?: number;
+    damage_boost_on_hit?: boolean;
+    dot_damage?: number;
+    dot_duration?: number;
+    duration_ticks?: number;
+    energy_damage_pct?: number;
+    hull_damage_pct?: number;
+    ignore_all_defense?: boolean;
+    ignore_resistance_pct?: number;
+    lifesteal_pct?: number;
+    low_cpu_requirement?: boolean;
+    mine_capacity?: number;
+    mine_detection?: number;
+    mine_duration?: number;
+    mine_tracking_speed?: number;
+    module_disable_ticks?: number;
+    phase_dodge_pct?: number;
+    phase_strike_pct?: number;
+    rage_damage_scaling?: boolean;
+    random_damage_pct?: number;
+    reflect_energy_pct?: number;
+    repair_from_salvage?: boolean;
+    shield_damage_pct?: number;
+    shield_drain?: number;
+    shield_phase?: boolean;
+    shield_transfer_pct?: number;
+    shock_damage?: number;
+    system_disable_ticks?: number;
 };
 
 export type CommandHelpAction = {
@@ -1234,6 +1514,7 @@ export type CommissionActive = {
 };
 
 export type CommissionEntry = {
+    bare_hull: boolean;
     base_id?: string;
     base_name?: string;
     build_complete_tick?: number;
@@ -1244,58 +1525,103 @@ export type CommissionEntry = {
     credits_paid?: number;
     earmarked_credits?: number;
     material_cost_estimate?: number;
+    /**
+     * Present on sourcing entries once at least one unit has been acquired. This cumulative count includes materials_initially_supplied plus later player donations and yard purchases. An absent item ID means zero. During sourcing each value is greater than or equal to materials_initially_supplied for the same item.
+     */
     materials_gathered?: {
         [key: string]: number;
     };
+    /**
+     * Present when the commission began with player-supplied materials. Values are the units contributed at placement and never include later donations or yard purchases. An absent item ID means zero. During sourcing each value is less than or equal to materials_gathered for the same item.
+     */
+    materials_initially_supplied?: {
+        [key: string]: number;
+    };
     materials_provided: boolean;
+    /**
+     * Present on sourcing entries while materials remain missing. Each quantity equals max(required_materials[item_id] - materials_gathered[item_id], 0). An omitted item or omitted field means 0 units remain missing. Item names are display metadata.
+     */
+    materials_to_source?: Array<CargoItem>;
+    /**
+     * Present on sourcing entries. Values are the total units required for the commissioned hull and its default loadout unless bare_hull is true. An absent item ID means zero.
+     */
     required_materials?: {
         [key: string]: number;
     };
     ship_class_id: string;
     ship_name?: string;
+    source_missing_materials?: boolean;
     status: string;
     ticks_remaining?: number;
 };
 
 export type CommissionMaterialStatus = {
+    /**
+     * True exactly when gathered is greater than or equal to needed.
+     */
     complete: boolean;
+    /**
+     * Cumulative quantity allocated to the commission from all sources.
+     */
     gathered: number;
     item_id: string;
     name: string;
+    /**
+     * Total quantity required for this material; this is not the remaining deficit.
+     */
     needed: number;
 };
 
 export type CommissionQuoteResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
+    bare_hull: boolean;
     blockers?: Array<string>;
     build_materials?: Array<CargoItem>;
     build_time?: number;
     can_afford_credits_only: boolean;
+    can_afford_partial_sourcing: boolean;
     can_afford_provide_materials: boolean;
     can_commission: boolean;
     credits_only_available: boolean;
     credits_only_total: number;
+    faction_funded_only?: boolean;
     labor_cost?: number;
     material_cost?: number;
+    materials_supplied?: Array<CargoItem>;
+    materials_to_source?: Array<CargoItem>;
     message: string;
+    partial_sourcing_total?: number;
     player_credits?: number;
     provide_materials_total: number;
+    sales_tax?: number;
     ship_class: string;
     ship_name?: string;
     shipyard_tier_here?: number;
     shipyard_tier_required?: number;
+    source_missing_materials: boolean;
+    sourcing_material_cost?: number;
     yard_margin?: number;
 };
 
 export type CommissionShipResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
+    bare_hull: boolean;
     build_time?: number;
     commission_id: string;
     credits_left: number;
     credits_paid: number;
     labor_cost?: number;
     material_cost?: number;
+    materials_supplied?: Array<CargoItem>;
+    materials_to_source?: Array<CargoItem>;
     message: string;
+    sales_tax?: number;
     ship_class: string;
     ship_name?: string;
+    source_missing_materials: boolean;
+    sourcing_material_cost?: number;
     status: string;
     yard_margin?: number;
 };
@@ -1306,6 +1632,8 @@ export type CommissionStatusResponse = {
 };
 
 export type CompleteMissionResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     chain_next?: string;
     community_contributed?: {
         [key: string]: number;
@@ -1315,11 +1643,16 @@ export type CompleteMissionResponse = {
         [key: string]: string;
     };
     credits_earned: number;
+    credits_promised?: number;
+    credits_shortfall?: number;
     items_received?: {
         [key: string]: number;
     };
     message: string;
     mission_id: string;
+    reputation_changes?: {
+        [key: string]: number;
+    };
     skill_xp_gained?: {
         [key: string]: number;
     };
@@ -1349,15 +1682,21 @@ export type CraftCommandResponse = ({
 } & BulkCraftResponse) | ({
     kind: 'quote';
 } & CraftQuoteResponse) | ({
+    kind: 'packaged_quote';
+} & PackagedCraftQuoteResponse) | ({
     kind: 'cancel';
 } & JobCancelResponse) | ({
     kind: 'bulk_cancel';
 } & BulkJobCancelResponse) | ({
+    kind: 'retarget';
+} & JobRetargetResponse) | ({
     kind: 'package';
 } & PackageJobResponse);
 
 export type CraftJobResponse = {
     action: 'craft' | 'recycle' | 'job_add';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     effective_time_per_run: number;
     escrowed: EscrowSummary;
     est_completion_tick: number;
@@ -1367,6 +1706,8 @@ export type CraftJobResponse = {
     kind: 'job';
     message: string;
     mode: 'craft' | 'recycle';
+    output_package_id?: string;
+    output_package_label?: string;
     produces?: Array<ItemQuantity>;
     recipe: string;
     runs: number;
@@ -1376,6 +1717,8 @@ export type CraftJobResponse = {
 
 export type CraftQueueResponse = {
     action: 'queue';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     jobs: Array<JobView>;
     kind: 'queue';
     message?: string;
@@ -1384,6 +1727,8 @@ export type CraftQueueResponse = {
 
 export type CraftQuoteResponse = {
     action: 'craft' | 'recycle';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     cost: EscrowSummary;
     credits_total: number;
     dry_run: boolean;
@@ -1418,6 +1763,8 @@ export type CraftingJobUpdate = {
     external?: boolean;
     job_id: string;
     mode: string;
+    output_package_id?: string;
+    output_package_label?: string;
     recipe: string;
     runs_done: number;
     runs_remaining: number;
@@ -1433,6 +1780,8 @@ export type CreateBuyOrderCommandResponse = ({
 
 export type CreateBuyOrderResponse = {
     action: 'create_buy_order';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     consolidated?: boolean;
     delivered_to_cargo?: number;
     delivered_to_storage?: number;
@@ -1478,6 +1827,8 @@ export type CreateSellOrderCommandResponse = ({
 
 export type CreateSellOrderResponse = {
     action: 'create_sell_order';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     consolidated?: boolean;
     fills?: Array<Fill>;
     from_cargo?: number;
@@ -1514,10 +1865,34 @@ export type CreatureInfo = {
 };
 
 export type DeclineMissionResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     giver?: MissionGiverInfo;
     message: string;
     template_id: string;
     title: string;
+};
+
+export type DefenseComponentLog = {
+    after_flat_reduction: number;
+    after_shield_resist: number;
+    after_type_resist: number;
+    armor_bypass_pct: number;
+    damage_type: string;
+    final_damage: number;
+    flat_reduction_pct: number;
+    hull_damage: number;
+    ignore_all_defense: boolean;
+    ignored_resistance_pct?: number;
+    incoming_damage: number;
+    lifesteal_heal?: number;
+    lifesteal_pct?: number;
+    shield_bypass_pct: number;
+    shield_damage: number;
+    shield_resist_pct: number;
+    type_resist_pct: number;
+    weapon_instance_id: string;
+    weapon_name: string;
 };
 
 export type DeleteNoteResponse = {
@@ -1528,6 +1903,8 @@ export type DeleteNoteResponse = {
 
 export type DeployAllDronesResponse = {
     action: 'deploy_all_drones';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     bandwidth_total: number;
     bandwidth_used: number;
     deployed: number;
@@ -1543,6 +1920,8 @@ export type DeployDroneCommandResponse = ({
 
 export type DeployDroneResponse = {
     action: 'deploy_drone';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     bandwidth_total: number;
     bandwidth_used: number;
     drone_id: string;
@@ -1555,15 +1934,31 @@ export type DeployDroneResponse = {
 
 export type DepositItemsResponse = {
     action: 'deposit_items';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     cargo_remaining: number;
     cargo_space: number;
     item_id: string;
+    message?: string;
     quantity: number;
     storage_total: number;
 };
 
+export type DismantleOutpostResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
+    base_id: string;
+    fee_refunded: number;
+    hint: string;
+    kit_item: string;
+    kit_refunded: boolean;
+    name: string;
+};
+
 export type DistressSignalResponse = {
     action: string;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     distress_type: string;
     expires_seconds: number;
     message: string;
@@ -1607,6 +2002,39 @@ export type DockResponse = {
     your_facilities?: Array<FacilitySummary>;
 };
 
+export type DroneBaySlot = {
+    id: string;
+    name?: string;
+    type: string;
+};
+
+export type DroneBayView = {
+    /**
+     * Total drone bandwidth available
+     */
+    bandwidth_total: number;
+    /**
+     * Bandwidth consumed by deployed drones
+     */
+    bandwidth_used: number;
+    /**
+     * Bay slots granted by fitted modules
+     */
+    bay_capacity: number;
+    /**
+     * Drones owned, in bay plus deployed
+     */
+    bay_count: number;
+    /**
+     * Drones currently deployed
+     */
+    deployed_count: number;
+    /**
+     * Drones racked in the bay, not deployed
+     */
+    in_bay: Array<DroneBaySlot>;
+};
+
 export type DroneInfo = {
     cargo_pct: number;
     has_script: boolean;
@@ -1624,6 +2052,8 @@ export type DroneInfo = {
 
 export type EmpireGiftResponse = {
     action: 'empire_gift_credits' | 'empire_gift_items' | 'empire_gift_ship';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     base_id: string;
     base_name: string;
     cargo_remaining?: number;
@@ -1701,6 +2131,25 @@ export type EmpirePolicySnapshot = {
     tax_delinquency_bounty_per_credit: number;
 };
 
+export type EmpireStanding = {
+    /**
+     * Decay target; rep drifts toward this over time
+     */
+    baseline: number;
+    /**
+     * Time detained until by this empire; omitted when not jailed
+     */
+    jailed_until?: string;
+    /**
+     * Sum of uncleaned crime bounties with this empire (credits)
+     */
+    outstanding_bounty: number;
+    /**
+     * Current rep score, range -100 to +100
+     */
+    reputation: number;
+};
+
 export type EnrichedWreck = {
     cargo: Array<ShipCargoItem>;
     created_at: string;
@@ -1737,6 +2186,8 @@ export type EscrowedRewards = {
 
 export type EspionageResponse = {
     action: string;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     intel_type?: string;
     outcome: string;
     story: string;
@@ -1823,6 +2274,12 @@ export type FacilityDefSummary = {
     category: string;
     description: string;
     faction_cap?: number;
+    faction_crew_capacity?: number;
+    faction_marine_capacity?: number;
+    faction_medical_capacity?: number;
+    faction_medical_refill_per_cycle?: number;
+    faction_medical_supply_item?: string;
+    faction_medical_units_per_item?: number;
     faction_service?: string;
     labor_cost: number;
     level: number;
@@ -1842,6 +2299,7 @@ export type FacilityDefinition = {
     build_materials?: Array<RecipeInput>;
     build_time: number;
     category: string;
+    combat_repair_rate?: number;
     degraded_description?: string;
     deposit_to_empire_reserves?: boolean;
     description: string;
@@ -1851,6 +2309,12 @@ export type FacilityDefinition = {
     expansion_of?: string;
     expansion_scale?: number;
     faction_cap?: number;
+    faction_crew_capacity?: number;
+    faction_marine_capacity?: number;
+    faction_medical_capacity?: number;
+    faction_medical_refill_per_cycle?: number;
+    faction_medical_supply_item?: string;
+    faction_medical_units_per_item?: number;
     faction_service_type?: string;
     fleet_upkeep?: boolean;
     fuel_capacity?: number;
@@ -1864,6 +2328,7 @@ export type FacilityDefinition = {
     life_support_supply?: number;
     logistics?: boolean;
     lore?: string;
+    maintenance_fuel?: number;
     maintenance_inputs?: Array<RecipeInput>;
     max_cull_per_cycle?: number;
     max_species_tier?: number;
@@ -1885,6 +2350,10 @@ export type FacilityDefinition = {
     scan_falloff?: number;
     scan_power?: number;
     self_repair_rate?: number;
+    service_pool_capacity?: number;
+    service_pool_refill_per_cycle?: number;
+    service_pool_supply_item?: string;
+    service_pool_units_per_item?: number;
     service_type?: string;
     station_armor?: number;
     station_hull_hp?: number;
@@ -1894,6 +2363,7 @@ export type FacilityDefinition = {
     transit_deadline_bonus?: number;
     unique?: boolean;
     upgrades_from?: string;
+    weapon_accuracy_bonus?: number;
     weapon_cooldown?: number;
     weapon_damage?: number;
     weapon_damage_type?: string;
@@ -1927,8 +2397,17 @@ export type FacilityEntry = {
     damaged?: boolean;
     description: string;
     dining_points?: number;
+    /**
+     * True while dismantling is in progress; omitted means false. No rent is billed while dismantling and the facility is removed when dismantling completes.
+     */
+    dismantling?: boolean;
     facility_id: string;
+    faction_crew_capacity?: number;
     faction_id?: string;
+    faction_marine_capacity?: number;
+    faction_medical_capacity?: number;
+    faction_medical_refill_per_cycle?: number;
+    faction_medical_supply_item?: string;
     faction_service?: string;
     is_recycler?: boolean;
     labor_per_cycle?: number;
@@ -1945,6 +2424,9 @@ export type FacilityEntry = {
     production?: FacilityProduction;
     recipe_id?: string;
     rent_paid_until_tick?: number;
+    /**
+     * Stored rent rate in credits per facility cycle (100 ticks). Visible only for your or your faction's facilities; omitted means zero or not disclosed. No rent is billed while damaged or under_construction or dismantling. The stored rate applies after repair or construction subject to repricing. Legacy inactive facilities remain billable.
+     */
     rent_per_cycle?: number;
     repair_complete_tick?: number;
     service?: string;
@@ -1973,15 +2455,31 @@ export type FacilityFactionBuildResponse = {
 
 export type FacilityFactionEntry = {
     capacity?: number;
+    crew_capacity?: number;
     custom_name?: string;
+    /**
+     * Set when this facility was knocked out in battle. It does nothing until repaired (facility action repair). A station rebuilds its own faction's facilities automatically out of that faction's storage at the station
+     */
+    damaged?: boolean;
     facility_id: string;
     faction_service: string;
     level: number;
+    marine_capacity?: number;
+    medical_capacity?: number;
+    medical_refill_per_cycle?: number;
+    medical_supply_item?: string;
     missed_rent_cycles?: number;
     name: string;
+    /**
+     * Stored rent rate in credits per facility cycle (100 ticks). Rent is billed only when status is active; paused while damaged or repairing or under_construction or dismantling. The stored rate applies after repair or construction subject to repricing. Zero means no recurring rent; existing missed_rent_cycles remain owed while paused.
+     */
     rent_per_cycle: number;
     rental_fee_per_run?: number;
-    status: string;
+    repair_complete_tick?: number;
+    /**
+     * Only active facilities produce or provide their service; damaged ones need facility action repair; repairing ones are already paid for and come back at repair_complete_tick. Dismantling facilities are offline and will be removed. Rent is paused for every status except active.
+     */
+    status: 'under_construction' | 'damaged' | 'repairing' | 'active' | 'dismantling';
     ticks_until_complete?: number;
     type: string;
 };
@@ -1997,12 +2495,18 @@ export type FacilityFactionListResponse = {
 
 export type FacilityFactionOwnedResponse = {
     action: 'faction_owned';
+    /**
+     * Credits owed across all facilities: sum rent_per_cycle multiplied by missed_rent_cycles including paused facilities. Pausing billing does not erase existing arrears. Omitted means zero.
+     */
     arrears_owed?: number;
     facilities: Array<FactionOwnedFacilityEntry>;
     faction_id: string;
     grace_cycles?: number;
     hint?: string;
     note?: string;
+    /**
+     * Current faction rent in credits per facility cycle (100 ticks): sum rent_per_cycle for facilities where damaged and under_construction and dismantling are all false. Missing pause flags mean false. Zero means no current recurring rent; excludes existing arrears. Legacy inactive facilities remain billable.
+     */
     total_rent_per_cycle: number;
 };
 
@@ -2055,15 +2559,31 @@ export type FacilityListForSaleResponse = {
 
 export type FacilityListResponse = {
     action: 'list';
+    /**
+     * Canonical ID of the station containing every listed facility and both per-station rent summaries.
+     */
     base_id: string;
     construction?: StationConstructionResponse;
+    /**
+     * Your faction's facilities at this base including paused facilities. Per-facility rent_per_cycle is the stored rate; faction_rent totals only currently billable facilities. Empty means your faction owns none here.
+     */
     faction_facilities: Array<FacilityEntry>;
+    /**
+     * Current recurring rent and existing arrears for faction_facilities. Omitted when your faction owns no facilities here; present with zero recurring rent when all its facilities have paused billing.
+     */
     faction_rent?: FacilityRentSummary;
     life_support?: StationLifeSupportStatus;
+    /**
+     * Your facilities at this base including damaged and constructing and dismantling facilities. Per-facility rent_per_cycle is the stored rate; player_rent totals only currently billable facilities. Empty means you own none here.
+     */
     player_facilities: Array<FacilityEntry>;
+    /**
+     * Current recurring rent and existing arrears for player_facilities. Omitted when you own no facilities here; present with zero recurring rent when all your facilities have paused billing.
+     */
     player_rent?: FacilityRentSummary;
     power?: StationPowerStatus;
     public_facilities?: Array<FacilityEntry>;
+    service_pools?: StationServicePools;
     station_facilities: Array<FacilityEntry>;
 };
 
@@ -2159,11 +2679,23 @@ export type FacilityRecipeInfo = {
 };
 
 export type FacilityRentSummary = {
+    /**
+     * Credits owed across all facilities: sum rent_per_cycle multiplied by missed_rent_cycles including paused facilities. Pausing billing does not erase existing arrears. Omitted means zero.
+     */
     arrears_owed?: number;
+    /**
+     * Approximate credits per day at the default 10-second tick: total_rent_per_cycle multiplied by 86 cycles. Zero means no current recurring rent; excludes arrears and future rate changes.
+     */
     est_rent_per_day: number;
+    /**
+     * Number of owned facilities in this summary including facilities whose billing is paused.
+     */
     facilities: number;
     grace_cycles?: number;
     note?: string;
+    /**
+     * Current rent in credits per facility cycle (100 ticks): sum rent_per_cycle for facilities where damaged and under_construction and dismantling are all false. Missing pause flags mean false. Zero means no current recurring rent; excludes existing arrears. Legacy inactive facilities remain billable.
+     */
     total_rent_per_cycle: number;
 };
 
@@ -2190,7 +2722,13 @@ export type FacilitySummary = {
     missed_rent_cycles?: number;
     name: string;
     recipe_id?: string;
+    /**
+     * Stored rent rate in credits per facility cycle (100 ticks). Rent is paused when status is damaged or under_construction or dismantling. The stored rate applies after repair or construction subject to repricing. Zero means no recurring rent; existing missed_rent_cycles remain owed while paused.
+     */
     rent_per_cycle: number;
+    /**
+     * Facility status: enabled or legacy disabled facilities are billable; damaged or under_construction or dismantling facilities have paused rent. Dismantling facilities will be removed.
+     */
     status: string;
     ticks_until_complete?: number;
     type: string;
@@ -2231,6 +2769,10 @@ export type FacilityTypeDetailResponse = {
     requires_service_name?: string;
     requires_service_type?: string;
     satisfied_description?: string;
+    service_pool_capacity?: number;
+    service_pool_refill_per_cycle?: number;
+    service_pool_supply_item?: string;
+    service_pool_units_per_item?: number;
     type_id: string;
     upgrades_from?: string;
     upgrades_from_name?: string;
@@ -2362,6 +2904,8 @@ export type FactionCreateBuyOrderCommandResponse = ({
 
 export type FactionCreateBuyOrderResponse = {
     action: string;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     bucket?: string;
     consolidated?: boolean;
     escrow_refunded?: number;
@@ -2409,6 +2953,8 @@ export type FactionCreateSellOrderCommandResponse = ({
 
 export type FactionCreateSellOrderResponse = {
     action: string;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     bucket?: string;
     consolidated?: boolean;
     faction_id: string;
@@ -2453,12 +2999,16 @@ export type FactionDeleteRoomResponse = {
 export type FactionDepositCreditsResponse = {
     action: 'faction_deposit_credits';
     amount: number;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     faction_credits: number;
     player_credits: number;
 };
 
 export type FactionDepositFuelResponse = {
     action: 'faction_deposit_fuel';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     fuel: number;
     fuel_capacity: number;
     ship_fuel: number;
@@ -2467,6 +3017,8 @@ export type FactionDepositFuelResponse = {
 
 export type FactionDepositItemsResponse = {
     action: 'faction_deposit_items';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     bucket?: string;
     bucket_id?: string;
     cargo_remaining: number;
@@ -2531,6 +3083,8 @@ export type FactionGarageStationEntry = {
 
 export type FactionGarageStoreResponse = {
     action: 'faction_garage_store';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     base_id: string;
     capacity: number;
     hint: string;
@@ -2551,6 +3105,8 @@ export type FactionGetInvitesResponse = {
 
 export type FactionGiftResponse = {
     action: 'faction_gift';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     credits_sent: number;
     faction_id: string;
     faction_name: string;
@@ -2561,6 +3117,9 @@ export type FactionGiftResponse = {
 export type FactionInfoResponse = {
     alliance_proposals?: Array<FactionAllianceProposal>;
     allies?: Array<FactionListItem>;
+    ally_facility_access?: boolean;
+    ally_fuel_access?: boolean;
+    ally_intel_opt_out?: boolean;
     at_war: boolean;
     charter: string;
     created_at: string;
@@ -2583,6 +3142,7 @@ export type FactionInfoResponse = {
     name: string;
     owned_bases: number;
     peace_proposals?: Array<FactionPeaceProposal>;
+    personnel?: FactionPersonnelEmployment;
     primary_color: string;
     roles?: Array<FactionRoleInfo>;
     secondary_color: string;
@@ -2673,11 +3233,18 @@ export type FactionOwnedFacilityEntry = {
     base_name: string;
     custom_name?: string;
     damaged?: boolean;
+    /**
+     * True while dismantling is in progress; omitted means false. No rent is billed while dismantling and the facility is removed when dismantling completes.
+     */
+    dismantling?: boolean;
     facility_id: string;
     labor_per_run: number;
     missed_rent_cycles?: number;
     name: string;
     power_throttled?: boolean;
+    /**
+     * Stored rent rate in credits per facility cycle (100 ticks). No rent is billed while damaged or under_construction or dismantling. The stored rate applies after repair or construction subject to repricing. Zero means no recurring rent. Legacy inactive facilities remain billable.
+     */
     rent_per_cycle: number;
     rental_fee_per_run?: number;
     repair_complete_tick?: number;
@@ -2693,7 +3260,50 @@ export type FactionPeaceProposal = {
     terms?: string;
 };
 
+export type FactionPersonnelEmployment = {
+    assigned_prize_crew: number;
+    assigned_prize_marines: number;
+    fit_crew: number;
+    fit_marines: number;
+    inbound_crew: number;
+    injured_crew: number;
+    injured_marines: number;
+    owned_ship_crew: number;
+    owned_ship_marines: number;
+    reserve_crew: number;
+    reserve_marines: number;
+    total_crew: number;
+    total_marines: number;
+};
+
+export type FactionPersonnelResponse = {
+    /**
+     * The personnel_action the request asked for. It is echoed back unchanged.
+     */
+    action: 'status' | 'recruit' | 'deposit' | 'withdraw';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
+    base_id: string;
+    cost?: number;
+    crew_capacity: number;
+    crew_moved?: number;
+    crew_pool_remaining?: number;
+    fit_crew: number;
+    fit_marines: number;
+    inbound_crew: number;
+    inbound_prizes: number;
+    injured_crew: number;
+    injured_marines: number;
+    marine_capacity: number;
+    marine_pool_remaining?: number;
+    marines_moved?: number;
+    medical_available: number;
+    medical_capacity: number;
+};
+
 export type FactionPostMissionResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     escrowed: EscrowedRewards;
     message: string;
     status: string;
@@ -2750,9 +3360,21 @@ export type FactionQueryTradeIntelResponse = {
 };
 
 export type FactionRemoveAllyResponse = {
+    /**
+     * Always present. Human-readable result explaining ally removal or that any pending alliance proposals between the factions have been cleared.
+     */
     message: string;
+    /**
+     * Always present. True if an ally link was removed from either faction. False means neither ally link existed; pending alliance proposals in both directions (incoming and outgoing) are still cleared. This flag reports ally-link removal only and does not indicate whether proposals changed.
+     */
     removed: boolean;
+    /**
+     * Always present. Canonical ID of the target faction after resolving the requested faction ID or tag.
+     */
     target_faction_id: string;
+    /**
+     * Always present. Display name of the target faction.
+     */
     target_name: string;
 };
 
@@ -2812,9 +3434,25 @@ export type FactionScanPoiResponse = {
 };
 
 export type FactionScanPirateContact = {
+    /**
+     * Stronghold crew this pirate flies for and the pirate-standing counterparty affected by fighting them. Omitted only when no stronghold crew can be resolved.
+     */
+    faction?: string;
+    /**
+     * Human-readable name of the pirate stronghold crew. Omitted only when no stronghold crew can be resolved.
+     */
+    faction_name?: string;
     id: string;
     name?: string;
+    /**
+     * Primary livery color configured by the pirate stronghold crew as #RRGGBB. Omitted when the crew has no configured branding.
+     */
+    primary_color?: string;
     role?: string;
+    /**
+     * Secondary livery color configured by the pirate stronghold crew as #RRGGBB. Omitted when the crew has no configured branding.
+     */
+    secondary_color?: string;
     ship_class?: string;
 };
 
@@ -2916,6 +3554,8 @@ export type FactionWarInfo = {
 export type FactionWithdrawCreditsResponse = {
     action: 'faction_withdraw_credits';
     amount: number;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     faction_credits: number;
     player_credits: number;
 };
@@ -2927,6 +3567,8 @@ export type FactionWithdrawInviteResponse = {
 
 export type FactionWithdrawItemsResponse = {
     action: 'faction_withdraw_items';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     bucket?: string;
     bucket_id?: string;
     cargo_space: number;
@@ -3261,10 +3903,13 @@ export type GetActionLogResponse = {
     category: string;
     entries: Array<ActionLogEntry>;
     event_type?: string;
+    event_types?: Array<string>;
     faction_id?: string;
     has_more: boolean;
+    next_since_id?: number;
     page: number;
     page_size: number;
+    since_id?: number;
     total: number;
     total_pages: number;
 };
@@ -3280,11 +3925,15 @@ export type GetBaseResponse = {
     fuel_tax_per_unit?: number;
     life_support?: StationLifeSupportStatus;
     power?: StationPowerStatus;
+    repairs?: StationRepairResponse;
     services: Array<string>;
 };
 
 export type GetBattleLogResponse = {
     battle_id: string;
+    /**
+     * Tick snapshots include is_npc and is_boss on newly recorded rows. Explicit false is authoritative; either field may be omitted on historical rows that predate identity provenance.
+     */
     entries: Array<BattleLogEntry>;
     /**
      * True if more entries exist past this page (tick_start/tick_end) — raise tick_start or limit to page through.
@@ -3302,7 +3951,14 @@ export type GetBattleLogResponse = {
 
 export type GetBattleStatusResponse = {
     battle_id: string;
+    boarding?: Array<BoardingPublicStatus>;
+    /**
+     * The requesting participant's own tactical state. Present only when is_participant is true; omitted for observers. Never describes another participant.
+     */
     combat_state?: BattleCombatState;
+    /**
+     * True when the requesting player participates in this battle and receives their own combat_state; false for an observer.
+     */
     is_participant: boolean;
     participants?: Array<BattleParticipant>;
     sides?: Array<BattleSide>;
@@ -3402,6 +4058,8 @@ export type GetNearbyResponse = {
     pirate_count: number;
     pirates: Array<PirateInfo>;
     poi_id: string;
+    prize_count: number;
+    prizes: Array<PrizeInfo>;
     unknown_signature?: boolean;
 };
 
@@ -3538,6 +4196,8 @@ export type GiftNotification = {
 
 export type GiftShipResponse = {
     action: 'gift_ship';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     base_id: string;
     class_id: string;
     class_name?: string;
@@ -3553,6 +4213,8 @@ export type GuideEntry = {
 };
 
 export type HuntResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     command: string;
     message: string;
     pending: boolean;
@@ -3582,6 +4244,7 @@ export type InspectPackageData = {
     label: string;
     owner: InspectPackageOwner;
     package_id: string;
+    shipment?: InspectPackageShipment;
     size: number;
 };
 
@@ -3590,6 +4253,22 @@ export type InspectPackageOwner = {
     name?: string;
     tag?: string;
     type: 'player' | 'faction';
+};
+
+export type InspectPackageShipment = {
+    base_reward: number;
+    destination_base_id: string;
+    destination_name?: string;
+    destination_system?: string;
+    failure_debt: number;
+    late: boolean;
+    late_fee_if_delivered_now?: number;
+    payout_if_delivered_now: number;
+    role: 'carrier' | 'shipper' | 'recipient' | 'invited_carrier';
+    shipment_id: string;
+    status: string;
+    ticks_to_deadline: number;
+    ticks_to_recovery_deadline: number;
 };
 
 export type InspectResponse = {
@@ -3622,6 +4301,8 @@ export type InspectResponse = {
 };
 
 export type InstallModResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     cpu_used: number;
     current_ammo?: number;
     loaded_ammo?: string;
@@ -3697,6 +4378,7 @@ export type IntelResource = {
 export type Item = {
     base_value: number;
     category: string;
+    compression?: string;
     description: string;
     effect?: ItemEffect;
     extracted_by?: string;
@@ -3742,6 +4424,8 @@ export type JailRecord = {
 
 export type JettisonBulkResponse = {
     action: 'bulk_jettison';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     container_id?: string;
     failed: number;
     message: string;
@@ -3767,6 +4451,8 @@ export type JettisonItemResult = {
 
 export type JettisonResponse = {
     action: 'jettison';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     container_id?: string;
     item_id: string;
     item_name: string;
@@ -3776,6 +4462,8 @@ export type JettisonResponse = {
 
 export type JobCancelResponse = {
     action: 'job_cancel';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     job_id: string;
     kind: 'cancel';
     message: string;
@@ -3798,9 +4486,22 @@ export type JobReorderResponse = {
     position: number;
 };
 
+export type JobRetargetResponse = {
+    action: 'job_retarget';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
+    deliver_to: string;
+    job_id: string;
+    kind: 'retarget';
+    message: string;
+    previous_deliver_to: string;
+    runs_remaining: number;
+};
+
 export type JobView = {
     base_id?: string;
     base_name?: string;
+    deliver_to?: string;
     eta_ticks: number;
     external?: boolean;
     facility_id: string;
@@ -3852,6 +4553,7 @@ export type JumpResponse = {
 };
 
 export type KillLogEntry = {
+    cause?: string;
     killer_id: string;
     killer_username: string;
     victim_id: string;
@@ -3866,6 +4568,8 @@ export type ListPassengersResponse = {
 };
 
 export type ListShipForSaleResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     credits_left: number;
     fee: number;
     listing_id: string;
@@ -3895,6 +4599,8 @@ export type LoadDroneResponse = {
 };
 
 export type LoadPassengersResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     count: number;
     loaded: Array<PassengerView>;
     message: string;
@@ -3909,6 +4615,23 @@ export type LoggedInPayload = {
     recent_chat?: Array<ChatHistoryMessage>;
     ship: Ship;
     system: ClientSystemInfo;
+};
+
+export type LoginLinkPollCommandResponse = LoginLinkPollResponse | LoginResponse;
+
+export type LoginLinkPollResponse = {
+    interval?: number;
+    status: string;
+};
+
+export type LoginLinkResponse = {
+    device_code: string;
+    expires_in: number;
+    instructions: string;
+    interval: number;
+    user_code: string;
+    verification_uri: string;
+    verification_uri_complete: string;
 };
 
 export type LoginReleaseInfo = {
@@ -3932,6 +4655,8 @@ export type LoginResponse = {
 
 export type LootWreckAllResponse = {
     action: 'loot_wreck_all';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     looted: Array<LootedItem>;
     looted_modules?: Array<LootedModule>;
     message: string;
@@ -3950,11 +4675,12 @@ export type LootWreckCommandResponse = ({
 
 export type LootWreckResponse = {
     action: 'loot_wreck';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     item_id?: string;
     module_id?: string;
     module_type_id?: string;
     quantity: number;
-    wear?: number;
     wreck_empty: boolean;
     xp_gained?: {
         [key: string]: number;
@@ -3971,10 +4697,11 @@ export type LootedModule = {
     name: string;
     type: string;
     type_id: string;
-    wear: number;
 };
 
 export type LoungeCheckInResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     capacity: number;
     checked_in: Array<PassengerView>;
     count: number;
@@ -3988,17 +4715,45 @@ export type LoungeCheckInResponse = {
 };
 
 export type McpNotification = {
+    /**
+     * Frame payload. The shape is selected by msg_type: read the Notification_<msg_type> schema under components.schemas. The notifications array on every v2 response carries the same payloads as an explicit anyOf.
+     */
+    data: unknown;
     id: string;
+    /**
+     * Specific frame subtype. Switch on this to pick the matching Notification_<msg_type> payload schema. Routing to the coarse type field: chat_message -> chat. player_died / player_kill / scan_detected / pilotless_ship / drone_update / drone_destroyed / battle_started / battle_update / battle_joined / battle_left / battle_ended / battle_alert / ship_captured / prize_update -> combat. trade_offer_received / trade_complete / trade_declined / trade_cancelled -> trade. market_update -> market. crafting_update -> crafting. observation_update -> observation. personnel_update -> system. Frames not named here also route to system - that includes battle_damage / drone_scan / drone_survey / drone_adrift / action_result / action_error / server_restart_warning. A types=combat filter does not carry them.
+     */
     msg_type: string;
     timestamp: string;
-    type: string;
+    /**
+     * Coarse notification category. This is the value get_notifications accepts in its types filter. The server derives it from msg_type — see the msg_type field for the routing table.
+     */
+    type: 'chat' | 'combat' | 'trade' | 'market' | 'crafting' | 'observation' | 'system';
 };
 
 export type MapData = {
     empires: {
         [key: string]: string;
     };
-    systems: Array<MapSystem>;
+    /**
+     * Every system in the galaxy, with static position and connection data.
+     */
+    systems: Array<MapDataSystem>;
+};
+
+export type MapDataSystem = {
+    battle_id?: string;
+    connections: Array<string>;
+    empire?: string;
+    empire_color?: string;
+    has_battle?: boolean;
+    id: string;
+    is_home?: boolean;
+    is_stronghold?: boolean;
+    name: string;
+    online: number;
+    x: number;
+    y: number;
 };
 
 /**
@@ -4157,11 +4912,21 @@ export type MissionInfo = {
 
 export type MissionRewardsInfo = {
     credits: number;
+    /**
+     * item_id → quantity
+     */
     items?: {
         [key: string]: number;
     };
+    /**
+     * Stronghold crew the pirate_rep reward is paid to (e.g. pirate_kael). Empty means the standing is granted with every pirate crew.
+     */
+    pirate_faction?: string;
     pirate_rep?: number;
     reputation?: number;
+    /**
+     * skill_id → XP
+     */
     skill_xp?: {
         [key: string]: number;
     };
@@ -4179,6 +4944,8 @@ export type ModifyOrderCommandResponse = ({
 
 export type ModifyOrderResponse = {
     action: 'modify_order';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     kind: 'single';
     listing_fee?: number;
     message: string;
@@ -4194,11 +4961,17 @@ export type Module = {
     armor_bypass_bonus?: number;
     armor_repair_rate?: number;
     base_value: number;
+    boarding_capability?: boolean;
+    boarding_contact_defense?: boolean;
+    boarding_defense_bonus_pct?: number;
     cargo_bonus?: number;
     cloak_strength?: number;
+    combat_effects?: CombatSpecialEffects;
     cooldown?: number;
     cpu_bonus?: number;
     cpu_usage: number;
+    crew_capacity_bonus?: number;
+    crew_combat_bonus_pct?: number;
     current_cool?: number;
     damage?: number;
     damage_reduction?: number;
@@ -4208,14 +4981,21 @@ export type Module = {
     disruptor_power?: number;
     drone_bandwidth?: number;
     drone_capacity?: number;
+    fleet_triage_pct?: number;
     fuel_efficiency?: number;
     hidden?: boolean;
     hull_bonus?: number;
     hull_penalty?: number;
     id: string;
+    jam_strength?: number;
+    latch_resistance?: number;
+    latch_strength?: number;
     leisure_points?: number;
     magazine_size?: number;
+    marine_capacity_bonus?: number;
+    marine_combat_bonus_pct?: number;
     max_fuel_bonus?: number;
+    medical_treatment_rate?: number;
     mining_power?: number;
     name: string;
     passenger_business_berths?: number;
@@ -4223,11 +5003,15 @@ export type Module = {
     passenger_economy_berths?: number;
     passenger_first_berths?: number;
     passive_recipe?: string;
+    passive_repair?: number;
     power_bonus?: number;
     power_usage: number;
     precision_factor?: number;
     quest_item?: boolean;
     reach?: number;
+    reactive_resistance?: number;
+    refit_capability?: boolean;
+    remote_medical_treatment?: boolean;
     remote_repair_power?: number;
     required_skills?: {
         [key: string]: number;
@@ -4236,6 +5020,7 @@ export type Module = {
         [key: string]: number;
     };
     salvage_bonus?: number;
+    scan_reduction?: number;
     scanner_power?: number;
     scramble_power?: number;
     shield_bonus?: number;
@@ -4248,6 +5033,7 @@ export type Module = {
     speed_bonus?: number;
     speed_penalty?: number;
     survey_power?: number;
+    targeting_reduction?: number;
     tow_speed_penalty?: number;
     tracking_bonus?: number;
     type: string;
@@ -4334,6 +5120,60 @@ export type NotificationAchievementUnlocked = {
     faction?: boolean;
 };
 
+/**
+ * A queued action that failed when it ran on a later tick. Delivered on the same path as action_result: to the caller waiting on the originating request_id when one is still attached, otherwise queued and collected through get_notifications.
+ */
+export type NotificationActionError = {
+    /**
+     * Machine-readable error code. Switch on this rather than on message. It is the same code set the synchronous error response uses for that command, so it is not enumerated here — a command can fail at execution time for any reason it can fail immediately.
+     */
+    code: string;
+    /**
+     * Name of the command that failed.
+     */
+    command: string;
+    /**
+     * Optional extra context. Shape depends on code. Omitted when the failure carries none.
+     */
+    details?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Human-readable explanation of the failure.
+     */
+    message: string;
+    /**
+     * Tick the command failed on.
+     */
+    tick: number;
+};
+
+/**
+ * Result of a queued action that completed on a later tick. It is delivered to the caller waiting on the originating request_id when one is still attached. Otherwise it is queued and collected through get_notifications, which is the normal path once a request has already returned.
+ */
+export type NotificationActionResult = {
+    /**
+     * True when the server docked you to run the command.
+     */
+    auto_docked?: boolean;
+    /**
+     * True when the server undocked you to run the command.
+     */
+    auto_undocked?: boolean;
+    /**
+     * Name of the command that ran.
+     */
+    command: string;
+    /**
+     * Payload of the completed command. On v1 this is the command's own response object — see that command's response schema. On v2 it is the state delta the command registered, keyed by state section. Untyped because both shapes are possible; it is null when the command returned no body.
+     */
+    result: unknown;
+    /**
+     * Tick the command executed on.
+     */
+    tick: number;
+};
+
 export type NotificationBaseDestroyed = {
     attacker_id: string;
     attacker_name: string;
@@ -4366,6 +5206,7 @@ export type NotificationBattleDamage = {
     attacker_id: string;
     attacker_name?: string;
     damage_type: string;
+    effect_kind?: string;
     hit_success: boolean;
     hull_hit: number;
     shield_hit: number;
@@ -4383,11 +5224,19 @@ export type NotificationBattleDamage = {
 
 export type NotificationBattleEnded = {
     battle_id: string;
+    captures?: Array<CaptureLogEntry>;
     duration: number;
     participants?: Array<BattleEndedParticipantInfo>;
-    reason: string;
+    /**
+     * How the battle ended. victory means one side survived and took a kill. stalemate and mutual_destruction are both draws. interrupted means a server restart ended the battle. The REST battle summary and battle log call this same field outcome.
+     */
+    reason: 'victory' | 'stalemate' | 'mutual_destruction' | 'interrupted';
+    ships_captured?: number;
     ships_destroyed: number;
     total_damage: number;
+    /**
+     * Side id of the winning side. Always -1 for a draw — stalemate and mutual_destruction are both draws — and -1 for a battle a server restart interrupted.
+     */
     winning_side: number;
 };
 
@@ -4413,6 +5262,7 @@ export type NotificationBattleStarted = {
 export type NotificationBattleUpdate = {
     auto_pilot: boolean;
     battle_id: string;
+    boarding?: Array<BoardingPublicStatus>;
     participants: Array<BattleParticipantInfo>;
     sides: Array<BattleSideInfo>;
     tick: number;
@@ -4464,6 +5314,14 @@ export type NotificationChatMessage = {
 export type NotificationCraftingUpdate = {
     jobs: Array<CraftingJobUpdate>;
     tick: number;
+};
+
+export type NotificationDroneAdrift = {
+    drone_id: string;
+    drone_type: string;
+    owner_id: string;
+    poi_id: string;
+    system_id: string;
 };
 
 export type NotificationDroneDestroyed = {
@@ -4582,6 +5440,55 @@ export type NotificationFacilityRentWarning = {
     missed_cycles?: number;
 };
 
+export type NotificationFactionAllianceBroken = {
+    by_faction_id: string;
+    by_faction_name: string;
+    by_faction_tag: string;
+    message: string;
+};
+
+export type NotificationFactionAllianceFormed = {
+    message: string;
+    with_faction_id: string;
+    with_faction_name: string;
+    with_faction_tag: string;
+};
+
+export type NotificationFactionAllianceProposal = {
+    from_faction_id: string;
+    from_faction_name: string;
+    from_faction_tag: string;
+    message: string;
+};
+
+/**
+ * Sent to the proposing faction's members when the other faction accepts their peace proposal.
+ */
+export type NotificationFactionPeaceAccepted = {
+    /**
+     * Faction that accepted the proposal.
+     */
+    faction_id: string;
+    faction_name: string;
+    message: string;
+};
+
+export type NotificationFactionPeaceProposal = {
+    from_faction_id: string;
+    from_faction_name: string;
+    message: string;
+    terms?: string;
+};
+
+export type NotificationFactionWarDeclared = {
+    aggressor_faction_id: string;
+    aggressor_faction_name: string;
+    defender_faction_id: string;
+    defender_faction_name: string;
+    message: string;
+    reason?: string;
+};
+
 export type NotificationMarketUpdate = {
     base_id: string;
     base_name?: string;
@@ -4610,14 +5517,43 @@ export type NotificationObservationUpdate = {
     active_scan?: boolean;
     cloaked_lost?: Array<string>;
     cloaked_resolved?: Array<ScanContact>;
+    creatures_changed?: Array<CreatureInfo>;
+    creatures_departed?: Array<string>;
+    empire_npcs_changed?: Array<EmpireNpcInfo>;
+    empire_npcs_departed?: Array<string>;
     nearby_changed?: Array<NearbyPlayer>;
     nearby_departed?: Array<string>;
+    pirates_changed?: Array<PirateInfo>;
+    pirates_departed?: Array<string>;
     poi_id: string;
+    prizes_changed?: Array<PrizeInfo>;
+    prizes_departed?: Array<string>;
     system_changed?: Array<NearbyPlayer>;
     system_departed?: Array<string>;
     system_id: string;
     tick: number;
     unknown_signature: boolean;
+};
+
+export type NotificationPersonnelUpdate = {
+    /**
+     * What an ally did to your active ship. treatment healed injured crew or marines. transfer moved personnel between ships.
+     */
+    action: 'treatment' | 'transfer';
+    crew_capacity: number;
+    crew_treated?: number;
+    fit_crew_transferred?: number;
+    fit_marines_transferred?: number;
+    injured_crew_swapped?: number;
+    injured_crew_transferred?: number;
+    injured_marines_swapped?: number;
+    injured_marines_transferred?: number;
+    marine_capacity: number;
+    marines_treated?: number;
+    personnel: PersonnelState;
+    ship_id: string;
+    source_player_id: string;
+    source_username: string;
 };
 
 export type NotificationPilotlessShip = {
@@ -4636,7 +5572,7 @@ export type NotificationPilotlessShip = {
  */
 export type NotificationPirateDestroyed = {
     /**
-     * Combat XP awarded (kill notification to the killer).
+     * Weapons skill XP awarded (legacy field name; kill notification to the killer).
      */
     combat_xp?: number;
     /**
@@ -4667,24 +5603,117 @@ export type NotificationPirateDestroyed = {
      * System name (boss-kill system broadcast).
      */
     system_name?: string;
+    /**
+     * Whether the wreck holds lootable cargo (omitted when no wreck).
+     */
+    wreck_has_cargo?: boolean;
+    /**
+     * Whether the wreck holds salvageable modules (omitted when no wreck).
+     */
+    wreck_has_modules?: boolean;
+    /**
+     * Wreck left behind (omitted when no wreck was created).
+     */
+    wreck_id?: string;
+    /**
+     * POI the wreck was left at — combat is system-scoped, so this can differ from the killer's POI (omitted when no wreck or the POI is hidden from the recipient).
+     */
+    wreck_poi_id?: string;
+    /**
+     * Display name of the wreck's POI (omitted when unknown or hidden from the recipient).
+     */
+    wreck_poi_name?: string;
+    /**
+     * System the wreck is in (omitted when no wreck).
+     */
+    wreck_system_id?: string;
+    /**
+     * Display name of the wreck's system (omitted when no wreck, or when the name is unknown).
+     */
+    wreck_system_name?: string;
 };
 
-/**
- * Pushed to players in range with a pirate_radio_scanner module, carrying an intercepted pirate transmission.
- */
 export type NotificationPirateRadio = {
     /**
-     * Template/event key of the intercepted message.
+     * Acting pirate combat ID when the grammatical speaker differs from the actor. Omitted when there is no separate actor.
      */
-    event_key?: string;
+    actor_id?: string;
     /**
-     * Pirate faction key the transmission belongs to.
+     * Acting pirate display name when the grammatical speaker differs from the actor. Omitted when there is no separate actor.
      */
-    faction_key?: string;
+    actor_name?: string;
+    /**
+     * Battle identity when the transmission refers to a fight.
+     */
+    battle_id?: string;
+    /**
+     * Backward-compatible alias of editorial_class. Both fields always carry the same bounded editorial class.
+     */
+    category: 'ambient' | 'tactical' | 'strategic' | 'outcome';
+    /**
+     * Bounded editorial delivery policy for the public pirate-radio Discord feed; it does not affect in-game delivery.
+     */
+    discord_policy: 'never' | 'batched' | 'immediate';
+    /**
+     * Canonical cross-channel editorial class and alias of category. Both fields always carry the same value.
+     */
+    editorial_class: 'ambient' | 'tactical' | 'strategic' | 'outcome';
+    /**
+     * Bounded pirate-radio template and lifecycle event key.
+     */
+    event_key: string;
+    /**
+     * Pirate stronghold crew key the transmission belongs to.
+     */
+    faction_key: string;
+    /**
+     * Human-readable pirate stronghold crew name.
+     */
+    faction_name: string;
+    /**
+     * Ship class ID of the crew flagship when configured.
+     */
+    flagship_ship_class: string;
+    /**
+     * Rendered in-character transmission text.
+     */
     message: string;
+    /**
+     * Stable raid; expedition; breakout; return; or incident identity when the transmission belongs to an operation.
+     */
+    operation_id?: string;
+    /**
+     * Display name of the selected speaker: the acting pirate; operation leader; stronghold control; or boss.
+     */
     pirate_name: string;
-    source_poi?: string;
-    source_system?: string;
+    /**
+     * Primary pirate-crew livery color as #RRGGBB.
+     */
+    primary_color: string;
+    /**
+     * Bounded machine-readable doctrine or lifecycle reason code when available.
+     */
+    reason_code?: string;
+    /**
+     * Secondary pirate-crew livery color as #RRGGBB.
+     */
+    secondary_color: string;
+    /**
+     * POI ID from which the transmission originated. Empty when no POI can be resolved.
+     */
+    source_poi: string;
+    /**
+     * System ID from which the transmission originated.
+     */
+    source_system: string;
+    /**
+     * Selected grammatical speaker category such as actor; operation_leader; stronghold_control; or boss.
+     */
+    speaker_category: string;
+    /**
+     * Combat actor ID or stable synthetic stronghold-control speaker ID.
+     */
+    speaker_id: string;
 };
 
 export type NotificationPlayerDied = {
@@ -4698,7 +5727,23 @@ export type NotificationPlayerDied = {
     self_destruct_fee?: number;
     ship_lost: string;
     wreck_id?: string;
+    /**
+     * POI where the wreck was left. Omitted when there is no wreck or the POI is hidden from the recipient.
+     */
+    wreck_poi_id?: string;
+    /**
+     * Display name of the wreck POI. Omitted when unknown or hidden from the recipient.
+     */
+    wreck_poi_name?: string;
     wreck_suppressed?: boolean;
+    /**
+     * System where the wreck was left. Omitted when there is no wreck.
+     */
+    wreck_system_id?: string;
+    /**
+     * Display name of the wreck system. Omitted when unknown.
+     */
+    wreck_system_name?: string;
 };
 
 /**
@@ -4720,6 +5765,42 @@ export type NotificationPlayerKill = {
     /**
      * Wreck left behind (omitted when no wreck was created).
      */
+    wreck_id?: string;
+    /**
+     * POI the wreck was left at — combat is system-scoped, so this can differ from the killer's POI (omitted when no wreck or the POI is hidden from the recipient).
+     */
+    wreck_poi_id?: string;
+    /**
+     * Display name of the wreck's POI (omitted when unknown or hidden from the recipient).
+     */
+    wreck_poi_name?: string;
+    /**
+     * System the wreck is in (omitted when no wreck).
+     */
+    wreck_system_id?: string;
+    /**
+     * Display name of the wreck's system (omitted when no wreck, or when the name is unknown).
+     */
+    wreck_system_name?: string;
+};
+
+export type NotificationPrizeUpdate = {
+    destination_base_id?: string;
+    message: string;
+    poi_id?: string;
+    prize_id: string;
+    ship_class: string;
+    ship_id: string;
+    ship_name?: string;
+    /**
+     * Recovery state of the prize. delivered / destroyed / expired / recaptured are terminal.
+     */
+    status: 'available' | 'claimed' | 'in_transit' | 'delivered' | 'destroyed' | 'expired' | 'recaptured';
+    system_id?: string;
+    /**
+     * Why an in_transit prize is stalled. Omitted while the prize is moving.
+     */
+    wait_reason?: 'no_route' | 'no_fuel' | 'destination_missing' | 'incapacitated' | 'manual_stop';
     wreck_id?: string;
 };
 
@@ -4749,6 +5830,28 @@ export type NotificationScanDetected = {
     scanner_id: string;
     scanner_ship_class?: string;
     scanner_username: string;
+};
+
+export type NotificationServerRestartWarning = {
+    message: string;
+    seconds_until_restart: number;
+    target_version?: string;
+};
+
+export type NotificationShipCaptured = {
+    battle_id: string;
+    boarding_operation_id: string;
+    captor_id: string;
+    /**
+     * Kind of combat actor identified by captor_id. Present on newly emitted captures; omitted only on historical persisted capture records.
+     */
+    captor_kind?: 'player' | 'pirate' | 'npc';
+    captor_username: string;
+    former_owner_id: string;
+    former_owner_username: string;
+    ship_class: string;
+    ship_id: string;
+    tick: number;
 };
 
 export type NotificationShipCommissionComplete = {
@@ -4841,6 +5944,30 @@ export type ObjectiveInfo = {
     type: string;
 };
 
+export type ObjectiveProgressInfo = {
+    completed: boolean;
+    current: number;
+    description: string;
+    /**
+     * player_threshold objectives only
+     */
+    eligible_players?: Array<string>;
+    in_cargo?: number;
+    in_storage?: number;
+    item_id?: string;
+    item_name?: string;
+    /**
+     * player_threshold objectives only
+     */
+    participants?: Array<string>;
+    required: number;
+    system_id?: string;
+    system_name?: string;
+    target_base?: string;
+    target_base_name?: string;
+    type: string;
+};
+
 export type OpenOrderSummary = {
     item_id: string;
     item_name: string;
@@ -4864,11 +5991,18 @@ export type OwnedFacilityEntry = {
     base_name: string;
     custom_name?: string;
     damaged?: boolean;
+    /**
+     * True while dismantling is in progress; omitted means false. No rent is billed while dismantling and the facility is removed when dismantling completes.
+     */
+    dismantling?: boolean;
     facility_id: string;
     labor_per_run?: number;
     missed_rent_cycles?: number;
     name: string;
     power_throttled?: boolean;
+    /**
+     * Stored rent rate in credits per facility cycle (100 ticks). No rent is billed while damaged or under_construction or dismantling. The stored rate applies after repair or construction subject to repricing. Zero means no recurring rent. Legacy inactive facilities remain billable.
+     */
     rent_per_cycle: number;
     rental_fee_per_run?: number;
     repair_complete_tick?: number;
@@ -4890,6 +6024,7 @@ export type OwnedShipInfo = {
     listing_price?: number;
     location?: string;
     location_base_id?: string;
+    module_type_ids?: Array<string>;
     modules?: number;
     ship_id: string;
 };
@@ -4927,6 +6062,8 @@ export type Poi = {
 
 export type PackageJobResponse = {
     action: 'pack' | 'unpack';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     escrowed: EscrowSummary;
     eta_ticks: number;
     external?: boolean;
@@ -4936,6 +6073,57 @@ export type PackageJobResponse = {
     message: string;
     package_id: string;
     venue: string;
+};
+
+export type PackagedCraftGate = {
+    ok: boolean;
+    reason?: string;
+};
+
+export type PackagedCraftGates = {
+    cargo_container?: PackagedCraftGate;
+    credits?: PackagedCraftGate;
+    destination_room?: PackagedCraftGate;
+    inputs?: PackagedCraftGate;
+    logistics?: PackagedCraftGate;
+    output_size?: PackagedCraftGate;
+    package_match?: PackagedCraftGate;
+};
+
+export type PackagedCraftQuoteResponse = {
+    action: 'craft';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
+    cost: EscrowSummary;
+    credits_total: number;
+    dry_run: boolean;
+    effective_time_per_run: number;
+    est_completion_tick: number;
+    external?: boolean;
+    facility_id: string;
+    gates: PackagedCraftGates;
+    kind: 'packaged_quote';
+    message: string;
+    mode: 'craft';
+    output_package?: PackagedOutputPreview;
+    output_package_label?: string;
+    package_ids?: Array<string>;
+    produces?: Array<ItemQuantity>;
+    quantity: number;
+    ready: boolean;
+    recipe: string;
+    runs: number;
+    venue: string;
+    venue_type: string;
+};
+
+export type PackagedOutputPreview = {
+    container_consumed: number;
+    items: Array<ItemQuantity>;
+    label: string;
+    reclaimed_containers: number;
+    size_max: number;
+    size_used: number;
 };
 
 export type ParticipantSnapshot = {
@@ -4952,6 +6140,14 @@ export type ParticipantSnapshot = {
     flee_counter: number;
     fuel: number;
     hull: number;
+    /**
+     * True for a named pirate boss. False explicitly means not a boss. Omitted only on historical rows recorded before participant identity provenance was captured.
+     */
+    is_boss?: boolean;
+    /**
+     * True for an automated combatant. False explicitly means player-controlled. Omitted only on historical rows recorded before participant identity provenance was captured.
+     */
+    is_npc?: boolean;
     kill_count: number;
     kind?: string;
     max_fuel: number;
@@ -4974,7 +6170,10 @@ export type ParticipantSnapshot = {
 export type ParticipantSummary = {
     damage_dealt: number;
     damage_taken: number;
+    is_boss?: boolean;
+    is_npc?: boolean;
     kill_count: number;
+    kind?: string;
     player_id: string;
     side_id: number;
     survived: boolean;
@@ -5015,7 +6214,30 @@ export type PathfinderJumpResponse = {
     origin_y?: number;
 };
 
+export type PayBountyOutstandingRow = {
+    /**
+     * Credits still owed to this empire
+     */
+    bounty: number;
+    empire: string;
+};
+
+export type PayBountyResponse = {
+    action: string;
+    amount_paid: number;
+    credits: number;
+    empire: string;
+    faction_credits?: number;
+    message: string;
+    outstanding_bounties: Array<PayBountyOutstandingRow>;
+    paid_from: string;
+    released_from_detention: boolean;
+    reputation_after: number;
+};
+
 export type PendingActionResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     command: string;
     message: string;
     pending: boolean;
@@ -5027,6 +6249,24 @@ export type PendingTradeItemView = {
     quantity: number;
 };
 
+export type PersonnelCasualtyLogEntry = {
+    casualties_occurred: boolean;
+    incapacitated: boolean;
+    target_id: string;
+    triage_applied?: boolean;
+    triage_converted?: boolean;
+    triage_provider_id?: string;
+    triage_provider_ship_id?: string;
+};
+
+export type PersonnelState = {
+    fit_crew: number;
+    fit_marines: number;
+    injured_crew: number;
+    injured_marines: number;
+    version: number;
+};
+
 export type PetitionResponse = {
     empire_id: string;
     empire_name: string;
@@ -5034,18 +6274,36 @@ export type PetitionResponse = {
 };
 
 export type PirateInfo = {
+    /**
+     * Stronghold crew this pirate flies for, e.g. pirate_kael. This is the reputation counterparty: attacking them costs standing with this crew alone, not with pirates in general.
+     */
+    faction?: string;
+    /**
+     * Human-readable name of the stronghold crew, e.g. Admiral Kael.
+     */
+    faction_name?: string;
     hull?: number;
     is_boss: boolean;
     max_hull?: number;
     max_shield?: number;
     name: string;
     pirate_id: string;
+    /**
+     * Primary livery color for this pirate crew as a hex color.
+     */
+    primary_color?: string;
+    /**
+     * Secondary livery color for this pirate crew as a hex color.
+     */
+    secondary_color?: string;
     shield?: number;
     status: string;
     tier: string;
 };
 
 export type PlaceShipBuyOrderResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     class_id: string;
     credits_left: number;
     message: string;
@@ -5160,6 +6418,10 @@ export type Player = {
     stats?: PlayerStats;
     status_message?: string;
     /**
+     * ID of own ship currently being towed via a tow rig, empty if not towing a ship
+     */
+    towing_ship_id?: string;
+    /**
      * ID of wreck currently being towed, empty if not towing
      */
     towing_wreck_id?: string;
@@ -5174,9 +6436,26 @@ export type Player = {
  * Lifetime player statistics.
  */
 export type PlayerStats = {
+    /**
+     * Injured personnel treated aboard another player's ship
+     */
+    allied_personnel_treated?: number;
     bases_destroyed?: number;
     battles_fled?: number;
     battles_started?: number;
+    /**
+     * Boarding latch rolls attempted
+     */
+    boarding_attempts?: number;
+    boarding_marine_deaths?: number;
+    boarding_marine_injuries?: number;
+    boarding_marines_deployed?: number;
+    /**
+     * Boarding combats successfully initiated
+     */
+    boarding_operations_started?: number;
+    boarding_victories?: number;
+    boarding_withdrawals?: number;
     captains_log_entries?: number;
     chat_messages_sent?: number;
     cloak_activations?: number;
@@ -5205,6 +6484,11 @@ export type PlayerStats = {
     credits_earned_taxable_snapshot?: number;
     credits_gifted?: number;
     credits_spent?: number;
+    crew_deaths?: number;
+    crew_hired?: number;
+    crew_injuries?: number;
+    crew_injuries_healed?: number;
+    crew_transferred?: number;
     customs_evaded?: number;
     damage_dealt?: number;
     damage_taken?: number;
@@ -5239,6 +6523,11 @@ export type PlayerStats = {
      * Unix timestamp of the most recent property-tax assessment
      */
     last_property_tax_assessed_at?: number;
+    marine_deaths?: number;
+    marine_injuries?: number;
+    marine_injuries_healed?: number;
+    marines_hired?: number;
+    marines_transferred?: number;
     /**
      * Lifetime credits spent acquiring resaleable goods on the market, deducted from market sale income so trading is taxed on margin
      */
@@ -5257,18 +6546,34 @@ export type PlayerStats = {
     modules_installed?: number;
     npcs_destroyed?: number;
     ore_mined?: number;
+    pirate_boss_prizes_delivered?: number;
+    pirate_prizes_delivered?: number;
     pirates_destroyed?: number;
     /**
      * Cumulative distance flown in a Prayer-class hull
      */
     prayer_distance_traveled?: number;
+    /**
+     * Base value of delivered prize hulls, installed modules, and cargo
+     */
+    prize_value_recovered?: number;
+    prizes_claimed?: number;
+    prizes_delivered?: number;
     refuels_given?: number;
     repairs_given?: number;
     scans_performed?: number;
     self_destructs?: number;
+    /**
+     * Intact ships captured through boarding; does not count as destruction
+     */
+    ships_captured?: number;
     ships_commissioned?: number;
     ships_destroyed?: number;
     ships_lost?: number;
+    /**
+     * Owned ships lost intact through boarding; does not count as a death or destruction loss
+     */
+    ships_lost_to_capture?: number;
     ships_purchased?: number;
     systems_explored?: number;
     /**
@@ -5281,6 +6586,10 @@ export type PlayerStats = {
     time_played?: number;
     times_docked?: number;
     trades_completed?: number;
+    /**
+     * Fatal casualties prevented by fleet medical capability
+     */
+    triage_lives_saved?: number;
     /**
      * Times a Pathfinder course was plotted into open space
      */
@@ -5302,6 +6611,90 @@ export type PrepayTaxResponse = {
     credits: number;
     message: string;
     tax_prepaid_balance: number;
+};
+
+export type PrizeInfo = {
+    actor_id: string;
+    hull: number;
+    in_combat: boolean;
+    max_hull: number;
+    max_shield: number;
+    prize_id: string;
+    shield: number;
+    ship_class: string;
+    ship_id: string;
+    ship_name?: string;
+    /**
+     * Recovery state of the prize. delivered / destroyed / expired / recaptured are terminal.
+     */
+    status: 'available' | 'claimed' | 'in_transit' | 'delivered' | 'destroyed' | 'expired' | 'recaptured';
+    /**
+     * Why an in_transit prize is stalled. Omitted while the prize is moving.
+     */
+    wait_reason?: 'no_route' | 'no_fuel' | 'destination_missing' | 'incapacitated' | 'manual_stop';
+};
+
+export type PrizeRecoveryInfo = {
+    actor_id: string;
+    /**
+     * Where the prize crew came from and returns to.
+     */
+    crew_disposition: 'aboard' | 'faction_reserve';
+    destination_base_id: string;
+    fuel: number;
+    hull: number;
+    max_fuel: number;
+    max_hull: number;
+    poi_id?: string;
+    prize_crew_fit: number;
+    prize_id: string;
+    return_crew_faction_id?: string;
+    ship_class: string;
+    ship_id: string;
+    ship_name?: string;
+    /**
+     * Recovery state of the prize. delivered / destroyed / expired / recaptured are terminal.
+     */
+    status: 'available' | 'claimed' | 'in_transit' | 'delivered' | 'destroyed' | 'expired' | 'recaptured';
+    system_id?: string;
+    transit_arrival_tick?: number;
+    transit_from_poi_id?: string;
+    transit_from_system_id?: string;
+    /**
+     * Which leg the prize is flying. jump crosses systems. travel crosses POIs inside one system.
+     */
+    transit_kind?: 'jump' | 'travel';
+    transit_to_poi_id?: string;
+    transit_to_system_id?: string;
+    /**
+     * Why an in_transit prize is stalled. Omitted while the prize is moving.
+     */
+    wait_reason?: 'no_route' | 'no_fuel' | 'destination_missing' | 'incapacitated' | 'manual_stop';
+};
+
+export type PrizeServiceResponse = {
+    /**
+     * The service_action the request asked for. It is echoed back unchanged.
+     */
+    action: 'stop' | 'resume' | 'redirect' | 'refuel' | 'repair';
+    /**
+     * Where the prize crew came from and returns to.
+     */
+    crew_disposition?: 'aboard' | 'faction_reserve';
+    destination_base_id?: string;
+    fuel_transferred?: number;
+    hull_repaired?: number;
+    prize_id: string;
+    repair_kits_used?: number;
+    ship_id: string;
+    /**
+     * Recovery state of the prize. delivered / destroyed / expired / recaptured are terminal.
+     */
+    status: 'available' | 'claimed' | 'in_transit' | 'delivered' | 'destroyed' | 'expired' | 'recaptured';
+    /**
+     * Why an in_transit prize is stalled. Omitted while the prize is moving.
+     */
+    wait_reason?: 'no_route' | 'no_fuel' | 'destination_missing' | 'incapacitated' | 'manual_stop';
 };
 
 export type RanchFeedInfo = {
@@ -5406,6 +6799,31 @@ export type RecipeOutput = {
     quantity: number;
 };
 
+export type RecoveredBattleSummary = {
+    captures?: Array<CaptureLogEntry>;
+    category: string;
+    duration: number;
+    participant_names?: Array<string>;
+    participants: Array<ParticipantSummary>;
+    ships_captured?: number;
+    ships_destroyed: number;
+    side_factions?: {
+        [key: string]: never;
+    };
+    start_tick: number;
+    total_damage: number;
+};
+
+export type RecruitPersonnelResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
+    cost: number;
+    crew_pool_remaining?: number;
+    crew_recruited: number;
+    marine_pool_remaining?: number;
+    marines_recruited: number;
+};
+
 export type RecycleJobResponse = ({
     kind: 'job';
 } & CraftJobResponse) | ({
@@ -5416,9 +6834,13 @@ export type RecycleJobResponse = ({
     kind: 'cancel';
 } & JobCancelResponse) | ({
     kind: 'bulk_cancel';
-} & BulkJobCancelResponse);
+} & BulkJobCancelResponse) | ({
+    kind: 'retarget';
+} & JobRetargetResponse);
 
 export type RefitShipResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     cargo_returned: number;
     class_id: string;
     default_modules: number;
@@ -5459,6 +6881,7 @@ export type RegenLogEntry = {
     armor_repair: number;
     hull_after: number;
     hull_before: number;
+    passive_repair?: number;
     player_id: string;
     remote_repair?: number;
     shield_after: number;
@@ -5506,18 +6929,6 @@ export type ReloadResponse = {
     rounds_discarded?: number;
     weapon_id: string;
     weapon_name: string;
-};
-
-export type RepairModuleResponse = {
-    message: string;
-    module_id: string;
-    repair_amount: number;
-    wear_after: number;
-    wear_before: number;
-    wear_status: string;
-    xp_gained: {
-        [key: string]: number;
-    };
 };
 
 export type RepairResponse = {
@@ -5599,6 +7010,7 @@ export type ScanResponse = {
     cargo_types?: Array<string>;
     cloaked?: boolean;
     contacts?: Array<ScanContact>;
+    description?: string;
     faction_id?: string;
     hull?: number;
     message?: string;
@@ -5625,6 +7037,8 @@ export type ScrapShipResponse = {
 
 export type ScrapWreckResponse = {
     action: string;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     materials: Array<SalvageMaterial>;
     message: string;
     ship_class?: string;
@@ -5652,7 +7066,9 @@ export type SelfDestructResponse = {
 
 export type SellResponse = {
     action: string;
+    auto_docked?: boolean;
     auto_listed?: AutoListedOrder;
+    auto_undocked?: boolean;
     fills: Array<Fill>;
     item: string;
     item_id: string;
@@ -5668,6 +7084,8 @@ export type SellResponse = {
 };
 
 export type SellShipToOrderResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     class_id: string;
     credits_left: number;
     message: string;
@@ -5677,6 +7095,8 @@ export type SellShipToOrderResponse = {
 
 export type SellWreckResponse = {
     action: string;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     cargo_value?: number;
     message: string;
     new_balance: number;
@@ -5687,16 +7107,51 @@ export type SellWreckResponse = {
 };
 
 export type SendGiftResponse = {
+    /**
+     * Completed gift operation including station material donations.
+     */
     action: 'send_gift';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
+    /**
+     * Canonical Base ID where gifted items were deposited. A station gift always names the station at which the donor is docked.
+     */
     base_id: string;
+    /**
+     * Units of this item remaining in sender cargo after a cargo gift. Zero is omitted; not applicable to storage-source gifts.
+     */
     cargo_remaining?: number;
+    /**
+     * Credits gifted to a player; omitted when none. Station material gifts never transfer credits.
+     */
     credits_sent?: number;
+    /**
+     * Gifted item ID; omitted for credit-only player gifts. Station recipients accept ordinary items only and reject packages and quest items.
+     */
     item_id?: string;
+    /**
+     * Gift note or confirmation; omitted when empty.
+     */
     message?: string;
+    /**
+     * Number of item units donated without payment; omitted when no items were sent.
+     */
     quantity?: number;
+    /**
+     * Recipient player name or canonical station:<base ID> for a station material gift. Station gifts enter manager inventory used by repairs and ordinary operations; they are not empire reserves or an exclusive repair earmark.
+     */
     recipient: string;
+    /**
+     * Item source: cargo or personal storage. Omitted means cargo. Station cargo gifts work while storage service is offline; storage-source gifts require that service.
+     */
     source?: string;
+    /**
+     * Units of this item remaining in sender personal storage after a storage-source gift. Zero is omitted; not applicable to cargo gifts.
+     */
     storage_remaining?: number;
+    /**
+     * Sender wallet after a credit gift; omitted when not applicable or zero.
+     */
     wallet_remaining?: number;
 };
 
@@ -5732,6 +7187,8 @@ export type SetFacilityNameResponse = {
 };
 
 export type SetHomeBaseResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     home_base: string;
     message: string;
     old_home_base?: string;
@@ -5765,6 +7222,14 @@ export type Ship = {
      */
     armor_melt_ticks_remaining?: number;
     /**
+     * Durable in-battle self-destruct countdown state
+     */
+    battle_self_destruct?: {
+        battle_id?: string;
+        detonate_tick?: number;
+        started_tick?: number;
+    };
+    /**
      * Hull damage applied each battle tick while burning
      */
     burn_damage_per_tick?: number;
@@ -5783,6 +7248,10 @@ export type Ship = {
     cpu_capacity?: number;
     cpu_used?: number;
     created_at?: string;
+    /**
+     * Effective crew capacity after fitted-module effects
+     */
+    crew_capacity?: number;
     /**
      * Player-assigned custom ship name (globally unique)
      */
@@ -5818,6 +7287,10 @@ export type Ship = {
      * Default-loadout version this ship was built or last refitted against; a lower value than the class's default_loadout_version means refit_ship is offered
      */
     loadout_version?: number;
+    /**
+     * Effective marine capacity after fitted-module effects
+     */
+    marine_capacity?: number;
     max_fuel: number;
     max_hull: number;
     max_shield?: number;
@@ -5827,27 +7300,65 @@ export type Ship = {
     modules?: Array<string>;
     name: string;
     /**
-     * % of normal cargo space for ores/crystals (0=normal, 50=half)
+     * % of normal cargo space for mined ores and minerals (0=normal, 50=half)
      */
     ore_cargo_efficiency?: number;
     owner_id?: string;
+    /**
+     * Current crew and marine complement; version is a persistence migration sentinel
+     */
+    personnel?: {
+        fit_crew?: number;
+        fit_marines?: number;
+        injured_crew?: number;
+        injured_marines?: number;
+        version?: number;
+    };
+    /**
+     * Absolute game tick when an incapacitated ship's protected injured survivor can return to fit duty; zero when no recovery is scheduled
+     */
+    personnel_recovery_tick?: number;
     power_capacity?: number;
     power_used?: number;
     shield?: number;
     shield_recharge?: number;
     /**
+     * Unique named-hull instance identity; absent for ordinary ships and preserved through custody changes
+     */
+    singleton_instance_key?: string;
+    /**
      * AU per tick
      */
     speed?: number;
     speed_penalty?: number;
+    /**
+     * POI containing this unpiloted ship after it was unloaded in space; paired with stranded_system_id
+     */
+    stranded_poi_id?: string;
+    /**
+     * System containing this unpiloted ship after it was unloaded in space; paired with stranded_poi_id
+     */
+    stranded_system_id?: string;
     utility_slots?: number;
     weapon_slots?: number;
 };
 
 export type ShipActiveBuff = {
+    /**
+     * Bonus amount (percentage for most stats, absolute for hull_regen)
+     */
     amount: number;
+    /**
+     * Engine tick when the buff expires
+     */
     expires_at: number;
+    /**
+     * Item that created this buff
+     */
     item_id: string;
+    /**
+     * Effect stat name, e.g. weapon_damage
+     */
     stat: string;
 };
 
@@ -5886,6 +7397,10 @@ export type ShipClass = {
      */
     based_on?: string;
     /**
+     * Built-in percentage multiplier to defending crew and marine strength
+     */
+    boarding_defense_bonus_pct?: number;
+    /**
      * Materials required to build
      */
     build_materials?: Array<{
@@ -5896,6 +7411,14 @@ export type ShipClass = {
      * Ticks required to build this ship
      */
     build_time?: number;
+    /**
+     * Capture disposition; omission means standard, while starter hulls resolve to reclaim_only
+     */
+    capture_policy?: 'standard' | 'immune' | 'reclaim_only';
+    /**
+     * Required explanation for explicitly capture-immune hulls
+     */
+    capture_policy_reason?: string;
     cargo_capacity?: number;
     /**
      * Ship role category: Combat, Industrial, Exploration, etc.
@@ -5906,6 +7429,10 @@ export type ShipClass = {
      */
     class: string;
     cpu_capacity?: number;
+    /**
+     * Base crew capacity before fitted-module effects
+     */
+    crew_capacity?: number;
     /**
      * Bumped whenever the canonical default loadout changes; existing ships below this version are offered refit_ship
      */
@@ -5935,7 +7462,7 @@ export type ShipClass = {
          */
         flag?: string;
         /**
-         * Capability type: ore_yield_bonus, ice_yield_bonus, gas_yield_bonus, integrated_cloak, integrated_scanner, scan_resistance, integrated_survey_scanner, ship_bay_capacity, passenger_economy_berths, passenger_business_berths, passenger_first_berths, passenger_dining_points, passenger_leisure_points, passenger_comfort, fleet_command_capacity, special_flag
+         * Capability type: ore_yield_bonus, ice_yield_bonus, gas_yield_bonus, integrated_cloak, integrated_scanner, scan_resistance, integrated_survey_scanner, ship_bay_capacity, passenger_economy_berths, passenger_business_berths, passenger_first_berths, passenger_dining_points, passenger_leisure_points, passenger_comfort, fleet_command_capacity, personnel_casualty_multiplier_pct, remote_medical_treatment, medical_treatment_bonus, fleet_triage_bonus_pct, special_flag
          */
         type?: string;
         /**
@@ -5944,6 +7471,10 @@ export type ShipClass = {
         value?: number;
     }>;
     /**
+     * Built-in reduction to hostile boarding latch progress per round
+     */
+    latch_resistance?: number;
+    /**
      * Legacy ship class kept for existing players, hidden from catalog
      */
     legacy?: boolean;
@@ -5951,6 +7482,14 @@ export type ShipClass = {
      * Flavor text and lore description
      */
     lore?: string;
+    /**
+     * Base marine capacity before fitted-module effects
+     */
+    marine_capacity?: number;
+    /**
+     * Fit crew required for full operational efficiency
+     */
+    minimum_crew?: number;
     name: string;
     /**
      * Recipe IDs automatically processed from cargo
@@ -6076,6 +7615,7 @@ export type ShipmentContract = {
     posted_at: string;
     premium?: number;
     recipient: ShipmentActor;
+    recovery_deadline_tick?: number;
     reputation_eligible?: boolean;
     reserved_exposure: number;
     reward_escrow: number;
@@ -6110,6 +7650,32 @@ export type ShipmentTrackingEvent = {
     system_id?: string;
 };
 
+export type ShippingActiveContract = {
+    contract: ShipmentContract;
+    destination_name?: string;
+    destination_system?: string;
+    failure_debt: number;
+    last_known_location?: string;
+    late: boolean;
+    late_fee_if_delivered_now?: number;
+    next_step: string;
+    origin_name?: string;
+    origin_system?: string;
+    package_in_your_cargo: boolean;
+    payout_if_delivered_now: number;
+    role: 'carrier' | 'shipper' | 'recipient' | 'invited_carrier';
+    ticks_to_deadline: number;
+    ticks_to_recovery_deadline: number;
+    ticks_to_target: number;
+};
+
+export type ShippingActiveResponse = {
+    action: 'active';
+    message?: string;
+    shipments: Array<ShippingActiveContract>;
+    tick: number;
+};
+
 export type ShippingContractResponse = {
     action: 'post' | 'get' | 'accept';
     contract: ShipmentContract;
@@ -6139,8 +7705,11 @@ export type ShippingListResponse = {
 
 export type ShippingListing = {
     contract: ShipmentContract;
+    deadline_ticks: number;
     eligible: boolean;
     reason?: string;
+    recovery_ticks: number;
+    target_ticks: number;
 };
 
 export type ShippingProfileResponse = {
@@ -6172,6 +7741,7 @@ export type ShippingQuote = {
     package_id: string;
     premium: number;
     recipient: ShipmentActor;
+    recovery_ticks: number;
     required_carrier_tier: 'probationary' | 'licensed' | 'trusted' | 'prime';
     reserved_exposure: number;
     risk_band: 'probationary' | 'licensed' | 'trusted' | 'prime' | 'unpriced';
@@ -6197,6 +7767,8 @@ export type ShippingResponse = ({
 } & ShippingContractResponse) | ({
     action: 'list';
 } & ShippingListResponse) | ({
+    action: 'active';
+} & ShippingActiveResponse) | ({
     action: 'track';
 } & ShippingTrackResponse) | ({
     action: 'profile';
@@ -6212,6 +7784,7 @@ export type ShippingSettlementResponse = {
     claim_paid?: number;
     contract: ShipmentContract;
     debt_created?: number;
+    late?: boolean;
     shipper_refund?: number;
 };
 
@@ -6249,13 +7822,30 @@ export type SkillDefinition = {
     xp_per_level: Array<number>;
 };
 
+export type SkillProgress = {
+    /**
+     * Skill category
+     */
+    category: string;
+    level: number;
+    /**
+     * Maximum attainable level for this skill
+     */
+    max_level: number;
+    /**
+     * Display name of the skill
+     */
+    name: string;
+    next_level_xp: number;
+    xp: number;
+};
+
 export type SkippedModule = {
     id: string;
     name: string;
     reason: string;
     type: string;
     type_id: string;
-    wear: number;
 };
 
 export type SoldCargoItem = {
@@ -6381,6 +7971,53 @@ export type StationPowerStatus = {
     supply: number;
 };
 
+export type StationRepairEntry = {
+    category: string;
+    definition_id: string;
+    instance_id: string;
+    materials?: Array<StationRepairMaterial>;
+    name: string;
+    status: string;
+    ticks_until_complete?: number;
+};
+
+export type StationRepairMaterial = {
+    item_id: string;
+    name?: string;
+    quantity_in_storage: number;
+    quantity_missing?: number;
+    quantity_required: number;
+};
+
+export type StationRepairResponse = {
+    damaged_count: number;
+    facilities?: Array<StationRepairEntry>;
+    hull_current?: number;
+    hull_missing?: number;
+    hull_required?: number;
+    materials?: Array<StationRepairMaterial>;
+    next_blocked?: StationRepairEntry;
+    remediation?: string;
+    repairing_count: number;
+    supply_method: string;
+    waiting_count: number;
+    wrecked: boolean;
+};
+
+export type StationServicePoolStatus = {
+    capacity: number;
+    next_cycle_supply_required?: number;
+    refill_per_cycle: number;
+    remaining: number;
+    supply_item?: string;
+};
+
+export type StationServicePools = {
+    marine_training?: StationServicePoolStatus;
+    medical?: StationServicePoolStatus;
+    personnel?: StationServicePoolStatus;
+};
+
 export type StorageGift = {
     credits?: number;
     items?: Array<StorageGiftItem>;
@@ -6402,6 +8039,15 @@ export type StorageGiftShip = {
     class_name: string;
     custom_name?: string;
     ship_id: string;
+};
+
+export type StorageLocation = {
+    base_id: string;
+    base_name: string;
+    item_count: number;
+    ship_count: number;
+    system: string;
+    system_name: string;
 };
 
 export type StorageMessage = {
@@ -6439,9 +8085,13 @@ export type SubscribeObservationResponse = {
     action: string;
     active_scan: boolean;
     cloaked_contacts?: Array<ScanContact>;
+    creatures?: Array<CreatureInfo>;
+    empire_npcs?: Array<EmpireNpcInfo>;
     message?: string;
     nearby: Array<NearbyPlayer>;
+    pirates?: Array<PirateInfo>;
     poi_id: string;
+    prizes?: Array<PrizeInfo>;
     system_agents: Array<NearbyPlayer>;
     system_id: string;
     unknown_signature: boolean;
@@ -6449,6 +8099,8 @@ export type SubscribeObservationResponse = {
 
 export type SupplyCommissionResponse = {
     all_sourced: boolean;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     commission_id: string;
     commission_status: string;
     credits?: number;
@@ -6488,6 +8140,8 @@ export type SurveyedPoi = {
 export type SwitchShipResponse = {
     active_ship_class: string;
     active_ship_id: string;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     cargo_note?: string;
     cargo_to_storage?: Array<SoldCargoItem>;
     claimed_from_faction_garage?: boolean;
@@ -6641,6 +8295,8 @@ export type TaxableIncomeByCategoryEntry = {
 
 export type TowWreckResponse = {
     action: string;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     cargo_count?: number;
     insured: boolean;
     message: string;
@@ -6714,6 +8370,8 @@ export type TradeOfferResponse = {
 export type TransferCreditsResponse = {
     action: 'transfer';
     amount: number;
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     dest_credits: number;
     destination: string;
     source: string;
@@ -6722,6 +8380,8 @@ export type TransferCreditsResponse = {
 
 export type TransferItemsResponse = {
     action: 'transfer';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     bucket?: string;
     bucket_id?: string;
     dest_bucket?: string;
@@ -6735,6 +8395,8 @@ export type TransferItemsResponse = {
 };
 
 export type TransferPassengersResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     count: number;
     kind: 'transfer';
     message: string;
@@ -6743,6 +8405,16 @@ export type TransferPassengersResponse = {
     target_ship: string;
     target_ship_name: string;
     transferred: Array<PassengerView>;
+};
+
+export type TransferPersonnelResponse = {
+    fit_crew_transferred: number;
+    fit_marines_transferred: number;
+    injured_crew_swapped: number;
+    injured_crew_transferred: number;
+    injured_marines_swapped: number;
+    injured_marines_transferred: number;
+    target: string;
 };
 
 export type TransitLoungeView = {
@@ -6775,6 +8447,19 @@ export type TravelResponse = {
     xp_gained?: {
         [key: string]: number;
     };
+};
+
+export type TreatPersonnelResponse = {
+    cost?: number;
+    crew_treated: number;
+    marines_treated: number;
+    medical_pool_remaining?: number;
+    /**
+     * Which medical supply paid for the treatment. station is the base infirmary. faction is your faction reserve. field is shipboard medical supplies.
+     */
+    source: 'station' | 'faction' | 'field';
+    supplies_used?: number;
+    target: string;
 };
 
 export type TrimmedBase = {
@@ -6813,18 +8498,17 @@ export type UndockResponse = {
 };
 
 export type UninstallModResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     cpu_used: number;
-    damaged: boolean;
-    destroyed?: boolean;
     message: string;
     module_id: string;
     power_used: number;
-    uninstall_count?: number;
-    wear?: number;
-    wear_status?: string;
 };
 
 export type UnloadAllPassengersResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     delivered: Array<PassengerView>;
     fare_collected: number;
     kind: 'all';
@@ -6852,6 +8536,8 @@ export type UnloadPassengerCommandResponse = ({
 } & LoungeCheckInResponse);
 
 export type UnloadPassengerResponse = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     base_fare?: number;
     delivered: boolean;
     fare_collected: number;
@@ -6912,6 +8598,29 @@ export type UseItemResponse = {
     shield?: number;
     shield_restored?: number;
     stat?: string;
+    weapons_reset?: number;
+};
+
+export type V2CargoItem = {
+    item_id: string;
+    /**
+     * Resolved display name of the item
+     */
+    item_name: string;
+    quantity: number;
+    /**
+     * Cargo space one unit occupies
+     */
+    size: number;
+};
+
+export type V2CarriedShip = {
+    class_id: string;
+    class_name: string;
+    name: string;
+    scale: number;
+    ship_id: string;
+    slots_used: number;
 };
 
 export type V2CommandActionEntry = {
@@ -6936,29 +8645,11 @@ export type V2GameState = {
     /**
      * Full cargo manifest. In mutation deltas the array replaces prior client state wholesale: an absent key means unchanged, an explicit empty array means the hold emptied.
      */
-    cargo?: Array<{
-        item_id?: string;
-        /**
-         * Resolved display name of the item
-         */
-        item_name?: string;
-        quantity?: number;
-        /**
-         * Cargo space one unit occupies
-         */
-        size?: number;
-    }>;
+    cargo?: Array<V2CargoItem>;
     /**
      * Ships loaded in the current ship's carrier bay (v2_get_cargo only; present only on carrier ships)
      */
-    carried_ships?: Array<{
-        class_id?: string;
-        class_name?: string;
-        name?: string;
-        scale?: number;
-        ship_id?: string;
-        slots_used?: number;
-    }>;
+    carried_ships?: Array<V2CarriedShip>;
     /**
      * Current credit balance, surfaced by lean query endpoints (get_ship, get_cargo, get_location) that omit the full player blob
      */
@@ -6969,557 +8660,40 @@ export type V2GameState = {
     details?: {
         [key: string]: unknown;
     };
+    /**
+     * Drone bay counters and in-bay drones (v2_get_ship only; omitted when the player has no bay and no drones)
+     */
+    drone_bay?: DroneBayView;
     hints?: Array<string>;
-    location?: {
-        /**
-         * System IDs adjacent to the current system
-         */
-        connections?: Array<string>;
-        /**
-         * Base ID docked at; null when undocked
-         */
-        docked_at?: string | null;
-        empire?: string;
-        /**
-         * True when actively jumping or traveling
-         */
-        in_transit?: boolean;
-        /**
-         * Count of nearby empire NPCs before the response cap is applied
-         */
-        nearby_empire_npc_count?: number;
-        /**
-         * Empire NPCs at the current POI
-         */
-        nearby_empire_npcs?: Array<{
-            empire?: string;
-            /**
-             * Set for empire fleet member NPCs
-             */
-            fleet_name?: string;
-            in_combat?: boolean;
-            name?: string;
-            npc_id?: string;
-            role?: string;
-            ship_class?: string;
-            ship_name?: string;
-        }>;
-        /**
-         * Count of nearby pirates before the response cap is applied
-         */
-        nearby_pirate_count?: number;
-        /**
-         * Pirate NPCs at the current POI
-         */
-        nearby_pirates?: Array<{
-            hull?: number;
-            is_boss?: boolean;
-            max_hull?: number;
-            max_shield?: number;
-            name?: string;
-            pirate_id?: string;
-            shield?: number;
-            status?: string;
-            tier?: string;
-        }>;
-        /**
-         * Count of nearby players before the response cap is applied
-         */
-        nearby_player_count?: number;
-        /**
-         * Other (non-cloaked) players at the current POI
-         */
-        nearby_players?: Array<{
-            clan_tag?: string;
-            faction_tag?: string;
-            in_combat?: boolean;
-            offline?: boolean;
-            player_id?: string;
-            ship_class?: string;
-            /**
-             * Custom ship name
-             */
-            ship_name?: string;
-            username?: string;
-        }>;
-        /**
-         * Number of offline nearby players collapsed into a count when the POI is crowded (omitted when zero)
-         */
-        offline_collapsed?: number;
-        poi_id?: string;
-        poi_name?: string;
-        poi_type?: string;
-        /**
-         * Mineable resources at the current POI
-         */
-        resources?: Array<{
-            item_id?: string;
-            item_name?: string;
-            remaining?: number;
-            richness?: number;
-            /**
-             * Beam power this deposit supports at full extraction rate (standard precision); omitted when depleted or unlimited
-             */
-            supported_power?: number;
-        }>;
-        security_status?: string;
-        system_id?: string;
-        system_name?: string;
-        /**
-         * Engine tick when transit completes
-         */
-        transit_arrival_tick?: number;
-        /**
-         * Plotted compass bearing in degrees (pathfinder only)
-         */
-        transit_bearing?: number;
-        /**
-         * Destination POI ID (travel only)
-         */
-        transit_dest_poi_id?: string;
-        /**
-         * Destination POI name (travel only)
-         */
-        transit_dest_poi_name?: string;
-        /**
-         * Destination system ID (jump only)
-         */
-        transit_dest_system_id?: string;
-        /**
-         * Destination system name (jump only)
-         */
-        transit_dest_system_name?: string;
-        /**
-         * Ticks since the pathfinder drift began (pathfinder only)
-         */
-        transit_ticks_elapsed?: number;
-        /**
-         * "jump", "travel", or "pathfinder"
-         */
-        transit_type?: string;
-        /**
-         * Current galactic X coordinate (pathfinder only)
-         */
-        transit_x?: number;
-        /**
-         * Current galactic Y coordinate (pathfinder only)
-         */
-        transit_y?: number;
-        /**
-         * True when a cloaked ship at this POI is near your sensor threshold. Presence only — run an area scan (scan with no target_id) to resolve it (omitted when false)
-         */
-        unknown_signature?: boolean;
-        /**
-         * Navigation flavour text; present only when drifting beyond the galaxy edge (pathfinder void transit only)
-         */
-        void_message?: string;
-    };
+    location?: V2Location;
     message?: string;
     /**
      * Active missions and mission capacity
      */
-    missions?: {
-        /**
-         * Currently active mission objects
-         */
-        active?: Array<{
-            accepted_at?: string;
-            /**
-             * True for community/faction-wide missions
-             */
-            community?: boolean;
-            /**
-             * Community missions only
-             */
-            community_percent?: number;
-            /**
-             * item_id → "current/target" (community missions only)
-             */
-            community_progress?: {
-                [key: string]: string;
-            };
-            description?: string;
-            difficulty?: number;
-            expires_in_ticks?: number;
-            /**
-             * Present only when the mission has a named NPC giver
-             */
-            giver?: {
-                name?: string;
-                title?: string;
-            };
-            issuing_base?: string;
-            issuing_base_id?: string;
-            issuing_system_id?: string;
-            issuing_system_name?: string;
-            mission_id?: string;
-            objectives?: Array<{
-                completed?: boolean;
-                current?: number;
-                description?: string;
-                /**
-                 * player_threshold objectives only
-                 */
-                eligible_players?: Array<string>;
-                in_cargo?: number;
-                in_storage?: number;
-                item_id?: string;
-                item_name?: string;
-                /**
-                 * player_threshold objectives only
-                 */
-                participants?: Array<string>;
-                required?: number;
-                system_id?: string;
-                system_name?: string;
-                target_base?: string;
-                target_base_name?: string;
-                type?: string;
-            }>;
-            percent_complete?: number;
-            rewards?: {
-                credits?: number;
-                /**
-                 * item_id → quantity
-                 */
-                items?: {
-                    [key: string]: number;
-                };
-                pirate_rep?: number;
-                reputation?: number;
-                /**
-                 * skill_id → XP
-                 */
-                skill_xp?: {
-                    [key: string]: number;
-                };
-            };
-            template_id?: string;
-            title?: string;
-            type?: string;
-        }>;
-        /**
-         * Maximum simultaneous missions allowed
-         */
-        max_missions?: number;
-    };
+    missions?: V2Missions;
     /**
      * Installed ship modules. In mutation deltas the array replaces prior client state wholesale: an absent key means unchanged, an explicit empty array means no modules remain installed.
      */
-    modules?: Array<{
-        /**
-         * Present only on weapons that consume ammo
-         */
-        ammo_type?: string;
-        /**
-         * After engineering efficiency bonus
-         */
-        cpu_usage?: number;
-        /**
-         * Present only on weapons that consume ammo
-         */
-        current_ammo?: number;
-        /**
-         * Present only when ammo is loaded
-         */
-        loaded_ammo_id?: string;
-        /**
-         * Present only when ammo is loaded
-         */
-        loaded_ammo_name?: string;
-        /**
-         * Present only on weapons that consume ammo
-         */
-        magazine_size?: number;
-        module_id?: string;
-        name?: string;
-        /**
-         * After engineering efficiency bonus
-         */
-        power_usage?: number;
-        size?: number;
-        slot?: string;
-        /**
-         * Module-type-specific stats (damage, reach, shield_bonus, mining_power, etc.); omitted when empty
-         */
-        stats?: {
-            [key: string]: unknown;
-        };
-        /**
-         * weapon, defense, utility, or mining
-         */
-        type?: string;
-        type_id?: string;
-        wear?: number;
-        wear_status?: string;
-    }>;
-    player?: {
-        /**
-         * Empire IDs this player holds citizenship in (omitted when empty). Independent of the immutable origin empire.
-         */
-        citizenships?: Array<string>;
-        clan_tag?: string;
-        credits?: number;
-        empire?: string;
-        faction_id?: string;
-        faction_rank?: string;
-        home_base?: string;
-        /**
-         * POI ID of the home base (omitted when no home base set)
-         */
-        home_poi?: string;
-        /**
-         * System ID of the home base (omitted when no home base set)
-         */
-        home_system?: string;
-        id?: string;
-        is_cloaked?: boolean;
-        primary_color?: string;
-        secondary_color?: string;
-        /**
-         * Reputation score per empire ID. Keys: solarian, voidborn, crimson, nebula, outerrim, pirates.
-         */
-        standings?: {
-            [key: string]: {
-                /**
-                 * Decay target; rep drifts toward this over time
-                 */
-                baseline?: number;
-                /**
-                 * Time detained until by this empire; omitted when not jailed
-                 */
-                jailed_until?: string;
-                /**
-                 * Sum of uncleaned crime bounties with this empire (credits)
-                 */
-                outstanding_bounty?: number;
-                /**
-                 * Current rep score, range -100 to +100
-                 */
-                reputation?: number;
-            };
-        };
-        /**
-         * Lifetime player statistics (credits earned, ships destroyed, ore mined, etc.)
-         */
-        stats?: {
-            [key: string]: unknown;
-        };
-        status_message?: string;
-        /**
-         * ID of the wreck this player is currently towing (omitted when not towing)
-         */
-        towing_wreck_id?: string;
-        /**
-         * Trading, gifting, and exchange access restricted until this time (self-destruct penalty); omitted when no restriction is active
-         */
-        trading_restricted_until?: string;
-        username?: string;
-    };
+    modules?: Array<V2Module>;
+    player?: V2Player;
+    /**
+     * Active intact-ship recovery operations assigned to this player. Includes in-transit and stalled prizes outside the current POI.
+     */
+    prize_recoveries?: Array<PrizeRecoveryInfo>;
     /**
      * Pending action queue status
      */
-    queue?: {
-        /**
-         * Whether a tick-deferred action is queued
-         */
-        has_pending?: boolean;
-    };
+    queue?: V2Queue;
     /**
      * Present when the player is riding as a passenger aboard another player's ship (no ship of their own); the ship/modules/cargo blocks are omitted in that state.
      */
-    riding?: {
-        /**
-         * Username of the carrier piloting that ship
-         */
-        carrier?: string;
-        /**
-         * ID of the ship being ridden
-         */
-        ship_id?: string;
-    };
-    ship?: {
-        /**
-         * Active consumable buffs (omitted when none active)
-         */
-        active_buffs?: Array<{
-            /**
-             * Bonus amount (percentage for most stats, absolute for hull_regen)
-             */
-            amount?: number;
-            /**
-             * Engine tick when the buff expires
-             */
-            expires_at?: number;
-            /**
-             * Item that created this buff
-             */
-            item_id?: string;
-            /**
-             * Effect stat name, e.g. weapon_damage
-             */
-            stat?: string;
-        }>;
-        armor?: number;
-        /**
-         * Armor effectiveness reduction, 0.0-1.0 (omitted when not affected)
-         */
-        armor_melt_pct?: number;
-        /**
-         * Remaining ticks of plasma/corrosive armor melt (omitted when not affected)
-         */
-        armor_melt_ticks_remaining?: number;
-        /**
-         * Passenger accommodation by class (omitted when the ship has no berths)
-         */
-        berths?: {
-            /**
-             * Total and free business berths
-             */
-            business: {
-                /**
-                 * Berths of this class still free once citizens aboard are seated
-                 */
-                free: number;
-                /**
-                 * Berths of this class on the hull plus fitted cabins
-                 */
-                total: number;
-            };
-            /**
-             * Total and free economy berths
-             */
-            economy: {
-                /**
-                 * Berths of this class still free once citizens aboard are seated
-                 */
-                free: number;
-                /**
-                 * Berths of this class on the hull plus fitted cabins
-                 */
-                total: number;
-            };
-            /**
-             * Total and free first berths
-             */
-            first: {
-                /**
-                 * Berths of this class still free once citizens aboard are seated
-                 */
-                free: number;
-                /**
-                 * Berths of this class on the hull plus fitted cabins
-                 */
-                total: number;
-            };
-        };
-        /**
-         * Damage dealt per tick while burning (omitted when not burning)
-         */
-        burn_damage_per_tick?: number;
-        /**
-         * Player ID of the most recent burn applier, credited on burn kills (omitted when not burning)
-         */
-        burn_source_id?: string;
-        /**
-         * Remaining ticks of incendiary/entropic burn damage-over-time (omitted when not burning)
-         */
-        burn_ticks_remaining?: number;
-        cargo_capacity?: number;
-        cargo_used?: number;
-        class_id?: string;
-        class_name?: string;
-        /**
-         * Total CPU available
-         */
-        cpu_capacity?: number;
-        /**
-         * CPU consumed by fitted modules (after engineering efficiency bonus)
-         */
-        cpu_used?: number;
-        /**
-         * Player-assigned custom ship name (omitted when unset)
-         */
-        custom_name?: string;
-        /**
-         * Damage reduction multiplier from EM disruption, 0.0-1.0 (omitted when not disrupted)
-         */
-        damage_penalty?: number;
-        /**
-         * Number of defense module slots
-         */
-        defense_slots?: number;
-        /**
-         * Remaining ticks of EM disruption (omitted when not disrupted)
-         */
-        disruption_ticks_remaining?: number;
-        fuel?: number;
-        /**
-         * Percent of normal cargo space gases occupy (omitted when 100)
-         */
-        gas_cargo_efficiency?: number;
-        hull?: number;
-        /**
-         * Percent of normal cargo space ices occupy (omitted when 100)
-         */
-        ice_cargo_efficiency?: number;
-        id?: string;
-        max_fuel?: number;
-        max_hull?: number;
-        max_shield?: number;
-        /**
-         * Display name of the ship (custom name if set, otherwise the class name)
-         */
-        name?: string;
-        /**
-         * Percent of normal cargo space ores/crystals occupy (50 = half; omitted when 100)
-         */
-        ore_cargo_efficiency?: number;
-        /**
-         * Total power available
-         */
-        power_capacity?: number;
-        /**
-         * Power consumed by fitted modules (after engineering efficiency bonus)
-         */
-        power_used?: number;
-        shield?: number;
-        shield_recharge?: number;
-        speed?: number;
-        /**
-         * Speed reduction multiplier from EM disruption, 0.0-1.0 (omitted when not disrupted)
-         */
-        speed_penalty?: number;
-        /**
-         * Number of utility module slots
-         */
-        utility_slots?: number;
-        /**
-         * Number of weapon module slots
-         */
-        weapon_slots?: number;
-    };
+    riding?: V2Riding;
+    ship?: V2Ship;
     /**
      * Player skill levels and XP, keyed by skill ID
      */
     skills?: {
-        [key: string]: {
-            /**
-             * Skill category
-             */
-            category?: string;
-            level?: number;
-            /**
-             * Maximum attainable level for this skill
-             */
-            max_level?: number;
-            /**
-             * Display name of the skill
-             */
-            name?: string;
-            next_level_xp?: number;
-            xp?: number;
-        };
+        [key: string]: SkillProgress;
     };
     /**
      * State format version
@@ -7529,6 +8703,295 @@ export type V2GameState = {
 
 export type V2GetCommandsResponse = {
     actions: Array<V2CommandActionEntry>;
+};
+
+export type V2Location = {
+    /**
+     * System IDs adjacent to the current system
+     */
+    connections: Array<string>;
+    /**
+     * Base ID docked at; null when undocked
+     */
+    docked_at: string | null;
+    empire: string;
+    /**
+     * True when actively jumping or traveling
+     */
+    in_transit?: boolean;
+    /**
+     * Count of nearby empire NPCs before the response cap is applied
+     */
+    nearby_empire_npc_count: number;
+    /**
+     * Empire NPCs at the current POI
+     */
+    nearby_empire_npcs: Array<V2NearbyEmpireNpc>;
+    /**
+     * Count of nearby pirates before the response cap is applied
+     */
+    nearby_pirate_count: number;
+    /**
+     * Pirate NPCs at the current POI
+     */
+    nearby_pirates: Array<V2NearbyPirate>;
+    /**
+     * Count of nearby players before the response cap is applied
+     */
+    nearby_player_count: number;
+    /**
+     * Other (non-cloaked) players at the current POI
+     */
+    nearby_players: Array<V2NearbyPlayer>;
+    /**
+     * Count of nearby intact prizes before the response cap is applied
+     */
+    nearby_prize_count: number;
+    /**
+     * Intact captured ships physically present at the current POI
+     */
+    nearby_prizes: Array<PrizeInfo>;
+    /**
+     * Number of offline nearby players collapsed into a count when the POI is crowded (omitted when zero)
+     */
+    offline_collapsed?: number;
+    poi_id: string;
+    poi_name: string;
+    poi_type: string;
+    /**
+     * Mineable resources at the current POI
+     */
+    resources: Array<V2Resource>;
+    security_status: string;
+    system_id: string;
+    system_name: string;
+    /**
+     * Engine tick when transit completes
+     */
+    transit_arrival_tick?: number;
+    /**
+     * Plotted compass bearing in degrees (pathfinder only)
+     */
+    transit_bearing?: number;
+    /**
+     * Destination POI ID (travel only)
+     */
+    transit_dest_poi_id?: string;
+    /**
+     * Destination POI name (travel only)
+     */
+    transit_dest_poi_name?: string;
+    /**
+     * Destination system ID (jump only)
+     */
+    transit_dest_system_id?: string;
+    /**
+     * Destination system name (jump only)
+     */
+    transit_dest_system_name?: string;
+    /**
+     * Ticks since the pathfinder drift began (pathfinder only)
+     */
+    transit_ticks_elapsed?: number;
+    /**
+     * "jump", "travel", or "pathfinder"
+     */
+    transit_type?: string;
+    /**
+     * Current galactic X coordinate (pathfinder only)
+     */
+    transit_x?: number;
+    /**
+     * Current galactic Y coordinate (pathfinder only)
+     */
+    transit_y?: number;
+    /**
+     * True when a cloaked ship at this POI is near your sensor threshold. Presence only — run an area scan (scan with no target_id) to resolve it (omitted when false)
+     */
+    unknown_signature?: boolean;
+    /**
+     * Navigation flavour text; present only when drifting beyond the galaxy edge (pathfinder void transit only)
+     */
+    void_message?: string;
+};
+
+export type V2Missions = {
+    /**
+     * Currently active mission objects
+     */
+    active: Array<ActiveMissionInfo>;
+    /**
+     * Maximum simultaneous missions allowed
+     */
+    max_missions: number;
+};
+
+export type V2Module = {
+    /**
+     * Present only on weapons that consume ammo
+     */
+    ammo_type?: string;
+    /**
+     * After engineering efficiency bonus
+     */
+    cpu_usage: number;
+    /**
+     * Present only on weapons that consume ammo
+     */
+    current_ammo?: number;
+    /**
+     * Present only when ammo is loaded
+     */
+    loaded_ammo_id?: string;
+    /**
+     * Present only when ammo is loaded
+     */
+    loaded_ammo_name?: string;
+    /**
+     * Present only on weapons that consume ammo
+     */
+    magazine_size?: number;
+    module_id: string;
+    name: string;
+    /**
+     * After engineering efficiency bonus
+     */
+    power_usage: number;
+    size: number;
+    slot: string;
+    /**
+     * Module-type-specific stats (damage, reach, shield_bonus, mining_power, etc.); omitted when empty
+     */
+    stats?: {
+        [key: string]: unknown;
+    };
+    /**
+     * weapon, defense, utility, or mining
+     */
+    type: string;
+    type_id: string;
+};
+
+export type V2NearbyEmpireNpc = {
+    empire: string;
+    /**
+     * Set for empire fleet member NPCs
+     */
+    fleet_name?: string;
+    in_combat: boolean;
+    name: string;
+    npc_id: string;
+    role: string;
+    ship_class?: string;
+    ship_name?: string;
+};
+
+export type V2NearbyPirate = {
+    /**
+     * Stronghold crew this pirate flies for, e.g. pirate_kael. This is the reputation counterparty: attacking them costs standing with this crew alone, not with pirates in general.
+     */
+    faction?: string;
+    /**
+     * Human-readable name of the stronghold crew, e.g. Admiral Kael.
+     */
+    faction_name?: string;
+    hull: number;
+    is_boss: boolean;
+    max_hull: number;
+    max_shield: number;
+    name: string;
+    pirate_id: string;
+    shield: number;
+    status: string;
+    tier: string;
+};
+
+export type V2NearbyPlayer = {
+    clan_tag?: string;
+    faction_tag?: string;
+    in_combat: boolean;
+    offline?: boolean;
+    player_id: string;
+    ship_class?: string;
+    /**
+     * Custom ship name
+     */
+    ship_name?: string;
+    username?: string;
+};
+
+export type V2Personnel = {
+    fit_crew: number;
+    fit_marines: number;
+    injured_crew: number;
+    injured_marines: number;
+};
+
+export type V2Player = {
+    /**
+     * Empire IDs this player holds citizenship in (omitted when empty). Independent of the immutable origin empire.
+     */
+    citizenships?: Array<string>;
+    clan_tag: string;
+    credits: number;
+    empire: string;
+    faction_id?: string;
+    faction_rank?: string;
+    home_base: string;
+    /**
+     * POI ID of the home base (omitted when no home base set)
+     */
+    home_poi?: string;
+    /**
+     * System ID of the home base (omitted when no home base set)
+     */
+    home_system?: string;
+    id: string;
+    is_cloaked: boolean;
+    primary_color: string;
+    secondary_color: string;
+    /**
+     * Reputation per counterparty. Keys: the five empires (solarian, voidborn, crimson, nebula, outerrim) plus one per pirate stronghold (pirate_voss, pirate_kael, pirate_thane, pirate_mera, pirate_dross, pirate_crix, pirate_sable, pirate_nyx, pirate_korr). Each stronghold keeps its own books, so attacking one crew leaves the others' opinion of you unchanged.
+     */
+    standings?: {
+        [key: string]: EmpireStanding;
+    };
+    /**
+     * Lifetime player statistics (credits earned, ships destroyed, ore mined, etc.)
+     */
+    stats: unknown;
+    status_message: string;
+    /**
+     * ID of this player's own ship currently under tow via a tow rig (omitted when not towing a ship)
+     */
+    towing_ship_id?: string;
+    /**
+     * ID of the wreck this player is currently towing (omitted when not towing)
+     */
+    towing_wreck_id?: string;
+    /**
+     * Trading, gifting, and exchange access restricted until this time (self-destruct penalty); omitted when no restriction is active
+     */
+    trading_restricted_until?: string;
+    username: string;
+};
+
+export type V2Queue = {
+    /**
+     * Whether a tick-deferred action is queued
+     */
+    has_pending: boolean;
+};
+
+export type V2Resource = {
+    item_id: string;
+    item_name: string;
+    remaining: number;
+    richness: number;
+    /**
+     * Beam power this deposit supports at full extraction rate (standard precision); omitted when depleted or unlimited
+     */
+    supported_power?: number;
 };
 
 /**
@@ -7544,9 +9007,11 @@ export type V2Response = {
          */
         code?: string;
         /**
-         * Optional structured details about the error. Shape varies by error code. For example, `missing_materials` includes an array of {item_id, item_name, need, have} objects.
+         * Optional structured details about the error. Always an object; its keys vary by error code. For example, `missing_materials` carries a `missing` array of {item_id, item_name, need, have} objects.
          */
-        details?: unknown;
+        details?: {
+            [key: string]: unknown;
+        };
         /**
          * Human-readable error message.
          */
@@ -7563,15 +9028,15 @@ export type V2Response = {
         /**
          * Notification payload. Shape depends on msg_type — see the Notification_* schemas under components.schemas.
          */
-        data?: NotificationAchievementUnlocked | NotificationBaseDestroyed | NotificationStationRepaired | NotificationRanchPoached | NotificationBaseRaidUpdate | NotificationBattleAlert | NotificationBattleDamage | NotificationBattleEnded | NotificationBattleJoined | NotificationBattleLeft | NotificationBattleStarted | NotificationBattleUpdate | NotificationChatMessage | NotificationCraftingUpdate | NotificationDroneDestroyed | NotificationDroneScan | NotificationDroneSurvey | NotificationDroneUpdate | NotificationFacilityReclaimed | NotificationFacilityRentWarning | NotificationMarketUpdate | NotificationObservationUpdate | NotificationMiningYield | NotificationPilotlessShip | NotificationPirateDestroyed | NotificationPirateRadio | NotificationPlayerDied | NotificationPlayerKill | NotificationReconnected | NotificationScanDetected | NotificationShipCommissionComplete | NotificationSkillLevelUp | NotificationTradeCancelled | NotificationTradeComplete | NotificationTradeDeclined | NotificationTradeOfferReceived;
+        data?: NotificationAchievementUnlocked | NotificationActionError | NotificationActionResult | NotificationDroneAdrift | NotificationServerRestartWarning | NotificationFactionAllianceBroken | NotificationFactionAllianceFormed | NotificationFactionAllianceProposal | NotificationFactionPeaceAccepted | NotificationFactionPeaceProposal | NotificationFactionWarDeclared | NotificationBaseDestroyed | NotificationStationRepaired | NotificationRanchPoached | NotificationBaseRaidUpdate | NotificationBattleAlert | NotificationBattleDamage | NotificationBattleEnded | NotificationShipCaptured | NotificationPrizeUpdate | NotificationPersonnelUpdate | NotificationBattleJoined | NotificationBattleLeft | NotificationBattleStarted | NotificationBattleUpdate | NotificationChatMessage | NotificationCraftingUpdate | NotificationDroneDestroyed | NotificationDroneScan | NotificationDroneSurvey | NotificationDroneUpdate | NotificationFacilityReclaimed | NotificationFacilityRentWarning | NotificationMarketUpdate | NotificationObservationUpdate | NotificationMiningYield | NotificationPilotlessShip | NotificationPirateDestroyed | NotificationPirateRadio | NotificationPlayerDied | NotificationPlayerKill | NotificationReconnected | NotificationScanDetected | NotificationShipCommissionComplete | NotificationSkillLevelUp | NotificationTradeCancelled | NotificationTradeComplete | NotificationTradeDeclined | NotificationTradeOfferReceived;
         id?: string;
         /**
-         * Specific message subtype used for handler routing (e.g. chat_message, combat_update, action_result, mining_yield). Switch on this to pick the matching Notification_* payload schema.
+         * Specific message subtype used for handler routing (e.g. chat_message, battle_update, action_result, mining_yield). Switch on this to pick the matching Notification_* payload schema.
          */
         msg_type?: string;
         timestamp?: string;
         /**
-         * Notification category: system, combat, trade, chat, friend, tip
+         * Notification category: chat, combat, trade, market, crafting, observation, system
          */
         type?: string;
     }>;
@@ -7594,6 +9059,162 @@ export type V2Response = {
     structuredContent?: {
         [key: string]: unknown;
     };
+};
+
+export type V2Riding = {
+    /**
+     * Username of the carrier piloting that ship
+     */
+    carrier?: string;
+    /**
+     * ID of the ship being ridden
+     */
+    ship_id: string;
+};
+
+export type V2Ship = {
+    /**
+     * Active consumable buffs (omitted when none active)
+     */
+    active_buffs?: Array<ShipActiveBuff>;
+    armor: number;
+    /**
+     * Armor effectiveness reduction, 0.0-1.0 (omitted when not affected)
+     */
+    armor_melt_pct?: number;
+    /**
+     * Remaining ticks of plasma/corrosive armor melt (omitted when not affected)
+     */
+    armor_melt_ticks_remaining?: number;
+    /**
+     * Passenger accommodation by class (omitted when the ship has no berths)
+     */
+    berths?: BerthsView;
+    /**
+     * Damage dealt per tick while burning (omitted when not burning)
+     */
+    burn_damage_per_tick?: number;
+    /**
+     * Player ID of the most recent burn applier, credited on burn kills (omitted when not burning)
+     */
+    burn_source_id?: string;
+    /**
+     * Remaining ticks of incendiary/entropic burn damage-over-time (omitted when not burning)
+     */
+    burn_ticks_remaining?: number;
+    cargo_capacity: number;
+    cargo_used: number;
+    class_id: string;
+    class_name: string;
+    /**
+     * Total CPU available
+     */
+    cpu_capacity: number;
+    /**
+     * CPU consumed by fitted modules (after engineering efficiency bonus)
+     */
+    cpu_used: number;
+    /**
+     * Active-system output multiplier from fit crew relative to minimum crew; 0.0-1.0
+     */
+    crew_efficiency: number;
+    /**
+     * Player-assigned custom ship name (omitted when unset)
+     */
+    custom_name?: string;
+    /**
+     * Damage reduction multiplier from EM disruption, 0.0-1.0 (omitted when not disrupted)
+     */
+    damage_penalty?: number;
+    /**
+     * Number of defense module slots
+     */
+    defense_slots: number;
+    /**
+     * Remaining ticks of EM disruption (omitted when not disrupted)
+     */
+    disruption_ticks_remaining?: number;
+    /**
+     * Current crew capacity after hull and fitted-module effects
+     */
+    effective_crew_capacity: number;
+    /**
+     * Current marine capacity after hull and fitted-module effects
+     */
+    effective_marine_capacity: number;
+    fuel: number;
+    /**
+     * Percent of normal cargo space gases occupy (omitted when 100)
+     */
+    gas_cargo_efficiency?: number;
+    hull: number;
+    /**
+     * Percent of normal cargo space ices occupy (omitted when 100)
+     */
+    ice_cargo_efficiency?: number;
+    id: string;
+    /**
+     * True when initialized personnel include no fit crew and active ship operations are unavailable
+     */
+    incapacitated: boolean;
+    /**
+     * Where this ship is (get_ship by ship_id only; omitted for the ship you are flying)
+     */
+    location?: string;
+    max_fuel: number;
+    max_hull: number;
+    max_shield: number;
+    /**
+     * Fit crew required for full operational efficiency
+     */
+    minimum_crew: number;
+    /**
+     * Display name of the ship (custom name if set, otherwise the class name)
+     */
+    name: string;
+    /**
+     * Current base speed multiplied by crew efficiency; other temporary speed effects are reported separately
+     */
+    operational_speed: number;
+    /**
+     * Percent of normal cargo space mined ores and minerals occupy (50 = half; omitted when 100)
+     */
+    ore_cargo_efficiency?: number;
+    /**
+     * Current fit and injured crew and marine counts
+     */
+    personnel: V2Personnel;
+    /**
+     * Server tick when protected final-survivor recovery becomes available
+     */
+    personnel_recovery_tick?: number;
+    /**
+     * Ticks remaining until protected final-survivor recovery
+     */
+    personnel_recovery_ticks_remaining?: number;
+    /**
+     * Total power available
+     */
+    power_capacity: number;
+    /**
+     * Power consumed by fitted modules (after engineering efficiency bonus)
+     */
+    power_used: number;
+    shield: number;
+    shield_recharge: number;
+    speed: number;
+    /**
+     * Speed reduction multiplier from EM disruption, 0.0-1.0 (omitted when not disrupted)
+     */
+    speed_penalty?: number;
+    /**
+     * Number of utility module slots
+     */
+    utility_slots: number;
+    /**
+     * Number of weapon module slots
+     */
+    weapon_slots: number;
 };
 
 export type ViewCompletedMissionResponse = {
@@ -7665,6 +9286,7 @@ export type ViewStorageResponse = {
     gifts?: Array<StorageGift>;
     hint: string;
     items: Array<CargoItem>;
+    locations: Array<StorageLocation>;
     messages?: Array<StorageMessage>;
     ships: Array<StoredShip>;
 };
@@ -7721,9 +9343,12 @@ export type WildlifeSurvey = {
 
 export type WithdrawItemsResponse = {
     action: 'withdraw_items';
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
     cargo_space: number;
     cargo_total: number;
     item_id: string;
+    message?: string;
     quantity: number;
     storage_remaining: number;
 };
@@ -7827,7 +9452,7 @@ export type GetNotificationsData = {
          */
         clear?: boolean;
         /**
-         * Filter by notification type (e.g. chat, combat, trade). Repeat parameter for multiple types.
+         * Filter by notification type (chat, combat, trade, market, crafting, observation, system). Repeat parameter for multiple types.
          */
         types?: Array<string>;
     };
@@ -7953,7 +9578,7 @@ export type SpacemoltAcceptMissionResponse = SpacemoltAcceptMissionResponses[key
 export type SpacemoltAttackData = {
     body?: {
         /**
-         * ID of the target: a player, pirate, empire NPC, wildlife creature, or station. Opening fire on a station starts a siege; shelling an empire station is a serious crime.
+         * ID of the target: a player, pirate, empire NPC, wildlife creature, intact-prize actor, or station. Prize actor IDs come from get_nearby. Opening fire on a station starts a siege; shelling an empire station is a serious crime.
          */
         id: string;
     };
@@ -8168,7 +9793,7 @@ export type SpacemoltCraftData = {
          */
         count?: number;
         /**
-         * Output destination: 'storage' (default), 'faction' (faction main store — requires manage treasury permission), or 'faction:<bucket name or id>' for a specific faction Storage Extension bucket.
+         * Output destination: 'storage' (default), 'faction' (faction main store — requires manage treasury permission), or 'faction:<bucket name or id>' for a specific faction Storage Extension bucket. Pass it alongside job_id to redirect an ALREADY QUEUED job's remaining output there instead of queuing anything new.
          */
         deliver_to?: string;
         /**
@@ -8191,7 +9816,7 @@ export type SpacemoltCraftData = {
             quantity: number;
         }>;
         /**
-         * Cancel this queued job (refunding its unconsumed inputs, labor, and rental fee) instead of crafting. Use action='queue' to list your job IDs. Setting job_id implies cancel.
+         * Act on this queued job instead of crafting. Call craft with no recipe_id to list your job IDs. job_id alone cancels it (refunding its unconsumed inputs, labor, and rental fee); job_id together with deliver_to instead redirects the job's REMAINING output to that destination, keeping its recipe, runs, escrow, cost, and queue position.
          */
         job_id?: string;
         /**
@@ -8199,7 +9824,7 @@ export type SpacemoltCraftData = {
          */
         job_ids?: Array<string>;
         /**
-         * Bulk mode: queue many crafts in one action. Package entries may include items, package_id, label, and target. Each job commits independently with partial success. Max 50.
+         * Bulk mode: queue many crafts in one action. Each entry accepts the same input-sourcing and output-packaging fields as a single craft — package_ids to source inputs from packages, output_package_label to seal outputs into a new package — plus items, package_id, label, and target. Each job commits independently with partial success. Max 50.
          */
         jobs?: Array<{
             deliver_to?: string;
@@ -8209,7 +9834,15 @@ export type SpacemoltCraftData = {
                 quantity: number;
             }>;
             label?: string;
+            /**
+             * Seal this entry's outputs into a single new package with this label on completion, consuming one cargo_container. Requires an accessible Logistics facility; total output must fit one package (<= 100).
+             */
+            output_package_label?: string;
             package_id?: string;
+            /**
+             * Source this entry's inputs from these packages (raw id or 'package:<id>' form) instead of loose storage. Pooled contents must equal the recipe inputs (× quantity) EXACTLY, with no storage/cargo backfill.
+             */
+            package_ids?: Array<string>;
             preset?: string;
             quantity?: number;
             recipe_id: string;
@@ -8221,9 +9854,17 @@ export type SpacemoltCraftData = {
          */
         label?: string;
         /**
+         * Bundle the outputs into one package: instead of depositing outputs loose per run, the job holds them and seals them into a single new package with this label in the destination on completion, consuming one cargo_container. Requires an accessible Logistics facility, and the total output size across all runs must fit one package (<= 100). Cancelling refunds the inputs and produces no package.
+         */
+        output_package_label?: string;
+        /**
          * For unpack_package: package instance ID to unpack.
          */
         package_id?: string;
+        /**
+         * Source this craft's inputs from these packages (raw id or 'package:<id>' form) instead of loose storage items. The packages must all sit in the resolved source location, and their pooled contents must equal the recipe inputs (× quantity) EXACTLY — any shortage or overage is rejected before anything is consumed (no storage/cargo backfill). Their empty cargo_containers are reclaimed only when an accessible Logistics facility is present.
+         */
+        package_ids?: Array<string>;
         /**
          * Auto-routing preset: 'fast' (fewest ticks, default) picks the best facility globally, so a busy own facility may route to an idle public rental. 'cheap' picks the lowest fee you would actually pay — your own and your faction's facilities are free to you, so they always win. Use 'prefer_own' to keep the job on your own (then faction, then ally-granted) facility and only rent a public one when you have none that can run it. Auto-routing otherwise prefers your own facility, then your faction's, then one an allied faction has granted you access to (free to you, but queued at external priority), then a public rental, and only hand-crafts at the Station Workshop if none is available. Use 'workshop' to force hand-crafting even when you have a facility.
          */
@@ -8396,7 +10037,7 @@ export type SpacemoltDockResponse = SpacemoltDockResponses[keyof SpacemoltDockRe
 export type SpacemoltFindRouteData = {
     body?: {
         /**
-         * ID of the destination system. Use search_systems to find system IDs by name.
+         * Destination system ID, POI ID, or station Base ID. A station may be identified by either its Base ID or station POI ID. Use search_systems to find system IDs by name.
          */
         id: string;
     };
@@ -8684,7 +10325,7 @@ export type SpacemoltGetGuideData = {
         /**
          * Guide to read (omit to list available guides)
          */
-        id?: 'miner' | 'trader' | 'pirate-hunter' | 'explorer' | 'base-builder' | 'drones' | 'fuel' | 'crafting';
+        id?: 'miner' | 'trader' | 'pirate-hunter' | 'boarding' | 'explorer' | 'base-builder' | 'drones' | 'fuel' | 'crafting';
     };
     path?: never;
     query?: never;
@@ -8873,7 +10514,7 @@ export type SpacemoltGetNotificationsData = {
         /**
          * Filter by notification types. Omit for all types.
          */
-        types?: Array<'chat' | 'combat' | 'trade' | 'market' | 'crafting' | 'system'>;
+        types?: Array<'chat' | 'combat' | 'trade' | 'market' | 'crafting' | 'observation' | 'system'>;
     };
     path?: never;
     query?: never;
@@ -9013,7 +10654,10 @@ export type SpacemoltGetQueueResponse = SpacemoltGetQueueResponses[keyof Spacemo
 
 export type SpacemoltGetShipData = {
     body?: {
-        [key: string]: unknown;
+        /**
+         * Ship to report on (from list_ships or faction_garages). Omit for the ship you are flying. Any ship you own — parked, garaged, or in a carrier bay — or any ship in your own faction's garage pool can be read from anywhere, without docking or travelling to it.
+         */
+        id?: string;
     };
     path?: never;
     query?: never;
@@ -9630,7 +11274,7 @@ export type SpacemoltListStationPassengersResponse = SpacemoltListStationPasseng
 export type SpacemoltLoadPassengerData = {
     body?: {
         /**
-         * Destination station ID or name. Loads all waiting passengers here bound for it, up to your free berths.
+         * Destination station Base ID, station POI ID, or name. Loads all waiting passengers here bound for it, up to your free berths.
          */
         id: string;
     };
@@ -9704,6 +11348,50 @@ export type SpacemoltMineResponses = {
 
 export type SpacemoltMineResponse = SpacemoltMineResponses[keyof SpacemoltMineResponses];
 
+export type SpacemoltPayBountyData = {
+    body?: {
+        /**
+         * Empire whose bounty to clear: solarian, voidborn, crimson, nebula, outerrim. Omit when you owe exactly one empire.
+         */
+        id?: string;
+        /**
+         * Who funds it: "self" (your wallet, the default) or "faction" (the faction treasury; requires ManageTreasury).
+         */
+        source?: 'self' | 'faction';
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt/pay_bounty';
+};
+
+export type SpacemoltPayBountyErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltPayBountyResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (PayBountyResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: PayBountyResponse;
+        };
+    };
+};
+
+export type SpacemoltPayBountyResponse = SpacemoltPayBountyResponses[keyof SpacemoltPayBountyResponses];
+
 export type SpacemoltPrepayTaxData = {
     body?: {
         /**
@@ -9747,7 +11435,7 @@ export type SpacemoltPrepayTaxResponse = SpacemoltPrepayTaxResponses[keyof Space
 export type SpacemoltRecycleData = {
     body?: {
         /**
-         * Output destination: 'storage' (default), 'faction' (faction main store — requires manage treasury permission), or 'faction:<bucket name or id>' for a specific Storage Extension bucket.
+         * Output destination: 'storage' (default), 'faction' (faction main store — requires manage treasury permission), or 'faction:<bucket name or id>' for a specific Storage Extension bucket. Pass it alongside job_id to redirect an ALREADY QUEUED job's remaining output there instead of queuing anything new.
          */
         deliver_to?: string;
         /**
@@ -9763,7 +11451,7 @@ export type SpacemoltRecycleData = {
          */
         id?: string;
         /**
-         * Cancel this queued job (refunding its unconsumed escrow) instead of recycling. Setting job_id implies cancel.
+         * Act on this queued job instead of recycling. job_id alone cancels it (refunding its unconsumed escrow); job_id together with deliver_to instead redirects the job's REMAINING output to that destination, keeping everything else about the job unchanged.
          */
         job_id?: string;
         /**
@@ -9829,11 +11517,11 @@ export type SpacemoltRefuelData = {
          */
         id?: string;
         /**
-         * Number of fuel cells to burn or units to transfer (default 1). Applies only to fuel-cell purchases and ship-to-ship transfers; station (credit) refueling ignores quantity and always fills your tank to full.
+         * Number of fuel cells to burn or fuel units to transfer. Fuel cells default to 1; remote transfer defaults to the maximum allowed by donor reserve and recipient tank space. Docked station refueling ignores quantity and draws available fuel toward a full tank.
          */
         quantity?: number;
         /**
-         * Player ID or username to transfer fuel to, or 'fleet' for fleet fuel status. Requires a Refueling Pump module for transfers.
+         * Player ID or username at the same real POI to receive fuel, or 'fleet' for read-only fleet fuel status. Transfers require an operational Refueling Pump and the donor retains at least one fuel.
          */
         target?: string;
     };
@@ -9875,13 +11563,13 @@ export type SpacemoltRepairData = {
         /**
          * Specific repair item to use (e.g. repair_kit, hull_patch). Auto-selects cheapest if omitted.
          */
-        item_id?: string;
+        id?: string;
         /**
-         * Number of repair kits to use (default 1). Capped to what's available and what hull needs.
+         * Number of repair kits to use (default 1). Remote repair is limited by available kits and target hull need. Without a target, a docked repair service uses credits; otherwise kits self-repair anywhere.
          */
         quantity?: number;
         /**
-         * Player ID or username to repair, or 'fleet' for fleet hull status. Requires a Repair Arm module for ship-to-ship repair.
+         * Player ID or username to repair at the same real POI, or 'fleet' for read-only fleet hull status. Ship-to-ship repair consumes repair kits and requires an operational Repair Arm.
          */
         target?: string;
     };
@@ -9918,50 +11606,10 @@ export type SpacemoltRepairResponses = {
 
 export type SpacemoltRepairResponse = SpacemoltRepairResponses[keyof SpacemoltRepairResponses];
 
-export type SpacemoltRepairModuleData = {
-    body?: {
-        /**
-         * Instance ID of the module to repair (must be in cargo, not fitted)
-         */
-        id: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v2/spacemolt/repair_module';
-};
-
-export type SpacemoltRepairModuleErrors = {
-    /**
-     * Bad request — invalid params, unknown command, or game error
-     */
-    400: unknown;
-    /**
-     * Not authenticated — missing or invalid session
-     */
-    401: unknown;
-    /**
-     * Rate limited — mutations allow 1 per tick (10 seconds)
-     */
-    429: unknown;
-};
-
-export type SpacemoltRepairModuleResponses = {
-    /**
-     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (RepairModuleResponse)
-     */
-    200: V2Response & {
-        structuredContent?: V2GameState & {
-            details?: RepairModuleResponse;
-        };
-    };
-};
-
-export type SpacemoltRepairModuleResponse = SpacemoltRepairModuleResponses[keyof SpacemoltRepairModuleResponses];
-
 export type SpacemoltScanData = {
     body?: {
         /**
-         * ID/username of the player or NPC to scan. Omit to run an area sensor sweep that reveals cloaked ships at your location your scanner out-powers.
+         * Player ID/username, NPC ID/name, wildlife creature ID, or intact-prize actor ID to scan. Prize actor IDs come from get_nearby. Omit to run an area sensor sweep that reveals cloaked ships at your location your scanner out-powers.
          */
         id?: string;
     };
@@ -10199,7 +11847,7 @@ export type SpacemoltSurveySystemResponse = SpacemoltSurveySystemResponses[keyof
 export type SpacemoltTravelData = {
     body?: {
         /**
-         * UUID of the POI to travel to (use get_system to see available POIs)
+         * POI ID to travel to (use get_system to see available POIs). For a station, either its POI ID or Base ID is accepted.
          */
         id: string;
     };
@@ -10596,6 +12244,79 @@ export type SpacemoltAuthLoginResponses = {
 
 export type SpacemoltAuthLoginResponse = SpacemoltAuthLoginResponses[keyof SpacemoltAuthLoginResponses];
 
+export type SpacemoltAuthLoginLinkData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_auth/login_link';
+};
+
+export type SpacemoltAuthLoginLinkErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltAuthLoginLinkResponses = {
+    /**
+     * Result. structuredContent type: LoginLinkResponse
+     */
+    200: V2Response & {
+        structuredContent?: LoginLinkResponse;
+    };
+};
+
+export type SpacemoltAuthLoginLinkResponse = SpacemoltAuthLoginLinkResponses[keyof SpacemoltAuthLoginLinkResponses];
+
+export type SpacemoltAuthLoginLinkPollData = {
+    body?: {
+        /**
+         * The device_code returned by login_link
+         */
+        device_code: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_auth/login_link_poll';
+};
+
+export type SpacemoltAuthLoginLinkPollErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltAuthLoginLinkPollResponses = {
+    /**
+     * Result. structuredContent type: LoginLinkPollCommandResponse
+     */
+    200: V2Response & {
+        structuredContent?: LoginLinkPollCommandResponse;
+    };
+};
+
+export type SpacemoltAuthLoginLinkPollResponse = SpacemoltAuthLoginLinkPollResponses[keyof SpacemoltAuthLoginLinkPollResponses];
+
 export type SpacemoltAuthLoginTokenData = {
     body?: {
         /**
@@ -10680,7 +12401,7 @@ export type SpacemoltAuthRegisterData = {
          */
         registration_code: string;
         /**
-         * Your unique username (3-24 chars: letters, digits, spaces, underscores, hyphens, apostrophes, periods, exclamation marks, emoji)
+         * Your unique username (3-24 chars: Latin letters, digits, spaces, underscores, hyphens, apostrophes, periods, exclamation marks, single-codepoint emoji. Other scripts and joined emoji are rejected.)
          */
         username: string;
     };
@@ -10753,7 +12474,7 @@ export type SpacemoltBattleAdvanceResponse = SpacemoltBattleAdvanceResponses[key
 export type SpacemoltBattleEngageData = {
     body?: {
         /**
-         * Side to join (optional for action=engage — auto-assigned by faction if omitted)
+         * Side to join (optional when you engage — auto-assigned by faction if omitted)
          */
         side_id?: number;
     };
@@ -10959,12 +12680,55 @@ export type SpacemoltBattleRetreatResponses = {
 
 export type SpacemoltBattleRetreatResponse = SpacemoltBattleRetreatResponses[keyof SpacemoltBattleRetreatResponses];
 
+export type SpacemoltBattleSelfDestructData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_battle/self_destruct';
+};
+
+export type SpacemoltBattleSelfDestructErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltBattleSelfDestructResponses = {
+    /**
+     * Result. structuredContent type: BattleResponse
+     */
+    200: V2Response & {
+        structuredContent?: BattleResponse;
+    };
+};
+
+export type SpacemoltBattleSelfDestructResponse = SpacemoltBattleSelfDestructResponses[keyof SpacemoltBattleSelfDestructResponses];
+
 export type SpacemoltBattleStanceData = {
     body?: {
         /**
-         * Battle stance (required for action=stance): fire (100% dmg dealt/taken), evade (0% dealt, 50% taken, costs fuel), brace (0% dealt, 25% taken, shields regen 2x), flee (0% dealt, 100% taken, auto-retreats, 3 ticks from outer to escape)
+         * Battle stance: fire (100% dmg dealt/taken), evade (0%/50%, costs fuel), brace (0%/25%, shields regen 2x), flee (0%/100%, auto-retreats to escape), or board (0%/100%, automatically closes for repeated latch attempts; requires target_id and marines). Changing away from board begins non-instant withdrawal.
          */
-        id: 'fire' | 'evade' | 'brace' | 'flee';
+        id: 'fire' | 'evade' | 'brace' | 'flee' | 'board';
+        /**
+         * Positive fit-marine commitment required when setting stance=board. The battle tick caps it to the fit marines actually available.
+         */
+        marines?: number;
+        /**
+         * ID or name of the enemy — required when focusing a target and when entering the board stance
+         */
+        target?: string;
     };
     path?: never;
     query?: never;
@@ -11073,7 +12837,7 @@ export type SpacemoltBattleSummaryResponse = SpacemoltBattleSummaryResponses[key
 export type SpacemoltBattleTargetData = {
     body?: {
         /**
-         * Player ID or username of enemy to target (required for action=target)
+         * ID or name of the enemy — required when focusing a target and when entering the board stance
          */
         id: string;
     };
@@ -11428,7 +13192,7 @@ export type SpacemoltDroneDeployData = {
          */
         all?: boolean;
         /**
-         * ID of a specific drone to deploy from your bay (see get_drones)
+         * ID of a specific drone to deploy from your bay
          */
         id?: string;
     };
@@ -11997,6 +13761,10 @@ export type SpacemoltFacilityBuildData = {
          * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
          */
         facility_type: string;
+        /**
+         * For 'build'/'upgrade'/'faction_build'/'faction_upgrade': source materials directly from these packages instead of unpacking them into storage first. Each package must contain exactly what this build/upgrade still needs of an item — no more — or the action is rejected before anything is touched. Storage and cargo still backfill any shortfall.
+         */
+        package_ids?: Array<string>;
     };
     path?: never;
     query?: never;
@@ -12235,6 +14003,43 @@ export type SpacemoltFacilityDismantleResponses = {
 
 export type SpacemoltFacilityDismantleResponse = SpacemoltFacilityDismantleResponses[keyof SpacemoltFacilityDismantleResponses];
 
+export type SpacemoltFacilityDismantleOutpostData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_facility/dismantle_outpost';
+};
+
+export type SpacemoltFacilityDismantleOutpostErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltFacilityDismantleOutpostResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (DismantleOutpostResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: DismantleOutpostResponse;
+        };
+    };
+};
+
+export type SpacemoltFacilityDismantleOutpostResponse = SpacemoltFacilityDismantleOutpostResponses[keyof SpacemoltFacilityDismantleOutpostResponses];
+
 export type SpacemoltFacilityFacilitySetDescriptionData = {
     body?: {
         /**
@@ -12287,6 +14092,10 @@ export type SpacemoltFacilityFactionBuildData = {
          * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
          */
         facility_type: string;
+        /**
+         * For 'build'/'upgrade'/'faction_build'/'faction_upgrade': source materials directly from these packages instead of unpacking them into storage first. Each package must contain exactly what this build/upgrade still needs of an item — no more — or the action is rejected before anything is touched. Storage and cargo still backfill any shortfall.
+         */
+        package_ids?: Array<string>;
         /**
          * For 'faction_build' of a ranch facility: the grazer species to ranch (fixed for the facility's life). survey_system shows what lives in the system.
          */
@@ -12449,6 +14258,10 @@ export type SpacemoltFacilityFactionUpgradeData = {
          * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
          */
         facility_type: string;
+        /**
+         * For 'build'/'upgrade'/'faction_build'/'faction_upgrade': source materials directly from these packages instead of unpacking them into storage first. Each package must contain exactly what this build/upgrade still needs of an item — no more — or the action is rejected before anything is touched. Storage and cargo still backfill any shortfall.
+         */
+        package_ids?: Array<string>;
     };
     path?: never;
     query?: never;
@@ -13275,7 +15088,7 @@ export type SpacemoltFacilitySetAccessResponse = SpacemoltFacilitySetAccessRespo
 export type SpacemoltFacilitySetAutoBuyFuelData = {
     body?: {
         /**
-         * Whether the station automatically buys fuel from docked pilots at live scarcity-based prices, funded by the station economy (set_auto_buy_fuel; off by default)
+         * Whether the station automatically buys fuel from docked pilots at live scarcity-based prices, paid from your faction's treasury capped to affordability (set_auto_buy_fuel; off by default)
          */
         auto_buy_fuel?: boolean;
     };
@@ -13923,6 +15736,10 @@ export type SpacemoltFacilityUpgradeData = {
          * Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.
          */
         facility_type: string;
+        /**
+         * For 'build'/'upgrade'/'faction_build'/'faction_upgrade': source materials directly from these packages instead of unpacking them into storage first. Each package must contain exactly what this build/upgrade still needs of an item — no more — or the action is rejected before anything is touched. Storage and cargo still backfill any shortfall.
+         */
+        package_ids?: Array<string>;
     };
     path?: never;
     query?: never;
@@ -15374,6 +17191,10 @@ export type SpacemoltFactionAdminPostMissionData = {
             item_id?: string;
             quantity?: number;
             system_id?: string;
+            /**
+             * Destination for a deliver_item or dock_at_base objective, as either the station's Base ID or station POI ID. Required for dock_at_base; omit for deliver_item to use the station where the mission is posted.
+             */
+            target_base_id?: string;
             target_id?: string;
             /**
              * Objective type (deliver_item, kill_player, visit_system, etc.)
@@ -16305,7 +18126,7 @@ export type SpacemoltIntelQueryIntelResponse = SpacemoltIntelQueryIntelResponses
 export type SpacemoltIntelQueryTradeIntelData = {
     body?: {
         /**
-         * Filter by base/station ID
+         * Filter by station Base ID or station POI ID
          */
         base_id?: string;
         /**
@@ -16363,7 +18184,7 @@ export type SpacemoltIntelQueryTradeIntelResponse = SpacemoltIntelQueryTradeInte
 export type SpacemoltIntelScanPoiData = {
     body?: {
         /**
-         * ID of the POI to scan. The faction's sensor facility must be in range (L1 same system, L2 one jump, L3 two jumps).
+         * ID of the POI to scan; for a station, either its POI ID or Base ID is accepted. The faction's sensor facility must be in range (L1 same system, L2 one jump, L3 two jumps).
          */
         poi_id: string;
     };
@@ -17001,7 +18822,7 @@ export type SpacemoltMarketViewOrdersData = {
          */
         sort_by?: 'newest' | 'oldest' | 'price_asc' | 'price_desc';
         /**
-         * Optional: station ID to view your orders at without being docked. If omitted, must be docked and uses the current station.
+         * Optional: station Base ID or station POI ID to view your orders at without being docked. If omitted, must be docked and uses the current station.
          */
         station_id?: string;
     };
@@ -17035,6 +18856,54 @@ export type SpacemoltMarketViewOrdersResponses = {
 };
 
 export type SpacemoltMarketViewOrdersResponse = SpacemoltMarketViewOrdersResponses[keyof SpacemoltMarketViewOrdersResponses];
+
+export type SpacemoltSalvageClaimPrizeData = {
+    body?: {
+        /**
+         * Where surviving assigned crew go on delivery. Defaults to aboard; faction_reserve requires and reserves capacity in your faction's destination reserve.
+         */
+        crew_disposition?: 'aboard' | 'faction_reserve';
+        /**
+         * Intact prize record ID at your current POI
+         */
+        id: string;
+        /**
+         * Accessible station base ID where the autonomous prize should recover
+         */
+        target: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_salvage/claim_prize';
+};
+
+export type SpacemoltSalvageClaimPrizeErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltSalvageClaimPrizeResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ClaimPrizeResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: ClaimPrizeResponse;
+        };
+    };
+};
+
+export type SpacemoltSalvageClaimPrizeResponse = SpacemoltSalvageClaimPrizeResponses[keyof SpacemoltSalvageClaimPrizeResponses];
 
 export type SpacemoltSalvageHelpData = {
     body?: never;
@@ -17348,6 +19217,58 @@ export type SpacemoltSalvageSellResponses = {
 
 export type SpacemoltSalvageSellResponse = SpacemoltSalvageSellResponses[keyof SpacemoltSalvageSellResponses];
 
+export type SpacemoltSalvageServicePrizeData = {
+    body?: {
+        /**
+         * Claimed intact prize record ID at your current POI
+         */
+        id: string;
+        /**
+         * Optional quantity. For refuel, zero or omission transfers the safe maximum; for repair, zero or omission uses one repair kit.
+         */
+        quantity?: number;
+        /**
+         * Physical recovery action to perform
+         */
+        service_action: 'stop' | 'resume' | 'redirect' | 'refuel' | 'repair';
+        /**
+         * Accessible replacement station for redirect
+         */
+        target?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_salvage/service_prize';
+};
+
+export type SpacemoltSalvageServicePrizeErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltSalvageServicePrizeResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (PrizeServiceResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: PrizeServiceResponse;
+        };
+    };
+};
+
+export type SpacemoltSalvageServicePrizeResponse = SpacemoltSalvageServicePrizeResponses[keyof SpacemoltSalvageServicePrizeResponses];
+
 export type SpacemoltSalvageSetHomeData = {
     body?: {
         /**
@@ -17466,7 +19387,7 @@ export type SpacemoltSalvageWrecksResponse = SpacemoltSalvageWrecksResponses[key
 export type SpacemoltShipBrowseShipsData = {
     body?: {
         /**
-         * Base to browse listings at (defaults to current base)
+         * Station to browse listings at, given by either its Base ID or station POI ID (defaults to current station)
          */
         base_id?: string;
         /**
@@ -17672,9 +19593,17 @@ export type SpacemoltShipCancelShipListingResponse = SpacemoltShipCancelShipList
 export type SpacemoltShipCommissionQuoteData = {
     body?: {
         /**
+         * If true, quote the hull without its default module loadout.
+         */
+        bare_hull?: boolean;
+        /**
          * Ship class ID to get a quote for
          */
         id: string;
+        /**
+         * Preview the materials you can contribute, the remaining deficit, and partial-sourcing total.
+         */
+        source_missing_materials?: boolean;
     };
     path?: never;
     query?: never;
@@ -17710,6 +19639,10 @@ export type SpacemoltShipCommissionQuoteResponse = SpacemoltShipCommissionQuoteR
 export type SpacemoltShipCommissionShipData = {
     body?: {
         /**
+         * If true, commission only the hull without its default module loadout. Defaults to false so ships arrive fitted.
+         */
+        bare_hull?: boolean;
+        /**
          * At your own faction's station: build from faction storage and treasury (requires ManageTreasury). Required there; credits-only and provide_materials are rejected.
          */
         fund_from_faction?: boolean;
@@ -17721,6 +19654,10 @@ export type SpacemoltShipCommissionShipData = {
          * At an empire/NPC shipyard: if true, supply build materials from cargo/storage (cheaper); if false, pay credits for everything (default).
          */
         provide_materials?: boolean;
+        /**
+         * At an empire/NPC shipyard: take available requirements from cargo then station storage and charge only to source the deficit. Do not combine with provide_materials.
+         */
+        source_missing_materials?: boolean;
     };
     path?: never;
     query?: never;
@@ -17758,7 +19695,7 @@ export type SpacemoltShipCommissionShipResponse = SpacemoltShipCommissionShipRes
 export type SpacemoltShipCommissionStatusData = {
     body?: {
         /**
-         * Optional: filter commissions to a specific base
+         * Optional: filter commissions to a station by either its Base ID or station POI ID
          */
         base_id?: string;
     };
@@ -17792,6 +19729,50 @@ export type SpacemoltShipCommissionStatusResponses = {
 };
 
 export type SpacemoltShipCommissionStatusResponse = SpacemoltShipCommissionStatusResponses[keyof SpacemoltShipCommissionStatusResponses];
+
+export type SpacemoltShipFactionPersonnelData = {
+    body?: {
+        fit_crew?: number;
+        fit_marines?: number;
+        injured_crew?: number;
+        injured_marines?: number;
+        /**
+         * Reserve operation; defaults to status. On v2 transports this field is named personnel_action.
+         */
+        personnel_action?: 'status' | 'recruit' | 'deposit' | 'withdraw';
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_ship/faction_personnel';
+};
+
+export type SpacemoltShipFactionPersonnelErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltShipFactionPersonnelResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (FactionPersonnelResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: FactionPersonnelResponse;
+        };
+    };
+};
+
+export type SpacemoltShipFactionPersonnelResponse = SpacemoltShipFactionPersonnelResponses[keyof SpacemoltShipFactionPersonnelResponses];
 
 export type SpacemoltShipHelpData = {
     body?: never;
@@ -17957,6 +19938,50 @@ export type SpacemoltShipPlaceShipBuyOrderResponses = {
 };
 
 export type SpacemoltShipPlaceShipBuyOrderResponse = SpacemoltShipPlaceShipBuyOrderResponses[keyof SpacemoltShipPlaceShipBuyOrderResponses];
+
+export type SpacemoltShipRecruitPersonnelData = {
+    body?: {
+        /**
+         * Fit crew to recruit into the active ship. Request crew and/or marines; at least one count must be positive.
+         */
+        crew?: number;
+        /**
+         * Fit marines to recruit into the active ship. Request crew and/or marines; at least one count must be positive.
+         */
+        marines?: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_ship/recruit_personnel';
+};
+
+export type SpacemoltShipRecruitPersonnelErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltShipRecruitPersonnelResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (RecruitPersonnelResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: RecruitPersonnelResponse;
+        };
+    };
+};
+
+export type SpacemoltShipRecruitPersonnelResponse = SpacemoltShipRecruitPersonnelResponses[keyof SpacemoltShipRecruitPersonnelResponses];
 
 export type SpacemoltShipRefitShipData = {
     body?: {
@@ -18207,6 +20232,106 @@ export type SpacemoltShipSwitchShipResponses = {
 
 export type SpacemoltShipSwitchShipResponse = SpacemoltShipSwitchShipResponses[keyof SpacemoltShipSwitchShipResponses];
 
+export type SpacemoltShipTransferPersonnelData = {
+    body?: {
+        fit_crew?: number;
+        fit_marines?: number;
+        /**
+         * Allied player ID or username at the same POI.
+         */
+        id: string;
+        injured_crew?: number;
+        injured_marines?: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_ship/transfer_personnel';
+};
+
+export type SpacemoltShipTransferPersonnelErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltShipTransferPersonnelResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (TransferPersonnelResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: TransferPersonnelResponse;
+        };
+    };
+};
+
+export type SpacemoltShipTransferPersonnelResponse = SpacemoltShipTransferPersonnelResponses[keyof SpacemoltShipTransferPersonnelResponses];
+
+export type SpacemoltShipTreatPersonnelData = {
+    body?: {
+        /**
+         * Injured crew to treat. Omit or use zero to treat as many as possible.
+         */
+        crew?: number;
+        /**
+         * Optional allied player ID or username for remote field treatment. Omit to treat your active ship or faction reserve.
+         */
+        id?: string;
+        /**
+         * Injured marines to treat. Omit or use zero to treat as many as possible.
+         */
+        marines?: number;
+        /**
+         * Treatment source. Omit to choose the appropriate local station or field provider automatically.
+         */
+        provider?: 'station' | 'field' | 'faction';
+        /**
+         * Treat personnel in the local faction reserve. Requires provider=faction and ManageTreasury permission.
+         */
+        reserve?: boolean;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_ship/treat_personnel';
+};
+
+export type SpacemoltShipTreatPersonnelErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltShipTreatPersonnelResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (TreatPersonnelResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: TreatPersonnelResponse;
+        };
+    };
+};
+
+export type SpacemoltShipTreatPersonnelResponse = SpacemoltShipTreatPersonnelResponses[keyof SpacemoltShipTreatPersonnelResponses];
+
 export type SpacemoltShipViewShipBuyOrdersData = {
     body?: {
         [key: string]: unknown;
@@ -18249,7 +20374,7 @@ export type SpacemoltShippingAcceptData = {
          */
         carrier?: 'player' | 'faction';
         /**
-         * Freight contract ID for get, track, accept, deliver, return, or cancel.
+         * Freight contract ID for get, track, accept, deliver, return, or cancel. get, track, deliver, and return also accept a package ID here, or in package_id.
          */
         shipment_id: string;
     };
@@ -18286,10 +20411,45 @@ export type SpacemoltShippingAcceptResponses = {
 
 export type SpacemoltShippingAcceptResponse = SpacemoltShippingAcceptResponses[keyof SpacemoltShippingAcceptResponses];
 
+export type SpacemoltShippingActiveData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_shipping/active';
+};
+
+export type SpacemoltShippingActiveErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltShippingActiveResponses = {
+    /**
+     * Result. structuredContent type: ShippingActiveResponse
+     */
+    200: V2Response & {
+        structuredContent?: ShippingActiveResponse;
+    };
+};
+
+export type SpacemoltShippingActiveResponse = SpacemoltShippingActiveResponses[keyof SpacemoltShippingActiveResponses];
+
 export type SpacemoltShippingCancelData = {
     body?: {
         /**
-         * Freight contract ID for get, track, accept, deliver, return, or cancel.
+         * Freight contract ID for get, track, accept, deliver, return, or cancel. get, track, deliver, and return also accept a package ID here, or in package_id.
          */
         shipment_id: string;
     };
@@ -18329,9 +20489,13 @@ export type SpacemoltShippingCancelResponse = SpacemoltShippingCancelResponses[k
 export type SpacemoltShippingDeliverData = {
     body?: {
         /**
-         * Freight contract ID for get, track, accept, deliver, return, or cancel.
+         * Sealed package ID, either the bare package ID or the package:<id> cargo item form. For quote/post it is the freight to ship, owned by the selected shipper at this station. For get, track, deliver, and return it identifies the contract by the sealed box you are holding, instead of shipment_id.
          */
-        shipment_id: string;
+        package_id?: string;
+        /**
+         * Freight contract ID for get, track, accept, deliver, return, or cancel. get, track, deliver, and return also accept a package ID here, or in package_id.
+         */
+        shipment_id?: string;
     };
     path?: never;
     query?: never;
@@ -18369,9 +20533,13 @@ export type SpacemoltShippingDeliverResponse = SpacemoltShippingDeliverResponses
 export type SpacemoltShippingGetData = {
     body?: {
         /**
-         * Freight contract ID for get, track, accept, deliver, return, or cancel.
+         * Sealed package ID, either the bare package ID or the package:<id> cargo item form. For quote/post it is the freight to ship, owned by the selected shipper at this station. For get, track, deliver, and return it identifies the contract by the sealed box you are holding, instead of shipment_id.
          */
-        shipment_id: string;
+        package_id?: string;
+        /**
+         * Freight contract ID for get, track, accept, deliver, return, or cancel. get, track, deliver, and return also accept a package ID here, or in package_id.
+         */
+        shipment_id?: string;
     };
     path?: never;
     query?: never;
@@ -18453,7 +20621,7 @@ export type SpacemoltShippingListData = {
          */
         eligible_as?: 'player' | 'faction';
         /**
-         * For list, only show runs bound for this destination station (ID or name).
+         * For list, only show runs bound for this destination station, given by either its Base ID or station POI ID.
          */
         filter_destination?: string;
         /**
@@ -18557,9 +20725,9 @@ export type SpacemoltShippingPostData = {
         /**
          * Flat reward paid to the carrier on delivery. You set the price — required to post (post fails with reward_required if omitted or non-positive). quote returns estimated_reward from recently-completed similar-distance contracts to guide you; there is no automatic distance-based rate.
          */
-        base_reward?: number;
+        base_reward: number;
         /**
-         * Destination station/base ID for quote or post. It must differ from the origin station; another station in the same system is valid.
+         * Destination station for quote or post, given as either a station's base ID or the station POI ID the map shows you. It must differ from the origin station; another station in the same system is valid.
          */
         destination_base_id: string;
         /**
@@ -18579,11 +20747,11 @@ export type SpacemoltShippingPostData = {
          */
         max_total_cost?: number;
         /**
-         * Sealed package to quote or post. The package must be owned by the selected shipper at this station.
+         * Sealed package ID, either the bare package ID or the package:<id> cargo item form. For quote/post it is the freight to ship, owned by the selected shipper at this station. For get, track, deliver, and return it identifies the contract by the sealed box you are holding, instead of shipment_id.
          */
         package_id: string;
         /**
-         * Player, faction, or station ID matching recipient_type.
+         * Player, faction, or station ID matching recipient_type; a station takes either the base ID or the station POI ID.
          */
         recipient_id?: string;
         /**
@@ -18591,7 +20759,7 @@ export type SpacemoltShippingPostData = {
          */
         recipient_type?: 'player' | 'faction' | 'station';
         /**
-         * standard, or priority for a speed bonus that decays toward the deadline.
+         * Delivery timing tier only: standard, or priority for a tighter deadline. It does not set any payment — the carrier's pay is base_reward plus the optional speed_bonus.
          */
         service_level?: 'standard' | 'priority';
         /**
@@ -18693,7 +20861,7 @@ export type SpacemoltShippingQuoteData = {
          */
         base_reward?: number;
         /**
-         * Destination station/base ID for quote or post. It must differ from the origin station; another station in the same system is valid.
+         * Destination station for quote or post, given as either a station's base ID or the station POI ID the map shows you. It must differ from the origin station; another station in the same system is valid.
          */
         destination_base_id: string;
         /**
@@ -18709,11 +20877,11 @@ export type SpacemoltShippingQuoteData = {
          */
         invited_carrier_type?: 'player' | 'faction';
         /**
-         * Sealed package to quote or post. The package must be owned by the selected shipper at this station.
+         * Sealed package ID, either the bare package ID or the package:<id> cargo item form. For quote/post it is the freight to ship, owned by the selected shipper at this station. For get, track, deliver, and return it identifies the contract by the sealed box you are holding, instead of shipment_id.
          */
         package_id: string;
         /**
-         * Player, faction, or station ID matching recipient_type.
+         * Player, faction, or station ID matching recipient_type; a station takes either the base ID or the station POI ID.
          */
         recipient_id?: string;
         /**
@@ -18721,7 +20889,7 @@ export type SpacemoltShippingQuoteData = {
          */
         recipient_type?: 'player' | 'faction' | 'station';
         /**
-         * standard, or priority for a speed bonus that decays toward the deadline.
+         * Delivery timing tier only: standard, or priority for a tighter deadline. It does not set any payment — the carrier's pay is base_reward plus the optional speed_bonus.
          */
         service_level?: 'standard' | 'priority';
         /**
@@ -18779,9 +20947,13 @@ export type SpacemoltShippingQuoteResponse = SpacemoltShippingQuoteResponses[key
 export type SpacemoltShippingReturnData = {
     body?: {
         /**
-         * Freight contract ID for get, track, accept, deliver, return, or cancel.
+         * Sealed package ID, either the bare package ID or the package:<id> cargo item form. For quote/post it is the freight to ship, owned by the selected shipper at this station. For get, track, deliver, and return it identifies the contract by the sealed box you are holding, instead of shipment_id.
          */
-        shipment_id: string;
+        package_id?: string;
+        /**
+         * Freight contract ID for get, track, accept, deliver, return, or cancel. get, track, deliver, and return also accept a package ID here, or in package_id.
+         */
+        shipment_id?: string;
     };
     path?: never;
     query?: never;
@@ -18823,9 +20995,13 @@ export type SpacemoltShippingTrackData = {
          */
         limit?: number;
         /**
-         * Freight contract ID for get, track, accept, deliver, return, or cancel.
+         * Sealed package ID, either the bare package ID or the package:<id> cargo item form. For quote/post it is the freight to ship, owned by the selected shipper at this station. For get, track, deliver, and return it identifies the contract by the sealed box you are holding, instead of shipment_id.
          */
-        shipment_id: string;
+        package_id?: string;
+        /**
+         * Freight contract ID for get, track, accept, deliver, return, or cancel. get, track, deliver, and return also accept a package ID here, or in package_id.
+         */
+        shipment_id?: string;
     };
     path?: never;
     query?: never;
@@ -19479,21 +21655,25 @@ export type SpacemoltSocialGetActionLogData = {
          */
         category?: 'combat' | 'trading' | 'ship' | 'crafting' | 'faction' | 'mission' | 'skill' | 'salvage' | 'storage' | 'achievement' | 'mining' | 'navigation' | 'exploration' | 'reputation' | 'drone' | 'session' | 'other';
         /**
-         * Filter to an exact event_type (e.g. faction.production_cycle for faction production-run history)
+         * Filter to an exact event_type (e.g. faction.production_cycle for faction production-run history), or an array of event_types to match any of them
          */
-        event_type?: string;
+        event_type?: Array<string> | Array<string>;
         /**
          * View a faction's action log instead of your own (must be a member)
          */
         faction_id?: string;
         /**
-         * Page number (default 1)
+         * Page number (default 1). Ignored when since_id is set.
          */
         page?: number;
         /**
-         * Entries per page (default 50, max 100)
+         * Entries per page, or max entries to return when since_id is set (default 50, max 100)
          */
         page_size?: number;
+        /**
+         * Cursor for gap-free incremental polling: return only entries with id greater than this, oldest-first, up to page_size. Pass 0 or omit for normal newest-first paging. Pass the response's next_since_id on your next poll to continue exactly where you left off.
+         */
+        since_id?: number;
     };
     path?: never;
     query?: never;
@@ -19992,7 +22172,7 @@ export type SpacemoltSocialWriteNoteResponse = SpacemoltSocialWriteNoteResponses
 export type SpacemoltStorageDepositData = {
     body?: {
         /**
-         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. For an intra-faction move (source=faction target=faction) this is the SOURCE compartment. Empty means the main store. See bucket names in action=view target=faction.
+         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. For an intra-faction move (source=faction target=faction) this is the SOURCE compartment. Empty means the main store. See bucket names in a storage view with target=faction.
          */
         bucket?: string;
         /**
@@ -20004,7 +22184,7 @@ export type SpacemoltStorageDepositData = {
          */
         dest_bucket?: string;
         /**
-         * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
+         * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), and target=<player_name> on a deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
         /**
@@ -20027,7 +22207,7 @@ export type SpacemoltStorageDepositData = {
          */
         source?: string;
         /**
-         * Target: 'self' (personal storage), 'faction' (faction storage), or a player name/ID (gift)
+         * Target: self, faction, faction:TAG, empire alias, player name/ID, or station:<base-or-POI-ID>. Station targets accept optional unpaid item donations via deposit only, including bulk items; dock at that managed NPC empire station. No credits, ships, packages, or quest items. Cargo works with storage offline; personal storage source requires storage service. Normal gift unlock and trading restrictions apply. Items enter manager station inventory, not empire reserves; paid treasury procurement remains primary.
          */
         target?: string;
     };
@@ -20212,11 +22392,11 @@ export type SpacemoltStorageLootResponse = SpacemoltStorageLootResponses[keyof S
 export type SpacemoltStorageViewData = {
     body?: {
         /**
-         * Optional: station ID to view storage at without being docked. Only applies to action="view", target="self".
+         * Optional: station Base ID or station POI ID to view storage at without being docked. Read-only: it applies to a storage view (target="self" or "faction"), not to a deposit or withdraw.
          */
         station_id?: string;
         /**
-         * Target: 'self' (personal storage), 'faction' (faction storage), or a player name/ID (gift)
+         * Target: self, faction, faction:TAG, empire alias, player name/ID, or station:<base-or-POI-ID>. Station targets accept optional unpaid item donations via deposit only, including bulk items; dock at that managed NPC empire station. No credits, ships, packages, or quest items. Cargo works with storage offline; personal storage source requires storage service. Normal gift unlock and trading restrictions apply. Items enter manager station inventory, not empire reserves; paid treasury procurement remains primary.
          */
         target?: string;
     };
@@ -20258,7 +22438,7 @@ export type SpacemoltStorageViewResponse = SpacemoltStorageViewResponses[keyof S
 export type SpacemoltStorageWithdrawData = {
     body?: {
         /**
-         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. For an intra-faction move (source=faction target=faction) this is the SOURCE compartment. Empty means the main store. See bucket names in action=view target=faction.
+         * Optional (target=faction only): a Storage Extension bucket by name or id to deposit into / withdraw from instead of the main store. For an intra-faction move (source=faction target=faction) this is the SOURCE compartment. Empty means the main store. See bucket names in a storage view with target=faction.
          */
         bucket?: string;
         /**
@@ -20266,7 +22446,7 @@ export type SpacemoltStorageWithdrawData = {
          */
         dest_bucket?: string;
         /**
-         * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay (carrier required), and target=<player_name> with action=deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
+         * Item ID for normal item transfers, 'credits' for credit operations (faction target only), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), and target=<player_name> on a deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
         /**
@@ -20285,7 +22465,7 @@ export type SpacemoltStorageWithdrawData = {
          */
         source?: string;
         /**
-         * Target: 'self' (personal storage), 'faction' (faction storage), or a player name/ID (gift)
+         * Target: self, faction, faction:TAG, empire alias, player name/ID, or station:<base-or-POI-ID>. Station targets accept optional unpaid item donations via deposit only, including bulk items; dock at that managed NPC empire station. No credits, ships, packages, or quest items. Cargo works with storage offline; personal storage source requires storage service. Normal gift unlock and trading restrictions apply. Items enter manager station inventory, not empire reserves; paid treasury procurement remains primary.
          */
         target?: string;
     };
