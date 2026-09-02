@@ -661,7 +661,7 @@ const entries: [string, CommandMeta][] = [
     action: "stance",
     operationId: "spacemolt_battle_stance",
     summary: "Manage your battle — maneuver, target enemies, adopt combat stances, or self-destruct",
-    params: [{"name":"id","type":"string","description":"Battle stance: fire (100% dmg dealt/taken), evade (0%/50%, costs fuel), brace (0%/25%, shields regen 2x), flee (0%/100%, auto-retreats to escape), or board (0%/100%, automatically closes for repeated latch attempts; requires target_id and marines). Changing away from board begins non-instant withdrawal.","required":true,"positionalIndex":0,"enumValues":["fire","evade","brace","flee","board"]},{"name":"target","type":"string","description":"ID or name of the enemy — required when focusing a target and when entering the board stance","required":false,"positionalIndex":1},{"name":"marines","type":"integer","description":"Positive fit-marine commitment required when setting stance=board. The battle tick caps it to the fit marines actually available.","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Battle stance: fire (100% dmg dealt/taken), evade (0%/50%, costs fuel), brace (0%/25%, shields regen 2x), flee (0%/100%, auto-retreats to escape), or board (0%/100%, automatically closes for repeated latch attempts; requires target_id and marines). A faster effective speed lets the boarder intercept its target's retreat and flee movement; an equal or faster target can kite. Changing away from board begins non-instant withdrawal.","required":true,"positionalIndex":0,"enumValues":["fire","evade","brace","flee","board"]},{"name":"target","type":"string","description":"ID or name of the enemy — required when focusing a target and when entering the board stance. Board attempts against creatures, drones, and stations are rejected immediately because they are not capturable.","required":false,"positionalIndex":1},{"name":"marines","type":"integer","description":"Positive fit-marine commitment required when setting stance=board. The battle tick caps it to the fit marines actually available.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_battle/status", {
@@ -685,7 +685,7 @@ const entries: [string, CommandMeta][] = [
     action: "target",
     operationId: "spacemolt_battle_target",
     summary: "Manage your battle — maneuver, target enemies, adopt combat stances, or self-destruct",
-    params: [{"name":"id","type":"string","description":"ID or name of the enemy — required when focusing a target and when entering the board stance","required":true,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"ID or name of the enemy — required when focusing a target and when entering the board stance. Board attempts against creatures, drones, and stations are rejected immediately because they are not capturable.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_catalog/catalog", {

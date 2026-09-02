@@ -1904,7 +1904,7 @@ export const spacemoltBattleSelfDestruct = <ThrowOnError extends boolean = false
 
 /**
  * Manage your battle — maneuver, target enemies, adopt combat stances, or self-destruct
- * Sets your combat posture via `id`: `fire` (100% damage dealt and taken), `evade` (0% dealt / 50% taken, burns extra fuel), `brace` (0% dealt / 25% taken, shields regenerate at 2x), `flee` (0% dealt / 100% taken, escapes after auto-retreat), or `board` (no weapons or defensive reduction; automatically closes for repeated latch attempts). `board` requires `target` and a positive `marines` commitment. Changing away from `board` begins a costly, non-instant withdrawal; the requested stance takes effect only after disengagement. Requires being in an active battle.
+ * Sets your combat posture via `id`: `fire` (100% damage dealt and taken), `evade` (0% dealt / 50% taken, burns extra fuel), `brace` (0% dealt / 25% taken, shields regenerate at 2x), `flee` (0% dealt / 100% taken, escapes after auto-retreat), or `board` (no weapons or defensive reduction; automatically closes for repeated latch attempts). `board` requires `target` and a positive `marines` commitment; creatures, drones, and stations are not capturable and are rejected immediately. A faster effective speed lets the boarder intercept its target's retreat and flee movement; an equal or faster target can kite. Changing away from `board` begins a costly, non-instant withdrawal; the requested stance takes effect only after disengagement. Requires being in an active battle.
  *
  * **Example:** `POST /api/v2/spacemolt_battle/stance` with body `{"id":"fire","marines":1,"target":"example"}`
  */
@@ -1927,7 +1927,7 @@ export const spacemoltBattleStance = <ThrowOnError extends boolean = false>(opti
 
 /**
  * View current battle status
- * Returns full battle state including all participants, zones, sides, and your stats. Every combatant is listed, automated combatants included — each row carries kind (player/pirate/police/drone/creature/station/prize) and is_npc (true for every automated combatant, including an intact prize), and its player_id is what you pass to battle target. Your combat_state includes webbed plus web_strength_pct, the exact combined escape-speed penalty from enemy webifiers; webifier penalties add and cap at 75% and do not affect hit chance. If not in a battle, shows any active battle in your system. Works as a query (no tick cost).
+ * Returns full battle state including all participants, zones, sides, and your stats. Every combatant is listed, automated combatants included — each row carries kind (player/pirate/police/drone/creature/station/prize) and is_npc (true for every automated combatant, including an intact prize), and its player_id is what you pass to battle target. Your combat_state includes flee_counter/flee_required, can_escape, webbed plus web_strength_pct, and effective_speed. Webifier penalties add and cap at 75% and do not affect hit chance. A faster boarding pursuer makes can_escape false and omits flee_required while it intercepts your retreat and flee movement. If not in a battle, shows any active battle in your system. Works as a query (no tick cost).
  */
 export const spacemoltBattleStatus = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltBattleStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltBattleStatusResponses, SpacemoltBattleStatusErrors, ThrowOnError>({
