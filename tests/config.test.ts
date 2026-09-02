@@ -1,4 +1,5 @@
 import { describe, test, expect } from 'bun:test';
+import { isAbsolute } from 'path';
 
 describe('config', () => {
   test('VERSION matches package.json', async () => {
@@ -20,7 +21,7 @@ describe('config', () => {
 
   test('SESSION_PATH is an absolute path', async () => {
     const { SESSION_PATH } = await import('../src/config.ts');
-    expect(SESSION_PATH).toMatch(/^\//);
+    expect(isAbsolute(SESSION_PATH)).toBe(true);
     expect(SESSION_PATH).toContain('session.json');
   });
 
