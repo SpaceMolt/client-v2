@@ -536,6 +536,54 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"Template ID of the completed mission to view","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
+  ["spacemolt_arena/accept", {
+    toolGroup: "spacemolt_arena",
+    action: "accept",
+    operationId: "spacemolt_arena_accept",
+    summary: "Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact",
+    params: [],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_arena/cancel", {
+    toolGroup: "spacemolt_arena",
+    action: "cancel",
+    operationId: "spacemolt_arena_cancel",
+    summary: "Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact",
+    params: [],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_arena/challenge", {
+    toolGroup: "spacemolt_arena",
+    action: "challenge",
+    operationId: "spacemolt_arena_challenge",
+    summary: "Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact",
+    params: [{"name":"id","type":"string","description":"Player name or ID to challenge (for 'challenge')","required":true,"positionalIndex":0},{"name":"max_side_size","type":"integer","description":"For 'challenge': maximum ships per side. 0 (default) lets every eligible fleet member at the arena join; 1 is a solo duel.","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_arena/decline", {
+    toolGroup: "spacemolt_arena",
+    action: "decline",
+    operationId: "spacemolt_arena_decline",
+    summary: "Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact",
+    params: [],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_arena/help", {
+    toolGroup: "spacemolt_arena",
+    action: "help",
+    operationId: "spacemolt_arena_help_post",
+    summary: "Get help for spacemolt_arena",
+    params: [{"name":"topic","type":"string","description":"Optional: focus help on an action name, category, or search keyword. Searches across all tools.","required":false,"positionalIndex":-1}],
+    isAmbiguous: true,
+  }],
+  ["spacemolt_arena/status", {
+    toolGroup: "spacemolt_arena",
+    action: "status",
+    operationId: "spacemolt_arena_status",
+    summary: "Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact",
+    params: [],
+    isAmbiguous: true,
+  }],
   ["spacemolt_auth/claim", {
     toolGroup: "spacemolt_auth",
     action: "claim",
@@ -1583,7 +1631,7 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_fleet_decline",
     summary: "Create and manage player fleets for coordinated movement and combat",
     params: [],
-    isAmbiguous: false,
+    isAmbiguous: true,
   }],
   ["spacemolt_fleet/disband", {
     toolGroup: "spacemolt_fleet",
@@ -2111,7 +2159,7 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_shipping_cancel",
     summary: "Quote, post, haul, track, and settle sealed-package freight contracts through station mission services",
     params: [{"name":"shipment_id","type":"string","description":"Freight contract ID for get, track, accept, deliver, return, or cancel. get, track, deliver, and return also accept a package ID here, or in package_id.","required":true,"positionalIndex":-1}],
-    isAmbiguous: false,
+    isAmbiguous: true,
   }],
   ["spacemolt_shipping/deliver", {
     toolGroup: "spacemolt_shipping",
@@ -2515,6 +2563,6 @@ for (const [key, meta] of COMMAND_REGISTRY) {
   }
 }
 
-export const TOOL_GROUPS = ["spacemolt","spacemolt_auth","spacemolt_battle","spacemolt_catalog","spacemolt_citizenship","spacemolt_drone","spacemolt_facility","spacemolt_faction","spacemolt_faction_admin","spacemolt_faction_commerce","spacemolt_fleet","spacemolt_intel","spacemolt_market","spacemolt_salvage","spacemolt_ship","spacemolt_shipping","spacemolt_social","spacemolt_storage","spacemolt_transfer"] as const;
+export const TOOL_GROUPS = ["spacemolt","spacemolt_arena","spacemolt_auth","spacemolt_battle","spacemolt_catalog","spacemolt_citizenship","spacemolt_drone","spacemolt_facility","spacemolt_faction","spacemolt_faction_admin","spacemolt_faction_commerce","spacemolt_fleet","spacemolt_intel","spacemolt_market","spacemolt_salvage","spacemolt_ship","spacemolt_shipping","spacemolt_social","spacemolt_storage","spacemolt_transfer"] as const;
 
 export const SPEC_VERSION = "2.0.0";
