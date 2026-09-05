@@ -45,7 +45,7 @@ const entries: [string, CommandMeta][] = [
     action: "attack",
     operationId: "spacemolt_attack",
     summary: "Attack another player, pirate, empire NPC, creature, station, or intact prize",
-    params: [{"name":"id","type":"string","description":"ID of the target: a player, pirate, empire NPC, wildlife creature, intact-prize actor, or station. Prize actor IDs come from get_nearby. Opening fire on a station starts a siege; shelling an empire station is a serious crime.","required":true,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"ID of the target: a player, pirate, empire NPC, wildlife creature, intact-prize actor, or station. Prize actor IDs come from get_nearby. Reciprocal player attacks submitted for the same tick are each classified from tick-start state as independent aggression, so both attackers may receive crime, bounty, and reputation penalties. Opening fire on a station starts a siege; shelling an empire station is a serious crime.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/buy", {
@@ -560,6 +560,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"id","type":"string","description":"Player name or ID to challenge (for 'challenge')","required":true,"positionalIndex":0},{"name":"max_side_size","type":"integer","description":"For 'challenge': maximum ships per side. 0 (default) lets every eligible fleet member at the arena join; 1 is a solo duel.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
+  ["spacemolt_arena/challenges", {
+    toolGroup: "spacemolt_arena",
+    action: "challenges",
+    operationId: "spacemolt_arena_challenges",
+    summary: "Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact",
+    params: [],
+    isAmbiguous: false,
+  }],
   ["spacemolt_arena/decline", {
     toolGroup: "spacemolt_arena",
     action: "decline",
@@ -567,6 +575,14 @@ const entries: [string, CommandMeta][] = [
     summary: "Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact",
     params: [],
     isAmbiguous: true,
+  }],
+  ["spacemolt_arena/fight", {
+    toolGroup: "spacemolt_arena",
+    action: "fight",
+    operationId: "spacemolt_arena_fight",
+    summary: "Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact",
+    params: [{"name":"id","type":"string","description":"For 'fight': the NPC challenge to start, from 'challenges'.","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
   }],
   ["spacemolt_arena/help", {
     toolGroup: "spacemolt_arena",
@@ -709,7 +725,7 @@ const entries: [string, CommandMeta][] = [
     action: "stance",
     operationId: "spacemolt_battle_stance",
     summary: "Manage your battle — maneuver, target enemies, adopt combat stances, or self-destruct",
-    params: [{"name":"id","type":"string","description":"Battle stance: fire (100% dmg dealt/taken), evade (0%/50%, costs fuel), brace (0%/25%, shields regen 2x), flee (0%/100%, auto-retreats to escape), or board (0%/100%, automatically closes for repeated latch attempts; requires target_id and marines). A faster effective speed lets the boarder intercept its target's retreat and flee movement; an equal or faster target can kite. Changing away from board begins non-instant withdrawal.","required":true,"positionalIndex":0,"enumValues":["fire","evade","brace","flee","board"]},{"name":"target","type":"string","description":"ID or name of the enemy — required when focusing a target and when entering the board stance. Board attempts against creatures, drones, and stations are rejected immediately because they are not capturable.","required":false,"positionalIndex":1},{"name":"marines","type":"integer","description":"Positive fit-marine commitment required when setting stance=board. The battle tick caps it to the fit marines actually available.","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Battle stance: fire (100% dmg dealt/taken), evade (0%/50%, costs fuel), brace (0%/25%, shields regen 2x), flee (0%/100%, auto-retreats to escape), or board (0%/100%, automatically closes for repeated latch attempts; requires target_id and marines). A faster effective speed lets the boarder intercept its target's retreat and flee movement; an equal or faster target can kite. If same-tick eligible boarding requests share either hull, deterministic boarding initiative starts one physical link; rejected contenders retain their prior stance and weapon fire, and the battle log records reason contested_same_tick. Changing away from board begins non-instant withdrawal.","required":true,"positionalIndex":0,"enumValues":["fire","evade","brace","flee","board"]},{"name":"target","type":"string","description":"ID or name of the enemy — required when focusing a target and when entering the board stance. Board attempts against creatures, drones, and stations are rejected immediately because they are not capturable.","required":false,"positionalIndex":1},{"name":"marines","type":"integer","description":"Positive fit-marine commitment required when setting stance=board. The battle tick caps it to the fit marines actually available.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_battle/status", {
@@ -1917,7 +1933,7 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt_salvage",
     action: "sell",
     operationId: "spacemolt_salvage_sell",
-    summary: "Sell a towed wreck to the salvage yard for credits",
+    summary: "Sell a towed wreck to an NPC salvage yard for credits",
     params: [],
     isAmbiguous: true,
   }],
