@@ -1892,6 +1892,7 @@ export type CatalogDump = {
      * Regular items and modules merged into one list, sorted by ID.
      */
     items: Array<Item | Module>;
+    mining: MiningConstants;
     recipes: Array<Recipe>;
     ships: Array<ShipClass>;
     skills: Array<SkillDefinition>;
@@ -5343,6 +5344,10 @@ export type IntelPoi = {
     base_id?: string;
     base_name?: string;
     class?: string;
+    /**
+     * True when this is a hidden deep core POI holding deposits. Access there needs a deep_core_access extractor that a pilot cannot refit below so the too-sparse cutoff never applies and these deposits always work down to zero. It is the one input to the mining lock formula that you cannot derive from a deposit's own numbers. Omitted (false) for every ordinary POI and for a hidden POI with no resources such as a wormhole mouth.
+     */
+    deep_core?: boolean;
     description?: string;
     id: string;
     name: string;
@@ -5371,6 +5376,10 @@ export type Item = {
     hazardous?: boolean;
     hidden?: boolean;
     id: string;
+    /**
+     * Family of deposits that a specialized extractor targets. Present only on a mined item that belongs to one — currently the value crystal (energy/fury/trade/phase crystal) which the crystal_bonus module special pays its yield bonus out on. Omitted means no specialized-extractor bonus applies to this item.
+     */
+    mining_group?: string;
     name: string;
     quest_item?: boolean;
     rarity?: string;
@@ -5873,8 +5882,17 @@ export type MineFilteredResponse = {
      * True when the engine undocked you automatically before running this command, because the command requires being undocked. Omitted when no automatic undock happened.
      */
     auto_undocked?: boolean;
+    /**
+     * Always true on this shape. The action consumed its tick and mined nothing, because a fitted extraction filter rejects every deposit this ship can work at this POI. A filter that rejects only some of the deposits re-targets the cycle instead and returns the yield shape, so this shape never means a partial loss.
+     */
     filtered: boolean;
+    /**
+     * Always the literal value filtered. It marks this member of the mine response union as the no-yield shape, so a client can tell it apart from the yield shape without inspecting any other field.
+     */
     kind: 'filtered';
+    /**
+     * Human-readable explanation of the empty cycle. It names the fitted-filter cause and the two ways out: unfit the filter, or move to a field carrying an ore the filter accepts.
+     */
     message: string;
 };
 
@@ -5883,6 +5901,25 @@ export type MineResponse = ({
 } & MiningYieldPayload) | ({
     kind: 'filtered';
 } & MineFilteredResponse);
+
+export type MiningConstants = {
+    /**
+     * Fraction of capacity below which a deposit counts as depleted and the overkill cutoff can apply. A deposit at or above this fraction of max_remaining is always workable however thin, so naturally tiny veins stay mineable by the gear built for them.
+     */
+    depletion_floor: number;
+    /**
+     * How many times a deposit's supported power your array may apply before it loses its lock entirely instead of tapering. Only bites on a deposit already below depletion_floor, and only for an array whose power times its precision factor exceeds precision_k.
+     */
+    overkill_ratio: number;
+    /**
+     * Units of remaining stock required per point of applied beam power for full-rate extraction, before your array's precision factor is applied. A deposit supports remaining divided by this (times your precision factor) worth of power; power above that is capped down to it rather than wasted.
+     */
+    precision_k: number;
+    /**
+     * Weight multiplier per Mining skill level that biases which deposit a mining cycle selects toward rarer ore. A deposit's selection weight is its richness times (1 + this * your Mining level * its rarity rank) where rarity rank is 0 for common 1 uncommon 2 rare 3 exotic and 4 legendary. At Mining level 0 the term vanishes and selection is weighted by richness alone. Selection only; it changes which deposit a cycle picks at a POI holding several and never changes yield.
+     */
+    rare_ore_rarity_weight_per_level: number;
+};
 
 export type MiningYieldPayload = {
     auto_docked?: boolean;
@@ -6051,6 +6088,9 @@ export type Module = {
     passive_repair?: number;
     power_bonus?: number;
     power_usage: number;
+    /**
+     * Vein-density multiplier on how dense a deposit this beam needs. Above 1 is coarser and needs denser deposits; below 1 is finer and works thinner ones; omitted or 0 means the standard 1.0. Multiply it into the catalog mining.precision_k when computing a deposit's supported power or your lock threshold. A rig with several extractors uses the power-weighted average across them.
+     */
     precision_factor?: number;
     quest_item?: boolean;
     reach?: number;
@@ -8236,14 +8276,46 @@ export type RepairResponse = {
 };
 
 export type ResourceInfo = {
+    /**
+     * How far this deposit is drawn down, as a percentage of max_remaining. Below 25 percent a deposit is depleted enough for lock_minimum_stock to take effect. Omitted when max_remaining is.
+     */
     depletion_percent?: number;
+    /**
+     * Stock this deposit must hold for your fitted array to keep a lock on it once the deposit falls below a quarter of capacity. Below both thresholds at once the beam disperses the remaining fragments and extraction fails with deposit_too_sparse. Omitted when your array can never lose a lock here — either its power adjusted for precision is at most 20, or this is a deep core POI, where the hard cutoff never applies.
+     */
+    lock_minimum_stock?: number;
+    /**
+     * Capacity this deposit regenerates back toward, seeded from its starting stock. Omitted for unlimited deposits, which have no capacity and never lock.
+     */
     max_remaining?: number;
+    /**
+     * Display name of the resource. Falls back to the raw item id when the catalog has no entry for it.
+     */
     name: string;
+    /**
+     * Units of stock left. -1 means an unlimited deposit that never depletes and never regenerates; 0 means fully depleted. A finite deposit below capacity regenerates at least 1 unit per minute.
+     */
     remaining: number;
+    /**
+     * Human-readable form of remaining: the string unlimited, the string depleted, or a unit count such as 4000 units.
+     */
     remaining_display: string;
+    /**
+     * Item id of the ore, gas, ice or radioactive material in this deposit — for example iron_ore or fury_crystal. Look it up in the catalog for its rarity and which extractor works it.
+     */
     resource_id: string;
+    /**
+     * Percentage multiplier on extraction yield: yield is applied beam power times richness divided by 100, floored at 1 unit per action. It also weights random deposit selection when a POI holds several, so a richer deposit is picked more often.
+     */
     richness: number;
+    /**
+     * Beam power this deposit accepts at full extraction rate, computed for the extraction hardware you have fitted right now — remaining stock divided by 20 and by your array's precision factor. Applying more than this is not wasted: power above it is capped down to it and extraction continues at the reduced rate. Omitted when the deposit is depleted or unlimited.
+     */
     supported_power?: number;
+    /**
+     * True when your currently fitted array cannot work this deposit at all right now. Fit a lower-power or finer-precision extractor, or mine a richer deposit. Omitted (false) whenever the deposit is workable.
+     */
+    too_sparse?: boolean;
 };
 
 export type ResourceNode = {
@@ -10434,14 +10506,34 @@ export type V2Queue = {
 };
 
 export type V2Resource = {
+    /**
+     * Item id of the ore, gas, ice or radioactive material in this deposit — for example iron_ore or fury_crystal.
+     */
     item_id: string;
+    /**
+     * Display name of the resource. Falls back to the raw item id when the catalog has no entry for it.
+     */
     item_name: string;
+    /**
+     * Stock this deposit must hold for your fitted array to keep a lock on it once the deposit falls below a quarter of capacity. Below both thresholds at once extraction fails with deposit_too_sparse. Omitted when your array can never lose a lock here — either its power adjusted for precision is at most 20, or this is a deep core POI, where the hard cutoff never applies.
+     */
+    lock_minimum_stock?: number;
+    /**
+     * Units of stock left. -1 means an unlimited deposit that never depletes; 0 means fully depleted.
+     */
     remaining: number;
+    /**
+     * Percentage multiplier on extraction yield: yield is applied beam power times richness divided by 100, floored at 1 unit per action.
+     */
     richness: number;
     /**
-     * Beam power this deposit supports at full extraction rate (standard precision); omitted when depleted or unlimited
+     * Beam power this deposit accepts at full extraction rate, computed for the extraction hardware you have fitted right now — remaining stock divided by 20 and by your array's precision factor. Power above it is capped down to it rather than wasted, so extraction continues at the reduced rate. Omitted when the deposit is depleted or unlimited.
      */
     supported_power?: number;
+    /**
+     * True when your currently fitted array cannot work this deposit at all right now. Omitted (false) whenever the deposit is workable.
+     */
+    too_sparse?: boolean;
 };
 
 /**
@@ -10552,7 +10644,13 @@ export type V2Ship = {
      * Remaining ticks of incendiary/entropic burn damage-over-time (omitted when not burning)
      */
     burn_ticks_remaining?: number;
+    /**
+     * Total cargo space. Modules can raise or lower it, so it changes as you refit
+     */
     cargo_capacity: number;
+    /**
+     * Cargo space the hold currently contains. Can exceed cargo_capacity when a fitted module reduced the hold below what was already aboard, in which case nothing more can be loaded until you jettison, sell, or unfit the module
+     */
     cargo_used: number;
     class_id: string;
     class_name: string;
@@ -10561,7 +10659,7 @@ export type V2Ship = {
      */
     cpu_capacity: number;
     /**
-     * CPU consumed by fitted modules (after engineering efficiency bonus)
+     * CPU consumed by fitted modules (after engineering efficiency bonus). Can exceed cpu_capacity when a module granting CPU was unfitted or a fit predates the capacity it needs, in which case install_mod is refused until you unfit a consumer
      */
     cpu_used: number;
     /**
@@ -10647,7 +10745,7 @@ export type V2Ship = {
      */
     power_capacity: number;
     /**
-     * Power consumed by fitted modules (after engineering efficiency bonus)
+     * Power consumed by fitted modules (after engineering efficiency bonus). Can exceed power_capacity on the same terms as cpu_used
      */
     power_used: number;
     shield: number;
@@ -20005,7 +20103,7 @@ export type SpacemoltIntelScanPoiResponse = SpacemoltIntelScanPoiResponses[keyof
 export type SpacemoltIntelSubmitIntelData = {
     body?: {
         /**
-         * Array of system intel reports. Each entry: system_id (required), name (required), description, empire, police_level, connections (array of {system_id, name, distance} objects or bare ID strings), pois (array of {id, type, name, description, class, position:{x,y}, base_id, base_name, resources:[{resource_id, richness, remaining, max_remaining}]})
+         * Array of system intel reports. Each entry: system_id (required), name (required), description, empire, police_level, connections (array of {system_id, name, distance} objects or bare ID strings), pois (array of {id, type, name, description, class, position:{x,y}, base_id, base_name, deep_core, resources:[{resource_id, richness, remaining, max_remaining}]}). deep_core marks a hidden deep core POI, where the mining too-sparse cutoff never applies
          */
         systems: Array<{
             [key: string]: unknown;

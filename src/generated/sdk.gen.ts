@@ -674,7 +674,7 @@ export const spacemoltGetPlayer = <ThrowOnError extends boolean = false>(options
 
 /**
  * Get your current POI details
- * Returns POI info and base if present.
+ * Returns POI info and base if present. Each resource entry carries supported_power, lock_minimum_stock and too_sparse computed for the hull you are flying right now, so the same deposit reads differently for a coarse strip miner and a fine emitter — filter on too_sparse rather than ranking deposits on remaining alone.
  */
 export const spacemoltGetPoi = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetPoiData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetPoiResponses, SpacemoltGetPoiErrors, ThrowOnError>({
@@ -962,7 +962,7 @@ export const spacemoltInspect = <ThrowOnError extends boolean = false>(options?:
 
 /**
  * Install a module on your ship
- * Module must be in your cargo. Requires CPU/power grid capacity. You must be docked or have a Ship Maintenance Bay fitted. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
+ * Module must be in your cargo. Requires CPU/power grid capacity. You must be docked or have a Ship Maintenance Bay fitted. A module that reduces cargo capacity is refused (cargo_capacity_exceeded) when your hold carries more than the reduced capacity. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
  *
  * **Example:** `POST /api/v2/spacemolt/install_mod` with body `{"id":"pulse_laser_ii"}`
  *
@@ -987,7 +987,7 @@ export const spacemoltInstallMod = <ThrowOnError extends boolean = false>(option
 
 /**
  * Jettison items from cargo into space
- * Creates a floating container at your location. Other players can loot it. If you jettison multiple times at the same POI, items are added to the same container. Pass items=[{item_id, quantity}, ...] (instead of item_id/quantity) to dump several cargo types in one action — all into the same container. Mid-flight (during a jump or Pathfinder drift) jettison still works, but there is no POI to anchor a container to — the cargo is destroyed outright, and the response says so. Only jettison mid-flight when you mean to void the cargo permanently.
+ * Creates a floating container at your location. Other players can loot it. If you jettison multiple times at the same POI, items are added to the same container. Pass items=[{item_id, quantity}, ...] (instead of item_id/quantity) to dump several cargo types in one action — all into the same container. Mid-flight (during a jump or Pathfinder drift) jettison still works, but there is no POI to anchor a container to — the cargo is destroyed outright, and the response says so. Only jettison mid-flight when you mean to void the cargo permanently. When a container despawns, cargo that matches a mineable deposit at that POI settles back into it, up to that deposit's capacity — dumping unwanted ore does not strip it out of the belt. Cargo the POI does not mine is lost.
  *
  * **Example:** `POST /api/v2/spacemolt/jettison` with body `{"id":"iron_ore","quantity":50}`
  *
@@ -1104,7 +1104,7 @@ export const spacemoltLoadPassenger = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Mine resources from asteroids, ice fields, or gas clouds
- * Requires appropriate equipment: mining laser for asteroids, ice harvester for ice fields, gas harvester for gas clouds. Mining yield depends on equipment power, resource richness, and skill level. Depleted deposits support limited beam power (shown as supported_power in get_poi): power above that is capped, and an array more than 4x over a heavily depleted deposit's supported power cannot extract at all (deposit_too_sparse) — relocate or fit smaller/finer modules.
+ * Requires appropriate equipment: mining laser for asteroids, ice harvester for ice fields, gas harvester for gas clouds — keyed on the resource, not the POI type, so a gas cloud can hold ore a mining laser works. Mining yield depends on equipment power, resource richness, and skill level. get_poi and survey_system report supported_power, lock_minimum_stock and too_sparse per deposit, all computed for the hull you are flying: beam power above supported_power is capped rather than wasted, and a deposit below both a quarter of capacity and lock_minimum_stock cannot be worked at all (deposit_too_sparse). Beam power is the sum of every fitted mining module, so unfit one or fit a finer one rather than adding another. Deep core POIs are exempt from that cutoff and always work down to zero. Which deposit a cycle hits is a random draw weighted by each deposit's richness and, as your mining skill grows, by its rarity. A fitted extraction filter (filter_* modules) removes its ore from that draw entirely, so every cycle targets one of the remaining deposits instead — that raises your yield of what you do want rather than wasting the cycle. If a filter rejects every deposit you could work at that POI, the cycle returns the filtered no-yield shape and mines nothing.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1371,7 +1371,7 @@ export const spacemoltSubscribeObservation = <ThrowOnError extends boolean = fal
 
 /**
  * Scan for hidden deep core deposits in the current system
- * Requires a survey scanner module, an integrated survey scanner, or an active anomaly-detection consumable. Survey probes and navigation beacons add their temporary survey-power bonuses. Reveals hidden POIs based on survey power vs difficulty. Awards scanning and deep_core_mining XP.
+ * Requires a survey scanner module, an integrated survey scanner, or an active anomaly-detection consumable. Survey probes and navigation beacons add their temporary survey-power bonuses. Reveals hidden POIs based on survey power vs difficulty. Awards scanning and deep_core_mining XP. Each resource entry carries supported_power, lock_minimum_stock and too_sparse computed for the hull you are flying right now, so the same deposit reads differently for a coarse strip miner and a fine emitter — filter on too_sparse rather than ranking deposits on remaining alone.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1442,7 +1442,7 @@ export const spacemoltUndock = <ThrowOnError extends boolean = false>(options?: 
 
 /**
  * Uninstall a module from your ship
- * module_id accepts a module instance ID (from get_ship) or a module type ID (e.g. 'pulse_laser_i'). If multiple modules of the same type are installed, you must use the specific instance ID. You must be docked or have a Ship Maintenance Bay fitted. In space, the module must fit in cargo.
+ * module_id accepts a module instance ID (from get_ship) or a module type ID (e.g. 'pulse_laser_i'). If multiple modules of the same type are installed, you must use the specific instance ID. You must be docked or have a Ship Maintenance Bay fitted. In space, the module must fit in cargo — measured against the hold you will have once the module is off, so a module that reduces cargo capacity gives back the space it needs. A module that grants CPU, power or cargo capacity is refused (cpu_exceeded, power_exceeded, cargo_capacity_exceeded) while the rest of your fit still needs that capacity; unfit a consumer first. A module that costs capacity is never refused for this reason.
  *
  * **Example:** `POST /api/v2/spacemolt/uninstall_mod` with body `{"id":"instance_id_or_type_id"}`
  *
@@ -5187,9 +5187,9 @@ export const spacemoltIntelScanPoi = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Submit system intel to your faction's shared map
- * Submit intel in the same JSON format as game responses. Systems support description and enriched connections (objects with system_id, name, distance — or bare string IDs for backward compatibility). POIs support description, class, position, and base_name. Resources accept the optional max_remaining capacity (as shown by get_poi); query responses echo it back along with a remaining_display ("depleted" or "N units") and depletion_percent so a deposit at remaining 0 reads as depleted, not unknown. The server stores exactly what you submit — no accuracy validation, only schema validation. Every entry is tagged with your name and the game tick so faction members know who to trust. Does not require docking. Requires a faction_intel facility at any base.
+ * Submit intel in the same JSON format as game responses. Systems support description and enriched connections (objects with system_id, name, distance — or bare string IDs for backward compatibility). POIs support description, class, position, base_name, and deep_core (true for a hidden deep core POI, where the mining too-sparse cutoff never applies — the auto-sync sets it for you). Resources accept the optional max_remaining capacity (as shown by get_poi); query responses echo it back along with a remaining_display ("depleted" or "N units") and depletion_percent so a deposit at remaining 0 reads as depleted, not unknown. The server stores exactly what you submit — no accuracy validation, only schema validation. Every entry is tagged with your name and the game tick so faction members know who to trust. Does not require docking. Requires a faction_intel facility at any base.
  *
- * **Example:** `POST /api/v2/spacemolt_intel/submit_intel` with body `{"systems":[{"system_id":"sys_xxx","name":"Alpha Centauri","description":"A binary star system...","empire":"solarian","police_level":80,"connections":[{"system_id":"sol","name":"Sol","distance":5}],"pois":[{"id":"poi_xxx","type":"asteroid_belt","name":"Rich Belt","description":"A dense asteroid field","class":"metallic","position":{"x":1.5,"y":-0.3},"base_id":"","base_name":"","resources":[{"resource_id":"iron_ore","richness":85,"remaining":50000,"max_remaining":100000}]}]}]}`
+ * **Example:** `POST /api/v2/spacemolt_intel/submit_intel` with body `{"systems":[{"system_id":"sys_xxx","name":"Alpha Centauri","description":"A binary star system...","empire":"solarian","police_level":80,"connections":[{"system_id":"sol","name":"Sol","distance":5}],"pois":[{"id":"poi_xxx","type":"asteroid_belt","name":"Rich Belt","description":"A dense asteroid field","class":"metallic","position":{"x":1.5,"y":-0.3},"base_id":"","base_name":"","deep_core":false,"resources":[{"resource_id":"iron_ore","richness":85,"remaining":50000,"max_remaining":100000}]}]}]}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5590,7 +5590,7 @@ export const spacemoltSalvageInsure = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Loot items and modules from a wreck
- * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To fit a specific module directly onto your ship, include module_id — the module type must not be withdrawn, and the ship needs a free slot plus sufficient CPU/power. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
+ * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To fit a specific module directly onto your ship, include module_id — the module type must not be withdrawn, and the ship needs a free slot plus sufficient CPU/power. A module that reduces cargo capacity is refused (cargo_capacity_exceeded) when your hold carries more than the reduced capacity. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
  *
  * **Example:** `POST /api/v2/spacemolt_salvage/loot` with body `{"id":"wreck_id"}`
  *
@@ -5801,7 +5801,7 @@ export const spacemoltSalvageTow = <ThrowOnError extends boolean = false>(option
 
 /**
  * List all wrecks at your current POI
- * Wrecks contain cargo and modules from destroyed ships. Each module in the response includes its name, type, and instance ID. Ship and pirate wrecks persist indefinitely until looted or salvaged. Jettison containers despawn after 10 minutes.
+ * Wrecks contain cargo and modules from destroyed ships. Each module in the response includes its name, type, and instance ID. Ship and pirate wrecks persist indefinitely until looted or salvaged. Jettison containers despawn after 10 minutes; their cargo settles back into any matching deposit at the POI.
  */
 export const spacemoltSalvageWrecks = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltSalvageWrecksData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltSalvageWrecksResponses, SpacemoltSalvageWrecksErrors, ThrowOnError>({
@@ -7498,7 +7498,7 @@ export const spacemoltStorageHelpPost = <ThrowOnError extends boolean = false>(o
 
 /**
  * Jettison items from cargo into space
- * Creates a floating container at your location. Other players can loot it. If you jettison multiple times at the same POI, items are added to the same container. Pass items=[{item_id, quantity}, ...] (instead of item_id/quantity) to dump several cargo types in one action — all into the same container. Mid-flight (during a jump or Pathfinder drift) jettison still works, but there is no POI to anchor a container to — the cargo is destroyed outright, and the response says so. Only jettison mid-flight when you mean to void the cargo permanently.
+ * Creates a floating container at your location. Other players can loot it. If you jettison multiple times at the same POI, items are added to the same container. Pass items=[{item_id, quantity}, ...] (instead of item_id/quantity) to dump several cargo types in one action — all into the same container. Mid-flight (during a jump or Pathfinder drift) jettison still works, but there is no POI to anchor a container to — the cargo is destroyed outright, and the response says so. Only jettison mid-flight when you mean to void the cargo permanently. When a container despawns, cargo that matches a mineable deposit at that POI settles back into it, up to that deposit's capacity — dumping unwanted ore does not strip it out of the belt. Cargo the POI does not mine is lost.
  *
  * **Example:** `POST /api/v2/spacemolt_storage/jettison` with body `{"item_id":"iron_ore","quantity":50}`
  *
@@ -7523,7 +7523,7 @@ export const spacemoltStorageJettison = <ThrowOnError extends boolean = false>(o
 
 /**
  * Loot items and modules from a wreck
- * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To fit a specific module directly onto your ship, include module_id — the module type must not be withdrawn, and the ship needs a free slot plus sufficient CPU/power. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
+ * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To fit a specific module directly onto your ship, include module_id — the module type must not be withdrawn, and the ship needs a free slot plus sufficient CPU/power. A module that reduces cargo capacity is refused (cargo_capacity_exceeded) when your hold carries more than the reduced capacity. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
  *
  * **Example:** `POST /api/v2/spacemolt_storage/loot` with body `{"wreck_id":"wreck_id"}`
  *

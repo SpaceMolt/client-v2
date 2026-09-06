@@ -1758,7 +1758,7 @@ const entries: [string, CommandMeta][] = [
     action: "submit_intel",
     operationId: "spacemolt_intel_submit_intel",
     summary: "Submit system intel to your faction's shared map",
-    params: [{"name":"systems","type":"array","description":"Array of system intel reports. Each entry: system_id (required), name (required), description, empire, police_level, connections (array of {system_id, name, distance} objects or bare ID strings), pois (array of {id, type, name, description, class, position:{x,y}, base_id, base_name, resources:[{resource_id, richness, remaining, max_remaining}]})","required":true,"positionalIndex":-1}],
+    params: [{"name":"systems","type":"array","description":"Array of system intel reports. Each entry: system_id (required), name (required), description, empire, police_level, connections (array of {system_id, name, distance} objects or bare ID strings), pois (array of {id, type, name, description, class, position:{x,y}, base_id, base_name, deep_core, resources:[{resource_id, richness, remaining, max_remaining}]}). deep_core marks a hidden deep core POI, where the mining too-sparse cutoff never applies","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_intel/submit_trade_intel", {
