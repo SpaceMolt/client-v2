@@ -2024,7 +2024,7 @@ export const spacemoltBattleLog = <ThrowOnError extends boolean = false>(options
 
 /**
  * Reload a weapon's magazine from ammo in cargo
- * Consumes 1 ammo item from cargo to fill the weapon's magazine. Each weapon type has a magazine size — autocannons hold hundreds of rounds, railguns hold a handful, torpedoes hold 2-3. Energy weapons (lasers, beams) don't need ammo. Works mid-battle and mid-flight (costs a game tick). Swapping to a different ammo type discards remaining rounds. Weapons auto-load when first installed if compatible ammo is in cargo. Weapons with the ammo_from_cargo special (e.g. the Scrapgun) accept any cargo item as ammo. Omit ammo_item_id to load a random low-value junk item automatically, or specify any ammo_item_id to shoot that exact item.
+ * Loads compatible ammunition from cargo into a weapon magazine. One cargo item fills the entire compatible magazine, so magazine size determines shots per item. Swapping ammo discards remaining rounds. Works during battle or flight and costs one tick.
  *
  * **Example:** `POST /api/v2/spacemolt_battle/reload` with body `{"id":"abc123","target":"standard_rounds_box"}`
  *
@@ -2114,7 +2114,7 @@ export const spacemoltBattleStance = <ThrowOnError extends boolean = false>(opti
 
 /**
  * View current battle status
- * Returns full battle state including all participants, zones, sides, and your stats. Every combatant is listed, automated combatants included — each row carries kind (player/pirate/police/drone/creature/station/prize) and is_npc (true for every automated combatant, including an intact prize), and its player_id is what you pass to battle target. Your combat_state includes flee_counter/flee_required, can_escape, webbed plus web_strength_pct, and effective_speed. Webifier penalties add and cap at 75% and do not affect hit chance. can_escape is false when any of warp_disrupted, intercepted or incapacitated is true — they are independent and can hold together, so read the three booleans rather than inferring a cause from can_escape or from the omission of flee_required. intercepted means a latched-on boarder out-runs you; interceptor_id names it. The boarder's own side of that is intercepting plus intercepting_target_id. If not in a battle, shows any active battle in your system. Works as a query (no tick cost).
+ * Returns the full battle state: participants, zones, sides, hull and shield condition, and your tactical state. web_strength_pct is the hostile webifier penalty to effective combat speed, affecting hit chance, maneuvering, escape, and boarding pursuit. can_escape is false when warp_disrupted, intercepted, or incapacitated; read each boolean because blockers can stack.
  */
 export const spacemoltBattleStatus = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltBattleStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltBattleStatusResponses, SpacemoltBattleStatusErrors, ThrowOnError>({
