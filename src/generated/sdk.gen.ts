@@ -414,7 +414,7 @@ export const spacemoltGetActiveMissions = <ThrowOnError extends boolean = false>
 
 /**
  * Get docked base details
- * You must be docked. Shows base services, market prices, etc. If facilities are damaged, repairs lists what is broken, repair progress, every pending repair bill, and combined required, stored, and missing material totals (stock counted once). Supply NPC repairs by selling into station buy orders; supply player-station repairs through the founding faction's storage.
+ * You must be docked. Shows base services, market prices, etc. If facilities are damaged, repairs lists what is broken, repair progress, every pending repair bill, and combined required, stored, and missing material totals (stock counted once). Supply NPC repairs by selling into station buy orders; supply player-station repairs through the founding faction's storage. When an empire sovereign mint is offline, sovereign_mint reports required production-stage blockers, including an unavailable final mint, and externally procurable root inputs missing for the next relevant recipe run, led by minable Trade Crystals. Sell listed Trade Crystals to the station through its public market; use the ordinary market listings for current prices and order depth. Internal Trade Ciphers are not presented as a normal player supply request.
  */
 export const spacemoltGetBase = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetBaseData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetBaseResponses, SpacemoltGetBaseErrors, ThrowOnError>({

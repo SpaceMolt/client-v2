@@ -4985,6 +4985,10 @@ export type GetBaseResponse = {
     power?: StationPowerStatus;
     repairs?: StationRepairResponse;
     services: Array<string>;
+    /**
+     * Explains an input or internal production-stage blockage at this station's empire-backed trade-authenticator mint. Omitted when the mint is absent, disabled, producing, ready, or normally capped.
+     */
+    sovereign_mint?: SovereignMintStatus;
 };
 
 export type GetBattleLogResponse = {
@@ -9535,6 +9539,87 @@ export type SoldCargoItem = {
 export type SoldModuleItem = {
     module_type: string;
     name: string;
+};
+
+export type SovereignMintInputShortage = {
+    /**
+     * Stable item ID of the externally procurable root input. At the Grand Exchange this normally identifies minable Trade Crystals rather than the internally produced Trade Cipher intermediate.
+     */
+    item_id: string;
+    /**
+     * Display name of item_id. Falls back to item_id when the item definition is unavailable.
+     */
+    name?: string;
+    /**
+     * Units currently present in station-manager storage and available to that recipe run.
+     */
+    quantity_in_storage: number;
+    /**
+     * Additional units needed, equal to max(quantity_required minus quantity_in_storage, 0). This entry is present only when the result is greater than zero.
+     */
+    quantity_missing: number;
+    /**
+     * Units required in station-manager storage to queue the next relevant mint-chain recipe run.
+     */
+    quantity_required: number;
+};
+
+export type SovereignMintInternalBlocker = {
+    /**
+     * Installed station facility instance responsible for this stage. Omitted when the required stage is not installed.
+     */
+    facility_id?: string;
+    /**
+     * Display name of facility_id.
+     */
+    facility_name?: string;
+    /**
+     * Stable item ID produced by this required stage.
+     */
+    item_id: string;
+    /**
+     * Display name of item_id.
+     */
+    name?: string;
+    /**
+     * Explains that station repair, construction, or restoration must return this production stage to service. For internal intermediates, the output is not a normal player supply request.
+     */
+    remediation: string;
+    /**
+     * Classification of this blocker.
+     */
+    stage: 'internal_intermediate' | 'sovereign_mint';
+    /**
+     * Why the required station production stage cannot currently run.
+     */
+    status: 'damaged' | 'under_construction' | 'unavailable';
+};
+
+export type SovereignMintStatus = {
+    /**
+     * Required station-owned production stages that are missing or cannot currently run, including the final sovereign mint. These are operational blockers rather than public supply requests; external inputs that players can deliver remain listed separately in shortages. Omitted when all required stages are available and operational.
+     */
+    internal_blockers?: Array<SovereignMintInternalBlocker>;
+    /**
+     * Stable item ID produced by this sovereign mint.
+     */
+    output_item_id: string;
+    /**
+     * Display name of output_item_id. Falls back to output_item_id when the item definition is unavailable.
+     */
+    output_name?: string;
+    /**
+     * Player-actionable supply instruction. Present whenever shortages is non-empty; mine or otherwise acquire the listed root inputs — principally Trade Crystals — and sell them into the station's public market so its manager buy orders can acquire them. Internal Trade Ciphers are not presented as normal player procurement.
+     */
+    remediation?: string;
+    /**
+     * Externally procurable root inputs insufficient to queue the next relevant mint-chain recipe run. Trade Crystals appear first when present. An intermediate made by an installed station feeder is expanded into that feeder's inputs rather than presented as a separate conjunctive bill. Omitted when no root input is short.
+     */
+    shortages?: Array<SovereignMintInputShortage>;
+    /**
+     * Why authenticator production is offline: blocked_inputs when one or more external root inputs are short, or blocked_internal when a required station-owned production stage — including the final sovereign mint — is missing or cannot run.
+     */
+    status: 'blocked_inputs' | 'blocked_internal';
 };
 
 export type StationConfigResponse = {
