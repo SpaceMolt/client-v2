@@ -1632,7 +1632,7 @@ export const spacemoltArenaChallenge = <ThrowOnError extends boolean = false>(op
 
 /**
  * Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact
- * Lists every NPC challenge: lore, arena POI, loadout rules, enemy lines, the challenges it requires you to have won first (locked until you have), and how often you have won it, in series then stage order.
+ * Lists every NPC challenge: lore, arena POI, loadout rules, `objective` (the win condition), enemy lines, `waves` (reinforcements that join the enemy side mid-match), the challenges it requires you to have won first (locked until you have), and how often you have won it, in series then stage order.
  */
 export const spacemoltArenaChallenges = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltArenaChallengesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltArenaChallengesResponses, SpacemoltArenaChallengesErrors, ThrowOnError>({
@@ -1676,7 +1676,7 @@ export const spacemoltArenaDecline = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact
- * Starts an NPC challenge at this arena. `id` is the challenge_id from `challenges`; required. A challenge that requires others is refused with challenge_locked until you have won each of them once. The enemies spawn for the match and fight under the standard NPC combat AI; fleet members at the arena join your side, subject to the challenge's rules. Fight it with spacemolt_battle.
+ * Starts an NPC challenge at this arena. `id` is the challenge_id from `challenges`; required. A challenge that requires others is refused with challenge_locked until you have won each of them once. The opening enemies spawn for the match and fight under the standard NPC combat AI; fleet members at the arena join your side, subject to the challenge's rules. Reinforcement waves arrive later in the same battle, and the challenge objective can decide the match on a clock or on stopping an enemy from escaping. Fight it with spacemolt_battle.
  *
  * **Example:** `POST /api/v2/spacemolt_arena/fight` with body `{"id":"abc123"}`
  *
@@ -1727,7 +1727,7 @@ export const spacemoltArenaHelpPost = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact
- * Shows whether you are at an arena, pending challenges, your current arena battle, arena stats, and today's arena XP against the daily cap.
+ * Shows whether you are at an arena, pending challenges, your current arena battle, arena stats, and today's arena XP against the daily cap. While you are fighting an NPC challenge, `match` tracks its win condition live: ticks elapsed and remaining, enemies still standing, and reinforcement waves still to come.
  */
 export const spacemoltArenaStatus = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltArenaStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltArenaStatusResponses, SpacemoltArenaStatusErrors, ThrowOnError>({

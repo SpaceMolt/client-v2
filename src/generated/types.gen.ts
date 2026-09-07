@@ -245,7 +245,7 @@ export type ArenaChallengeDefInfo = {
      */
     description: string;
     /**
-     * The enemy ships spawned for the fight, one entry per line of the definition.
+     * The enemy ships spawned when the fight starts, one entry per line of the definition. Reinforcement waves are listed separately in waves.
      */
     enemies: Array<ArenaEnemyInfo>;
     /**
@@ -256,6 +256,10 @@ export type ArenaChallengeDefInfo = {
      * Display name of the challenge.
      */
     name: string;
+    /**
+     * How the fight is won beyond knocking out every enemy. Every zero or omitted field is off, so an all-zero objective means the last side standing wins.
+     */
+    objective: ArenaObjective;
     /**
      * Arena POI the fight is held at. You must be undocked there to start it.
      */
@@ -280,6 +284,10 @@ export type ArenaChallengeDefInfo = {
      * Position within the series, from 1. Higher stages are harder.
      */
     stage: number;
+    /**
+     * Reinforcements that join the enemy side mid-match, in arrival order. Empty when the opening enemies are the whole fight.
+     */
+    waves: Array<ArenaWaveInfo>;
     /**
      * Times you have won this challenge. 0 until your first win.
      */
@@ -371,6 +379,10 @@ export type ArenaEnemyInfo = {
      */
     count: number;
     /**
+     * True when this line runs for the ring beacons instead of fighting. It takes the flee stance from its first tick, and a challenge whose objective sets no_enemy_escape is lost the moment one gets away — stop it with damage or warp tackle.
+     */
+    flees: boolean;
+    /**
      * True for the named headline enemy of the fight. Your ship opens targeting the boss when there is one.
      */
     is_boss: boolean;
@@ -402,7 +414,7 @@ export type ArenaFightResponse = {
      */
     challenge_id: string;
     /**
-     * The enemy lines of the challenge, as listed by arena action=challenges.
+     * The enemy lines the challenge opens with, as listed by arena action=challenges. Reinforcement waves are not spawned yet and are listed in waves.
      */
     enemies: Array<ArenaEnemyInfo>;
     /**
@@ -418,13 +430,52 @@ export type ArenaFightResponse = {
      */
     name: string;
     /**
+     * How this fight is won beyond knocking out every enemy. Every zero or omitted field is off. Track it live with arena action=status.
+     */
+    objective: ArenaObjective;
+    /**
      * Every combatant in the match at the moment it started, your side and the enemies. Enemy entries carry the spawned NPC's id as player_id.
      */
     participants: Array<ArenaParticipantInfo>;
     /**
+     * Reinforcements that will join the enemy side later in this match, in arrival order. Empty when the opening enemies are the whole fight.
+     */
+    waves: Array<ArenaWaveInfo>;
+    /**
      * Your battle side ID. Fleet members share it.
      */
     your_side: number;
+};
+
+export type ArenaMatchInfo = {
+    /**
+     * ID of the NPC challenge being fought.
+     */
+    challenge_id: string;
+    /**
+     * Ticks since the match started. 0 on the tick it began.
+     */
+    elapsed_ticks: number;
+    /**
+     * Challenge enemies still in the fight. Reinforcement waves that have not arrived yet are not counted.
+     */
+    enemies_remaining: number;
+    /**
+     * Display name of the challenge.
+     */
+    name: string;
+    /**
+     * The challenge's win condition, as listed by arena action=challenges. Every zero or omitted field is off.
+     */
+    objective: ArenaObjective;
+    /**
+     * Ticks left before the objective's survive_ticks or time_limit_ticks deadline resolves the match. Omitted when the challenge sets neither; 0 means the deadline falls this tick.
+     */
+    ticks_remaining?: number;
+    /**
+     * Reinforcement waves that have not arrived yet. The match cannot end while one is still due and your side is still standing.
+     */
+    waves_remaining: number;
 };
 
 export type ArenaNpcInfo = {
@@ -432,6 +483,10 @@ export type ArenaNpcInfo = {
      * ID of the arena match the enemy is fighting in. Enemies exist only for the length of their match.
      */
     battle_id: string;
+    /**
+     * True when the enemy is running for the ring beacons instead of fighting. Its challenge is lost the moment it gets away.
+     */
+    flees: boolean;
     /**
      * Current hull points.
      */
@@ -480,6 +535,40 @@ export type ArenaNpcInfo = {
      * The enemy's status line, as a player's status message. Omitted when it has none.
      */
     status?: string;
+};
+
+export type ArenaObjective = {
+    /**
+     * True when an enemy that escapes the ring loses you the match. Challenges that set it spawn at least one enemy that runs from the first tick (flees on its enemy line); stop it with damage or warp tackle. Omitted = an enemy that breaks contact is simply out of the fight.
+     */
+    no_enemy_escape?: boolean;
+    /**
+     * Ticks your side must last to win, counted from the first tick of the match. The match ends the moment you reach it and any enemy still standing is called off. Omitted or 0 = you win by knocking out every enemy instead.
+     */
+    survive_ticks?: number;
+    /**
+     * Ticks you have to knock out every enemy. The match is lost the moment you reach it with one still standing. Omitted or 0 = no time limit.
+     */
+    time_limit_ticks?: number;
+};
+
+export type ArenaObjectiveEnemy = {
+    /**
+     * True when this enemy runs for the ring beacons instead of fighting. Letting one escape loses a challenge whose objective sets no_enemy_escape.
+     */
+    flees: boolean;
+    /**
+     * Display name of the enemy. Copies of a multi-ship line are numbered (Ring Cleaver 1, Ring Cleaver 2).
+     */
+    name: string;
+    /**
+     * Combat ID of the enemy: the player_id it carries in battle payloads and the id to pass to the battle command as a target.
+     */
+    npc_id: string;
+    /**
+     * Ship class ID of the enemy hull.
+     */
+    ship_class: string;
 };
 
 export type ArenaParticipantInfo = {
@@ -671,6 +760,10 @@ export type ArenaStatusResponse = {
      */
     incoming?: ArenaChallengeInfo;
     /**
+     * Live objective state of the NPC challenge you are fighting. Omitted when you are not in a challenge match — a player duel has no objective.
+     */
+    match?: ArenaMatchInfo;
+    /**
      * A challenge you issued that is still unanswered. Omitted when none is pending.
      */
     outgoing?: ArenaChallengeInfo;
@@ -684,6 +777,25 @@ export type ArenaStatusResponse = {
     xp_used_today: {
         [key: string]: number;
     };
+};
+
+export type ArenaWaveInfo = {
+    /**
+     * Ticks into the match before the wave can arrive. Omitted or 0 = no time trigger.
+     */
+    after_ticks?: number;
+    /**
+     * The enemy ships the wave brings, one entry per line of the definition.
+     */
+    enemies: Array<ArenaEnemyInfo>;
+    /**
+     * Display name of the wave, announced in the arena_objective push frame when it arrives.
+     */
+    name: string;
+    /**
+     * Enemies that must be left standing before the wave can arrive. Omitted = no count trigger; 0 = only once you have cleared the ring.
+     */
+    when_enemies_remaining?: number;
 };
 
 export type ArenaXpLedger = {
@@ -5758,12 +5870,12 @@ export type LoungeCheckInResponse = {
 
 export type McpNotification = {
     /**
-     * Frame payload. The shape is selected by msg_type: read the Notification_<msg_type> schema under components.schemas. The notifications array on every v2 response carries the same payloads as an explicit anyOf.
+     * Frame payload selected by msg_type: see Notification_<msg_type>. The same NotificationPayload union is used by polling and inline delivery; null means no payload.
      */
-    data: unknown;
+    data: NotificationPayload;
     id: string;
     /**
-     * Specific frame subtype. Switch on this to pick the matching Notification_<msg_type> payload schema. Routing to the coarse type field: chat_message -> chat. player_died / player_kill / scan_detected / pilotless_ship / drone_update / drone_destroyed / battle_started / battle_update / battle_joined / battle_left / battle_ended / battle_alert / ship_captured / prize_update -> combat. trade_offer_received / trade_complete / trade_declined / trade_cancelled -> trade. market_update -> market. crafting_update -> crafting. observation_update -> observation. personnel_update -> system. Frames not named here also route to system - that includes battle_damage / drone_scan / drone_survey / drone_adrift / action_result / action_error / server_restart_warning. A types=combat filter does not carry them.
+     * Specific frame subtype. Switch on this to pick the matching Notification_<msg_type> payload schema. Routing to the coarse type field: chat_message -> chat. player_died / player_kill / scan_detected / pilotless_ship / drone_update / drone_destroyed / battle_started / battle_update / battle_joined / battle_left / battle_ended / battle_alert / ship_captured / prize_update -> combat. trade_offer_received / trade_complete / trade_declined / trade_cancelled -> trade. market_update -> market. crafting_update -> crafting. observation_update -> observation. personnel_update -> system. Frames not named here also route to system - that includes battle_damage / drone_scan / drone_survey / drone_adrift / action_result / action_error / error / server_restart_warning. A types=combat filter does not carry them.
      */
     msg_type: string;
     timestamp: string;
@@ -5938,6 +6050,19 @@ export type MiningYieldPayload = {
     resource_id: string;
     resource_name?: string;
     xp_gained?: {
+        [key: string]: number;
+    };
+};
+
+export type MissionAutoCompleteRewards = {
+    /**
+     * Nominal mission credit reward. Zero means no credit reward. The wallet cap can reduce the credits actually added; this field is not the resulting balance.
+     */
+    credits: number;
+    /**
+     * Skill XP actually awarded keyed by skill ID. Always present; an empty object means no XP was awarded. Missing skill keys mean zero XP.
+     */
+    skill_xp: {
         [key: string]: number;
     };
 };
@@ -6192,6 +6317,11 @@ export type NotificationChannelInfo = {
     muted: boolean;
 };
 
+/**
+ * Frame payload shared by polling and inline notifications. Select Notification_<msg_type> using the envelope msg_type; payload shapes can overlap so this is an anyOf union. Null means the frame supplied no payload.
+ */
+export type NotificationPayload = NotificationAchievementUnlocked | NotificationActionError | NotificationActionResult | NotificationArenaChallenge | NotificationArenaObjective | NotificationBaseDestroyed | NotificationBaseRaidUpdate | NotificationBattleAlert | NotificationBattleDamage | NotificationBattleEnded | NotificationBattleJoined | NotificationBattleLeft | NotificationBattleStarted | NotificationBattleUpdate | NotificationChatMessage | NotificationCloak | NotificationCompleteMission | NotificationCraftingUpdate | NotificationDroneAdrift | NotificationDroneDestroyed | NotificationDroneScan | NotificationDroneSurvey | NotificationDroneUpdate | NotificationError | NotificationFacilityReclaimed | NotificationFacilityRentWarning | NotificationFactionAllianceBroken | NotificationFactionAllianceFormed | NotificationFactionAllianceProposal | NotificationFactionPeaceAccepted | NotificationFactionPeaceProposal | NotificationFactionWarDeclared | NotificationFleet | NotificationMarketUpdate | NotificationMiningYield | NotificationObservationUpdate | NotificationOk | NotificationPersonnelUpdate | NotificationPilotlessShip | NotificationPirateDestroyed | NotificationPirateRadio | NotificationPlayerDied | NotificationPlayerKill | NotificationPrizeUpdate | NotificationRanchPoached | NotificationReconnected | NotificationScanDetected | NotificationServerRestartWarning | NotificationShipCaptured | NotificationShipCommissionComplete | NotificationSkillLevelUp | NotificationStationRepaired | NotificationTradeCancelled | NotificationTradeComplete | NotificationTradeDeclined | NotificationTradeOfferReceived | null;
+
 export type NotificationSettingsResponse = {
     action: string;
     channels: Array<NotificationChannelInfo>;
@@ -6261,7 +6391,7 @@ export type NotificationActionResult = {
      */
     auto_undocked?: boolean;
     /**
-     * Name of the command that ran. On an unsolicited push (no request_id) no command ran, and this instead names the event that changed your state: player_died, ship_captured, emergency_warp_stabilizer, passenger_stranded, fleet_kicked, fleet_disbanded, or mobile_capital_transit. Not restricted to registered command names, so switch on it with a default branch rather than an exhaustive one.
+     * Name of the command that ran. On an unsolicited push (no request_id) no command ran, and this instead names the event that changed your state: player_died, ship_captured, emergency_warp_stabilizer, passenger_stranded, fleet_kicked, fleet_disbanded, or mobile_capital_transit. Fleet followers also receive travel or jump at arrival without having submitted those commands. fleet_dock is instead an ok notification with action=fleet_dock (see Notification_ok). Not restricted to registered command names, so switch on it with a default branch rather than an exhaustive one.
      */
     command: string;
     /**
@@ -6315,6 +6445,37 @@ export type NotificationArenaChallenge = {
      * Arena POI the match is fought at.
      */
     poi_id: string;
+};
+
+export type NotificationArenaObjective = {
+    /**
+     * ID of the arena battle.
+     */
+    battle_id: string;
+    /**
+     * ID of the NPC challenge being fought, as listed by arena action=challenges.
+     */
+    challenge_id: string;
+    /**
+     * The enemy ships the wave brought. Present only when event is wave_arrived.
+     */
+    enemies?: Array<ArenaObjectiveEnemy>;
+    /**
+     * What happened: wave_arrived (reinforcements joined the enemy side), objective_won (the objective handed your side the match), objective_lost (the objective handed the enemy side the match). The match itself ends on the same tick as objective_won or objective_lost, followed by battle_ended.
+     */
+    event: 'wave_arrived' | 'objective_won' | 'objective_lost';
+    /**
+     * Human-readable summary of the event.
+     */
+    message: string;
+    /**
+     * Which objective decided the match: survive_ticks (your side lasted the required ticks), time_limit (an enemy was still standing at the deadline), enemy_escaped (an enemy cleared the ring). Present only when event is objective_won or objective_lost.
+     */
+    objective?: 'survive_ticks' | 'time_limit' | 'enemy_escaped';
+    /**
+     * Name of the wave that arrived. Present only when event is wave_arrived.
+     */
+    wave_name?: string;
 };
 
 export type NotificationBaseDestroyed = {
@@ -6454,6 +6615,44 @@ export type NotificationChatMessage = {
     timestamp?: string;
 };
 
+/**
+ * Automatic cloak state change: fuel exhaustion, a missing cloaking device, or emergency cloak expiry disables the cloak; an emergency cloak can enable it after shield failure. Carried as msg_type=cloak without a client request.
+ */
+export type NotificationCloak = {
+    auto_docked?: boolean;
+    auto_undocked?: boolean;
+    /**
+     * Current cloak strength; zero when disabled.
+     */
+    cloak_strength: number;
+    /**
+     * Whether the player is cloaked after this event.
+     */
+    enabled: boolean;
+    /**
+     * Human-readable explanation of the automatic cloak change.
+     */
+    message: string;
+};
+
+/**
+ * Distress mission auto-completion pushed as msg_type=complete_mission without a client command. This is not the response shape of a manually submitted complete_mission action.
+ */
+export type NotificationCompleteMission = {
+    /**
+     * ID of the completed mission instance.
+     */
+    mission_id: string;
+    /**
+     * Display title of the completed mission.
+     */
+    mission_title: string;
+    /**
+     * Nominal credit reward and skill XP actually awarded for completion.
+     */
+    rewards: MissionAutoCompleteRewards;
+};
+
 export type NotificationCraftingUpdate = {
     jobs: Array<CraftingJobUpdate>;
     tick: number;
@@ -6535,6 +6734,12 @@ export type NotificationDroneUpdate = {
     owner_id: string;
     target_id: string;
     tick: number;
+};
+
+export type NotificationError = {
+    code: string;
+    message: string;
+    pending_command?: string;
 };
 
 /**
@@ -6632,6 +6837,28 @@ export type NotificationFactionWarDeclared = {
     reason?: string;
 };
 
+/**
+ * Fleet lifecycle notification, including death, succession, and arena disbanding. action is fleet_leader_promoted, fleet_disbanded, or fleet_member_died. Delivered without an originating request_id to affected fleet members.
+ */
+export type NotificationFleet = {
+    /**
+     * Fleet event: fleet_leader_promoted, fleet_disbanded, or fleet_member_died. Tolerate future event names.
+     */
+    action: string;
+    /**
+     * Human-readable event explanation.
+     */
+    message: string;
+    /**
+     * Promoted leader username, falling back to player ID if unresolved; only present for fleet_leader_promoted.
+     */
+    new_leader?: string;
+    /**
+     * Destroyed member username; only present for fleet_member_died.
+     */
+    player_name?: string;
+};
+
 export type NotificationMarketUpdate = {
     base_id: string;
     base_name?: string;
@@ -6676,6 +6903,40 @@ export type NotificationObservationUpdate = {
     system_id: string;
     tick: number;
     unknown_signature: boolean;
+};
+
+/**
+ * Fleet movement ok notifications identify their event in action. Other ok payloads may omit action. Fleet followers receive fleet_dock (base name and base_id), fleet_undock, fleet_travel (destination POI ID and arrival_tick), or fleet_jump (destination system ID and arrival_tick) without request_id. fleet_dock is not a command or a separate message type; DockResponse describes the leader's dock command, not this push. Other actions and command-specific fields may occur. Inspect action and tolerate unknown actions. Delta-capable WebSocket followers also receive action_result with command travel or jump at arrival.
+ */
+export type NotificationOk = {
+    /**
+     * Event or completed command name. For coordinated docking this is fleet_dock.
+     */
+    action?: string;
+    /**
+     * Scheduled arrival game tick for fleet_travel or fleet_jump; omitted for fleet_dock and fleet_undock.
+     */
+    arrival_tick?: number;
+    /**
+     * Station display name string for fleet_dock. Other OK responses may carry a base object or null.
+     */
+    base?: {
+        [key: string]: unknown;
+    } | {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Station Base ID, always present for fleet_dock; distinct from its POI ID. Omitted for fleet_undock, fleet_travel and fleet_jump.
+     */
+    base_id?: string;
+    /**
+     * Destination POI ID for fleet_travel or system ID for fleet_jump; omitted for fleet_dock and fleet_undock.
+     */
+    destination?: string;
+    /**
+     * Human-readable event explanation.
+     */
+    message?: string;
 };
 
 export type NotificationPersonnelUpdate = {
@@ -10574,7 +10835,7 @@ export type V2Response = {
         /**
          * Notification payload. Shape depends on msg_type — see the Notification_* schemas under components.schemas.
          */
-        data?: NotificationAchievementUnlocked | NotificationActionError | NotificationArenaChallenge | NotificationActionResult | NotificationDroneAdrift | NotificationServerRestartWarning | NotificationFactionAllianceBroken | NotificationFactionAllianceFormed | NotificationFactionAllianceProposal | NotificationFactionPeaceAccepted | NotificationFactionPeaceProposal | NotificationFactionWarDeclared | NotificationBaseDestroyed | NotificationStationRepaired | NotificationRanchPoached | NotificationBaseRaidUpdate | NotificationBattleAlert | NotificationBattleDamage | NotificationBattleEnded | NotificationShipCaptured | NotificationPrizeUpdate | NotificationPersonnelUpdate | NotificationBattleJoined | NotificationBattleLeft | NotificationBattleStarted | NotificationBattleUpdate | NotificationChatMessage | NotificationCraftingUpdate | NotificationDroneDestroyed | NotificationDroneScan | NotificationDroneSurvey | NotificationDroneUpdate | NotificationFacilityReclaimed | NotificationFacilityRentWarning | NotificationMarketUpdate | NotificationObservationUpdate | NotificationMiningYield | NotificationPilotlessShip | NotificationPirateDestroyed | NotificationPirateRadio | NotificationPlayerDied | NotificationPlayerKill | NotificationReconnected | NotificationScanDetected | NotificationShipCommissionComplete | NotificationSkillLevelUp | NotificationTradeCancelled | NotificationTradeComplete | NotificationTradeDeclined | NotificationTradeOfferReceived;
+        data?: NotificationPayload;
         id?: string;
         /**
          * Specific message subtype used for handler routing (e.g. chat_message, battle_update, action_result, mining_yield). Switch on this to pick the matching Notification_* payload schema.
@@ -11036,7 +11297,9 @@ export type GetNotificationsResponses = {
     /**
      * Notifications polled
      */
-    200: V2Response;
+    200: V2Response & {
+        structuredContent?: GetNotificationsResponse;
+    };
 };
 
 export type GetNotificationsResponse2 = GetNotificationsResponses[keyof GetNotificationsResponses];
