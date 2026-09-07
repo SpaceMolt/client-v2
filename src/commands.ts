@@ -942,7 +942,7 @@ const entries: [string, CommandMeta][] = [
     action: "buy_ship_license",
     operationId: "spacemolt_facility_buy_ship_license",
     summary: "License a specific ship design so your faction can build it at its own stations",
-    params: [{"name":"ship_class","type":"string","description":"Ship class id to license (from ship_catalog), e.g. solarian_frigate","required":true,"positionalIndex":-1}],
+    params: [{"name":"ship_class","type":"string","description":"Ship class id to license (from catalog type=ships), e.g. solarian_frigate","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/cancel_listing", {
@@ -2022,7 +2022,7 @@ const entries: [string, CommandMeta][] = [
     action: "commission_ship",
     operationId: "spacemolt_ship_commission_ship",
     summary: "Commission a ship to be built at this shipyard",
-    params: [{"name":"id","type":"string","description":"Ship class ID to commission (use ship_catalog to see options)","required":true,"positionalIndex":0},{"name":"bare_hull","type":"boolean","description":"If true, commission only the hull without its default module loadout. Defaults to false so ships arrive fitted.","required":false,"positionalIndex":-1},{"name":"fund_from_faction","type":"boolean","description":"At your own faction's station: build from faction storage and treasury (requires ManageTreasury). Required there; credits-only and provide_materials are rejected.","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"At an empire/NPC shipyard: if true, supply build materials from cargo/storage (cheaper); if false, pay credits for everything (default).","required":false,"positionalIndex":-1},{"name":"source_missing_materials","type":"boolean","description":"At an empire/NPC shipyard: take available requirements from cargo then station storage and charge only to source the deficit. Do not combine with provide_materials.","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Ship class ID to commission (use catalog type=ships to see options)","required":true,"positionalIndex":0},{"name":"bare_hull","type":"boolean","description":"If true, commission only the hull without its default module loadout. Defaults to false so ships arrive fitted.","required":false,"positionalIndex":-1},{"name":"fund_from_faction","type":"boolean","description":"At your own faction's station: build from faction storage and treasury (requires ManageTreasury). Required there; credits-only and provide_materials are rejected.","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"At an empire/NPC shipyard: if true, supply build materials from cargo/storage (cheaper); if false, pay credits for everything (default).","required":false,"positionalIndex":-1},{"name":"source_missing_materials","type":"boolean","description":"At an empire/NPC shipyard: take available requirements from cargo then station storage and charge only to source the deficit. Do not combine with provide_materials.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/commission_status", {

@@ -4083,6 +4083,10 @@ export type FactionMember = {
 export type FactionMissionEntry = {
     active_instances: number;
     difficulty: number;
+    /**
+     * Objectives from the posted mission template in template order using the get_missions shape. Always present; an empty array means no objectives. These are requirements rather than per-player progress. Bounty objectives include the stored target_player_id even if the player cannot be resolved; target_player is the username and is omitted when the player cannot be resolved.
+     */
+    objectives: Array<ObjectiveInfo>;
     posted_by?: string;
     reward_credits: number;
     template_id: string;
@@ -6245,7 +6249,7 @@ export type NotificationActionError = {
 };
 
 /**
- * Result of a queued action that completed on a later tick. It is delivered to the caller waiting on the originating request_id when one is still attached. Otherwise it is queued and collected through get_notifications, which is the normal path once a request has already returned.
+ * A state update from the server. Two producers send it. A queued action that completed on a later tick is delivered to the caller waiting on the originating request_id when one is still attached; otherwise it is queued and collected through get_notifications, which is the normal path once a request has already returned. The server also pushes this frame with NO request_id when it changes your state without you having commanded it — you died, your ship was captured, a module warped you home, the fleet you were riding with arrived, or the station you were docked at moved. Never assume a request_id is present: an absent one means nothing of yours is waiting on this frame, not that the frame is malformed.
  */
 export type NotificationActionResult = {
     /**
@@ -6257,11 +6261,11 @@ export type NotificationActionResult = {
      */
     auto_undocked?: boolean;
     /**
-     * Name of the command that ran.
+     * Name of the command that ran. On an unsolicited push (no request_id) no command ran, and this instead names the event that changed your state: player_died, ship_captured, emergency_warp_stabilizer, passenger_stranded, fleet_kicked, fleet_disbanded, or mobile_capital_transit. Not restricted to registered command names, so switch on it with a default branch rather than an exhaustive one.
      */
     command: string;
     /**
-     * Payload of the completed command. On v1 this is the command's own response object — see that command's response schema. On v2 it is the state delta the command registered, keyed by state section. Untyped because both shapes are possible; it is null when the command returned no body.
+     * Payload of the completed command. On v1 this is the command's own response object — see that command's response schema. On v2 it is a state delta keyed by state section: the sections the command registered, or every section on an unsolicited push, since an event that moves you without your asking changes more than any one command does. A section that is absent is unchanged. Untyped because all these shapes are possible; it is null when the command returned no body.
      */
     result: unknown;
     /**
@@ -15722,7 +15726,7 @@ export type SpacemoltFacilityBuyListingResponse = SpacemoltFacilityBuyListingRes
 export type SpacemoltFacilityBuyShipLicenseData = {
     body?: {
         /**
-         * Ship class id to license (from ship_catalog), e.g. solarian_frigate
+         * Ship class id to license (from catalog type=ships), e.g. solarian_frigate
          */
         ship_class: string;
     };
@@ -21526,7 +21530,7 @@ export type SpacemoltShipCommissionShipData = {
          */
         fund_from_faction?: boolean;
         /**
-         * Ship class ID to commission (use ship_catalog to see options)
+         * Ship class ID to commission (use catalog type=ships to see options)
          */
         id: string;
         /**
