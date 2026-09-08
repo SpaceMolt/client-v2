@@ -2543,7 +2543,7 @@ export const spacemoltDroneUnload = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Upload a DroneLang script to an autonomous drone
- * DroneLang is a simple scripting language. Scripts run once per tick. The drone executes the first matching IF branch as one game action. Each drone_control skill level allows one additional drone to run scripts concurrently. Pass empty script to clear.
+ * DroneLang is a simple scripting language. Scripts run once per tick. The drone executes the first matching IF branch as one game action. MOVE and at() accept either a POI ID or its station/base ID. MOVE stays within the current system. DEPOSIT unloads into storage at the drone's current station. Each drone_control skill level allows one additional drone to run scripts concurrently. Pass empty script to clear.
  *
  * **Example:** `POST /api/v2/spacemolt_drone/upload` with body `{"id":"abc123","text":"IF enemy_nearby()\n  ATTACK \"nearest\"\nEND"}`
  *
