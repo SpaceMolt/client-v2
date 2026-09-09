@@ -5590,7 +5590,7 @@ export const spacemoltSalvageInsure = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Loot items and modules from a wreck
- * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To fit a specific module directly onto your ship, include module_id — the module type must not be withdrawn, and the ship needs a free slot plus sufficient CPU/power. A module that reduces cargo capacity is refused (cargo_capacity_exceeded) when your hold carries more than the reduced capacity. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
+ * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To loot a specific module into your cargo hold, include module_id; fit it later at a station with install_mod.
  *
  * **Example:** `POST /api/v2/spacemolt_salvage/loot` with body `{"id":"wreck_id"}`
  *
@@ -5680,7 +5680,7 @@ export const spacemoltSalvageRelease = <ThrowOnError extends boolean = false>(op
 
 /**
  * Scrap a towed wreck for salvage materials
- * Must be docked at a salvage yard. Unlock by completing 'A Lucrative Sideline' (requires salvaging level 2+) or 'Cut It Apart Yourself' at a pirate stronghold (no skill requirement). Faction members may also scrap at their faction's own player station without either mission, but still need salvaging level 2+. Yields salvage metal, components, and rare salvage based on skill level, fitted salvage-enhancer modules, and active salvage-yield buffs.
+ * Must be docked at a salvage yard. Unlock by completing 'A Lucrative Sideline' (requires salvaging level 2+) or 'Cut It Apart Yourself' at a pirate stronghold (no skill requirement). Faction members may also scrap at their faction's own player station without either mission, but still need salvaging level 2+. Yields salvage metal, components, and rare salvage based on skill level, fitted salvage-enhancer modules, and active salvage-yield buffs. Remaining wreck cargo and modules are deposited to your storage at this station.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5703,7 +5703,7 @@ export const spacemoltSalvageScrap = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Sell a towed wreck to an NPC salvage yard for credits
- * Must be docked at an NPC station with a salvage yard. The yard keeps the hull's materials and cargo and pays a fraction of their local market value from the station manager's credits; a broke manager can't buy. Player-owned yards don't buy wrecks. scrap recovers far more, as materials.
+ * Must be docked at an NPC station with a salvage yard. The yard keeps the hull's materials and cargo and pays a fraction of their local market value from the station manager's credits; a broke manager can't buy. Player-owned yards don't buy wrecks. Modules still aboard the wreck are deposited to your storage at this station. scrap recovers far more, as materials.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -7523,7 +7523,7 @@ export const spacemoltStorageJettison = <ThrowOnError extends boolean = false>(o
 
 /**
  * Loot items and modules from a wreck
- * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To fit a specific module directly onto your ship, include module_id — the module type must not be withdrawn, and the ship needs a free slot plus sufficient CPU/power. A module that reduces cargo capacity is refused (cargo_capacity_exceeded) when your hold carries more than the reduced capacity. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
+ * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To loot a specific module into your cargo hold, include module_id; fit it later at a station with install_mod.
  *
  * **Example:** `POST /api/v2/spacemolt_storage/loot` with body `{"wreck_id":"wreck_id"}`
  *

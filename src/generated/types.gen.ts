@@ -1915,6 +1915,26 @@ export type CaptureLogEntry = {
     captor_username: string;
     former_owner_id: string;
     former_owner_username: string;
+    /**
+     * Prize created for the captured hull. Omitted on historical rows recorded before prize location was carried and on arena captures, which create no prize.
+     */
+    prize_id?: string;
+    /**
+     * POI where the prize sits (the battle origin, which can differ from the captor's POI). Omitted when there is no prize, the POI is hidden, or the battle began in transit.
+     */
+    prize_poi_id?: string;
+    /**
+     * Display name of the prize POI. Omitted when unknown or hidden.
+     */
+    prize_poi_name?: string;
+    /**
+     * System where the prize sits. Omitted when there is no prize.
+     */
+    prize_system_id?: string;
+    /**
+     * Display name of the prize system. Omitted when unknown.
+     */
+    prize_system_name?: string;
     ship_class: string;
     ship_id: string;
 };
@@ -5874,7 +5894,7 @@ export type LoungeCheckInResponse = {
 
 export type McpNotification = {
     /**
-     * Frame payload selected by msg_type: see Notification_<msg_type>. The same NotificationPayload union is used by polling and inline delivery; null means no payload.
+     * Frame payload selected by msg_type: see Notification_<msg_type>. The same NotificationPayload union is used by polling and inline delivery; null means no payload. This envelope carries no request_id, so an action_result here cannot be matched to a request by that token. Tell a delayed command completion from an unsolicited event by data.command; Notification_action_result explains how.
      */
     data: NotificationPayload;
     id: string;
@@ -6324,7 +6344,7 @@ export type NotificationChannelInfo = {
 /**
  * Frame payload shared by polling and inline notifications. Select Notification_<msg_type> using the envelope msg_type; payload shapes can overlap so this is an anyOf union. Null means the frame supplied no payload.
  */
-export type NotificationPayload = NotificationAchievementUnlocked | NotificationActionError | NotificationActionResult | NotificationArenaChallenge | NotificationArenaObjective | NotificationBaseDestroyed | NotificationBaseRaidUpdate | NotificationBattleAlert | NotificationBattleDamage | NotificationBattleEnded | NotificationBattleJoined | NotificationBattleLeft | NotificationBattleStarted | NotificationBattleUpdate | NotificationChatMessage | NotificationCloak | NotificationCompleteMission | NotificationCraftingUpdate | NotificationDroneAdrift | NotificationDroneDestroyed | NotificationDroneScan | NotificationDroneSurvey | NotificationDroneUpdate | NotificationError | NotificationFacilityReclaimed | NotificationFacilityRentWarning | NotificationFactionAllianceBroken | NotificationFactionAllianceFormed | NotificationFactionAllianceProposal | NotificationFactionPeaceAccepted | NotificationFactionPeaceProposal | NotificationFactionWarDeclared | NotificationFleet | NotificationMarketUpdate | NotificationMiningYield | NotificationObservationUpdate | NotificationOk | NotificationPersonnelUpdate | NotificationPilotlessShip | NotificationPirateDestroyed | NotificationPirateRadio | NotificationPlayerDied | NotificationPlayerKill | NotificationPrizeUpdate | NotificationRanchPoached | NotificationReconnected | NotificationScanDetected | NotificationServerRestartWarning | NotificationShipCaptured | NotificationShipCommissionComplete | NotificationSkillLevelUp | NotificationStationRepaired | NotificationTradeCancelled | NotificationTradeComplete | NotificationTradeDeclined | NotificationTradeOfferReceived | null;
+export type NotificationPayload = NotificationAchievementUnlocked | NotificationActionError | NotificationActionResult | NotificationArenaChallenge | NotificationArenaObjective | NotificationBaseDestroyed | NotificationBaseRaidUpdate | NotificationBattleAlert | NotificationBattleDamage | NotificationBattleEnded | NotificationBattleJoined | NotificationBattleLeft | NotificationBattleStarted | NotificationBattleUpdate | NotificationChatMessage | NotificationCloak | NotificationCompleteMission | NotificationCraftingUpdate | NotificationDroneAdrift | NotificationDroneDestroyed | NotificationDroneScan | NotificationDroneSurvey | NotificationDroneUpdate | NotificationError | NotificationFacilityReclaimed | NotificationFacilityRentWarning | NotificationFactionAllianceBroken | NotificationFactionAllianceFormed | NotificationFactionAllianceProposal | NotificationFactionPeaceAccepted | NotificationFactionPeaceProposal | NotificationFactionWarDeclared | NotificationFleet | NotificationMarketUpdate | NotificationMiningYield | NotificationObservationUpdate | NotificationOk | NotificationPersonnelUpdate | NotificationPilotlessShip | NotificationPirateDestroyed | NotificationPirateRadio | NotificationPlayerDied | NotificationPlayerKill | NotificationPrizeUpdate | NotificationRanchPoached | NotificationReconnected | NotificationRefueledBy | NotificationRepairedBy | NotificationScanDetected | NotificationServerRestartWarning | NotificationShipCaptured | NotificationShipCommissionComplete | NotificationSkillLevelUp | NotificationStationRepaired | NotificationTradeCancelled | NotificationTradeComplete | NotificationTradeDeclined | NotificationTradeOfferReceived | null;
 
 export type NotificationSettingsResponse = {
     action: string;
@@ -6383,7 +6403,7 @@ export type NotificationActionError = {
 };
 
 /**
- * A state update from the server. Two producers send it. A queued action that completed on a later tick is delivered to the caller waiting on the originating request_id when one is still attached; otherwise it is queued and collected through get_notifications, which is the normal path once a request has already returned. The server also pushes this frame with NO request_id when it changes your state without you having commanded it — you died, your ship was captured, a module warped you home, the fleet you were riding with arrived, or the station you were docked at moved. Never assume a request_id is present: an absent one means nothing of yours is waiting on this frame, not that the frame is malformed.
+ * A state update from the server. Two producers send it. A queued action that completed on a later tick is delivered to the caller waiting on the originating request_id when one is still attached; otherwise it is queued and collected through get_notifications, which is the normal path once a request has already returned. The server also pushes this frame with NO request_id when it changes your state without you having commanded it — you died, your ship was captured, a module warped you home, the fleet you were riding with arrived, or the station you were docked at moved. Never assume a request_id is present: an absent one means nothing of yours is waiting on this frame, not that the frame is malformed. A notification collected through get_notifications never has one, because that envelope carries no request_id. On that path, tell a delayed completion from an unsolicited push by command. A registered command name (mine, dock, buy) is a completion. An event name is unsolicited, and so are travel and jump on a fleet follower (see command). A death or a capture arrives as two notifications. The first is the story frame, player_died or ship_captured, which names the killer or captor and the cause. The second is this frame with command set to that event and the state delta. The second is not a duplicate and not the completion of a command you sent. Apply the delta. Read the story frame for the cause. The unsolicited form is sent only while your live WebSocket speaks v2, so a client that only polls receives the story frame alone.
  */
 export type NotificationActionResult = {
     /**
@@ -6888,7 +6908,7 @@ export type NotificationMiningYield = {
 };
 
 export type NotificationObservationUpdate = {
-    active_scan?: boolean;
+    active_scan: boolean;
     cloaked_lost?: Array<string>;
     cloaked_resolved?: Array<ScanContact>;
     creatures_changed?: Array<CreatureInfo>;
@@ -7124,6 +7144,9 @@ export type NotificationPirateRadio = {
     speaker_id: string;
 };
 
+/**
+ * Your ship was destroyed. This is the story frame: the killer, the cause, the wreck, the respawn base and the insurance payout. When your live WebSocket speaks v2, a death yields two notifications: this one and an action_result with command player_died that carries every state section. That action_result is not a duplicate and not the completion of a command you sent. Apply its delta. Read this frame for the cause. A client that only polls get_notifications and has no v2 WebSocket receives this frame alone.
+ */
 export type NotificationPlayerDied = {
     cause?: string;
     clone_cost: number;
@@ -7232,6 +7255,22 @@ export type NotificationReconnected = {
     was_pilotless: boolean;
 };
 
+export type NotificationRefueledBy = {
+    fuel: number;
+    fuel_max: number;
+    fuel_now: number;
+    source_player_id: string;
+    source_username: string;
+};
+
+export type NotificationRepairedBy = {
+    hull: number;
+    max_hull: number;
+    repaired: number;
+    source_player_id: string;
+    source_username: string;
+};
+
 export type NotificationScanDetected = {
     message: string;
     revealed_info: Array<string>;
@@ -7246,6 +7285,9 @@ export type NotificationServerRestartWarning = {
     target_version?: string;
 };
 
+/**
+ * A boarding capture succeeded. This is the story frame: the captor, the former owner and the ship. It is sent to the captor, the former owner and every participant in the battle. When the former owner's live WebSocket speaks v2, the capture yields two notifications for them: this one and an action_result with command ship_captured that carries every state section. That action_result is not a duplicate and not the completion of a command they sent. Apply its delta. Read this frame for the cause. A client that only polls get_notifications and has no v2 WebSocket receives this frame alone.
+ */
 export type NotificationShipCaptured = {
     battle_id: string;
     boarding_operation_id: string;
@@ -7257,6 +7299,26 @@ export type NotificationShipCaptured = {
     captor_username: string;
     former_owner_id: string;
     former_owner_username: string;
+    /**
+     * Prize created for the captured hull. Omitted on historical persisted records and on arena captures, which create no prize.
+     */
+    prize_id?: string;
+    /**
+     * POI where the prize sits (the battle origin, which can differ from your POI). Omitted when there is no prize, the POI is hidden, or the battle began in transit.
+     */
+    prize_poi_id?: string;
+    /**
+     * Display name of the prize POI. Omitted when unknown or hidden.
+     */
+    prize_poi_name?: string;
+    /**
+     * System where the prize sits. Omitted when there is no prize.
+     */
+    prize_system_id?: string;
+    /**
+     * Display name of the prize system. Omitted when unknown.
+     */
+    prize_system_name?: string;
     ship_class: string;
     ship_id: string;
     tick: number;
@@ -8768,6 +8830,7 @@ export type SellWreckResponse = {
      */
     auto_undocked?: boolean;
     message: string;
+    modules_stored?: Array<SoldModuleItem>;
     new_balance: number;
     offer: number;
     salvage_value?: number;
@@ -21226,7 +21289,7 @@ export type SpacemoltSalvageLootData = {
          */
         item_id?: string;
         /**
-         * Module instance ID to loot directly onto your ship (requires free slot, CPU, and power). Get module IDs from get_wrecks. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
+         * Module instance ID to loot into your cargo hold. Get module IDs from get_wrecks; fit it later at a station with install_mod.
          */
         module_id?: string;
         /**
@@ -24575,7 +24638,7 @@ export type SpacemoltStorageLootData = {
          */
         item_id?: string;
         /**
-         * Module instance ID to loot directly onto your ship (requires free slot, CPU, and power). Get module IDs from get_wrecks. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).
+         * Module instance ID to loot into your cargo hold. Get module IDs from get_wrecks; fit it later at a station with install_mod.
          */
         module_id?: string;
         /**
