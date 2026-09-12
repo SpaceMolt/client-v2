@@ -1037,7 +1037,7 @@ export type BattleCombatState = {
      */
     flee_counter: number;
     /**
-     * Flee ticks needed to escape under current conditions (slower-than-pursuer and webbing raise it). Omitted while escape progress is blocked — by warp disruption or by a boarding intercept alike — so its absence does not identify which. Read warp_disrupted and intercepted for that.
+     * Flee ticks needed to escape under current conditions. 3 ticks is the baseline, and the combat-speed gap to the fastest enemy ship moves it either way: being slower (or webbed) raises it, being faster lowers it, with a floor of 1. Omitted while escape progress is blocked — by warp disruption or by a boarding intercept alike — so its absence does not identify which. Read warp_disrupted and intercepted for that.
      */
     flee_required?: number;
     /**
@@ -1175,6 +1175,9 @@ export type BattleParticipant = {
      */
     shield_pct?: number;
     ship_class?: string;
+    /**
+     * Display name of whatever this combatant is flying: a ship reports its custom name when one is set and otherwise its class display name, a drone reports its drone type, and a creature reports its species role. Omitted for stations, which have no hull, and when the combatant ship cannot be resolved.
+     */
     ship_name?: string;
     side_id: number;
     /**
@@ -1209,6 +1212,9 @@ export type BattleParticipantInfo = {
     player_id: string;
     shield_pct?: number;
     ship_class?: string;
+    /**
+     * Display name of the ship this combatant is flying: its custom name when one is set, otherwise the ship class display name. Omitted for combatants that are not flying a resolvable ship, such as stations, drones, and creatures.
+     */
     ship_name?: string;
     side_id: number;
     stance?: string;
@@ -1387,7 +1393,7 @@ export type BoardingStateLogEntry = {
      */
     destroyed?: boolean;
     /**
-     * Observable boarding transition. Terminal values include capture_ready; plundered; withdrawn; attacker_destroyed; attacker_incapacitated; target_destroyed; target_self_destructed; and restart_canceled. plundered means pirates removed eligible cargo and then disengaged without taking the hull.
+     * Observable boarding transition. Terminal values include capture_ready; plundered; withdrawn; closing_stalled; attacker_destroyed; attacker_incapacitated; target_destroyed; target_self_destructed; and restart_canceled. plundered means pirates removed eligible cargo and then disengaged without taking the hull. closing_stalled means a latch with zero progress was withdrawn after the battle sat idle for the whole stalemate window.
      */
     event: string;
     /**
@@ -2025,10 +2031,69 @@ export type CatalogDump = {
      */
     items: Array<Item | Module>;
     mining: MiningConstants;
-    recipes: Array<Recipe>;
+    recipes: Array<CatalogRecipe>;
     ships: Array<ShipClass>;
     skills: Array<SkillDefinition>;
     version: string;
+};
+
+export type CatalogRecipe = {
+    /**
+     * Grouping label used by the catalog type=recipes category filter. Two values are load-bearing rather than cosmetic: 'Facility Only' and 'Ship Passive' each make the recipe impossible to hand-craft. Prefer hand_craftable, which folds both of those strings together, over comparing this field yourself.
+     */
+    category: string;
+    /**
+     * Base ticks for one production run before venue and skill modifiers. Fractional values are allowed. At the Station Workshop this is divided by a Crafting/Refining skill factor running from 1.0 at level 0 to 5.0 at level 100; a facility applies its own throughput instead and ignores skill.
+     */
+    crafting_time: number;
+    /**
+     * Prose summary of what the recipe does. Guidance for the reader only — no mechanic reads it, and it may be empty.
+     */
+    description: string;
+    /**
+     * True when the recipe runs only inside a production facility and can never be hand-crafted at the Station Workshop. It is one of the two inputs to hand_craftable; category is the other. Do not test it alone — a 'Facility Only' or 'Ship Passive' category recipe is equally un-hand-craftable with this field absent.
+     */
+    facility_only?: boolean;
+    /**
+     * Units of fuel added straight to the processing ship's tank (not to cargo) per run, when this recipe runs as a Ship Passive recipe aboard a fuel-synthesis module. Absent or zero on every recipe that delivers cargo instead.
+     */
+    fuel_output?: number;
+    /**
+     * Whether a docked pilot can run this recipe by hand at their Station Workshop, with no facility of any kind. Derived exactly as: facility_only is false AND category is not 'Facility Only' AND category is not 'Ship Passive'. Always present. False means the recipe needs a venue — a 'Ship Passive' recipe runs itself aboard a ship built for it and can never be queued at all, while any other false value must be queued at one of produced_by_facility_ids. True is a venue answer only: inputs, credits and workshop queue space are still checked when you actually craft.
+     */
+    hand_craftable: boolean;
+    /**
+     * True when the recipe is withheld from the catalog and cannot be crafted. Catalog surfaces omit hidden recipes entirely, so this is absent (false) on every recipe you can actually see.
+     */
+    hidden?: boolean;
+    /**
+     * Stable recipe identifier. Pass it as recipe_id to craft or to facility action=job_add, and it is what catalog type=recipes id={id} looks up.
+     */
+    id: string;
+    /**
+     * Materials consumed per production run. Empty on a package operation, whose real manifest is chosen at craft time, and on a labour-only recipe that consumes nothing at all.
+     */
+    inputs: Array<RecipeInput>;
+    /**
+     * Human-readable recipe name, shown in catalog listings and craft messages. Display only; never pass it as recipe_id.
+     */
+    name: string;
+    /**
+     * True when the process is irreversible and a recycling facility cannot run it backwards. Absent (false) means a recycler can reverse it to recover the inputs.
+     */
+    no_recycle?: boolean;
+    /**
+     * Items produced per production run. The first entry's quantity is the run size: a craft count is rounded up to whole runs against it, so asking for 3 of a recipe that yields 2 queues 2 runs and produces 4.
+     */
+    outputs: Array<RecipeOutput>;
+    /**
+     * Set to pack or unpack on the two dynamic package recipes, whose inputs and outputs are the player-selected manifest rather than the static lists here. Absent on every ordinary recipe.
+     */
+    package_operation?: string;
+    /**
+     * Ids of the facility definitions that can run this recipe forward, each matching an entry in this dump's facilities list. Sorted by facility level then name. Always present, never omitted: an empty list means no facility definition runs it, which for a hand_craftable recipe is normal (the Station Workshop is then the only venue) and for a recipe with hand_craftable false means it has no player-reachable venue at all. Owning or renting one of these facilities is what craft auto-routes to.
+     */
+    produced_by_facility_ids: Array<string>;
 };
 
 export type CatalogResponse = {
@@ -3030,6 +3095,9 @@ export type EmpireNpcInfo = {
     npc_id: string;
     role: string;
     ship_class?: string;
+    /**
+     * Display name of the ship this NPC is flying: its custom name when one is set, otherwise the ship class display name (an unnamed enforcer reads as Enforcer). Presence of this field does not mean the hull is named. Omitted only when the NPC has no resolvable ship.
+     */
     ship_name?: string;
 };
 
@@ -3110,6 +3178,9 @@ export type EnrichedWreck = {
     poi_id: string;
     salvage_value: number;
     ship_class: string;
+    /**
+     * Custom name the pilot gave this hull, and only that. Unlike ship_name everywhere else in the API it does not fall back to the ship class display name, because the value is a persisted column written when the wreck was created. Omitted when the hull was never named and on wrecks that were never a named ship (jettison containers, creature carcasses, ambient derelicts). Read ship_class for the hull type.
+     */
     ship_name?: string;
     system_id: string;
     towed_by_player_id?: string;
@@ -6301,28 +6372,58 @@ export type NameShipResponse = {
  * A player visible at the current POI.
  */
 export type NearbyPlayer = {
+    /**
+     * Self-assigned clan tag of up to 4 characters. It is cosmetic and unrelated to faction membership - faction_id and faction_tag carry the real affiliation. Omitted when the player has not set one.
+     */
     clan_tag?: string;
     /**
      * True when the player is docked at a base. Docked players are listed but cannot be attacked, scanned, or traded with until they undock.
      */
     docked?: boolean;
+    /**
+     * Id of the faction the player belongs to. Omitted when the player is unaffiliated.
+     */
     faction_id?: string;
+    /**
+     * Short display tag of that faction. Present whenever faction_id is and the faction record still resolves.
+     */
     faction_tag?: string;
-    in_combat?: boolean;
+    /**
+     * True while the player is in an active battle. Always emitted: false means not in combat.
+     */
+    in_combat: boolean;
     /**
      * True when the player has no active connection and no recent activity. Offline players are still listed when the POI total is small; otherwise summarised in the response's offline_collapsed count.
      */
     offline?: boolean;
-    player_id?: string;
+    /**
+     * Unique id of the player. It is the target id for attack and scan. Always present on a listed player.
+     */
+    player_id: string;
+    /**
+     * Cosmetic profile colour the player set with set_colors, as a 7-character #RRGGBB hex string (new pilots start at #FFFFFF). Decorative only - it drives no game mechanic. Omitted when the player has cleared their colours.
+     */
     primary_color?: string;
+    /**
+     * Cosmetic secondary profile colour in the same 7-character #RRGGBB form as primary_color (new pilots start at #000000). Decorative only. Omitted when the player has cleared their colours.
+     */
     secondary_color?: string;
+    /**
+     * Class id of the hull the player is currently flying (for example enforcer). Omitted only when the player has no resolvable current ship.
+     */
     ship_class?: string;
     /**
-     * Custom ship name if set
+     * Display name of the ship this player is flying: their custom name when they have set one, otherwise the ship class display name (an unnamed enforcer reads as Enforcer). Presence of this field does not mean the hull is named. Omitted only when the player has no resolvable current ship.
      */
     ship_name?: string;
+    /**
+     * Free-text status line the player set with set_status. Omitted when they have not set one.
+     */
     status_message?: string;
-    username?: string;
+    /**
+     * Pilot name the player registered under. Always present on a listed player.
+     */
+    username: string;
 };
 
 export type NoteInfo = {
@@ -6909,6 +7010,14 @@ export type NotificationMiningYield = {
 
 export type NotificationObservationUpdate = {
     active_scan: boolean;
+    /**
+     * Arena challenge enemies that joined the match at the watched POI or whose visible state (hull, shield, status, flees) changed this tick. A knockout surfaces here as hull reaching 0 — not as a departure. Omitted when none changed. Expect one on most updates while a match runs, because hull and shield move every tick.
+     */
+    arena_npcs_changed?: Array<ArenaNpcInfo>;
+    /**
+     * IDs of arena challenge enemies removed from the watched POI. Enemies are removed only when their match ends, so a knocked-out enemy stays in the feed at hull 0 until then — a missing departure does not mean it is still fighting. Omitted when none departed.
+     */
+    arena_npcs_departed?: Array<string>;
     cloaked_lost?: Array<string>;
     cloaked_resolved?: Array<ScanContact>;
     creatures_changed?: Array<CreatureInfo>;
@@ -7222,6 +7331,9 @@ export type NotificationPrizeUpdate = {
     prize_id: string;
     ship_class: string;
     ship_id: string;
+    /**
+     * Display name of the captured ship: the custom name its pilot set when there is one, otherwise the ship class display name (an unnamed enforcer reads as Enforcer). Presence of this field does not mean the hull is named. Omitted only when the captured hull no longer resolves in server state.
+     */
     ship_name?: string;
     /**
      * Recovery state of the prize. delivered / destroyed / expired / recaptured are terminal.
@@ -8389,17 +8501,53 @@ export type RecallDroneResponse = {
 };
 
 export type Recipe = {
+    /**
+     * Grouping label used by the catalog type=recipes category filter. Two values are load-bearing rather than cosmetic: 'Facility Only' and 'Ship Passive' each make the recipe impossible to hand-craft. Prefer hand_craftable, which folds both of those strings together, over comparing this field yourself.
+     */
     category: string;
+    /**
+     * Base ticks for one production run before venue and skill modifiers. Fractional values are allowed. At the Station Workshop this is divided by a Crafting/Refining skill factor running from 1.0 at level 0 to 5.0 at level 100; a facility applies its own throughput instead and ignores skill.
+     */
     crafting_time: number;
+    /**
+     * Prose summary of what the recipe does. Guidance for the reader only — no mechanic reads it, and it may be empty.
+     */
     description: string;
+    /**
+     * True when the recipe runs only inside a production facility and can never be hand-crafted at the Station Workshop. It is one of the two inputs to hand_craftable; category is the other. Do not test it alone — a 'Facility Only' or 'Ship Passive' category recipe is equally un-hand-craftable with this field absent.
+     */
     facility_only?: boolean;
+    /**
+     * Units of fuel added straight to the processing ship's tank (not to cargo) per run, when this recipe runs as a Ship Passive recipe aboard a fuel-synthesis module. Absent or zero on every recipe that delivers cargo instead.
+     */
     fuel_output?: number;
+    /**
+     * True when the recipe is withheld from the catalog and cannot be crafted. Catalog surfaces omit hidden recipes entirely, so this is absent (false) on every recipe you can actually see.
+     */
     hidden?: boolean;
+    /**
+     * Stable recipe identifier. Pass it as recipe_id to craft or to facility action=job_add, and it is what catalog type=recipes id={id} looks up.
+     */
     id: string;
+    /**
+     * Materials consumed per production run. Empty on a package operation, whose real manifest is chosen at craft time, and on a labour-only recipe that consumes nothing at all.
+     */
     inputs: Array<RecipeInput>;
+    /**
+     * Human-readable recipe name, shown in catalog listings and craft messages. Display only; never pass it as recipe_id.
+     */
     name: string;
+    /**
+     * True when the process is irreversible and a recycling facility cannot run it backwards. Absent (false) means a recycler can reverse it to recover the inputs.
+     */
     no_recycle?: boolean;
+    /**
+     * Items produced per production run. The first entry's quantity is the run size: a craft count is rounded up to whole runs against it, so asking for 3 of a recipe that yields 2 queues 2 runs and produces 4.
+     */
     outputs: Array<RecipeOutput>;
+    /**
+     * Set to pack or unpack on the two dynamic package recipes, whose inputs and outputs are the player-selected manifest rather than the static lists here. Absent on every ordinary recipe.
+     */
     package_operation?: string;
 };
 
@@ -8688,6 +8836,9 @@ export type ScanContact = {
     revealed_info: Array<string>;
     shield?: number;
     ship_class?: string;
+    /**
+     * Display name of the scanned ship: the custom name its pilot set when there is one, otherwise the ship class display name. Presence of this field does not mean the hull is named. Omitted when the scan did not reach the ship_class reveal tier.
+     */
     ship_name?: string;
     target_id: string;
     username?: string;
@@ -8704,6 +8855,9 @@ export type ScanResponse = {
     revealed_info: Array<string>;
     shield?: number;
     ship_class?: string;
+    /**
+     * Display name of the scanned ship: the custom name its pilot set when there is one, otherwise the ship class display name. Presence of this field does not mean the hull is named. Omitted when the scan did not reach the ship_class reveal tier.
+     */
     ship_name?: string;
     signature_detected?: boolean;
     success: boolean;
@@ -9910,6 +10064,10 @@ export type SubscribeMarketResponse = {
 export type SubscribeObservationResponse = {
     action: string;
     active_scan: boolean;
+    /**
+     * Challenge enemies fighting an arena match held at the watched POI, the same set get_nearby returns there. Omitted when no NPC challenge is in progress at this POI, which is the usual case: enemies exist only for the length of one match. While a match runs their hull and shield move every tick, so expect an arena_npcs_changed entry in most observation_update messages until it ends.
+     */
+    arena_npcs?: Array<ArenaNpcInfo>;
     cloaked_contacts?: Array<ScanContact>;
     creatures?: Array<CreatureInfo>;
     empire_npcs?: Array<EmpireNpcInfo>;
@@ -10808,6 +10966,9 @@ export type V2NearbyEmpireNpc = {
     npc_id: string;
     role: string;
     ship_class?: string;
+    /**
+     * Display name of the ship this NPC is flying: its custom name when one is set, otherwise the ship class display name (an unnamed enforcer reads as Enforcer). Presence of this field does not mean the hull is named. Omitted only when the NPC has no resolvable ship.
+     */
     ship_name?: string;
 };
 
@@ -10826,6 +10987,14 @@ export type V2NearbyPirate = {
     max_shield: number;
     name: string;
     pirate_id: string;
+    /**
+     * Primary livery color configured by the pirate stronghold crew as #RRGGBB. Omitted when the crew has no configured branding.
+     */
+    primary_color?: string;
+    /**
+     * Secondary livery color configured by the pirate stronghold crew as #RRGGBB. Omitted when the crew has no configured branding.
+     */
+    secondary_color?: string;
     shield: number;
     status: string;
     tier: string;
@@ -10837,9 +11006,17 @@ export type V2NearbyPlayer = {
     in_combat: boolean;
     offline?: boolean;
     player_id: string;
+    /**
+     * Primary livery color as #RRGGBB. Omitted when the player has not set one.
+     */
+    primary_color?: string;
+    /**
+     * Secondary livery color as #RRGGBB. Omitted when the player has not set one.
+     */
+    secondary_color?: string;
     ship_class?: string;
     /**
-     * Custom ship name
+     * Display name of the ship this player is flying: their custom name when they have set one, otherwise the ship class display name (an unnamed enforcer reads as Enforcer). Presence of this field does not mean the hull is named. Omitted only when the player has no resolvable current ship.
      */
     ship_name?: string;
     username?: string;
@@ -11850,7 +12027,7 @@ export type SpacemoltCraftData = {
          */
         package_ids?: Array<string>;
         /**
-         * Auto-routing preset: 'fast' (fewest ticks, default) picks the best facility globally, so a busy own facility may route to an idle public rental. 'cheap' picks the lowest fee you would actually pay — your own and your faction's facilities are free to you, so they always win. Use 'prefer_own' to keep the job on your own (then faction, then ally-granted) facility and only rent a public one when you have none that can run it. Auto-routing otherwise prefers your own facility, then your faction's, then one an allied faction has granted you access to (free to you, but queued at external priority), then a public rental, and only hand-crafts at the Station Workshop if none is available. Use 'workshop' to force hand-crafting even when you have a facility.
+         * Auto-routing preset. 'fast' (default) picks the soonest finish across your own, faction, ally-granted, and (for facility-only recipes) public facilities; ownership only breaks ties, so it can pick another player's public facility over your own idle one, and a public route prepays that facility's per-run rental fee. 'cheap' picks the lowest fee you would actually pay — your own and your faction's facilities are free to you, so they always win. 'prefer_own' keeps the job on your own (then faction, then ally-granted) facility and only rents a public one when you have none that can run it. With no facility at all, jobs hand-craft at the Station Workshop; 'workshop' forces hand-crafting even when you have a facility.
          */
         preset?: 'fast' | 'cheap' | 'prefer_own' | 'workshop';
         /**
@@ -13449,7 +13626,7 @@ export type SpacemoltRecycleData = {
             [key: string]: unknown;
         }>;
         /**
-         * Auto-routing preset: 'fast' (fewest ticks, default) picks the best eligible recycler globally, so a busy own recycler may route to an idle public rental. 'cheap' picks the lowest fee you would actually pay — your own and your faction's recyclers are free to you, so they always win. Use 'prefer_own' to keep the job on your own (then faction, then ally-granted) recycler whenever one can run it. Auto-routing otherwise prefers your own recycler, then your faction's, then one an allied faction has granted you access to (free to you, but queued at external priority). 'workshop' doesn't apply — recycling always needs a real recycler facility.
+         * Auto-routing preset. 'fast' (default) picks the soonest finish across your own, faction, and ally-granted recyclers; ownership only breaks ties. 'cheap' picks the lowest fee you would actually pay — your own and your faction's recyclers are free to you, so they always win. 'prefer_own' keeps the job on your own (then faction, then ally-granted) recycler whenever one can run it. 'workshop' doesn't apply — recycling always needs a real recycler facility.
          */
         preset?: 'fast' | 'cheap' | 'prefer_own';
         /**
@@ -19480,6 +19657,10 @@ export type SpacemoltFactionAdminPostMissionData = {
         objectives: Array<{
             description: string;
             item_id?: string;
+            /**
+             * Optional pirate role ID for kill_pirate objectives; omit to count any role. Must name an existing pirate role.
+             */
+            pirate_tier?: string;
             quantity?: number;
             system_id?: string;
             /**
@@ -19500,9 +19681,12 @@ export type SpacemoltFactionAdminPostMissionData = {
          */
         rewards: {
             credits?: number;
-            items?: Array<{
-                [key: string]: unknown;
-            }>;
+            /**
+             * Item IDs mapped to reward quantities
+             */
+            items?: {
+                [key: string]: number;
+            };
         };
         /**
          * Mission title
