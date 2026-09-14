@@ -9787,6 +9787,10 @@ export type SoldModuleItem = {
 
 export type SovereignMintInputShortage = {
     /**
+     * Always present. True exactly when this station manager has a public non-commission buy order for this item with remaining quantity greater than zero. False means no such order is available. Availability is a snapshot and does not guarantee enough order depth to cover quantity_missing.
+     */
+    buy_order_available: boolean;
+    /**
      * Stable item ID of the externally procurable root input. At the Grand Exchange this normally identifies minable Trade Crystals rather than the internally produced Trade Cipher intermediate.
      */
     item_id: string;
@@ -9853,7 +9857,7 @@ export type SovereignMintStatus = {
      */
     output_name?: string;
     /**
-     * Player-actionable supply instruction. Present whenever shortages is non-empty; mine or otherwise acquire the listed root inputs — principally Trade Crystals — and sell them into the station's public market so its manager buy orders can acquire them. Internal Trade Ciphers are not presented as normal player procurement.
+     * Supply guidance present whenever shortages is non-empty. Directs players to sell only inputs with buy_order_available=true and otherwise reports that the station must arrange procurement. Check ordinary market listings for current prices and order depth. Internal Trade Ciphers are not normal player procurement.
      */
     remediation?: string;
     /**
