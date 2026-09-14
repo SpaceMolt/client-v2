@@ -2180,6 +2180,10 @@ export type ChatHistoryMessage = {
     system_id?: string;
     target_id?: string;
     target_name?: string;
+    /**
+     * Structured weekly tax statement when this message is a tax assessment. Omitted for other messages and older notices.
+     */
+    tax_statement?: TaxStatement;
     timestamp_utc: string;
 };
 
@@ -4630,6 +4634,9 @@ export type FactionTaxEstimateResponse = {
     last_assessed_at?: number;
     loss_carryforward_applied?: number;
     net_taxable_profit: number;
+    /**
+     * Approximate seconds until the next weekly tick boundary: remaining ticks times configured tick duration rounded down to seconds. Paused ticks and later tick-rate changes alter the actual time.
+     */
     next_assessment_approx_seconds: number;
     note?: string;
     tax_collection_active: boolean;
@@ -5409,6 +5416,14 @@ export type HuntResponse = {
     command: string;
     message: string;
     pending: boolean;
+};
+
+export type IncomeTaxBracketBreakdown = {
+    income_in_bracket: number;
+    lower_bound: number;
+    rate_bps: number;
+    tax_from_bracket: number;
+    upper_bound?: number;
 };
 
 export type InherentCapability = {
@@ -8188,6 +8203,14 @@ export type PlayerStats = {
      * Unix timestamp of the most recent property-tax assessment
      */
     last_property_tax_assessed_at?: number;
+    /**
+     * UTC start of the latest weekly assessment, including an exempt period. Zero time means no tracked weekly boundary; the first assessment remains eligible.
+     */
+    last_weekly_tax_assessed_at?: string;
+    /**
+     * Latest completed personal weekly statement, also returned as latest_statement by get_tax_estimate. Omitted before the first statement. Later debt payments do not change this historical statement.
+     */
+    latest_tax_statement?: TaxStatement;
     marine_deaths?: number;
     marine_injuries?: number;
     marine_injuries_healed?: number;
@@ -8259,6 +8282,10 @@ export type PlayerStats = {
      * Times a Pathfinder course was plotted into open space
      */
     void_drifts?: number;
+    /**
+     * Gameplay or economic activity recorded since the latest weekly boundary. Omitted means false. This flag alone does not determine eligibility: unassessed income or purchases and an untracked first period also prevent inactivity exemption.
+     */
+    weekly_tax_active?: boolean;
     wormholes_traversed?: number;
     wreck_items_looted?: number;
     wrecks_scrapped?: number;
@@ -10243,10 +10270,25 @@ export type TaxEstimateIncomeRow = {
 };
 
 export type TaxEstimatePropertyRow = {
+    /**
+     * Owned hull and fitted module value in credits assessed independently by this empire.
+     */
     assessed_value: number;
+    /**
+     * Progressive assessment detail when applicable. Omitted for flat rates and when inactivity_exempt is true.
+     */
     brackets?: Array<TaxEstimateBracketRow>;
+    /**
+     * Citizenship empire assessing this property.
+     */
     empire: string;
+    /**
+     * Projected property tax in credits; zero when inactivity_exempt is true even if the normal rate is positive.
+     */
     owed: number;
+    /**
+     * Normal property rate in basis points or effective rate for a progressive schedule before any inactivity exemption. 100 basis points is one percent.
+     */
     rate_bps: number;
 };
 
@@ -10256,25 +10298,101 @@ export type TaxEstimatePropertyShipRow = {
 };
 
 export type TaxEstimateResponse = {
+    /**
+     * Command name: get_tax_estimate.
+     */
     action: string;
+    /**
+     * Current value in credits per owned ship; an empty list means no assessed ships.
+     */
     assessed_property_by_ship: Array<TaxEstimatePropertyShipRow>;
+    /**
+     * Total current owned hull and fitted module value in credits; retained when exempt.
+     */
     assessed_property_value: number;
+    /**
+     * True when this character currently qualifies to skip weekly income and property tax for inactivity after a fully observed assessment period. Gameplay or taxable income before assessment removes the exemption. Existing debt remains payable.
+     */
+    inactivity_exempt: boolean;
+    /**
+     * Income tax projected by citizenship empire in assessment order; empty means no empire assessment.
+     */
     income_tax: Array<TaxEstimateIncomeRow>;
+    /**
+     * Sum of income_tax owed amounts in credits for the pending assessment only.
+     */
     income_tax_total: number;
+    /**
+     * Unix timestamp in seconds of the last income assessment; omitted when none is recorded.
+     */
     last_assessed_at?: number;
+    /**
+     * Unix timestamp in seconds of the last property assessment; omitted when none is recorded.
+     */
     last_property_assessed_at?: number;
+    /**
+     * Latest saved weekly statement for this character. Omitted before the first statement. Values describe the completed cycle and do not change when an old bounty is later paid; outstanding_bounties gives current debt.
+     */
+    latest_statement?: TaxStatement;
+    /**
+     * Credits of market purchases and incoming loss deducted against market sales; cannot exceed market sales.
+     */
     market_cost_of_goods_deducted: number;
+    /**
+     * Unused market deduction brought forward from previous periods in credits; zero means none.
+     */
     market_loss_carryforward?: number;
+    /**
+     * Gross market sales in credits sampled since the previous income assessment.
+     */
     market_sales_to_date: number;
+    /**
+     * Approximate seconds until the next weekly tick boundary: remaining ticks times configured tick duration rounded down to seconds. Paused ticks and later tick-rate changes alter the actual time.
+     */
     next_assessment_approx_seconds: number;
+    /**
+     * Additional assessment explanation; omitted when no explanation applies.
+     */
     note?: string;
+    /**
+     * Current full settlement amounts by empire in credits including missed taxes and other crimes. Empty means no outstanding bounty. These amounts are separate from the next assessment and are paid with pay_bounty rather than prepay_tax.
+     */
+    outstanding_bounties: Array<PayBountyOutstandingRow>;
+    /**
+     * Instructions for paying existing debt remotely and reserving credits for the next assessment.
+     */
+    payment_guidance: string;
+    /**
+     * Property tax projected independently per citizenship empire; owed is zero when inactivity_exempt is true.
+     */
     property_tax: Array<TaxEstimatePropertyRow>;
+    /**
+     * Sum of property_tax owed amounts in credits; zero when inactivity_exempt is true.
+     */
     property_tax_total: number;
+    /**
+     * Current purchase tax rates by empire; these are separate from weekly income and property tax.
+     */
     sales_tax_rates: Array<TaxEstimateSalesRow>;
+    /**
+     * True when assessments collect credits. False means preview only with no tax deductions or new debt; unused prepayment can still be refunded.
+     */
     tax_collection_active: boolean;
+    /**
+     * Credits reserved for the next assessment; consumed before the wallet and any surplus refunded. Does not pay existing debt.
+     */
     tax_prepaid: number;
+    /**
+     * Gross taxable earnings by category in credits before market deductions; an empty list means no entries.
+     */
     taxable_income_by_source: Array<TaxableIncomeByCategoryEntry>;
+    /**
+     * Assessable income in credits since the last income assessment: nonmarket net income floored at zero plus taxable_market_income. Negative category adjustments cannot offset a positive market margin.
+     */
     taxable_income_to_date: number;
+    /**
+     * Market sales minus market cost of goods deducted in credits.
+     */
     taxable_market_income: number;
 };
 
@@ -10282,6 +10400,172 @@ export type TaxEstimateSalesRow = {
     empire: string;
     rate_bps: number;
     reason: string;
+};
+
+export type TaxStatement = {
+    /**
+     * UTC time this weekly personal assessment completed.
+     */
+    assessed_at: string;
+    /**
+     * True when this character was exempt from weekly personal taxes for inactivity during this period.
+     */
+    inactivity_exempt: boolean;
+    /**
+     * Income assessments in citizenship order; empires with zero net tax are omitted.
+     */
+    income: Array<TaxStatementIncome>;
+    /**
+     * Gross earnings by income category in credits; missing categories contributed zero.
+     */
+    income_by_category: {
+        [key: string]: number;
+    };
+    /**
+     * Gross taxable earnings sampled since the previous income assessment in credits before market deductions.
+     */
+    income_gross: number;
+    /**
+     * Unused market deduction carried into the next assessment in credits.
+     */
+    loss_carryforward_next: number;
+    /**
+     * Market loss carried into this assessment in credits; any unused portion remains in loss_carryforward_next.
+     */
+    loss_carryforward_previous: number;
+    /**
+     * Market purchases plus incoming loss applied against market sales in credits; never offsets nonmarket income.
+     */
+    market_deduction: number;
+    /**
+     * Deductible market purchases sampled this period in credits.
+     */
+    market_purchases: number;
+    /**
+     * Credits consumed from the personal prepaid tax pool across income then property collection.
+     */
+    paid_from_prepaid: number;
+    /**
+     * Credits consumed from the wallet after available prepayment across income then property collection.
+     */
+    paid_from_wallet: number;
+    /**
+     * Previous weekly assessment boundary in UTC; zero time means this character has no previous weekly boundary.
+     */
+    period_started_at: string;
+    /**
+     * True when collection was disabled; obligations are estimates and no new debt is created.
+     */
+    preview: boolean;
+    /**
+     * Property assessments in citizenship order; empires with zero tax are omitted.
+     */
+    property: Array<TaxStatementProperty>;
+    /**
+     * Sum of owned ship hull and fitted module assessed values in credits.
+     */
+    property_value: number;
+    /**
+     * Unused prepaid credits returned to the wallet after this assessment.
+     */
+    refund: number;
+    /**
+     * Owned ships valued at assessment time; an empty list means no assessed ships.
+     */
+    ships: Array<TaxStatementShip>;
+    /**
+     * Assessed income in credits. Nonmarket income is income_gross minus income_by_category.market with a floor of zero. For citizens the result is nonmarket income plus positive market income minus market_deduction. Missing market means zero. Stateless assessments report income_gross. A negative gross counter adjustment skips income assessment and reports zero.
+     */
+    taxable_income: number;
+    /**
+     * Server tick of this assessment.
+     */
+    tick: number;
+    /**
+     * Sum of income and property owed in credits for this assessment only.
+     */
+    total_owed: number;
+    /**
+     * Sum of income and property paid in credits; equals paid_from_prepaid plus paid_from_wallet.
+     */
+    total_paid: number;
+    /**
+     * Unpaid credits from this assessment only; zero in preview mode. Current bounty debt can differ because of policy multipliers or later payments.
+     */
+    total_unpaid: number;
+};
+
+export type TaxStatementIncome = {
+    /**
+     * Progressive bracket calculations at assessment time; empty or null for a flat rate.
+     */
+    brackets: Array<IncomeTaxBracketBreakdown>;
+    /**
+     * Foreign tax credit derived from prior empires net obligations and this empire deduction policy in credits.
+     */
+    credit: number;
+    /**
+     * Empire assessing this income tax.
+     */
+    empire: string;
+    /**
+     * Income tax before foreign tax credit in credits.
+     */
+    gross: number;
+    /**
+     * Gross minus credit with a floor of zero in credits.
+     */
+    owed: number;
+    /**
+     * Credits collected for this empire income tax; zero in preview mode.
+     */
+    paid: number;
+    /**
+     * Nominal flat rate or gross tax divided by taxable income times 10000 for progressive tax; 100 basis points equals one percent.
+     */
+    rate_bps: number;
+    /**
+     * Owed minus paid in credits during collection; zero in preview mode.
+     */
+    unpaid: number;
+};
+
+export type TaxStatementProperty = {
+    /**
+     * Progressive bracket calculations at assessment time; empty or null for a flat rate.
+     */
+    brackets: Array<IncomeTaxBracketBreakdown>;
+    /**
+     * Empire assessing this property tax.
+     */
+    empire: string;
+    /**
+     * Property tax owed to this empire in credits; there is no foreign property tax credit.
+     */
+    owed: number;
+    /**
+     * Credits collected for this empire property tax; zero in preview mode.
+     */
+    paid: number;
+    /**
+     * Nominal flat rate or tax divided by property value times 10000 for progressive tax; 100 basis points equals one percent.
+     */
+    rate_bps: number;
+    /**
+     * Owed minus paid in credits during collection; zero in preview mode.
+     */
+    unpaid: number;
+};
+
+export type TaxStatementShip = {
+    /**
+     * Owned ship identifier at assessment time.
+     */
+    ship_id: string;
+    /**
+     * Assessed hull plus fitted module value in credits.
+     */
+    value: number;
 };
 
 export type TaxableIncomeByCategoryEntry = {
