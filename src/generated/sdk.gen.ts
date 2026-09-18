@@ -2933,7 +2933,7 @@ export const spacemoltFacilityFactionDismantle = <ThrowOnError extends boolean =
 
 /**
  * Manage facilities at stations (production, faction, personal, sales, and more)
- * Lists all faction-owned facilities at your current station, with the same power/life-support/construction detail as `list`. Requires faction membership and docking.
+ * Lists all faction-owned facilities at your current station, with the same power/life-support/construction detail as `list`, and the station's faction rent bill under `faction_rent`. Requires faction membership and docking.
  */
 export const spacemoltFacilityFactionList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityFactionListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityFactionListResponses, SpacemoltFacilityFactionListErrors, ThrowOnError>({
@@ -2954,7 +2954,7 @@ export const spacemoltFacilityFactionList = <ThrowOnError extends boolean = fals
 
 /**
  * Manage facilities at stations (production, faction, personal, sales, and more)
- * Lists every facility owned by your faction across all stations, with total rent-per-cycle and arrears billed against the faction treasury — the real faction burn rate. Requires faction membership. Does not require docking (use `faction_list` while docked for full per-facility detail at one station).
+ * Lists every facility owned by your faction across all stations, with total rent-per-cycle and arrears billed against the faction treasury under `faction_rent` — the real faction burn rate. Requires faction membership. Does not require docking (use `faction_list` while docked for full per-facility detail at one station).
  */
 export const spacemoltFacilityFactionOwned = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityFactionOwnedData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityFactionOwnedResponses, SpacemoltFacilityFactionOwnedErrors, ThrowOnError>({

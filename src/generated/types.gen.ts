@@ -3517,25 +3517,23 @@ export type FacilityFactionListResponse = {
     base_id: string;
     faction_facilities: Array<FacilityFactionEntry>;
     faction_id: string;
+    /**
+     * Current recurring rent and existing arrears for faction_facilities at this station. Omitted when your faction owns none here; present with zero recurring rent when all of them have paused billing.
+     */
+    faction_rent?: FacilityRentSummary;
     faction_storage?: FacilityFactionStorage;
     hint: string;
 };
 
 export type FacilityFactionOwnedResponse = {
     action: 'faction_owned';
-    /**
-     * Credits owed across all facilities: sum rent_per_cycle multiplied by missed_rent_cycles including paused facilities. Pausing billing does not erase existing arrears. Omitted means zero.
-     */
-    arrears_owed?: number;
     facilities: Array<FactionOwnedFacilityEntry>;
     faction_id: string;
-    grace_cycles?: number;
-    hint?: string;
-    note?: string;
     /**
-     * Current faction rent in credits per facility cycle (100 ticks): sum rent_per_cycle for facilities where damaged and under_construction and dismantling are all false. Missing pause flags mean false. Zero means no current recurring rent; excludes existing arrears. Legacy inactive facilities remain billable.
+     * Current recurring rent and existing arrears for every faction facility across all stations.
      */
-    total_rent_per_cycle: number;
+    faction_rent: FacilityRentSummary;
+    hint?: string;
 };
 
 export type FacilityFactionStorage = {
@@ -3719,6 +3717,9 @@ export type FacilityRentSummary = {
      * Number of owned facilities in this summary including facilities whose billing is paused.
      */
     facilities: number;
+    /**
+     * Consecutive unpayable rent cycles allowed before the station repossesses the facility. Arrears still accrue during the grace window. Omitted means the station sets no grace window.
+     */
     grace_cycles?: number;
     note?: string;
     /**
