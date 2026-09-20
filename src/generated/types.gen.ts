@@ -2954,6 +2954,9 @@ export type DismantleOutpostResponse = {
 };
 
 export type DistressSignalResponse = {
+    /**
+     * Always "distress_signal". Echoes the command that produced this response.
+     */
     action: string;
     /**
      * True when the engine docked you automatically before running this command, because the command requires being docked. Omitted when no automatic dock happened.
@@ -2963,13 +2966,41 @@ export type DistressSignalResponse = {
      * True when the engine undocked you automatically before running this command, because the command requires being undocked. Omitted when no automatic undock happened.
      */
     auto_undocked?: boolean;
+    /**
+     * The kind of emergency broadcast: "fuel" (stranded without fuel), "repair" (hull critically damaged) or "combat" (under attack). Echoes the requested distress_type, or "fuel" when the request omitted it.
+     */
     distress_type: string;
+    /**
+     * Seconds until the posted rescue mission expires, measured from when the call was sent. 10800 (3 hours) for a player call. An unclaimed mission is removed at expiry, and is also removed early if you travel away under your own power.
+     */
     expires_seconds: number;
+    /**
+     * The broadcast text sent to the emergency chat channel, for example "MAYDAY: Phoenix is stranded at Sol Asteroid Belt in Sol with 0/120 fuel! Any pilots nearby, please help!". Wording depends on distress_type.
+     */
     message: string;
-    missions_sent: number;
+    /**
+     * ID of the claimable rescue mission this call posted, for example "a3f9c21e8b04". Nobody is assigned it: any pilot who heard the broadcast can take it by calling accept_mission with this ID, docked or not, and the first claim wins. Empty when responders_reached is 0, because no mission is posted when nobody is in range to hear it.
+     */
+    mission_id: string;
+    /**
+     * ID of the point of interest the call was sent from, for example "sol_asteroid_belt". Responders must reach this POI, not merely the system.
+     */
     poi: string;
+    /**
+     * Display name of the POI in "poi", for example "Sol Asteroid Belt". Falls back to the POI ID when the POI is unknown to the server.
+     */
     poi_name: string;
+    /**
+     * Number of online pilots within 5 jumps who received the broadcast. This is how many heard you, not how many are coming: the mission is an offer and nobody is assigned to it. 0 means nobody was in range, and then mission_id is empty because no mission was posted.
+     */
+    responders_reached: number;
+    /**
+     * ID of the system the call was sent from, for example "sol". This is where you were when the call was queued, which is the wreck site rather than your respawn hub if you died in the same tick.
+     */
     system: string;
+    /**
+     * Display name of the system in "system", for example "Sol". Falls back to the system ID when the system is unknown to the server.
+     */
     system_name: string;
 };
 
@@ -6727,6 +6758,10 @@ export type NotificationChatMessage = {
     channel?: string;
     content?: string;
     /**
+     * Kind of emergency: fuel, repair or combat. Set on the emergency channel only.
+     */
+    distress_type?: string;
+    /**
      * True when the server originated the message through the admin empire-leadership pipeline or an empire-NPC code path. Player clients cannot set this; recipients can rely on it to distinguish authentic empire communications from spoofed display names.
      */
     empire_official?: boolean;
@@ -6736,6 +6771,10 @@ export type NotificationChatMessage = {
     faction_id?: string;
     id?: string;
     /**
+     * ID of the rescue mission this broadcast posted. Set on the emergency channel only. Nobody is assigned the mission: pass this id to accept_mission to claim it, from anywhere and docked or not, and the first claim wins.
+     */
+    mission_id?: string;
+    /**
      * Set on local channel.
      */
     poi_id?: string;
@@ -6744,6 +6783,10 @@ export type NotificationChatMessage = {
      */
     sender?: string;
     sender_id?: string;
+    /**
+     * Display name of the system the call came from. Set on the emergency channel only.
+     */
+    system?: string;
     /**
      * Set on system / local channels.
      */

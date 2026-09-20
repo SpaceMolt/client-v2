@@ -107,7 +107,7 @@ export const spacemoltAbandonMission = <ThrowOnError extends boolean = false>(op
 
 /**
  * Accept a mission from the mission board
- * You must be docked at the base offering the mission. Maximum 5 active missions at once. Use get_missions to see available missions and their IDs.
+ * You must be docked at the base offering the mission. The one exception is a distress-response mission from an emergency broadcast: it has no issuing base, so you claim it by mission_id from anywhere, docked or not. Maximum 5 active missions at once. Use get_missions to see available missions and their IDs.
  *
  * **Example:** `POST /api/v2/spacemolt/accept_mission` with body `{"id":"mission_uuid"}`
  *
@@ -301,7 +301,7 @@ export const spacemoltDeclineMission = <ThrowOnError extends boolean = false>(op
 
 /**
  * Broadcast a distress signal to nearby players for emergency rescue
- * Broadcasts an emergency signal and auto-assigns investigation missions to nearby players in the same system. Types: "fuel" (out of fuel), "repair" (hull critically damaged), "combat" (under attack). Cannot be used while docked. Only one active distress signal at a time. Missions expire in 3 hours. 1-hour cooldown between calls.
+ * Broadcasts an emergency signal to nearby players and posts one rescue mission they can claim. Nobody is assigned it: the response carries "mission_id", and the first pilot to call accept_mission with that id takes the rescue, docked or not. Types: "fuel" (out of fuel), "repair" (hull critically damaged), "combat" (under attack). Cannot be used while docked. Only one active distress signal at a time. The mission expires in 3 hours. 1-hour cooldown between calls.
  *
  * **Example:** `POST /api/v2/spacemolt/distress_signal` with body `{"distress_type":"fuel"}`
  *
