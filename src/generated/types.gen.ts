@@ -1061,6 +1061,10 @@ export type BattleCombatState = {
      */
     interceptor_id?: string;
     /**
+     * Whether your own boarding latch is gaining ground, and what is stopping it when it is not. accruing: you hold point-blank contact with the target's shields suppressed, so latch progress accrues this tick. shields_holding: the target's shields have regenerated back above the suppression line, so the latch reverts instead of advancing — keep its shields down to reopen the gate. out_of_range: you are not in point-blank contact, so the latch reverts — close the gap first, because suppressing shields does nothing at range. Present only while you are latching onto a target; omitted once marines are aboard, and omitted for the ship being boarded.
+     */
+    latch_status?: 'accruing' | 'shields_holding' | 'out_of_range';
+    /**
      * Largest zone distance any fitted weapon can fire against your selected target after its targeting-range reductions. A target whose zone_distance exceeds this is out of range.
      */
     max_weapon_reach: number;
@@ -1686,6 +1690,23 @@ export type BulkModifyOrdersResponse = {
     mode: 'bulk';
     results: Array<BulkModifyOrderResult>;
     summary: BulkSummary;
+};
+
+export type BulkReloadResponse = {
+    action: 'reload';
+    message?: string;
+    mode: 'bulk';
+    results: Array<BulkReloadResult>;
+    summary: BulkSummary;
+};
+
+export type BulkReloadResult = {
+    error?: string;
+    error_code?: string;
+    index: number;
+    result?: ReloadResponse;
+    success: boolean;
+    weapon_id: string;
 };
 
 export type BulkSellOrderResult = {
@@ -8793,6 +8814,8 @@ export type ReleaseTowResponse = {
     wreck_id: string;
 };
 
+export type ReloadCommandResponse = ReloadResponse | BulkReloadResponse;
+
 export type ReloadResponse = {
     action: string;
     ammo_id: string;
@@ -15406,11 +15429,15 @@ export type SpacemoltBattleReloadData = {
         /**
          * Instance ID of the fitted weapon to reload (use get_ship to see weapon instance IDs)
          */
-        id: string;
+        id?: string;
         /**
          * Item ID of ammo to load from cargo (must match the weapon's ammo type). For weapons with the ammo_from_cargo special: omit to auto-select random low-value junk, or specify any cargo item to load that exact item.
          */
         target?: string;
+        /**
+         * Bulk reload: array of {weapon_instance_id, ammo_item_id?} entries loaded in a single action for one tick, however many weapons. Omit weapon_instance_id/ammo_item_id when using this. Entries are independent — the response reports per-weapon success/failure. Maximum 50 entries.
+         */
+        weapons?: Array<unknown>;
     };
     path?: never;
     query?: never;
@@ -15434,11 +15461,11 @@ export type SpacemoltBattleReloadErrors = {
 
 export type SpacemoltBattleReloadResponses = {
     /**
-     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ReloadResponse)
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/queue sections); the command result is under `details` (ReloadResponse | BulkReloadResponse)
      */
     200: V2Response & {
         structuredContent?: V2GameState & {
-            details?: ReloadResponse;
+            details?: ReloadResponse | BulkReloadResponse;
         };
     };
 };
@@ -22034,7 +22061,11 @@ export type SpacemoltSalvageServicePrizeData = {
          */
         id: string;
         /**
-         * Optional quantity. For refuel, zero or omission transfers the safe maximum; for repair, zero or omission uses one repair kit.
+         * Optional repair item to spend on repair. Omit to use the cheapest repair item in your cargo.
+         */
+        item_id?: string;
+        /**
+         * Optional quantity. For refuel, zero or omission transfers the safe maximum; for repair, zero or omission uses one repair item.
          */
         quantity?: number;
         /**

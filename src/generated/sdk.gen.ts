@@ -2024,9 +2024,9 @@ export const spacemoltBattleLog = <ThrowOnError extends boolean = false>(options
 
 /**
  * Reload a weapon's magazine from ammo in cargo
- * Loads compatible ammunition from cargo into a weapon magazine. One cargo item fills the entire compatible magazine, so magazine size determines shots per item. Swapping ammo discards remaining rounds. Works during battle or flight and costs one tick.
+ * Loads compatible ammunition from cargo into a weapon magazine. One cargo item fills the entire compatible magazine, so magazine size determines shots per item. Swapping ammo discards remaining rounds. Works during battle or flight and costs one tick. Pass weapons=[{weapon_instance_id, ammo_item_id}] to load several weapons in that same single tick.
  *
- * **Example:** `POST /api/v2/spacemolt_battle/reload` with body `{"id":"abc123","target":"standard_rounds_box"}`
+ * **Example:** `POST /api/v2/spacemolt_battle/reload` with body `{"id":"abc123","target":"example","weapons":[null]}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5726,9 +5726,9 @@ export const spacemoltSalvageSell = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Stop, resume, redirect, refuel, or repair a claimed intact prize
- * Both ships must be out of combat at the same POI. Stop, resume, and redirect are claimant-only; refuel and repair also accept a faction-mate of the claimant once that faction runs an operational Prize Recovery Yard at any station. Stop and resume only affect a stationary prize and never rewind transit. Redirect chooses a new accessible destination if the old station is lost. Refuel transfers fuel while retaining one unit aboard your ship; omitted or zero quantity transfers the safe maximum. Repair consumes repair kits; omitted or zero quantity uses one kit.
+ * Both ships must be out of combat at the same POI. Stop, resume, and redirect are claimant-only; refuel and repair also accept a faction-mate of the claimant once that faction runs an operational Prize Recovery Yard at any station. Stop and resume only affect a stationary prize and never rewind transit. Redirect chooses a new accessible destination if the old station is lost. Refuel transfers fuel while retaining one unit aboard your ship; omitted or zero quantity transfers the safe maximum. Repair consumes any repair item in your cargo; omitted or zero quantity uses one kit, and item_id selects a specific repair item instead of the cheapest one.
  *
- * **Example:** `POST /api/v2/spacemolt_salvage/service_prize` with body `{"id":"prize_id","service_action":"stop","target":"station_id","quantity":1}`
+ * **Example:** `POST /api/v2/spacemolt_salvage/service_prize` with body `{"id":"prize_id","service_action":"stop","target":"station_id","quantity":1,"item_id":"repair_kit"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */

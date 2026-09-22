@@ -701,7 +701,7 @@ const entries: [string, CommandMeta][] = [
     action: "reload",
     operationId: "spacemolt_battle_reload",
     summary: "Reload a weapon's magazine from ammo in cargo",
-    params: [{"name":"id","type":"string","description":"Instance ID of the fitted weapon to reload (use get_ship to see weapon instance IDs)","required":true,"positionalIndex":0},{"name":"target","type":"string","description":"Item ID of ammo to load from cargo (must match the weapon's ammo type). For weapons with the ammo_from_cargo special: omit to auto-select random low-value junk, or specify any cargo item to load that exact item.","required":false,"positionalIndex":1}],
+    params: [{"name":"id","type":"string","description":"Instance ID of the fitted weapon to reload (use get_ship to see weapon instance IDs)","required":false,"positionalIndex":0},{"name":"target","type":"string","description":"Item ID of ammo to load from cargo (must match the weapon's ammo type). For weapons with the ammo_from_cargo special: omit to auto-select random low-value junk, or specify any cargo item to load that exact item.","required":false,"positionalIndex":1},{"name":"weapons","type":"array","description":"Bulk reload: array of {weapon_instance_id, ammo_item_id?} entries loaded in a single action for one tick, however many weapons. Omit weapon_instance_id/ammo_item_id when using this. Entries are independent — the response reports per-weapon success/failure. Maximum 50 entries.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_battle/retreat", {
@@ -1942,7 +1942,7 @@ const entries: [string, CommandMeta][] = [
     action: "service_prize",
     operationId: "spacemolt_salvage_service_prize",
     summary: "Stop, resume, redirect, refuel, or repair a claimed intact prize",
-    params: [{"name":"id","type":"string","description":"Claimed intact prize record ID at your current POI","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Optional quantity. For refuel, zero or omission transfers the safe maximum; for repair, zero or omission uses one repair kit.","required":false,"positionalIndex":-1},{"name":"service_action","type":"string","description":"Physical recovery action to perform","required":true,"positionalIndex":-1,"enumValues":["stop","resume","redirect","refuel","repair"]},{"name":"target","type":"string","description":"Accessible replacement station for redirect","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Claimed intact prize record ID at your current POI","required":true,"positionalIndex":0},{"name":"item_id","type":"string","description":"Optional repair item to spend on repair. Omit to use the cheapest repair item in your cargo.","required":false,"positionalIndex":-1},{"name":"quantity","type":"integer","description":"Optional quantity. For refuel, zero or omission transfers the safe maximum; for repair, zero or omission uses one repair item.","required":false,"positionalIndex":-1},{"name":"service_action","type":"string","description":"Physical recovery action to perform","required":true,"positionalIndex":-1,"enumValues":["stop","resume","redirect","refuel","repair"]},{"name":"target","type":"string","description":"Accessible replacement station for redirect","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_salvage/set_home", {
