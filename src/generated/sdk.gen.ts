@@ -939,7 +939,7 @@ export const spacemoltHunt = <ThrowOnError extends boolean = false>(options?: Op
 
 /**
  * Inspect a visible package, item, module, ship class, system, POI, or docked base by ID
- * Routes the ID to the relevant inventory, _direct, or location query. Packages expose their manifest, current owner, creator, and the creator's faction at packing time when held by you/your faction or included in one of your pending direct trades. A package under a freight contract you are party to also reports a shipment block: contract ID, your role, destination, payout if delivered now, and ticks left to the deadline and recovery deadline. Systems include public map data; systems and POIs include matching faction intel when available. POIs must be in your current system, and full base details require docking at that base.
+ * Routes the ID to the relevant inventory, _direct, or location query. Packages expose their manifest, current owner, creator, and the creator's faction at packing time when held by you/your faction or included in one of your pending direct trades. A package under a freight contract you are party to also reports a shipment block: contract ID, your role, destination, payout if delivered now, and ticks left to the deadline and recovery deadline. Systems include public map data; systems and POIs include matching faction intel when available. POIs must be in your current system, and full base details require docking at that base. Look up skills, recipes, and facilities with _direct.
  *
  * **Example:** `POST /api/v2/spacemolt/inspect` with body `{"id":"object_id"}`
  */
