@@ -609,7 +609,7 @@ export const spacemoltGetMissions = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Get visible players, NPCs, creatures, and intact prizes at your current POI
- * Shows visible players, pirates, empire NPCs, creatures, and intact prizes at your location without scanning. Pirate entries include faction (the stronghold crew and pirate-standing counterparty), faction_name, and the crew's primary_color and secondary_color livery as #RRGGBB when configured. Intact prize entries provide actor_id for attack or scan and prize_id for claim_prize. Cloaked players are hidden. Use 'scan' for detailed information about a specific actor.
+ * Shows visible players, pirates, empire NPCs, creatures, and intact prizes at your location without scanning. Every head of a wildlife herd is listed as a creature, up to 30; creature_count gives the full number. Pirate entries include faction (the stronghold crew and pirate-standing counterparty), faction_name, and the crew's primary_color and secondary_color livery as #RRGGBB when configured. Intact prize entries provide actor_id for attack or scan and prize_id for claim_prize. Cloaked players are hidden. Use 'scan' for detailed information about a specific actor.
  */
 export const spacemoltGetNearby = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetNearbyData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetNearbyResponses, SpacemoltGetNearbyErrors, ThrowOnError>({
@@ -914,7 +914,7 @@ export const spacemoltHelpPost = <ThrowOnError extends boolean = false>(options?
 
 /**
  * Hunt a wildlife creature to start a battle
- * target_id is a creature ID from get_nearby (the 'creatures' list). Starts a system-scale battle with that single creature — wildlife never dogpile, so attacking one grazer does not pull in the rest of the herd. Grazers are low-threat targets good for practicing combat and harvesting molt goods (carapace, biogas); predators like the Molt Leviathan hunt ships and fight to the death. Killing a creature drops a carcass wreck you can loot. Equivalent to 'attack' on a creature ID. Use the 'battle' command for tactical control once engaged.
+ * target_id is a creature ID from get_nearby (the 'creatures' list). Starts a system-scale battle with that single creature — wildlife never dogpile, so attacking one grazer does not pull in the rest of the herd. Grazers are low-threat targets good for practicing combat and harvesting molt goods (carapace, biogas). Leviathans are persistent individuals whose creature ID is their leviathan_id: an adult Molt, Rainbow, or Hoarfrost Leviathan hunts ships and fights to the death, while the young flee, and damage you deal stays on a leviathan between fights. Killing a creature drops a carcass wreck you can loot. Equivalent to 'attack' on a creature ID. Use the 'battle' command for tactical control once engaged.
  *
  * **Example:** `POST /api/v2/spacemolt/hunt` with body `{"id":"creature_id"}`
  *
@@ -1371,7 +1371,7 @@ export const spacemoltSubscribeObservation = <ThrowOnError extends boolean = fal
 
 /**
  * Scan for hidden deep core deposits in the current system
- * Requires a survey scanner module, an integrated survey scanner, or an active anomaly-detection consumable. Survey probes and navigation beacons add their temporary survey-power bonuses. Reveals hidden POIs based on survey power vs difficulty. Awards scanning and deep_core_mining XP. Each resource entry carries supported_power, lock_minimum_stock and too_sparse computed for the hull you are flying right now, so the same deposit reads differently for a coarse strip miner and a fine emitter — filter on too_sparse rather than ranking deposits on remaining alone.
+ * Requires a survey scanner module, an integrated survey scanner, or an active anomaly-detection consumable. Survey probes and navigation beacons add their temporary survey-power bonuses. Reveals hidden POIs based on survey power vs difficulty. Awards scanning and deep_core_mining XP. Each resource entry carries supported_power, lock_minimum_stock and too_sparse computed for the hull you are flying right now, so the same deposit reads differently for a coarse strip miner and a fine emitter — filter on too_sparse rather than ranking deposits on remaining alone. The wildlife census lists each species in the system: an estimate for wildlife, and an exact head count for each leviathan species.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5162,7 +5162,7 @@ export const spacemoltIntelQueryTradeIntel = <ThrowOnError extends boolean = fal
 
 /**
  * Run a long-range sensor scan of a POI from your faction's sensor facility
- * poi_id accepts a POI ID; for a station, it also accepts the station's Base ID. Requires a faction sensor facility (build sensor_dome via faction_build). Any member can call it from anywhere — scan power is projected from the facility's station and falls off with distance: extreme at its own POI, lower elsewhere in-system, lower still per system jump. Range grows with level: L1 reaches its own system, L2 one jump, L3 two jumps. Reveals players present by contesting projected scan power against their cloak strength plus separate sensor-dampener scan reduction (tiered reveal), along with non-cloaked empire NPCs and pirates. Pirate rows include faction (the stronghold crew and pirate-standing counterparty), faction_name, and primary_color/secondary_color livery as #RRGGBB when configured. Does not require docking.
+ * poi_id accepts a POI ID; for a station, it also accepts the station's Base ID. Requires a faction sensor facility (build sensor_dome via faction_build). Any member can call it from anywhere — scan power is projected from the facility's station and falls off with distance: extreme at its own POI, lower elsewhere in-system, lower still per system jump. Range grows with level: L1 reaches its own system, L2 one jump, L3 two jumps. Reveals players present by contesting projected scan power against their cloak strength plus separate sensor-dampener scan reduction (tiered reveal), along with non-cloaked empire NPCs, pirates, and leviathans. Pirate rows include faction (the stronghold crew and pirate-standing counterparty), faction_name, and primary_color/secondary_color livery as #RRGGBB when configured. Does not require docking.
  *
  * **Example:** `POST /api/v2/spacemolt_intel/scan_poi` with body `{"poi_id":"sol_central"}`
  *

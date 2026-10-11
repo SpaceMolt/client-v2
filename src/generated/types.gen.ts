@@ -3223,6 +3223,10 @@ export type EmpireStanding = {
 
 export type EnrichedWreck = {
     cargo: Array<ShipCargoItem>;
+    /**
+     * Carrion this body adds to its system every wildlife pass (about 1 minute) while it lasts. It feeds the scavengers there. Set only on the body of a leviathan that died of age; omitted otherwise.
+     */
+    carrion?: number;
     created_at: string;
     expire_tick: number;
     expires_at: string;
@@ -4610,6 +4614,10 @@ export type FactionScanPoiResponse = {
     facility_level: number;
     facility_station?: string;
     hops: number;
+    /**
+     * Leviathans at the POI. Omitted when none are there.
+     */
+    leviathans?: Array<LeviathanContact>;
     message: string;
     npcs?: Array<FactionScanNpcContact>;
     pirates?: Array<FactionScanPirateContact>;
@@ -5288,7 +5296,13 @@ export type GetNearbyResponse = {
      */
     arena_npcs: Array<ArenaNpcInfo>;
     count: number;
+    /**
+     * Total wildlife creatures at this POI. When it is larger than the length of creatures, the list is cut at 30 and the rest are present but not listed.
+     */
     creature_count: number;
+    /**
+     * Wildlife creatures at this POI that you can hunt. Every head of a herd is a real creature here. The list holds at most 30 entries; creature_count gives the full number.
+     */
     creatures: Array<CreatureInfo>;
     empire_npc_count: number;
     empire_npcs: Array<EmpireNpcInfo>;
@@ -5851,6 +5865,41 @@ export type KillLogEntry = {
     killer_username: string;
     victim_id: string;
     victim_username: string;
+};
+
+export type LeviathanContact = {
+    /**
+     * True when this stage attacks ships at its POI. It never joins a fight already in progress.
+     */
+    aggressive: boolean;
+    /**
+     * Current hull. Damage carries over between fights and heals slowly out of battle.
+     */
+    hull: number;
+    /**
+     * True while it is in a battle.
+     */
+    in_combat: boolean;
+    /**
+     * The leviathan's ID. It is the same for its whole life and is the creature_id to attack while you are at its POI.
+     */
+    leviathan_id: string;
+    /**
+     * Maximum hull. It grows with the leviathan's size.
+     */
+    max_hull: number;
+    /**
+     * Name of its current life stage, e.g. Juvenile Molt Leviathan.
+     */
+    name: string;
+    /**
+     * Leviathan species ID, e.g. molt_leviathan.
+     */
+    species: string;
+    /**
+     * Life stage ID, e.g. hatchling, juvenile, adult, calf, or elder.
+     */
+    stage: string;
 };
 
 export type ListPassengersResponse = {
@@ -8312,6 +8361,10 @@ export type PlayerStats = {
      * Latest completed personal weekly statement, also returned as latest_statement by get_tax_estimate. Omitted before the first statement. Later debt payments do not change this historical statement.
      */
     latest_tax_statement?: TaxStatement;
+    /**
+     * Leviathans killed in their first active stage: a hatchling or a calf
+     */
+    leviathan_young_killed?: number;
     marine_deaths?: number;
     marine_injuries?: number;
     marine_injuries_healed?: number;
@@ -11279,6 +11332,10 @@ export type V2Location = {
      */
     nearby_empire_npcs: Array<V2NearbyEmpireNpc>;
     /**
+     * Leviathans at the current POI. Empty when none are here. An adult leviathan can attack your ship.
+     */
+    nearby_leviathans: Array<LeviathanContact>;
+    /**
      * Count of nearby pirates before the response cap is applied
      */
     nearby_pirate_count: number;
@@ -11952,6 +12009,9 @@ export type WelcomePayload = {
 
 export type WildlifeSurvey = {
     abundance: string;
+    /**
+     * For wildlife: the rounded wild population estimate in this system. For a leviathan species: the exact number of leviathans in this system, eggs not counted.
+     */
     estimate: number;
     name: string;
     ranched?: number;
