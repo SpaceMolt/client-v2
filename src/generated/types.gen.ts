@@ -3494,10 +3494,16 @@ export type FacilityEntry = {
     faction_medical_supply_item?: string;
     faction_service?: string;
     is_recycler?: boolean;
+    /**
+     * Credits of labor this facility pays per facility cycle (100 ticks). Present only alongside maintenance_per_cycle; omitted when zero. A tourism venue's labor scales with its recent paying footfall but never drops below 15 percent of its declared labor.
+     */
     labor_per_cycle?: number;
     leisure_points?: number;
     level: number;
     maintenance_level?: number;
+    /**
+     * Item stock this station-run facility must hold each facility cycle (100 ticks) to count as fully supplied. Present only for fleet depots and dining/leisure venues (tourism_upkeep); omitted otherwise. A tourism venue's figure scales with recent paying footfall and never drops below 15 percent of its declared menu (at least one of each item); it burns its paying guests' share of its declared menu — about the whole listed stock in a busy cycle and nothing in a cycle no guest paid for.
+     */
     maintenance_per_cycle?: Array<ItemQuantity>;
     maintenance_satisfied?: boolean;
     missed_rent_cycles?: number;
@@ -4254,6 +4260,10 @@ export type FactionInfoResponse = {
     emblem?: string;
     enemies?: Array<FactionListItem>;
     facilities?: Array<FactionFacilityPresence>;
+    /**
+     * Rent and arrears for the faction's facilities across all stations; billed to the treasury each cycle. Omitted for non-members and for a faction that owns no facilities. Use facility action=faction_owned for the per-facility breakdown.
+     */
+    faction_rent?: FacilityRentSummary;
     fuel_bunkers?: Array<FactionFuelBunker>;
     id: string;
     is_ally: boolean;
