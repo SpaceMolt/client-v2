@@ -1221,6 +1221,9 @@ export type BattleParticipantInfo = {
      */
     ship_name?: string;
     side_id: number;
+    /**
+     * This combatant's battle stance (fire, evade, brace, flee, or board). A stance is private: battle_update sets it only on your own entry. Every other entry, and every entry in battle_started, battle_alert, and pirate or creature attack alerts, omits it.
+     */
     stance?: string;
     username: string;
     zone: string;
@@ -1295,6 +1298,9 @@ export type BattleSummaryResponse = {
     duration_ticks: number;
     ended_at?: string;
     has_station: boolean;
+    /**
+     * POI ID where an active battle started. Absent for completed battles and when the origin POI is hidden: public surfaces never name an uncharted POI.
+     */
     origin_poi?: string;
     /**
      * How the battle ended. victory means one side survived and destroyed or captured an opponent. stalemate and mutual_destruction are both draws. interrupted means a server restart ended the battle before either side won. Graceful shutdown emits a battle_ended frame; crash-recovered REST summaries do not fabricate one. Null while status is active. The WebSocket battle_ended frame calls this same field reason.
@@ -1947,7 +1953,7 @@ export type CaptureLogEntry = {
      */
     prize_id?: string;
     /**
-     * POI where the prize sits (the battle origin, which can differ from the captor's POI). Omitted when there is no prize, the POI is hidden, or the battle began in transit.
+     * POI where the prize sits: the captor's POI at the moment of capture (the battle origin when the captor has no POI). A captured ship never lands at a hidden POI; it goes to the nearest charted POI in the system. Omitted when there is no prize or no POI is known, and when the POI is hidden (only in a system with no charted POI).
      */
     prize_poi_id?: string;
     /**
@@ -2327,19 +2333,41 @@ export type ClientConnectionInfo = {
 };
 
 export type ClientPoiInfo = {
+    /**
+     * ID of the station at this POI. Omitted when has_base is false.
+     */
     base_id?: string;
+    /**
+     * Name of the station at this POI. Omitted when has_base is false.
+     */
     base_name?: string;
+    /**
+     * Type-specific classification for rendering (star spectral class, planet type, belt composition). Omitted when the POI has none.
+     */
     class?: string;
-    faction_fuel_capacity?: number;
-    faction_fuel_reserve?: number;
-    fuel_capacity?: number;
-    fuel_price?: number;
-    fuel_reserve: number;
+    /**
+     * True when a station is at this POI.
+     */
     has_base: boolean;
+    /**
+     * POI ID. Pass it to travel or find_route.
+     */
     id: string;
+    /**
+     * Charted name of the POI.
+     */
     name: string;
-    online: number;
+    /**
+     * Position in AU from the system center.
+     */
     position: Position;
+    /**
+     * Ships your ship scanner picks up at this POI: other players that are not cloaked (online, offline, and docked alike), flying pirates, active empire NPC ships, and hatched leviathans. Your own ship and wildlife herds are not counted. Omitted when your ship has no working ship scanner (sensor rating 0); 0 means a scanner and no ships.
+     */
+    ship_count?: number;
+    /**
+     * POI type (planet, moon, sun, asteroid_belt, station, wormhole_entrance, and so on).
+     */
     type: string;
 };
 
@@ -3008,7 +3036,7 @@ export type DistressSignalResponse = {
      */
     poi: string;
     /**
-     * Display name of the POI in "poi", for example "Sol Asteroid Belt". Falls back to the POI ID when the POI is unknown to the server.
+     * Display name of the POI in "poi", for example "Sol Asteroid Belt". Falls back to the POI ID when the POI is unknown to the server. For a hidden POI it is "an uncharted location": the broadcast never names a hidden POI.
      */
     poi_name: string;
     /**
@@ -3145,6 +3173,9 @@ export type EmpireGiftResponse = {
 
 export type EmpireNpcInfo = {
     empire: string;
+    /**
+     * Set for empire fleet member NPCs
+     */
     fleet_name?: string;
     in_combat: boolean;
     name: string;
@@ -3323,6 +3354,9 @@ export type FacilityBuildResponse = {
     facility_type: string;
     hint: string;
     recipe_id?: string;
+    /**
+     * Rent in credits per facility cycle (100 ticks) charged to the builder for this facility. 0 means no rent is due: a member's facility at their own faction's player station or outpost pays none.
+     */
     rent_per_cycle: number;
     skill_xp?: {
         [key: string]: number;
@@ -3370,6 +3404,9 @@ export type FacilityDefSummary = {
     maintenance_per_cycle?: Array<ItemQuantity>;
     name: string;
     recipe_id?: string;
+    /**
+     * Rent quote in credits per facility cycle (100 ticks) for the requesting player at this station. 0 at their own faction's player station or outpost, where members pay no rent; an outsider there is quoted the tenant rent paid to the owning faction.
+     */
     rent_per_cycle: number;
     type_id: string;
 };
@@ -3536,6 +3573,9 @@ export type FacilityFactionBuildResponse = {
     hint: string;
     members_awarded_xp?: number;
     recipe_id?: string;
+    /**
+     * Rent in credits per facility cycle (100 ticks) charged to the faction treasury. 0 means no rent is due: a facility at the faction's own player station or outpost pays none. A Letter of Marque Office's toll is recomputed each cycle from the faction's unrepresented members and can also start at 0.
+     */
     rent_per_cycle: number;
     skill_xp?: {
         [key: string]: number;
@@ -3716,6 +3756,9 @@ export type FacilityPersonalBuildResponse = {
     hint: string;
     home_base_set?: boolean;
     personal_service: string;
+    /**
+     * Rent in credits per facility cycle (100 ticks) charged to the builder. 0 means no rent is due: a member's facility at their own faction's player station or outpost pays none.
+     */
     rent_per_cycle: number;
     skill_xp?: {
         [key: string]: number;
@@ -3776,7 +3819,7 @@ export type FacilityRentSummary = {
      */
     est_rent_per_day: number;
     /**
-     * Number of owned facilities in this summary including facilities whose billing is paused.
+     * Number of owned facilities in this summary including facilities whose billing is paused and facilities at the owner's own faction station or outpost, which pay no rent and count at 0.
      */
     facilities: number;
     /**
@@ -3856,6 +3899,9 @@ export type FacilityTypeDetailResponse = {
     personal_service?: string;
     recipe?: FacilityRecipeInfo;
     recipe_id?: string;
+    /**
+     * Rent quote in credits per facility cycle (100 ticks) for the requesting player at their docked station. 0 at their own faction's player station or outpost, where members pay no rent; an outsider there is quoted the tenant rent paid to the owning faction.
+     */
     rent_per_cycle: number;
     requires_service_name?: string;
     requires_service_type?: string;
@@ -3940,6 +3986,9 @@ export type FacilityUpgradeResponse = {
     level: number;
     personal_service?: string;
     recipe_id?: string;
+    /**
+     * Rent in credits per facility cycle (100 ticks) after the upgrade. 0 means no rent is due: a facility at its owner's own faction player station or outpost pays none.
+     */
     rent_per_cycle: number;
 };
 
@@ -4261,7 +4310,7 @@ export type FactionInfoResponse = {
     enemies?: Array<FactionListItem>;
     facilities?: Array<FactionFacilityPresence>;
     /**
-     * Rent and arrears for the faction's facilities across all stations; billed to the treasury each cycle. Omitted for non-members and for a faction that owns no facilities. Use facility action=faction_owned for the per-facility breakdown.
+     * Rent and arrears for the faction's facilities across all stations; billed to the treasury each cycle. Facilities at the faction's own station or outpost pay no rent and count at 0, so a faction that owns facilities only there gets a summary with zero rent. Omitted for non-members and for a faction that owns no facilities. Use facility action=faction_owned for the per-facility breakdown.
      */
     faction_rent?: FacilityRentSummary;
     fuel_bunkers?: Array<FactionFuelBunker>;
@@ -4540,14 +4589,41 @@ export type FactionProposePeaceResponse = {
 };
 
 export type FactionQueryIntelResponse = {
+    /**
+     * Number of entries in this page.
+     */
     count: number;
+    /**
+     * Game tick at which this query ran. Compare each POI's read_at_tick against it to judge how stale the resources are.
+     */
     current_tick: number;
+    /**
+     * Matching system entries for this page, newest submitted_at_tick first. Empty when nothing matches.
+     */
     entries: Array<IntelEntry>;
+    /**
+     * Intel facility level of the source faction: 1 = Intel Terminal (manual submissions and system filters only), 2 = Intel Center (auto-sync and the resource_type, poi_type and empire filters).
+     */
     intel_level: number;
+    /**
+     * Page size used (default 50, max 100).
+     */
     limit?: number;
+    /**
+     * System IDs in this page with at least one POI read live: an online member of the source faction is at that POI right now, so its resources are current and its read_at_tick equals current_tick. Only those POIs are live; every other POI in the entry is a stored snapshot. Intel facilities never make a system live. Omitted when no POI in this page is live.
+     */
     live_systems?: Array<string>;
+    /**
+     * Human-readable summary of the result and how to read its staleness.
+     */
     message: string;
+    /**
+     * Offset of this page into the matching entries. Omitted when 0.
+     */
     offset?: number;
+    /**
+     * Number of entries matching the query across all pages.
+     */
     total: number;
 };
 
@@ -4620,6 +4696,9 @@ export type FactionScanNpcContact = {
 };
 
 export type FactionScanPoiResponse = {
+    /**
+     * Players the scan resolved, each with the tiered reveal its contest margin allows (10 username, 20 ship class, 30 hull and shield, 40 cloaked flag, 50 faction). A cloaked player is listed only from margin 10. Omitted when none.
+     */
     contacts?: Array<ScanContact>;
     facility_level: number;
     facility_station?: string;
@@ -4629,11 +4708,20 @@ export type FactionScanPoiResponse = {
      */
     leviathans?: Array<LeviathanContact>;
     message: string;
+    /**
+     * Empire NPC ships that passed the contest (listed from margin 10, ship class from 20). Omitted when none. Area sweeps never fill it.
+     */
     npcs?: Array<FactionScanNpcContact>;
+    /**
+     * Pirate ships that passed the contest (listed from margin 10, ship class from 20). Omitted when none. Area sweeps never fill it.
+     */
     pirates?: Array<FactionScanPirateContact>;
     poi_id: string;
     poi_name?: string;
     scan_power: number;
+    /**
+     * True when a cloaked ship is within one sensor level (10 power) below detection: sensed but not resolved. Omitted when false.
+     */
     signature_detected?: boolean;
     system_id?: string;
 };
@@ -5382,10 +5470,22 @@ export type GetPoiTransitResponse = {
 };
 
 export type GetSystemAgentsResponse = {
+    /**
+     * Always empty. get_system_agents is deprecated: use get_nearby for the ships at your POI and get_system with a ship scanner for ship counts at the other POIs.
+     */
     agents: Array<NearbyPlayer>;
+    /**
+     * Always 0 (the length of agents).
+     */
     count: number;
-    offline_collapsed?: number;
+    /**
+     * Your current system ID. Empty while you are in hyperspace.
+     */
     system_id: string;
+    /**
+     * Deprecation notice: the command will be removed, and names the commands that replace it. Always present.
+     */
+    warning?: string;
 };
 
 export type GetSystemCommandResponse = ({
@@ -5638,18 +5738,49 @@ export type IntelEntry = {
 };
 
 export type IntelPoi = {
+    /**
+     * Station base ID at this POI. Omitted when the POI has no station.
+     */
     base_id?: string;
+    /**
+     * Station name at this POI. Omitted when the POI has no station.
+     */
     base_name?: string;
+    /**
+     * POI class (for example metallic for a belt). Omitted when the POI has none.
+     */
     class?: string;
     /**
      * True when this is a hidden deep core POI holding deposits. Access there needs a deep_core_access extractor that a pilot cannot refit below so the too-sparse cutoff never applies and these deposits always work down to zero. It is the one input to the mining lock formula that you cannot derive from a deposit's own numbers. Omitted (false) for every ordinary POI and for a hidden POI with no resources such as a wormhole mouth.
      */
     deep_core?: boolean;
+    /**
+     * POI description. Omitted when the POI has none or the entry never recorded it.
+     */
     description?: string;
+    /**
+     * POI ID. Always a real POI of this system: a submission drops any ID that is not on the submitter's charts.
+     */
     id: string;
+    /**
+     * POI display name.
+     */
     name: string;
+    /**
+     * POI position in the system in AU. Zero on an old or hand-submitted entry that never recorded it.
+     */
     position: Position;
+    /**
+     * Game tick at which a faction member's ship read this POI's resources: an Intel Center auto-sync from get_poi, successful mining or survey_system, or the live view when an online faction member is at this POI right now (then it equals current_tick). Omitted (0) when no member's ship has read the resources: a hand-submitted reading from faction_submit_intel is unverified and never carries this field. Compare it against current_tick to judge how stale the resources are.
+     */
+    read_at_tick?: number;
+    /**
+     * Resource deposits at this POI as last read. read_at_tick says when a member's ship read them; without read_at_tick they are a hand-submitted reading. Omitted when no reading exists: nobody has read this POI's ore.
+     */
     resources?: Array<IntelResource>;
+    /**
+     * POI type as get_system shows it (for example asteroid_belt or station). On a hand-submitted entry it is whatever the submitter wrote until the server backfills it.
+     */
     type: string;
 };
 
@@ -6138,7 +6269,6 @@ export type MapSystem = {
     empire?: string;
     is_stronghold?: boolean;
     name: string;
-    online?: number;
     poi_count?: number;
     position?: {
         x?: number;
@@ -6155,7 +6285,6 @@ export type MapSystemInfo = {
     empire?: string;
     is_stronghold?: boolean;
     name: string;
-    online: number;
     poi_count: number;
     position: GalacticPosition;
     system_id: string;
@@ -6502,7 +6631,7 @@ export type NearbyPlayer = {
      */
     clan_tag?: string;
     /**
-     * True when the player is docked at a base. Docked players are listed but cannot be attacked, scanned, or traded with until they undock.
+     * True when the player is docked at a base. Docked players are listed and can be scanned, but cannot be attacked until they undock.
      */
     docked?: boolean;
     /**
@@ -7005,7 +7134,7 @@ export type NotificationError = {
 };
 
 /**
- * Pushed to a facility owner (or all faction members) when the station repossesses facilities for unpaid rent.
+ * Pushed to a facility owner (or all faction members) when the station repossesses facilities for unpaid rent. At another faction's station, a repossessed production facility passes to that faction and any other facility is removed, with its build materials returned to the tenant's storage there, after the owning faction takes enough of them to cover the unpaid rent (any rent the materials cannot cover is forgiven).
  */
 export type NotificationFacilityReclaimed = {
     base_id: string;
@@ -7201,13 +7330,21 @@ export type NotificationObservationUpdate = {
     empire_npcs_departed?: Array<string>;
     nearby_changed?: Array<NearbyPlayer>;
     nearby_departed?: Array<string>;
+    /**
+     * The new count of offline players at the watched POI not listed individually (see offline_collapsed in subscribe_observation). Present only when the count changed this tick; 0 means every offline player is listed again.
+     */
+    offline_collapsed?: number;
     pirates_changed?: Array<PirateInfo>;
     pirates_departed?: Array<string>;
     poi_id: string;
     prizes_changed?: Array<PrizeInfo>;
     prizes_departed?: Array<string>;
-    system_changed?: Array<NearbyPlayer>;
-    system_departed?: Array<string>;
+    /**
+     * Replacement ship scanner count map for your system, keyed by POI ID (see ship_counts in subscribe_observation). Omitted means unchanged. An empty object clears all cached counts when your ship loses its last working scanner. When the scanner resumes, the full current map is sent again.
+     */
+    ship_counts?: {
+        [key: string]: number;
+    };
     system_id: string;
     tick: number;
     unknown_signature: boolean;
@@ -7411,7 +7548,7 @@ export type NotificationPirateRadio = {
      */
     secondary_color: string;
     /**
-     * POI ID from which the transmission originated. Empty when no POI can be resolved.
+     * POI ID from which the transmission originated. Empty when no POI can be resolved or the POI is hidden (uncharted POIs are never named on the radio).
      */
     source_poi: string;
     /**
@@ -7591,7 +7728,7 @@ export type NotificationShipCaptured = {
      */
     prize_id?: string;
     /**
-     * POI where the prize sits (the battle origin, which can differ from your POI). Omitted when there is no prize, the POI is hidden, or the battle began in transit.
+     * POI where the prize sits: the captor's POI at the moment of capture (the battle origin when the captor has no POI). A captured ship never lands at a hidden POI; it goes to the nearest charted POI in the system. Omitted when there is no prize or no POI is known.
      */
     prize_poi_id?: string;
     /**
@@ -8083,10 +8220,10 @@ export type PirateInfo = {
      * Human-readable name of the stronghold crew, e.g. Admiral Kael.
      */
     faction_name?: string;
-    hull?: number;
+    hull: number;
     is_boss: boolean;
-    max_hull?: number;
-    max_shield?: number;
+    max_hull: number;
+    max_shield: number;
     name: string;
     pirate_id: string;
     /**
@@ -8097,7 +8234,7 @@ export type PirateInfo = {
      * Secondary livery color for this pirate crew as a hex color.
      */
     secondary_color?: string;
-    shield?: number;
+    shield: number;
     status: string;
     tier: string;
 };
@@ -9040,18 +9177,44 @@ export type ScanContact = {
 export type ScanResponse = {
     cargo_types?: Array<string>;
     cloaked?: boolean;
+    /**
+     * Players the scan resolved, each with the tiered reveal its contest margin allows (10 username, 20 ship class, 30 hull and shield, 40 cloaked flag, 50 faction). A cloaked player is listed only from margin 10. Omitted when none.
+     */
     contacts?: Array<ScanContact>;
     description?: string;
     faction_id?: string;
     hull?: number;
+    /**
+     * Leviathans at the POI. Omitted when none are there.
+     */
+    leviathans?: Array<LeviathanContact>;
     message?: string;
+    /**
+     * Empire NPC ships that passed the contest (listed from margin 10, ship class from 20). Omitted when none. Area sweeps never fill it.
+     */
+    npcs?: Array<FactionScanNpcContact>;
+    /**
+     * Pirate ships that passed the contest (listed from margin 10, ship class from 20). Omitted when none. Area sweeps never fill it.
+     */
+    pirates?: Array<FactionScanPirateContact>;
+    /**
+     * The POI a remote POI scan read. Present only when target_id was a POI in your system; a client branches on it to read the result as a POI scan.
+     */
+    poi_id?: string;
     revealed_info: Array<string>;
+    /**
+     * Scan power of a remote POI scan: your sensor rating at your own POI, or your sensor rating minus 10 at another POI in your system. Each ship there is contested at this power minus its stealth rating. Omitted for other scans and when the power is 0.
+     */
+    scan_power?: number;
     shield?: number;
     ship_class?: string;
     /**
      * Display name of the scanned ship: the custom name its pilot set when there is one, otherwise the ship class display name. Presence of this field does not mean the hull is named. Omitted when the scan did not reach the ship_class reveal tier.
      */
     ship_name?: string;
+    /**
+     * True when a cloaked ship is within one sensor level (10 power) below detection: sensed but not resolved. Omitted when false.
+     */
     signature_detected?: boolean;
     success: boolean;
     swept?: boolean;
@@ -9751,6 +9914,9 @@ export type ShipmentTrackingEvent = {
     observed_at: string;
     observed_tick: number;
     package_id: string;
+    /**
+     * POI where the package was at this sample. Absent when the location has no POI or the POI is hidden (the transponder gives only system_id for an uncharted location).
+     */
     poi_id?: string;
     reference_id?: string;
     shipment_id: string;
@@ -10073,6 +10239,9 @@ export type SovereignMintStatus = {
 
 export type StationConfigResponse = {
     action: string;
+    /**
+     * True when non-members may build their own facilities at this station; those tenants pay rent each facility cycle to the owning faction's treasury. False means only the owning faction and its members may build.
+     */
     allow_outsider_facilities: boolean;
     allowed_factions?: Array<string>;
     allowed_players?: Array<string>;
@@ -10347,10 +10516,19 @@ export type SubscribeObservationResponse = {
     empire_npcs?: Array<EmpireNpcInfo>;
     message?: string;
     nearby: Array<NearbyPlayer>;
+    /**
+     * Offline players at the watched POI not listed in nearby, the same count get_nearby reports: when more than 10 players are there, offline ones collapse into this count. Omitted when 0.
+     */
+    offline_collapsed?: number;
     pirates?: Array<PirateInfo>;
     poi_id: string;
     prizes?: Array<PrizeInfo>;
-    system_agents: Array<NearbyPlayer>;
+    /**
+     * Ship scanner counts for every charted POI in your system, keyed by POI ID: the same value as ship_count in get_system (other players that are not cloaked, flying pirates, active empire NPC ships, hatched leviathans; never wildlife or your own ship). Omitted when your ship has no working ship scanner.
+     */
+    ship_counts?: {
+        [key: string]: number;
+    };
     system_id: string;
     unknown_signature: boolean;
 };
@@ -10380,6 +10558,10 @@ export type SurveySystemResponse = {
     anomaly_hint?: string;
     bloom_intensity: number;
     bloom_status: string;
+    /**
+     * Every charted (not hidden) POI in the system that has deposits, with its ore read by your survey scanner. Hidden POIs you have charted are in newly_revealed and already_revealed instead. Empty when your survey power is 0 (an anomaly detector alone reads no ore).
+     */
+    deposits: Array<SurveyedPoi>;
     faint_signatures: Array<FaintSignature>;
     message: string;
     newly_revealed: Array<SurveyedPoi>;
@@ -10393,11 +10575,29 @@ export type SurveySystemResponse = {
 };
 
 export type SurveyedPoi = {
+    /**
+     * Type-specific classification (belt composition, planet type). Omitted when the POI has none.
+     */
     class?: string;
+    /**
+     * Charted description of the POI. Omitted when it has none.
+     */
     description?: string;
+    /**
+     * POI ID. Pass it to travel.
+     */
     id: string;
+    /**
+     * Name of the POI.
+     */
     name: string;
+    /**
+     * Deposits at the POI in the same format get_poi uses, rated for the hull you are flying. Omitted when the POI has no deposits.
+     */
     resources?: Array<ResourceInfo>;
+    /**
+     * POI type (asteroid_belt, gas_cloud, ice_field, wormhole_entrance, and so on).
+     */
     type: string;
 };
 
@@ -10457,33 +10657,9 @@ export type SystemPoi = {
      * Type-specific classification for client rendering (e.g. star spectral class, planet type, belt composition)
      */
     class?: string;
-    /**
-     * Your faction's total fuel tank capacity at this station
-     */
-    faction_fuel_capacity?: number;
-    /**
-     * Your faction's private fuel reserve at this station (0 if no faction bunker here)
-     */
-    faction_fuel_reserve?: number;
-    /**
-     * Maximum fuel tank capacity (0 if no bunker)
-     */
-    fuel_capacity?: number;
-    /**
-     * Current cr/unit refuel price based on reserve level
-     */
-    fuel_price?: number;
-    /**
-     * Current fuel reserves in station tank (0 if no bunker)
-     */
-    fuel_reserve?: number;
     has_base?: boolean;
     id: string;
     name: string;
-    /**
-     * Number of players at this POI
-     */
-    online?: number;
     /**
      * Position in AU from system center
      */
@@ -10491,6 +10667,10 @@ export type SystemPoi = {
         x?: number;
         y?: number;
     };
+    /**
+     * Ships your ship scanner picks up at this POI: other players that are not cloaked (online, offline, and docked alike), flying pirates, active empire NPC ships, and hatched leviathans. Your own ship and wildlife herds are not counted. Omitted when your ship has no working ship scanner (sensor rating 0); 0 means a scanner and no ships.
+     */
+    ship_count?: number;
     type: string;
 };
 
@@ -10996,16 +11176,10 @@ export type TransitLoungeView = {
     passengers: Array<PassengerView>;
 };
 
-export type TravelNearbyPlayer = {
-    clan_tag?: string;
-    offline?: boolean;
-    primary_color?: string;
-    secondary_color?: string;
-    status_message?: string;
-    username: string;
-};
-
 export type TravelResponse = {
+    /**
+     * Always arrived.
+     */
     action: string;
     /**
      * True when the engine docked you automatically before running this command, because the command requires being docked. Omitted when no automatic dock happened.
@@ -11015,13 +11189,41 @@ export type TravelResponse = {
      * True when the engine undocked you automatically before running this command, because the command requires being undocked. Omitted when no automatic undock happened.
      */
     auto_undocked?: boolean;
+    /**
+     * Explanation of a special arrival, such as the Mobile Capital jumping while you were in transit. Omitted on a normal arrival.
+     */
     message?: string;
+    /**
+     * Offline players at the arrival POI not listed individually because more than 10 players are there. 0 when every offline player is listed.
+     */
     offline_collapsed: number;
-    online_players: Array<TravelNearbyPlayer>;
+    /**
+     * The other players at the arrival POI that are not cloaked, as get_nearby lists them: online players first, then by username. Offline players are listed too (offline is true) unless more than 10 players are there; then they collapse into offline_collapsed. Despite the name, the list is not online-only.
+     */
+    online_players: Array<NearbyPlayer>;
+    /**
+     * Number of players listed in online_players.
+     */
     online_players_count: number;
+    /**
+     * True when more players are at the POI than the 50 listed in online_players. Run get_nearby for the same list.
+     */
     online_players_truncated: boolean;
+    /**
+     * Name of the POI you arrived at.
+     */
     poi: string;
+    /**
+     * ID of the POI you arrived at.
+     */
     poi_id: string;
+    /**
+     * True when a cloaked ship at the arrival POI is within one sensor level of your scanner: presence only. Run an area scan (scan with no target_id) to resolve it. Omitted when false.
+     */
+    unknown_signature?: boolean;
+    /**
+     * Skill XP the trip awarded, keyed by skill ID. Omitted when the trip awarded none.
+     */
     xp_gained?: {
         [key: string]: number;
     };
@@ -11340,7 +11542,7 @@ export type V2Location = {
     /**
      * Empire NPCs at the current POI
      */
-    nearby_empire_npcs: Array<V2NearbyEmpireNpc>;
+    nearby_empire_npcs: Array<EmpireNpcInfo>;
     /**
      * Leviathans at the current POI. Empty when none are here. An adult leviathan can attack your ship.
      */
@@ -11352,15 +11554,15 @@ export type V2Location = {
     /**
      * Pirate NPCs at the current POI
      */
-    nearby_pirates: Array<V2NearbyPirate>;
+    nearby_pirates: Array<PirateInfo>;
     /**
-     * Count of nearby players before the response cap is applied
+     * Count of players listed in nearby_players (at most 50). Offline players collapsed out of the list are counted in offline_collapsed instead.
      */
     nearby_player_count: number;
     /**
-     * Other (non-cloaked) players at the current POI
+     * Other (non-cloaked) players at the current POI: the same list get_nearby returns, online players first then by username
      */
-    nearby_players: Array<V2NearbyPlayer>;
+    nearby_players: Array<NearbyPlayer>;
     /**
      * Count of nearby intact prizes before the response cap is applied
      */
@@ -11488,73 +11690,6 @@ export type V2Module = {
      */
     type: string;
     type_id: string;
-};
-
-export type V2NearbyEmpireNpc = {
-    empire: string;
-    /**
-     * Set for empire fleet member NPCs
-     */
-    fleet_name?: string;
-    in_combat: boolean;
-    name: string;
-    npc_id: string;
-    role: string;
-    ship_class?: string;
-    /**
-     * Display name of the ship this NPC is flying: its custom name when one is set, otherwise the ship class display name (an unnamed enforcer reads as Enforcer). Presence of this field does not mean the hull is named. Omitted only when the NPC has no resolvable ship.
-     */
-    ship_name?: string;
-};
-
-export type V2NearbyPirate = {
-    /**
-     * Stronghold crew this pirate flies for, e.g. pirate_kael. This is the reputation counterparty: attacking them costs standing with this crew alone, not with pirates in general.
-     */
-    faction?: string;
-    /**
-     * Human-readable name of the stronghold crew, e.g. Admiral Kael.
-     */
-    faction_name?: string;
-    hull: number;
-    is_boss: boolean;
-    max_hull: number;
-    max_shield: number;
-    name: string;
-    pirate_id: string;
-    /**
-     * Primary livery color configured by the pirate stronghold crew as #RRGGBB. Omitted when the crew has no configured branding.
-     */
-    primary_color?: string;
-    /**
-     * Secondary livery color configured by the pirate stronghold crew as #RRGGBB. Omitted when the crew has no configured branding.
-     */
-    secondary_color?: string;
-    shield: number;
-    status: string;
-    tier: string;
-};
-
-export type V2NearbyPlayer = {
-    clan_tag?: string;
-    faction_tag?: string;
-    in_combat: boolean;
-    offline?: boolean;
-    player_id: string;
-    /**
-     * Primary livery color as #RRGGBB. Omitted when the player has not set one.
-     */
-    primary_color?: string;
-    /**
-     * Secondary livery color as #RRGGBB. Omitted when the player has not set one.
-     */
-    secondary_color?: string;
-    ship_class?: string;
-    /**
-     * Display name of the ship this player is flying: their custom name when they have set one, otherwise the ship class display name (an unnamed enforcer reads as Enforcer). Presence of this field does not mean the hull is named. Omitted only when the player has no resolvable current ship.
-     */
-    ship_name?: string;
-    username?: string;
 };
 
 export type V2Personnel = {
@@ -14308,7 +14443,7 @@ export type SpacemoltRepairResponse = SpacemoltRepairResponses[keyof SpacemoltRe
 export type SpacemoltScanData = {
     body?: {
         /**
-         * Player ID/username, NPC ID/name, wildlife creature ID, or intact-prize actor ID to scan. Prize actor IDs come from get_nearby. Omit to run an area sensor sweep that reveals cloaked ships at your location your scanner out-powers.
+         * Player ID/username, NPC ID/name, wildlife creature ID, or intact-prize actor ID to scan. Prize actor IDs come from get_nearby. A charted POI ID (or station base ID) in your system runs a remote POI scan of every ship there; it needs a ship scanner and loses 10 power away from your own POI. Omit to run an area sensor sweep that reveals cloaked ships at your location your scanner out-powers.
          */
         id?: string;
     };

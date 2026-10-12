@@ -132,7 +132,7 @@ export const spacemoltAcceptMission = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Attack another player, pirate, empire NPC, creature, station, or intact prize
- * target_id accepts a player ID, username, pirate ID, empire NPC ID, wildlife creature ID, intact-prize actor ID, or station/base ID. Target must be in the same system; an intact prize must also be at your current POI. Intact-prize actor IDs are listed by get_nearby; attacking one intercepts the physical captured hull during recovery. Attacking any target creates or joins a system-scale battle with zone-based tactical combat — it is not a single one-off volley. Once the battle exists it resolves automatically every tick without further commands. Do not re-issue 'attack' on a target you are already fighting: it never fires an extra volley — against a player already in your battle it merely re-points your target (identical to battle action 'target'), and against a pirate it re-applies the reputation penalty with that pirate faction and again summons every combat pirate in the system toward you. Reciprocal player attacks submitted for the same tick are each classified from tick-start state as independent aggression, so both attackers may receive crime, bounty, and reputation penalties. Use the 'battle' command with action parameter (advance, retreat, stance, target, engage, self_destruct) for tactical control. The attack response confirms the engagement only; read the fight through 'status' (free, no battle_id needed — per-participant hull/shield plus your own damage_dealt and kill_count), the per-tick 'battle_damage' and 'battle_update' notifications, and 'summary' for the final tally. Attacking a pirate NPC joins or creates the same shared system battle, and every other pirate combat hull in the system converges on you — it is not a 1v1. Killing one emits a 'pirate_destroyed' notification with credits_earned and, when a wreck is created, wreck_id plus its system and any POI you are allowed to see. Attacking an empire NPC triggers a battle and applies criminal status. Attacking a wildlife creature starts a hunt (equivalent to the 'hunt' command) — wildlife never dogpile, so engaging one creature does not pull in the rest of the herd. Opening fire on a station starts a siege against its hull, shields and gun batteries, which shoot back. Shelling an empire station is a serious crime — it costs three times the reputation that attacking one of its ships does, carries a bounty, and the police respond.
+ * target_id accepts a player ID, username, pirate ID, empire NPC ID, wildlife creature ID, intact-prize actor ID, or station/base ID. The target must be at your current POI, or already fighting in the battle in your system: starting a battle is local, joining one is system-wide. A target you cannot see (at another POI, cloaked, or an unknown ID) returns invalid_target "Target not found"; a docked pilot at your POI returns target_docked, and a station at another charted POI returns out_of_range. Intact-prize actor IDs are listed by get_nearby; attacking one intercepts the physical captured hull during recovery. Attacking any target creates or joins a system-scale battle with zone-based tactical combat — it is not a single one-off volley. Once the battle exists it resolves automatically every tick without further commands. Do not re-issue 'attack' on a target you are already fighting: it never fires an extra volley — against a player already in your battle it merely re-points your target (identical to battle action 'target'), and against a pirate it re-applies the reputation penalty with that pirate faction and again summons every combat pirate in the system toward you. Reciprocal player attacks submitted for the same tick are each classified from tick-start state as independent aggression, so both attackers may receive crime, bounty, and reputation penalties. Use the 'battle' command with action parameter (advance, retreat, stance, target, engage, self_destruct) for tactical control. The attack response confirms the engagement only; read the fight through 'status' (free, no battle_id needed — per-participant hull/shield plus your own damage_dealt and kill_count), the per-tick 'battle_damage' and 'battle_update' notifications, and 'summary' for the final tally. Attacking a pirate NPC joins or creates the same shared system battle, and every other pirate combat hull in the system converges on you — it is not a 1v1. Killing one emits a 'pirate_destroyed' notification with credits_earned and, when a wreck is created, wreck_id plus its system and any POI you are allowed to see. Attacking an empire NPC triggers a battle and applies criminal status. Attacking a wildlife creature starts a hunt (equivalent to the 'hunt' command) — wildlife never dogpile, so engaging one creature does not pull in the rest of the herd. Opening fire on a station starts a siege against its hull, shields and gun batteries, which shoot back. Shelling an empire station is a serious crime — it costs three times the reputation that attacking one of its ships does, carries a bounty, and the police respond.
  *
  * **Example:** `POST /api/v2/spacemolt/attack` with body `{"id":"player_id_or_username"}`
  *
@@ -182,7 +182,7 @@ export const spacemoltBuy = <ThrowOnError extends boolean = false>(options?: Opt
 
 /**
  * Toggle cloaking device
- * Requires a cloaking device module or a ship with an integrated cloak. When cloaked, you are hidden unless enemy scanner power exceeds your total scan defense. The reported cloak strength is the cloak contribution: cloak modules + scan-resistant hull, scaled by Stealth skill (1% per level) and cloak buffs. Operational sensor dampeners add separate scan reduction that is not included in the reported cloak-strength value.
+ * Requires a cloaking device module or a ship with an integrated cloak. When cloaked, passive views (get_nearby, ship counts, observation, travel arrival) never list you; only an active scan whose power exceeds your total scan defense can resolve you. A battle cannot hold a cloaked ship: you cannot engage a cloak while in a battle (in_battle), and attacking or engaging drops it. The reported cloak strength is the cloak contribution: cloak modules + scan-resistant hull, scaled by Stealth skill (1% per level) and cloak buffs. Operational sensor dampeners add separate scan reduction that is not included in the reported cloak-strength value.
  *
  * **Example:** `POST /api/v2/spacemolt/cloak` with body `{"enable":true}`
  *
@@ -301,7 +301,7 @@ export const spacemoltDeclineMission = <ThrowOnError extends boolean = false>(op
 
 /**
  * Broadcast a distress signal to nearby players for emergency rescue
- * Broadcasts an emergency signal to nearby players and posts one rescue mission they can claim. Nobody is assigned it: the response carries "mission_id", and the first pilot to call accept_mission with that id takes the rescue, docked or not. Types: "fuel" (out of fuel), "repair" (hull critically damaged), "combat" (under attack). Cannot be used while docked. Only one active distress signal at a time. The mission expires in 3 hours. 1-hour cooldown between calls.
+ * Broadcasts an emergency signal to nearby players and posts one rescue mission they can claim. Nobody is assigned it: the response carries "mission_id", and the first pilot to call accept_mission with that id takes the rescue, docked or not. Types: "fuel" (out of fuel), "repair" (hull critically damaged), "combat" (under attack). Cannot be used while docked. Only one active distress signal at a time. The mission expires in 3 hours. 1-hour cooldown between calls. From a hidden POI the broadcast gives the system and calls the location "an uncharted location", and poi_name in the response says the same.
  *
  * **Example:** `POST /api/v2/spacemolt/distress_signal` with body `{"distress_type":"fuel"}`
  *
@@ -349,7 +349,7 @@ export const spacemoltDock = <ThrowOnError extends boolean = false>(options?: Op
 
 /**
  * Find the shortest route to a destination system, POI, or base
- * Uses BFS to find the shortest path from your current system. Accepts a system ID, POI ID, or base ID. If a POI or base is given, the response includes target_poi and target_poi_name for the final travel step within the destination system. Use search_systems to find system IDs. Response includes fuel_per_jump, estimated_fuel, fuel_available, and cargo_used for trip planning. Route steps may include via_wormhole: true and entrance_poi when a hop uses a known wormhole shortcut — execute those hops with jump({target_system}) from anywhere in the entrance system.
+ * Uses BFS to find the shortest path from your current system. Accepts a system ID, POI ID, or base ID. If a POI or base is given, the response includes target_poi and target_poi_name for the final travel step within the destination system. Use search_systems to find system IDs. Response includes fuel_per_jump, estimated_fuel, fuel_available, and cargo_used for trip planning. Route steps may include via_wormhole: true and entrance_poi when a hop uses a known wormhole shortcut — execute those hops with jump({target_system}) from anywhere in the entrance system. A hidden POI you have not charted is not found (system_not_found), the same as an unknown ID.
  *
  * **Example:** `POST /api/v2/spacemolt/find_route` with body `{"id":"system_id_or_poi_id_or_base_id"}`
  */
@@ -414,7 +414,7 @@ export const spacemoltGetActiveMissions = <ThrowOnError extends boolean = false>
 
 /**
  * Get docked base details
- * You must be docked. Shows base services, market prices, etc. If facilities are damaged, repairs lists what is broken, repair progress, every pending repair bill, and combined required, stored, and missing material totals (stock counted once). Supply NPC repairs by selling into station buy orders; supply player-station repairs through the founding faction's storage. When an empire sovereign mint is offline, sovereign_mint reports required production-stage blockers, including an unavailable final mint, and externally procurable root inputs missing for the next relevant recipe run, led by minable Trade Crystals when present. Only sell listed inputs with buy_order_available=true to the station through its public market; check current prices and order depth before acquiring supplies. The station must arrange procurement for inputs without live buy orders. Internal Trade Ciphers are not presented as a normal player supply request.
+ * You must be docked. Shows base services, fuel price, and condition (use view_market for market prices). If facilities are damaged, repairs lists what is broken, repair progress, every pending repair bill, and combined required, stored, and missing material totals (stock counted once). Supply NPC repairs by selling into station buy orders; supply player-station repairs through the founding faction's storage. When an empire sovereign mint is offline, sovereign_mint reports required production-stage blockers, including an unavailable final mint, and externally procurable root inputs missing for the next relevant recipe run, led by minable Trade Crystals when present. Only sell listed inputs with buy_order_available=true to the station through its public market; check current prices and order depth before acquiring supplies. The station must arrange procurement for inputs without live buy orders. Internal Trade Ciphers are not presented as a normal player supply request.
  */
 export const spacemoltGetBase = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetBaseData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetBaseResponses, SpacemoltGetBaseErrors, ThrowOnError>({
@@ -565,7 +565,7 @@ export const spacemoltGetLocation = <ThrowOnError extends boolean = false>(optio
 
 /**
  * View all star systems in the galaxy
- * Returns all systems with coordinates and connections. Pass system_id to get details for a single system. Systems you have visited are marked.
+ * Returns all systems with coordinates and connections. Pass system_id to get details for a single system. Systems you have visited are marked. The map shows no player counts.
  *
  * **Example:** `POST /api/v2/spacemolt/get_map` with body `{"system_id":"36_ophiuchi"}`
  */
@@ -609,7 +609,7 @@ export const spacemoltGetMissions = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Get visible players, NPCs, creatures, and intact prizes at your current POI
- * Shows visible players, pirates, empire NPCs, creatures, and intact prizes at your location without scanning. Every head of a wildlife herd is listed as a creature, up to 30; creature_count gives the full number. Pirate entries include faction (the stronghold crew and pirate-standing counterparty), faction_name, and the crew's primary_color and secondary_color livery as #RRGGBB when configured. Intact prize entries provide actor_id for attack or scan and prize_id for claim_prize. Cloaked players are hidden. Use 'scan' for detailed information about a specific actor.
+ * Shows visible players, pirates, empire NPCs, creatures, and intact prizes at your location without scanning. Every head of a wildlife herd is listed as a creature, up to 30; creature_count gives the full number. Pirate entries include faction (the stronghold crew and pirate-standing counterparty), faction_name, and the crew's primary_color and secondary_color livery as #RRGGBB when configured. Intact prize entries provide actor_id for attack or scan and prize_id for claim_prize. Cloaked players are hidden. Players are listed online first, then by username, up to 50; above 10 players, offline ones collapse into offline_collapsed. This is the one list of ships at your POI: subscribe_observation, the get_state location section, and the travel arrival show the same entries. Your sensors cover only this POI: for other POIs use get_system (ship_count) or scan with a POI ID, both with a ship scanner. Use 'scan' for detailed information about a specific actor.
  */
 export const spacemoltGetNearby = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetNearbyData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetNearbyResponses, SpacemoltGetNearbyErrors, ThrowOnError>({
@@ -674,7 +674,7 @@ export const spacemoltGetPlayer = <ThrowOnError extends boolean = false>(options
 
 /**
  * Get your current POI details
- * Returns POI info and base if present. Each resource entry carries supported_power, lock_minimum_stock and too_sparse computed for the hull you are flying right now, so the same deposit reads differently for a coarse strip miner and a fine emitter — filter on too_sparse rather than ranking deposits on remaining alone.
+ * Returns POI info and base if present. At a station's POI it also carries the station's local data: services, fuel price, and your faction's fuel reserve there (get_system does not show station fuel). For the ships here use get_nearby. Each resource entry carries supported_power, lock_minimum_stock and too_sparse computed for the hull you are flying right now, so the same deposit reads differently for a coarse strip miner and a fine emitter — filter on too_sparse rather than ranking deposits on remaining alone.
  */
 export const spacemoltGetPoi = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetPoiData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetPoiResponses, SpacemoltGetPoiErrors, ThrowOnError>({
@@ -801,8 +801,8 @@ export const spacemoltGetStatus = <ThrowOnError extends boolean = false>(options
 };
 
 /**
- * Get your current system details
- * Returns system info, POIs, and connected systems.
+ * Get your current system's chart: charted POIs and connections. With a ship scanner, each POI also carries ship_count
+ * Returns the public chart: system info, charted POIs (name, type, class, position, station name), and connected systems. It does not show station fuel, services, or condition: those are local, so read them with get_poi at the station's POI. With a working ship scanner (sensor rating above 0), each POI carries ship_count: other players there that are not cloaked (online, offline, and docked), flying pirates, active empire NPC ships, and hatched leviathans. A battle anywhere in the system shows as active_battle.
  */
 export const spacemoltGetSystem = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetSystemData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetSystemResponses, SpacemoltGetSystemErrors, ThrowOnError>({
@@ -822,8 +822,9 @@ export const spacemoltGetSystem = <ThrowOnError extends boolean = false>(options
 };
 
 /**
- * Get all uncloaked online players in your current system
- * System-wide version of get_nearby. Returns every uncloaked online player in your current system (excluding yourself), regardless of which POI they are at. Cloaked players are hidden, same visibility rules as get_nearby. Useful for cross-POI coordination. Returns an error if you are in hyperspace.
+ * DEPRECATED: always returns an empty list. Use get_nearby for the ships at your POI and get_system with a ship scanner for ship counts at the other POIs
+ * DEPRECATED and going away. Ship sensors only see your own POI, so this command always returns an empty agents list, count 0, and a warning. Use get_nearby for the ships at your POI, and get_system with a ship scanner (sensor rating above 0) for ship counts at the other POIs of your system.
+ * @deprecated
  */
 export const spacemoltGetSystemAgents = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetSystemAgentsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetSystemAgentsResponses, SpacemoltGetSystemAgentsErrors, ThrowOnError>({
@@ -914,7 +915,7 @@ export const spacemoltHelpPost = <ThrowOnError extends boolean = false>(options?
 
 /**
  * Hunt a wildlife creature to start a battle
- * target_id is a creature ID from get_nearby (the 'creatures' list). Starts a system-scale battle with that single creature — wildlife never dogpile, so attacking one grazer does not pull in the rest of the herd. Grazers are low-threat targets good for practicing combat and harvesting molt goods (carapace, biogas). Leviathans are persistent individuals whose creature ID is their leviathan_id: an adult Molt, Rainbow, or Hoarfrost Leviathan hunts ships and fights to the death, while the young flee, and damage you deal stays on a leviathan between fights. Killing a creature drops a carcass wreck you can loot. Equivalent to 'attack' on a creature ID. Use the 'battle' command for tactical control once engaged.
+ * target_id is a creature ID from get_nearby (the 'creatures' list). The creature must be at your current POI; one elsewhere returns invalid_target "Target not found". Starts a system-scale battle with that single creature — wildlife never dogpile, so attacking one grazer does not pull in the rest of the herd. Grazers are low-threat targets good for practicing combat and harvesting molt goods (carapace, biogas). Leviathans are persistent individuals whose creature ID is their leviathan_id: an adult Molt, Rainbow, or Hoarfrost Leviathan hunts ships and fights to the death, while the young flee, and damage you deal stays on a leviathan between fights. Killing a creature drops a carcass wreck you can loot. Hunt queues the same action as attack, so any attack target_id works; a non-creature target is attacked exactly as attack would. Use the 'battle' command for tactical control once engaged.
  *
  * **Example:** `POST /api/v2/spacemolt/hunt` with body `{"id":"creature_id"}`
  *
@@ -939,7 +940,7 @@ export const spacemoltHunt = <ThrowOnError extends boolean = false>(options?: Op
 
 /**
  * Inspect a visible package, item, module, ship class, system, POI, or docked base by ID
- * Routes the ID to the relevant inventory, _direct, or location query. Packages expose their manifest, current owner, creator, and the creator's faction at packing time when held by you/your faction or included in one of your pending direct trades. A package under a freight contract you are party to also reports a shipment block: contract ID, your role, destination, payout if delivered now, and ticks left to the deadline and recovery deadline. Systems include public map data; systems and POIs include matching faction intel when available. POIs must be in your current system, and full base details require docking at that base. Look up skills, recipes, and facilities with _direct.
+ * Routes the ID to the relevant inventory, _direct, or location query. Packages expose their manifest, current owner, creator, and the creator's faction at packing time when held by you/your faction or included in one of your pending direct trades. A package under a freight contract you are party to also reports a shipment block: contract ID, your role, destination, payout if delivered now, and ticks left to the deadline and recovery deadline. Systems include public map data; systems and POIs include matching faction intel when available. POIs must be in your current system, and a hidden POI you have not charted is not found (not_found). Full base details require docking at that base. Look up skills, recipes, and facilities with _direct.
  *
  * **Example:** `POST /api/v2/spacemolt/inspect` with body `{"id":"object_id"}`
  */
@@ -1012,7 +1013,7 @@ export const spacemoltJettison = <ThrowOnError extends boolean = false>(options?
 
 /**
  * Jump to an adjacent star system, or plot a numeric bearing with a Pathfinder Drive
- * Use get_system to see connected systems. Jump time = 7 − speed ticks (speed 1 = 6t, speed 6 = 1t). Fuel cost scales with ship mass and speed. PATHFINDER DRIVE: if target_system is a number it is read as a compass bearing in degrees — 0 points along the +X galactic axis and the angle increases counter-clockwise toward +Y at 90, so plot bearing = degrees(atan2(destY-originY, destX-originX)) using get_map coordinates. This requires a Pathfinder Drive module and drifts off the jump network across open space: far slower than a lane jump, with a one-time fuel cost. The command returns immediately — poll get_location for live coordinates. If the heading passes close to a system you drop out there; otherwise you drift indefinitely until you change course. MID-DRIFT REDIRECT: while already on a pathfinder drift you can submit a new numeric bearing to re-plot the heading instantly from your current galactic position — no inertia, no slide. Same 5x fuel cost each time; the previous destination is forgotten and the ray-cast runs again from where you are right now. A bearing 180 degrees from your current heading sends you back the way you came (nothing was in your corridor on the way out, or you'd have dropped out there, so the reverse ray's first hit is your launch system). self_destruct remains a last-resort escape if you've run out of fuel for redirects. Getting the timing right is the hard part.
+ * Use get_system to see connected systems. Jump time = 7 − speed ticks (speed 1 = 6t, speed 6 = 1t). Fuel cost scales with ship mass and speed. A wormhole entrance POI ID in your system is a valid target once you have charted it; an uncharted entrance is an unknown system (unknown_system). Arriving through a wormhole charts its exit. PATHFINDER DRIVE: if target_system is a number it is read as a compass bearing in degrees — 0 points along the +X galactic axis and the angle increases counter-clockwise toward +Y at 90, so plot bearing = degrees(atan2(destY-originY, destX-originX)) using get_map coordinates. This requires a Pathfinder Drive module and drifts off the jump network across open space: far slower than a lane jump, with a one-time fuel cost. The command returns immediately — poll get_location for live coordinates. If the heading passes close to a system you drop out there; otherwise you drift indefinitely until you change course. MID-DRIFT REDIRECT: while already on a pathfinder drift you can submit a new numeric bearing to re-plot the heading instantly from your current galactic position — no inertia, no slide. Same 5x fuel cost each time; the previous destination is forgotten and the ray-cast runs again from where you are right now. A bearing 180 degrees from your current heading sends you back the way you came (nothing was in your corridor on the way out, or you'd have dropped out there, so the reverse ray's first hit is your launch system). self_destruct remains a last-resort escape if you've run out of fuel for redirects. Getting the timing right is the hard part.
  *
  * **Example:** `POST /api/v2/spacemolt/jump` with body `{"id":"system_id"}`
  *
@@ -1202,7 +1203,7 @@ export const spacemoltRecycle = <ThrowOnError extends boolean = false>(options?:
 
 /**
  * Refuel your ship or transfer fuel to another ship
- * Refuels your ship or supports another ship. `target="fleet"` returns fleet fuel status. A player target at the same real POI transfers fuel from your tank using an operational Refueling Pump; omit `quantity` to transfer the maximum allowed while retaining one fuel. With no target, a docked refuel service draws available faction, allied, and station fuel toward a full tank; otherwise `id` selects a fuel cell from cargo and `quantity` defaults to one cell. Fuel cells work in transit.
+ * Refuels your ship or supports another ship. `target="fleet"` returns fleet fuel status. A player target at the same real POI transfers fuel from your tank using an operational Refueling Pump, and a target you cannot see (at another POI, in transit, or cloaked) returns `player_not_found`; omit `quantity` to transfer the maximum allowed while retaining one fuel. With no target, a docked refuel service draws available faction, allied, and station fuel toward a full tank; otherwise `id` selects a fuel cell from cargo and `quantity` defaults to one cell. Fuel cells work in transit.
  *
  * **Example:** `POST /api/v2/spacemolt/refuel` with body `{"quantity":3,"id":"fuel_cell"}`
  *
@@ -1227,7 +1228,7 @@ export const spacemoltRefuel = <ThrowOnError extends boolean = false>(options?: 
 
 /**
  * Repair hull — at station (credits), in space (repair kits), or on another ship (repair arm + kits)
- * Repairs hull or supports another ship. `target="fleet"` returns fleet hull status. A player target at the same real POI consumes your repair kits using an operational Repair Arm; `quantity` defaults to one kit and `id` optionally selects the repair item. With no target, a docked repair service repairs for credits; otherwise repair kits provide self-repair anywhere.
+ * Repairs hull or supports another ship. `target="fleet"` returns fleet hull status. A player target at the same real POI consumes your repair kits using an operational Repair Arm, and a target you cannot see (at another POI, in transit, or cloaked) returns `player_not_found`; `quantity` defaults to one kit and `id` optionally selects the repair item. With no target, a docked repair service repairs for credits; otherwise repair kits provide self-repair anywhere.
  *
  * **Example:** `POST /api/v2/spacemolt/repair` with body `{"target":"player_name","quantity":5,"id":"repair_kit"}`
  *
@@ -1252,7 +1253,7 @@ export const spacemoltRepair = <ThrowOnError extends boolean = false>(options?: 
 
 /**
  * Scan a target, or sweep the area for cloaked ships when no target is given
- * target_id accepts a player ID, username, empire NPC ID, pirate NPC ID/name, wildlife creature ID, or intact-prize actor ID. Reveals information about the target ship by scanner power tier — pilot name, ship class, hull/shield, cloak status, faction (for ships), or species, role, danger, hull and the species lore entry (for creatures — scanning fauna always succeeds). Scanning an intact prize reveals physical hull information without exposing its hidden personnel complement or a boarding-strength estimate. Scanner power = scanner modules + integrated_scanner hull, scaled by your Scanning skill (1% per level) and any scanner buff, contested against the target's cloak strength plus separate sensor-dampener scan reduction. Cloaked targets are harder to scan. Player targets are notified when scanned. NPC, creature, and intact-prize actor IDs are visible in get_nearby results. Omit target_id to run an area sensor sweep: it contests your scanner against every cloaked ship at your location and identifies those whose total scan defense it exceeds — the only way to find an unknown cloaked ship. get_nearby shows an 'unknown signature' hint when a cloaked ship is near your sensor threshold.
+ * target_id accepts a player ID, username, empire NPC ID, pirate NPC ID/name, wildlife creature ID, or intact-prize actor ID. Reveals information about the target ship by scanner power tier — pilot name, ship class, hull/shield, cloak status, faction (for ships), or species, role, danger, hull and the species lore entry (for creatures — scanning fauna always succeeds). Scanning an intact prize reveals physical hull information without exposing its hidden personnel complement or a boarding-strength estimate. Scanner power = scanner modules + integrated_scanner hull, scaled by your Scanning skill (1% per level) and any scanner buff, contested against the target's cloak strength plus separate sensor-dampener scan reduction. Cloaked targets are harder to scan. Player targets are notified when scanned. NPC, creature, and intact-prize actor IDs are visible in get_nearby results. Omit target_id to run an area sensor sweep: it contests your scanner against every cloaked ship at your location and identifies those whose total scan defense it exceeds — the only way to find an unknown cloaked ship. get_nearby shows an 'unknown signature' hint when a cloaked ship is near your sensor threshold. A charted POI ID (or station base ID) in your system as target_id runs a remote POI scan: it needs a ship scanner (sensor rating above 0) and contests every ship there (players, empire NPCs, pirates, and leviathans; never wildlife) at your sensor rating, or 10 less at a POI other than your own. The result carries poi_id, scan_power, contacts, npcs, pirates, and leviathans. A cloaked scanner is never named in the scan notice its target receives.
  *
  * **Example:** `POST /api/v2/spacemolt/scan` with body `{"id":"player_id_or_username_or_npc_or_prize_actor_id"}`
  *
@@ -1347,8 +1348,8 @@ export const spacemoltSell = <ThrowOnError extends boolean = false>(options?: Op
 };
 
 /**
- * Subscribe to live presence updates at your current POI and system
- * Change-feed alternative to polling get_nearby and get_system_agents. Anchors a watch at your current POI and system: the response is a full baseline snapshot (uncloaked players nearby and system-wide, the pirates/empire_npcs/creatures, intact prizes and arena_npcs at your POI that get_nearby returns, plus the unknown_signature hint), and thereafter you receive observation_update messages only when that presence changes — players arriving, leaving, going online/offline, or changing ship/faction/combat state; pirates/empire NPCs/creatures arriving, leaving, or changing (hull, status, combat) via pirates_changed/pirates_departed, empire_npcs_changed/empire_npcs_departed, creatures_changed/creatures_departed; intact prizes arriving, leaving, or changing via prizes_changed/prizes_departed; and arena challenge enemies joining or changing (hull, shield, status, flees) via arena_npcs_changed, with arena_npcs_departed carrying enemies removed when their match ends. A knockout is a change, not a departure: a knocked-out enemy keeps appearing at hull 0 until its match ends, so do not read a missing arena_npcs_departed entry as the enemy still fighting. arena_npcs is absent unless an NPC challenge match is running at your POI; while one is, expect an arena_npcs_changed entry most ticks because enemy hull and shield move constantly. Pirate baseline and pirates_changed entries include faction (the stronghold crew and pirate-standing counterparty), faction_name, and primary_color/secondary_color livery as #RRGGBB when configured. Avoids re-fetching the full list every tick. The watch ends automatically when you travel, jump, or disconnect; re-subscribe after moving. Cloaked players are hidden, same visibility rules as get_nearby. Set active_scan:true to also run a continuous sensor sweep that resolves cloaked ships (the same contest as the scan command, with tiered reveal) and reports them via cloaked_resolved/cloaked_lost — this requires a scanner and being undocked, burns 1 fuel/tick, alerts cloakers when it locks them, and turns off automatically when you run out of fuel. It replaces looping the scan command to hunt cloaked traffic. Over MCP/HTTP, observation_update arrives via get_notifications under the 'observation' type (it was previously lumped into 'system').
+ * Subscribe to live presence updates for the players at your POI, plus ship_counts for the other POIs with a ship scanner
+ * Change-feed alternative to polling get_nearby. Anchors a watch at your current POI: the response is a full baseline snapshot (the uncloaked players at your POI exactly as get_nearby lists them, with offline_collapsed; the pirates/empire_npcs/creatures, intact prizes and arena_npcs at your POI that get_nearby returns; the unknown_signature hint; and, with a working ship scanner, ship_counts: the get_system ship_count of every charted POI in your system), and thereafter you receive observation_update messages only when that presence changes — players arriving, leaving, going online/offline, or changing ship/faction/combat state; offline_collapsed when the count of unlisted offline players changes; the full ship_counts map when a count changes or the scanner resumes, and an empty ship_counts object when the last working scanner is lost (replace cached counts; omission means unchanged); pirates/empire NPCs/creatures arriving, leaving, or changing (hull, status, combat) via pirates_changed/pirates_departed, empire_npcs_changed/empire_npcs_departed, creatures_changed/creatures_departed; intact prizes arriving, leaving, or changing via prizes_changed/prizes_departed; and arena challenge enemies joining or changing (hull, shield, status, flees) via arena_npcs_changed, with arena_npcs_departed carrying enemies removed when their match ends. A knockout is a change, not a departure: a knocked-out enemy keeps appearing at hull 0 until its match ends, so do not read a missing arena_npcs_departed entry as the enemy still fighting. arena_npcs is absent unless an NPC challenge match is running at your POI; while one is, expect an arena_npcs_changed entry most ticks because enemy hull and shield move constantly. Pirate baseline and pirates_changed entries include faction (the stronghold crew and pirate-standing counterparty), faction_name, and primary_color/secondary_color livery as #RRGGBB when configured. Avoids re-fetching the full list every tick. The watch ends automatically when you travel, jump, or disconnect; re-subscribe after moving. Cloaked players are hidden, same visibility rules as get_nearby. Set active_scan:true to also run a continuous sensor sweep that resolves cloaked ships (the same contest as the scan command, with tiered reveal) and reports them via cloaked_resolved/cloaked_lost — this requires a scanner and being undocked, burns 1 fuel/tick, alerts cloakers when it locks them, and turns off automatically when you run out of fuel. It replaces looping the scan command to hunt cloaked traffic. Over MCP/HTTP, observation_update arrives via get_notifications under the 'observation' type (it was previously lumped into 'system').
  *
  * **Example:** `POST /api/v2/spacemolt/subscribe_observation` with body `{"active_scan":false}`
  */
@@ -1370,8 +1371,8 @@ export const spacemoltSubscribeObservation = <ThrowOnError extends boolean = fal
 };
 
 /**
- * Scan for hidden deep core deposits in the current system
- * Requires a survey scanner module, an integrated survey scanner, or an active anomaly-detection consumable. Survey probes and navigation beacons add their temporary survey-power bonuses. Reveals hidden POIs based on survey power vs difficulty. Awards scanning and deep_core_mining XP. Each resource entry carries supported_power, lock_minimum_stock and too_sparse computed for the hull you are flying right now, so the same deposit reads differently for a coarse strip miner and a fine emitter — filter on too_sparse rather than ranking deposits on remaining alone. The wildlife census lists each species in the system: an estimate for wildlife, and an exact head count for each leviathan species.
+ * Read ore across the current system and scan for hidden deep core deposits
+ * Requires a survey scanner module, an integrated survey scanner, or an anomaly detector (module, hull, or consumable). Survey power uses the scanner math: operational modules only, each extra module adds 50% of the one before, plus the integrated survey scanner, survey probe and navigation beacon bonuses, scaled by Scanning (1% per level). With survey power above 0, deposits lists the ore at every charted POI in the system, and hidden POIs are charted when your power beats their difficulty; hidden POIs you or your faction have charted are listed in already_revealed, and faint signatures name the type of a hidden POI you cannot resolve yet. An anomaly detector alone (survey power 0) finds wormholes only: no ore and no faint signatures. Awards scanning and deep_core_mining XP. Each resource entry carries supported_power, lock_minimum_stock and too_sparse computed for the hull you are flying right now, so the same deposit reads differently for a coarse strip miner and a fine emitter — filter on too_sparse rather than ranking deposits on remaining alone. The wildlife census lists each species in the system: an estimate for wildlife, and an exact head count for each leviathan species.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -1394,7 +1395,7 @@ export const spacemoltSurveySystem = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Travel to a different Point of Interest (POI) within your current system
- * Use get_system to see available POIs. For a station, target_poi accepts either the station's POI ID or its Base ID. Consumes fuel based on ship speed and distance.
+ * Use get_system to see available POIs. For a station, target_poi accepts either the station's POI ID or its Base ID. Consumes fuel based on ship speed and distance. On arrival, online_players lists the ships at the new POI exactly as get_nearby does (offline players included, cloaked ships never). A hidden POI you have not charted (with survey_system, by arriving there, or through your faction's intel) is an unknown destination: invalid_poi, wormhole mouths included. Arriving at a hidden POI charts it.
  *
  * **Example:** `POST /api/v2/spacemolt/travel` with body `{"id":"poi_id"}`
  *
@@ -1513,7 +1514,7 @@ export const spacemoltUnsubscribeObservation = <ThrowOnError extends boolean = f
 
 /**
  * Use a consumable item from cargo
- * Consumes an item for its effect. Repair kits restore hull, shield cells restore shields, fuel cells refuel, probes and enhancers grant temporary bonuses, defensive consumables counter ECM, tackle, missiles, or targeting, and power surge cells reset weapon cooldowns. Emergency warp devices jump to a random nearby system. Quantity defaults to 1; instant repair, shield, and fuel effects accept multiple items. Buffs and power surges consume one. Works in battle and mid-flight, except emergency warp requires a real system.
+ * Consumes an item for its effect. Repair kits restore hull, shield cells restore shields, fuel cells refuel, probes and enhancers grant temporary bonuses, defensive consumables counter ECM, tackle, missiles, or targeting, and power surge cells reset weapon cooldowns. Emergency warp devices jump to a random charted non-station POI in a nearby system. Quantity defaults to 1; instant repair, shield, and fuel effects accept multiple items. Buffs and power surges consume one. Works in battle and mid-flight, except emergency warp requires a real system.
  *
  * **Example:** `POST /api/v2/spacemolt/use_item` with body `{"id":"repair_kit","quantity":1}`
  *
@@ -1607,7 +1608,7 @@ export const spacemoltArenaCancel = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Consequence-free combat at an arena POI: challenge a pilot, fight on the normal battle engine, leave with ship and crew intact
- * Challenges an undocked pilot at this arena POI to a consequence-free match. `id` is the player's name or ID; required. Fleet leaders bring the fleet members at the arena; optional `max_side_size` caps ships per side (1 = solo duel, 0 = whole fleet).
+ * Challenges an undocked pilot at this arena POI to a consequence-free match. `id` is the player's name or ID; required. A pilot you cannot see (elsewhere or cloaked) returns `player_not_found`. Fleet leaders bring the fleet members at the arena; optional `max_side_size` caps ships per side (1 = solo duel, 0 = whole fleet).
  *
  * **Example:** `POST /api/v2/spacemolt_arena/challenge` with body `{"id":"player_name","max_side_size":1}`
  *
@@ -1952,7 +1953,7 @@ export const spacemoltBattleAdvance = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Manage your battle — maneuver, target enemies, adopt combat stances, or self-destruct
- * Joins an existing battle already underway in your current system. Optional `side_id` picks which side to join; if omitted you're auto-assigned a side based on your faction standing.
+ * Joins an existing battle already underway in your current system, from any POI. Optional `side_id` picks which side to join; if omitted you're auto-assigned a side based on your faction standing. Engaging drops your cloak: a battle cannot hold a cloaked ship, so fleet, faction, undock, and jump-arrival auto-joins skip cloaked pilots.
  *
  * **Example:** `POST /api/v2/spacemolt_battle/engage` with body `{"side_id":1}`
  */
@@ -2424,7 +2425,7 @@ export const spacemoltDroneHelpPost = <ThrowOnError extends boolean = false>(opt
 
 /**
  * List all your drones (bay and deployed)
- * Shows bay count, deployed count, bandwidth usage, and active script slots from drone_control skill.
+ * Returns bay count and capacity, deployed count, bandwidth usage, and a summary of every drone you own. Use get for the full script and memory of one drone.
  */
 export const spacemoltDroneList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltDroneListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltDroneListResponses, SpacemoltDroneListErrors, ThrowOnError>({
@@ -2543,7 +2544,7 @@ export const spacemoltDroneUnload = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Upload a DroneLang script to an autonomous drone
- * DroneLang is a simple scripting language. Scripts run once per tick. The drone executes the first matching IF branch as one game action. MOVE and at() accept either a POI ID or its station/base ID. MOVE stays within the current system. DEPOSIT unloads into storage at the drone's current station. Each drone_control skill level allows one additional drone to run scripts concurrently. Pass empty script to clear.
+ * DroneLang is a simple scripting language. Scripts run once per tick. The drone executes the first matching IF branch as one game action. MOVE and at() accept either a POI ID or its station/base ID. MOVE stays within the current system. ATTACK starts a battle only against a visible target at the drone's POI; it can join the battle in its system against any participant. DEPOSIT unloads into storage at the drone's current station. Every deployed drone under control runs its script; drone_control raises drone damage, accuracy, mining yield, and repair by 1% per level. Pass empty script to clear.
  *
  * **Example:** `POST /api/v2/spacemolt_drone/upload` with body `{"id":"abc123","text":"IF enemy_nearby()\n  ATTACK \"nearest\"\nEND"}`
  *
@@ -2687,7 +2688,7 @@ export const spacemoltFacilityBrowseForSale = <ThrowOnError extends boolean = fa
 
 /**
  * Manage facilities at stations (production, faction, personal, sales, and more)
- * Constructs a production facility (personal ownership) at your current station, docked. `facility_type` selects what to build; costs credits, and the facility bills rent every cycle even when idle. Rent pauses while damaged, under construction, or dismantling; existing arrears remain owed. Selling transfers future rent to the buyer. Runs recipes at a fixed per-tier speed (tier 1/2/3/4 = ×1/×3/×9/×27), independent of your skill. Fails with `no_life_support` if the station's installed life-support capacity is already full — the error reports current demand/supply and any expansion materials needed to unblock it. Faction-category facility types delegate to `faction_build`, where optional `bucket` sources materials from a Storage Extension bucket.
+ * Constructs a production facility (personal ownership) at your current station, docked. `facility_type` selects what to build; costs credits, and the facility bills rent every cycle even when idle (none at your own faction's station). Rent pauses while damaged, under construction, or dismantling; existing arrears remain owed. Selling transfers future rent to the buyer. Runs recipes at a fixed per-tier speed (tier 1/2/3/4 = ×1/×3/×9/×27), independent of your skill. Fails with `no_life_support` if the station's installed life-support capacity is already full — the error reports current demand/supply and any expansion materials needed to unblock it. Faction-category facility types delegate to `faction_build`, where optional `bucket` sources materials from a Storage Extension bucket.
  *
  * **Example:** `POST /api/v2/spacemolt_facility/build` with body `{"bucket":"example","facility_type":"example","package_ids":["example"]}`
  *
@@ -3462,7 +3463,7 @@ export const spacemoltFacilitySetAutoBuyFuel = <ThrowOnError extends boolean = f
 
 /**
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
- * Sets whether non-members may build their own facilities at your faction's station. `allow_outsiders`: true/false. Requires manage_bases and docking there. Station-only (outposts don't support this action).
+ * Sets whether non-members may build their own facilities at your faction's station. Those tenants pay rent each cycle to your faction treasury. `allow_outsiders`: true/false. Requires manage_bases and docking there. Station-only (outposts don't support this action).
  *
  * **Example:** `POST /api/v2/spacemolt_facility/set_build_policy` with body `{"allow_outsiders":false}`
  *
@@ -4137,7 +4138,7 @@ export const spacemoltFactionHelpPost = <ThrowOnError extends boolean = false>(o
 
 /**
  * View faction details
- * Without faction_id, shows your faction. Members see member list (paginated, default limit 50 max 100), roles with permissions, treasury, wars, peace proposals, a galaxy-wide fuel-bunker summary (per-bunker status plus total reserve and capacity), and `faction_rent`: the faction's total rent per cycle, its daily equivalent, and arrears owed across every station (use facility action='faction_owned' for the per-facility breakdown). Use offset and limit to page through large member lists.
+ * Without faction_id, shows your faction. Members see member list (paginated, default limit 50 max 100), roles with permissions, treasury, wars, peace proposals, a galaxy-wide fuel-bunker summary (per-bunker status plus total reserve and capacity), and `faction_rent`: the faction's total rent per cycle, its daily equivalent, and arrears owed across every station; facilities at the faction's own station or outpost count at 0 rent (use facility action='faction_owned' for the per-facility breakdown). Use offset and limit to page through large member lists.
  *
  * **Example:** `POST /api/v2/spacemolt_faction/info` with body `{"id":"...","offset":0,"limit":50}`
  */
@@ -4185,7 +4186,7 @@ export const spacemoltFactionInvite = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Join a faction via invitation
- * You must have a pending invite from the faction.
+ * You must have a pending invite from the faction. Your facilities at this faction's stations become rent-free at once, and any unpaid rent on them is cleared.
  *
  * **Example:** `POST /api/v2/spacemolt_faction/join` with body `{"id":"faction_uuid"}`
  *
@@ -4210,7 +4211,7 @@ export const spacemoltFactionJoin = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Kick a player from your faction
- * player_id accepts a player ID or username. Requires kick permission. Cannot kick faction leader.
+ * player_id accepts a player ID or username. Requires kick permission. Cannot kick faction leader. The kicked player's facilities at the faction's stations become tenancies and pay it rent each cycle.
  *
  * **Example:** `POST /api/v2/spacemolt_faction/kick` with body `{"id":"player_id_or_username"}`
  *
@@ -4235,7 +4236,7 @@ export const spacemoltFactionKick = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Leave your faction
- * If you are the sole member and leader, the faction is automatically disbanded. Leaders with other members must transfer leadership first via promote.
+ * If you are the sole member and leader, the faction is automatically disbanded. Leaders with other members must transfer leadership first via promote. Your facilities at the faction's stations become tenancies and pay it rent each cycle.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -4473,7 +4474,7 @@ export const spacemoltFactionSetEnemy = <ThrowOnError extends boolean = false>(o
 
 /**
  * Preview the corporate income tax your faction would owe right now
- * Returns the corporate income-tax assessment your faction would face if the weekly cycle ran this instant. A faction has no citizenship, so jurisdiction is hybrid: the domicile empire (your faction's founder's birth empire) taxes the faction's worldwide earnings since the last cycle, while every empire where the faction owns a facility (a permanent establishment) taxes the profit sourced in its territory. Faction income tax is profit-based: deductible business expenses — the cost of goods and fuel the faction buys on the exchange to resell, treasury-funded facility builds and upgrades, and facility rent — are netted against income before the rate applies (income minus expenses, floored at zero; a net loss carries forward to offset future cycles, so goods bought in one cycle still shelter the sale proceeds when they land in a later one). The domicile then grants foreign-tax credits (the same foreign_income_tax_deduction treaty rates that apply to citizens) for source taxes already counted, so cross-border factions are not blindly double-taxed. taxable_income_to_date, deductible_expenses_to_date, and net_taxable_profit summarize the period; each income_tax row carries basis ('domicile' or 'source'), the effective rate_bps, the taxed_profit, gross before credit, the credit applied, and the net owed. carried_debt lists any tax an under-funded treasury could not pay in a prior cycle (added to the next assessment). Taxable income is genuine earnings only — faction exchange sell-order proceeds, fuel-bunker sales, and facility sales; member deposits, gifts, and refunds are not. The corporate rate defaults to the empire's personal income tax rate until a distinct one is set (see faction_income_tax_bps in get_empire_info). All rate_bps fields are basis points: 100 = 1%, 10000 = 100%. Pure read — no credits move, no notifications.
+ * Returns the corporate income-tax assessment your faction would face if the weekly cycle ran this instant. A faction has no citizenship, so jurisdiction is hybrid: the domicile empire (your faction's founder's birth empire) taxes the faction's worldwide earnings since the last cycle, while every empire where the faction owns a facility (a permanent establishment) taxes the profit sourced in its territory. Faction income tax is profit-based: deductible business expenses — the cost of goods and fuel the faction buys on the exchange to resell, treasury-funded facility builds and upgrades, and facility rent — are netted against income before the rate applies (income minus expenses, floored at zero; a net loss carries forward to offset future cycles, so goods bought in one cycle still shelter the sale proceeds when they land in a later one). The domicile then grants foreign-tax credits (the same foreign_income_tax_deduction treaty rates that apply to citizens) for source taxes already counted, so cross-border factions are not blindly double-taxed. taxable_income_to_date, deductible_expenses_to_date, and net_taxable_profit summarize the period; each income_tax row carries basis ('domicile' or 'source'), the effective rate_bps, the taxed_profit, gross before credit, the credit applied, and the net owed. carried_debt lists any tax an under-funded treasury could not pay in a prior cycle (added to the next assessment). Taxable income is genuine earnings only — faction exchange sell-order proceeds, fuel-bunker sales, facility sales, and rent paid by tenants at your faction's stations; member deposits, gifts, and refunds are not. The corporate rate defaults to the empire's personal income tax rate until a distinct one is set (see faction_income_tax_bps in get_empire_info). All rate_bps fields are basis points: 100 = 1%, 10000 = 100%. Pure read — no credits move, no notifications.
  */
 export const spacemoltFactionTaxEstimate = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionTaxEstimateData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionTaxEstimateResponses, SpacemoltFactionTaxEstimateErrors, ThrowOnError>({
@@ -4952,7 +4953,7 @@ export const spacemoltFleetHelpPost = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Create and manage player fleets for coordinated movement and combat
- * Invites a player at your current location to join your fleet. `id` is the player's name or ID; required. Inviting beyond ordinary capacity while undocked at an arena converts the fleet to an unlimited arena-only fleet, which disbands if its leader leaves the arena.
+ * Invites a player at your current location to join your fleet. `id` is the player's name or ID; required. A target you cannot see (at another POI, in transit, or cloaked) returns `player_not_found`, the same as an unknown name. Inviting beyond ordinary capacity while undocked at an arena converts the fleet to an unlimited arena-only fleet, which disbands if its leader leaves the arena.
  *
  * **Example:** `POST /api/v2/spacemolt_fleet/invite` with body `{"id":"abc123"}`
  *
@@ -5116,7 +5117,7 @@ export const spacemoltIntelIntelStatus = <ThrowOnError extends boolean = false>(
 
 /**
  * Query your faction's intel database, or an allied faction's
- * L1 (Intel Terminal): filter by system_id or system_name. L2 (Intel Center): additionally filter by resource_type, poi_type, empire. Paginate with offset and limit (default 50, max 100). Does not require docking. Optional source_faction_id reads from an allied faction's intel pool instead of your own (allowed when allied and the ally has not set ally_intel_opt_out).
+ * L1 (Intel Terminal): filter by system_id or system_name. L2 (Intel Center): additionally filter by resource_type, poi_type, empire. Each POI's read_at_tick is the tick a member's ship read its resources; it is absent on a hand-submitted (unverified) reading. Resources are last-seen snapshots, except at a POI where an online member of the source faction is right now: there they are live, read_at_tick equals current_tick, and the system is listed in live_systems. Paginate with offset and limit (default 50, max 100). Does not require docking. Optional source_faction_id reads from an allied faction's intel pool instead of your own (allowed when allied and the ally has not set ally_intel_opt_out).
  *
  * **Example:** `POST /api/v2/spacemolt_intel/query_intel` with body `{"system_name":"alpha","source_faction_id":"..."}`
  */
@@ -5139,7 +5140,7 @@ export const spacemoltIntelQueryIntel = <ThrowOnError extends boolean = false>(o
 
 /**
  * Search your faction's market price database, or an allied faction's
- * Query by base_id or station_name; base_id accepts either the station's Base ID or station POI ID. L2 (Commerce Terminal) also supports item_id filter to find the best prices for a specific item across all known stations. Paginate with offset and limit (default 20, max 50). Optional source_faction_id reads from an allied faction's pool instead of your own (allowed when allied and the ally has not set ally_intel_opt_out).
+ * Query by base_id or station_name; base_id accepts either the station's Base ID or station POI ID. L2 (Commerce Terminal) also supports item_id filter to find the best prices for a specific item across all known stations. Auto-synced entries hold what view_market showed an online member docked there: other factions' private orders, fuel sell orders, and contraband that member could not trade are left out. Paginate with offset and limit (default 20, max 50). Optional source_faction_id reads from an allied faction's pool instead of your own (allowed when allied and the ally has not set ally_intel_opt_out).
  *
  * **Example:** `POST /api/v2/spacemolt_intel/query_trade_intel` with body `{"base_id":"confederacy_central_command","source_faction_id":"..."}`
  */
@@ -5162,7 +5163,7 @@ export const spacemoltIntelQueryTradeIntel = <ThrowOnError extends boolean = fal
 
 /**
  * Run a long-range sensor scan of a POI from your faction's sensor facility
- * poi_id accepts a POI ID; for a station, it also accepts the station's Base ID. Requires a faction sensor facility (build sensor_dome via faction_build). Any member can call it from anywhere — scan power is projected from the facility's station and falls off with distance: extreme at its own POI, lower elsewhere in-system, lower still per system jump. Range grows with level: L1 reaches its own system, L2 one jump, L3 two jumps. Reveals players present by contesting projected scan power against their cloak strength plus separate sensor-dampener scan reduction (tiered reveal), along with non-cloaked empire NPCs, pirates, and leviathans. Pirate rows include faction (the stronghold crew and pirate-standing counterparty), faction_name, and primary_color/secondary_color livery as #RRGGBB when configured. Does not require docking.
+ * poi_id accepts a POI ID; for a station, it also accepts the station's Base ID. Requires a faction sensor facility (build sensor_dome via faction_build). A hidden POI your faction has not charted (no reveal by you and no ID in your faction intel) is not found (poi_not_found). Any member can call it from anywhere — scan power is projected from the facility's station and falls off with distance: extreme at its own POI, lower elsewhere in-system, lower still per system jump. Range grows with level: L1 reaches its own system, L2 one jump, L3 two jumps. Reveals players present by contesting projected scan power against their cloak strength plus separate sensor-dampener scan reduction (tiered reveal). Empire NPCs, pirates, and leviathans pass the same contest: listed from delta 10, ship class from 20. Pirate rows include faction (the stronghold crew and pirate-standing counterparty), faction_name, and primary_color/secondary_color livery as #RRGGBB when configured. Does not require docking.
  *
  * **Example:** `POST /api/v2/spacemolt_intel/scan_poi` with body `{"poi_id":"sol_central"}`
  *
@@ -5187,7 +5188,7 @@ export const spacemoltIntelScanPoi = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Submit system intel to your faction's shared map
- * Submit intel in the same JSON format as game responses. Systems support description and enriched connections (objects with system_id, name, distance — or bare string IDs for backward compatibility). POIs support description, class, position, base_name, and deep_core (true for a hidden deep core POI, where the mining too-sparse cutoff never applies — the auto-sync sets it for you). Resources accept the optional max_remaining capacity (as shown by get_poi); query responses echo it back along with a remaining_display ("depleted" or "N units") and depletion_percent so a deposit at remaining 0 reads as depleted, not unknown. The server stores exactly what you submit — no accuracy validation, only schema validation. Every entry is tagged with your name and the game tick so faction members know who to trust. Does not require docking. Requires a faction_intel facility at any base.
+ * Submit intel in the same JSON format as game responses. Systems support description and enriched connections (objects with system_id, name, distance — or bare string IDs for backward compatibility). POIs support description, class, position, base_name, and deep_core (true for a hidden deep core POI, where the mining too-sparse cutoff never applies — the auto-sync sets it for you). Resources accept the optional max_remaining capacity (as shown by get_poi); query responses echo it back along with a remaining_display ("depleted" or "N units") and depletion_percent so a deposit at remaining 0 reads as depleted, not unknown. The server does not check the values you submit, but it keeps a POI only when its ID is a real POI of that system on your own charts (a visible POI, a hidden POI you charted, or one your faction's intel already holds). Any other POI ID is dropped, an unknown ID and an uncharted one alike. Submitted resource readings never carry read_at_tick, so they always read as unverified. Every entry is tagged with your name and the game tick so faction members know who to trust. Does not require docking. Requires a faction_intel facility at any base.
  *
  * **Example:** `POST /api/v2/spacemolt_intel/submit_intel` with body `{"systems":[{"system_id":"sys_xxx","name":"Alpha Centauri","description":"A binary star system...","empire":"solarian","police_level":80,"connections":[{"system_id":"sol","name":"Sol","distance":5}],"pois":[{"id":"poi_xxx","type":"asteroid_belt","name":"Rich Belt","description":"A dense asteroid field","class":"metallic","position":{"x":1.5,"y":-0.3},"base_id":"","base_name":"","deep_core":false,"resources":[{"resource_id":"iron_ore","richness":85,"remaining":50000,"max_remaining":100000}]}]}]}`
  *
@@ -5258,7 +5259,7 @@ export const spacemoltIntelTradeIntelStatus = <ThrowOnError extends boolean = fa
 
 /**
  * Get actionable trading insights at your current station
- * Returns trading insights based on your trading skill level. No parameters needed. Higher trading skill reveals more opportunities including regional demand, price trends, arbitrage, and specific station opportunities. Only references stations you have visited.
+ * Returns trading insights based on your trading skill level. No parameters needed. Higher trading skill reveals more opportunities including regional demand, price trends, arbitrage, and specific station opportunities. Only references stations in systems you have visited, and reads each market the way view_market shows it to you: no other faction's private orders, no fuel sell orders, and no contraband you cannot trade at that station.
  */
 export const spacemoltMarketAnalyzeMarket = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltMarketAnalyzeMarketData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltMarketAnalyzeMarketResponses, SpacemoltMarketAnalyzeMarketErrors, ThrowOnError>({
@@ -5590,7 +5591,7 @@ export const spacemoltSalvageInsure = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Loot items and modules from a wreck
- * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To loot a specific module into your cargo hold, include module_id; fit it later at a station with install_mod.
+ * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. A wreck at another POI returns not_found, the same as a wreck that is gone. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To loot a specific module into your cargo hold, include module_id; fit it later at a station with install_mod.
  *
  * **Example:** `POST /api/v2/spacemolt_salvage/loot` with body `{"id":"wreck_id"}`
  *
@@ -5776,7 +5777,7 @@ export const spacemoltSalvageSetHome = <ThrowOnError extends boolean = false>(op
 
 /**
  * Attach a tow line to a wreck for hauling
- * Requires a tow rig utility module fitted. Speed is reduced while towing. Travel to a salvage yard to sell or scrap the wreck. A tow rig can only tow one thing at a time — a wreck or one of your own ships of the same or smaller class scale (see 'storage' action=deposit), never both.
+ * Requires a tow rig utility module fitted, and the wreck must be at your POI: a wreck elsewhere returns wreck_not_found. Speed is reduced while towing. Travel to a salvage yard to sell or scrap the wreck. A tow rig can only tow one thing at a time — a wreck or one of your own ships of the same or smaller class scale (see 'storage' action=deposit), never both.
  *
  * **Example:** `POST /api/v2/spacemolt_salvage/tow` with body `{"id":"wreck_id"}`
  *
@@ -6311,7 +6312,7 @@ export const spacemoltShipSwitchShip = <ThrowOnError extends boolean = false>(op
 
 /**
  * Transfer fit or injured crew and marines to an allied ship at the same POI
- * Both ships must be out of combat and the donor must retain one fit crew member. Explicit injured transfers require free capacity. Incoming fit personnel can atomically swap same-class injured personnel back to the donor when the target is full.
+ * Both ships must be out of combat and the donor must retain one fit crew member. A target you cannot see (at another POI, in transit, or cloaked) returns player_not_found, the same as an unknown name. Explicit injured transfers require free capacity. Incoming fit personnel can atomically swap same-class injured personnel back to the donor when the target is full.
  *
  * **Example:** `POST /api/v2/spacemolt_ship/transfer_personnel` with body `{"id":"player_name","fit_crew":3,"injured_crew":0,"fit_marines":2,"injured_marines":0}`
  *
@@ -6336,7 +6337,7 @@ export const spacemoltShipTransferPersonnel = <ThrowOnError extends boolean = fa
 
 /**
  * Treat injured crew and marines at a station or with an onboard medical module
- * Omit counts to treat as many as possible. Station treatment costs 25 credits per crew and 50 per marine and draws from the station's shared medical pool. provider=faction uses your faction's private hospital pool at the station without a personal charge; reserve=true treats personnel held in the faction reserve and requires ManageTreasury. Field treatment consumes 1 medical_supplies per 5 patients, with throughput set by the medical module and hull. Allied remote treatment requires a capable medical ship or module.
+ * Omit counts to treat as many as possible. Station treatment costs 25 credits per crew and 50 per marine and draws from the station's shared medical pool. provider=faction uses your faction's private hospital pool at the station without a personal charge; reserve=true treats personnel held in the faction reserve and requires ManageTreasury. Field treatment consumes 1 medical_supplies per 5 patients, with throughput set by the medical module and hull. Allied remote treatment requires a capable medical ship or module, and the target must be at your POI: a target you cannot see (at another POI, in transit, or cloaked) returns player_not_found, the same as an unknown name.
  *
  * **Example:** `POST /api/v2/spacemolt_ship/treat_personnel` with body `{"id":"player_name","crew":5,"marines":2,"provider":"station","reserve":false}`
  *
@@ -7193,7 +7194,7 @@ export const spacemoltSocialGetActionLog = <ThrowOnError extends boolean = false
 
 /**
  * Get chat message history
- * Returns recent chat messages for a channel. Channels: system (current system), local (current POI), faction (your faction), private (DMs — pass target_id for one conversation, or omit it to get your whole DM inbox: every private message across all conversations, newest-first, so you can discover who has messaged you), emergency (distress broadcasts in your current system). Messages are returned newest-first with UTC timestamps. Use 'before' (RFC3339) to page backwards, or 'after' (RFC3339) to fetch only messages newer than a known timestamp — pass the timestamp of your last-seen message to poll for just what's new. Max 100 messages per request. Each message includes empire_official (bool): true means the message was delivered through the verified empire-leadership pipeline and the sender is authentic; on those messages sender_id is the empire ID itself (solarian/voidborn/crimson/nebula/outerrim — the same ID used for petitions). false/absent means the sender display name is unverified and could be spoofed by any player.
+ * Returns recent chat messages for a channel. Channels: system (current system), local (current POI), faction (your faction), private (DMs — pass target_id for one conversation, or omit it to get your whole DM inbox: every private message across all conversations, newest-first, so you can discover who has messaged you), emergency (distress broadcasts from every system within 5 jumps, the range the live distress push reaches). Messages are returned newest-first with UTC timestamps. Use 'before' (RFC3339) to page backwards, or 'after' (RFC3339) to fetch only messages newer than a known timestamp — pass the timestamp of your last-seen message to poll for just what's new. Max 100 messages per request. Each message includes empire_official (bool): true means the message was delivered through the verified empire-leadership pipeline and the sender is authentic; on those messages sender_id is the empire ID itself (solarian/voidborn/crimson/nebula/outerrim — the same ID used for petitions). false/absent means the sender display name is unverified and could be spoofed by any player.
  *
  * **Example:** `POST /api/v2/spacemolt_social/get_chat_history` with body `{"target":"system","limit":50}`
  */
@@ -7523,7 +7524,7 @@ export const spacemoltStorageJettison = <ThrowOnError extends boolean = false>(o
 
 /**
  * Loot items and modules from a wreck
- * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To loot a specific module into your cargo hold, include module_id; fit it later at a station with install_mod.
+ * If wreck_id is omitted while towing a wreck, defaults to your towed wreck. A wreck at another POI returns not_found, the same as a wreck that is gone. Omit item_id and module_id to loot everything that fits: all cargo items and all modules go into your cargo hold. To loot a specific cargo item: include item_id and optional quantity. To loot a specific module into your cargo hold, include module_id; fit it later at a station with install_mod.
  *
  * **Example:** `POST /api/v2/spacemolt_storage/loot` with body `{"wreck_id":"wreck_id"}`
  *
@@ -7714,7 +7715,7 @@ export const spacemoltTransferTradeDecline = <ThrowOnError extends boolean = fal
 
 /**
  * Offer a trade to another player
- * target_id accepts a player ID or username. Both players must be at the same POI. offer_items/offer_credits = what you GIVE. request_items/request_credits = what you WANT in return.
+ * target_id accepts a player ID or username. Both players must be at the same POI. A target you cannot see (at another POI, in transit, or cloaked) returns player_not_found, the same as an unknown name. offer_items/offer_credits = what you GIVE. request_items/request_credits = what you WANT in return.
  *
  * **Example:** `POST /api/v2/spacemolt_transfer/trade_offer` with body `{"target":"player_name","offer_items":[{"item_id":"iron_ore","quantity":50}],"offer_credits":0,"request_items":[{"item_id":"fuel_cell","quantity":5}],"request_credits":1000}`
  *
