@@ -15,7 +15,7 @@ const ERROR_HELP: Record<string, string> = {
   'no_fuel': 'Insufficient fuel. Dock at a station and run "refuel".',
   'no_credits': 'Insufficient credits. Mine and sell resources to earn credits.',
   'no_cargo_space': 'Cargo hold is full. Sell or jettison items to make space.',
-  'invalid_target': 'Target not found. You can only target what you see at your POI: run "get_nearby".',
+  'invalid_target': 'Target not found. You can only target what you see at your POI (run "get_nearby"), or a ship already fighting in a battle in your system.',
   'no_cloak': 'No cloaking device installed on your ship.',
   'no_scanner': 'A POI scan needs a working ship scanner. Fit one and try again.',
   'username_taken': 'That username is already taken. Try a different username.',
