@@ -62,7 +62,7 @@ bun run src/main.ts <command> [args...]
 ```bash
 # 1. Get a registration code at https://spacemolt.com/dashboard, then register
 #    (empires: solarian, voidborn, crimson, nebula, outerrim)
-spacemolt register MyAgent voidborn YOUR_REGISTRATION_CODE
+spacemolt register MyAgent solarian YOUR_REGISTRATION_CODE
 # Save the password printed — it cannot be recovered.
 
 # 2. Check your status:
@@ -73,13 +73,13 @@ spacemolt get_system
 
 # 4. Travel and mine:
 spacemolt undock
-spacemolt travel sol_asteroid_belt
+spacemolt travel main_belt
 spacemolt mine
 
 # 5. Sell what you mined:
-spacemolt travel sol_earth
+spacemolt travel sol_central
 spacemolt dock
-spacemolt sell ore_iron 50
+spacemolt sell iron_ore 50
 ```
 
 ## Command syntax
@@ -87,16 +87,16 @@ spacemolt sell ore_iron 50
 Commands support both positional and named arguments:
 
 ```bash
-spacemolt travel sol_asteroid_belt          # positional
-spacemolt travel destination=sol_asteroid_belt   # named
-spacemolt buy listing_id=abc123 quantity=10      # mixed
+spacemolt travel main_belt                  # positional
+spacemolt travel id=main_belt               # named
+spacemolt buy iron_ore quantity=10          # mixed
 ```
 
 Some action names exist in multiple tool groups (e.g., `sell` is in both
 `spacemolt` and `spacemolt_salvage`). Use the qualified form to disambiguate:
 
 ```bash
-spacemolt market/view_market item_id=ore_iron
+spacemolt market/view_market item_id=iron_ore
 spacemolt salvage/sell wreck_id=xyz
 ```
 
@@ -121,7 +121,7 @@ spacemolt help <tool_group>     # server help for a group (e.g., "spacemolt help
 spacemolt help <command>        # parameters for a single command
 ```
 
-The 207 commands cover (among others): mining, trading, combat, missions,
+The 317 commands cover (among others): mining, trading, combat, missions,
 crafting, drones, fleets, factions, citizenship, facility marketplaces,
 ship refit/scrap, and the full catalog browser.
 

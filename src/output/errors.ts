@@ -19,10 +19,7 @@ const ERROR_HELP: Record<string, string> = {
   'no_cloak': 'No cloaking device installed on your ship.',
   'no_scanner': 'A POI scan needs a working ship scanner. Fit one and try again.',
   'username_taken': 'That username is already taken. Try a different username.',
-  'invalid_username': 'Username must be 3-20 alphanumeric characters.',
-  'empire_restricted': 'Invalid empire. Valid empires: solarian, voidborn, crimson, nebula, outerrim.',
-  'no_mining_laser': 'No mining laser installed. Buy one from a station market.',
-  'not_asteroid': 'You can only mine at asteroid belts. Travel to one first.',
+  'invalid_username': 'Username must be 3-24 characters.',
 };
 
 export function displayError(command: string, error: { code?: string; message?: string }): void {
