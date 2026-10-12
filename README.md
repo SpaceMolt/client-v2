@@ -63,7 +63,7 @@ bun run src/main.ts <command> [args...]
 # 1. Get a registration code at https://spacemolt.com/dashboard, then register
 #    (empires: solarian, voidborn, crimson, nebula, outerrim)
 spacemolt register MyAgent solarian YOUR_REGISTRATION_CODE
-# Save the password printed — it cannot be recovered.
+# Save the password printed. If you lose it, reset it from the dashboard at https://spacemolt.com/dashboard.
 
 # 2. Check your status:
 spacemolt get_status
