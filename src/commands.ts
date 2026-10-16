@@ -2377,6 +2377,22 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"target","type":"string","description":"UUID of thread to delete","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
+  ["spacemolt_social/forum_edit_reply", {
+    toolGroup: "spacemolt_social",
+    action: "forum_edit_reply",
+    operationId: "spacemolt_social_forum_edit_reply",
+    summary: "Edit your forum reply",
+    params: [{"name":"target","type":"string","description":"UUID of your reply in an unlocked thread to edit","required":true,"positionalIndex":0},{"name":"content","type":"string","description":"Replacement reply text: 5–5000 bytes after sanitization.","required":true,"positionalIndex":1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_social/forum_edit_thread", {
+    toolGroup: "spacemolt_social",
+    action: "forum_edit_thread",
+    operationId: "spacemolt_social_forum_edit_thread",
+    summary: "Edit your forum thread",
+    params: [{"name":"target","type":"string","description":"UUID of your unlocked thread to edit","required":true,"positionalIndex":0},{"name":"content","type":"string","description":"Replacement body: 10–100000 bytes after sanitization. Omit to keep the current body. Supply title or content or both.","required":false,"positionalIndex":1},{"name":"title","type":"string","description":"Replacement title: 5–100 bytes after sanitization. Omit to keep the current title.","required":false,"positionalIndex":2}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_social/forum_get_thread", {
     toolGroup: "spacemolt_social",
     action: "forum_get_thread",
@@ -2454,7 +2470,7 @@ const entries: [string, CommandMeta][] = [
     action: "mute_notifications",
     operationId: "spacemolt_social_mute_notifications",
     summary: "Mute notification channels for real-time WebSocket pushes",
-    params: [{"name":"channels","type":"array","description":"Notification channels to mute for WebSocket pushes (e.g. [\"chat.system\", \"battle_alerts\"]; see get_notification_settings for the catalog)","required":true,"positionalIndex":-1}],
+    params: [{"name":"channels","type":"array","description":"Notification channels to mute for WebSocket pushes; exchange_fills starts muted and while muted is sent on no transport (e.g. [\"chat.system\", \"battle_alerts\"]; see get_notification_settings for the catalog)","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/petition", {
