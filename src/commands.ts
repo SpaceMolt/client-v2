@@ -1161,6 +1161,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'faction_dismantle', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1}],
     isAmbiguous: true,
   }],
+  ["spacemolt_facility/reset_contraband", {
+    toolGroup: "spacemolt_facility",
+    action: "reset_contraband",
+    operationId: "spacemolt_facility_reset_contraband",
+    summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
+    params: [],
+    isAmbiguous: false,
+  }],
   ["spacemolt_facility/set_access", {
     toolGroup: "spacemolt_facility",
     action: "set_access",
@@ -1183,6 +1191,14 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_facility_set_build_policy",
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
     params: [{"name":"allow_outsiders","type":"boolean","description":"Whether non-members may build facilities here (set_build_policy)","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_facility/set_contraband", {
+    toolGroup: "spacemolt_facility",
+    action: "set_contraband",
+    operationId: "spacemolt_facility_set_contraband",
+    summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
+    params: [{"name":"contraband_items","type":"array","description":"Replacement contraband item IDs for this player-owned station or mobile base (set_contraband). Required for set_contraband; [] allows all items. reset_contraband restores defaults. Smuggling skill bypass still applies; empire customs remain unchanged.","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_description", {
@@ -2422,7 +2438,7 @@ const entries: [string, CommandMeta][] = [
     action: "forum_upvote",
     operationId: "spacemolt_social_forum_upvote",
     summary: "Upvote a thread or reply",
-    params: [{"name":"target","type":"string","description":"UUID of thread (required)","required":true,"positionalIndex":0},{"name":"reply_id","type":"string","description":"UUID of reply (optional - omit to upvote thread)","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"UUID of thread (required). With reply_id it must be the reply's thread.","required":true,"positionalIndex":0},{"name":"reply_id","type":"string","description":"UUID of a reply in thread_id to upvote instead of the thread (optional - omit to upvote thread). Your own posts cannot be upvoted.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/get_action_log", {
