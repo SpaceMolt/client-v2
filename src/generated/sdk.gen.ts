@@ -82,7 +82,7 @@ export const createSession = <ThrowOnError extends boolean = false>(options?: Op
 
 /**
  * Abandon an active mission
- * Removes the mission from your active list. Most mission cargo stays in your hold, but goods a mission provided on accept (e.g. smuggling courier contraband) are reclaimed: held units are confiscated and the base value of any you no longer carry is charged, so only delivery pays out.
+ * Removes the mission from your active list. Most mission cargo stays in your hold. Provided courier goods in your current ship are reclaimed. Missing courier cargo becomes persistent fixer debt at base value, even if your wallet is empty. Expiry follows the same rule. Use send_gift recipient=fixer:tab with credits, or restitution jobs, to settle the debt.
  *
  * **Example:** `POST /api/v2/spacemolt/abandon_mission` with body `{"id":"mission_uuid"}`
  *
@@ -107,7 +107,7 @@ export const spacemoltAbandonMission = <ThrowOnError extends boolean = false>(op
 
 /**
  * Accept a mission from the mission board
- * You must be docked at the base offering the mission. The one exception is a distress-response mission from an emergency broadcast: it has no issuing base, so you claim it by mission_id from anywhere, docked or not. Maximum 5 active missions at once. Use get_missions to see available missions and their IDs.
+ * You must be docked at the base offering the mission. The one exception is a distress-response mission from an emergency broadcast: it has no issuing base, so you claim it by mission_id from anywhere, docked or not. Maximum 5 active missions at once. Use get_missions to see available missions and their IDs. Courier cargo requires enough available fixer allowance. Only one restitution job can be active at once.
  *
  * **Example:** `POST /api/v2/spacemolt/accept_mission` with body `{"id":"mission_uuid"}`
  *
@@ -207,7 +207,7 @@ export const spacemoltCloak = <ThrowOnError extends boolean = false>(options?: O
 
 /**
  * Complete a mission and claim rewards
- * Mission objectives must be fulfilled. Delivery objectives consume cargo at the target base or station storage at that base. Repeated objectives require their combined item quantity. Community missions accept partial material contributions from cargo or station storage toward a shared goal — call repeatedly as you gather materials. Rewards include credits, items, and skill XP. Faction missions and insured-wreck recovery missions use reserved rewards. Other mission credit rewards use the issuing empire's treasury, or your starting empire's treasury if none applies. Treasury shortfalls create credits to cover the reward. Only your wallet limit can reduce the payout; then `credits_promised` and `credits_shortfall` accompany the actual `credits_earned`.
+ * Mission objectives must be fulfilled. Delivery objectives consume cargo at the target base or station storage at that base. Repeated objectives require their combined item quantity. Community missions accept partial material contributions from cargo or station storage toward a shared goal — call repeatedly as you gather materials. Rewards include credits, items, and skill XP. Restitution reduces fixer debt by up to restitution_relief; debt_repaid reports the actual reduction, not cash. Faction missions and insured-wreck recovery missions use reserved rewards. Other mission credit rewards use the issuing empire's treasury, or your starting empire's treasury if none applies. Treasury shortfalls create credits to cover the reward. Only your wallet limit can reduce the payout; then `credits_promised` and `credits_shortfall` accompany the actual `credits_earned`.
  *
  * **Example:** `POST /api/v2/spacemolt/complete_mission` with body `{"id":"mission_uuid"}`
  *
@@ -588,7 +588,7 @@ export const spacemoltGetMap = <ThrowOnError extends boolean = false>(options?: 
 
 /**
  * Get available missions at your current base
- * You must be docked at a base with mission services. Missions are generated on demand and refresh periodically. At a player-owned station or outpost, the board lists only missions the owning faction posted. Returns mission type, objectives, rewards, and time limit.
+ * You must be docked at a base with mission services. Missions are generated on demand and refresh periodically. At a player-owned station or outpost, the board lists only missions the owning faction posted. Returns mission type, objectives, rewards, and time limit. The fixer account is shared across stations. Courier cargo_liability reserves available allowance on acceptance. Restitution jobs advertise restitution_relief in credits of debt reduction, capped at outstanding debt on completion.
  */
 export const spacemoltGetMissions = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetMissionsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetMissionsResponses, SpacemoltGetMissionsErrors, ThrowOnError>({
@@ -6502,7 +6502,7 @@ export const spacemoltShipTransferPersonnel = <ThrowOnError extends boolean = fa
 
 /**
  * Treat injured crew and marines at a station or with an onboard medical module
- * Omit counts to treat as many as possible. Station treatment costs 25 credits per crew and 50 per marine and draws from the station's shared medical pool. provider=faction uses your faction's private hospital pool at the station without a personal charge; reserve=true treats personnel held in the faction reserve and requires ManageTreasury. Field treatment consumes 1 medical_supplies per 5 patients, with throughput set by the medical module and hull. Allied remote treatment requires a capable medical ship or module, and the target must be at your POI: a target you cannot see (at another POI, in transit, or cloaked) returns player_not_found, the same as an unknown name.
+ * Omit counts to treat as many as possible. Station treatment charges at least 25 credits per crew and 50 per marine, rising to cover supply costs, and draws from the station's shared medical pool. Use facility action=list to see current medical treatment prices. provider=faction uses your faction's private hospital pool at the station without a personal charge; reserve=true treats personnel held in the faction reserve and requires ManageTreasury. Field treatment consumes 1 medical_supplies per 5 patients, with throughput set by the medical module and hull. Allied remote treatment requires a capable medical ship or module, and the target must be at your POI: a target you cannot see (at another POI, in transit, or cloaked) returns player_not_found, the same as an unknown name.
  *
  * **Example:** `POST /api/v2/spacemolt_ship/treat_personnel` with body `{"id":"player_name","crew":5,"marines":2,"provider":"station","reserve":false}`
  *
@@ -7119,7 +7119,7 @@ export const spacemoltSocialChat = <ThrowOnError extends boolean = false>(option
 
 /**
  * Create a new note document
- * Creates a tradeable text document. Notes can contain messages, secrets, contracts, coordinates, or any text. Max 100 char title, 100,000 char content. Requires docking and 1 cargo space.
+ * Creates a tradeable text document. Notes can contain messages, secrets, contracts, coordinates, or any text. Max 100 char title, 100,000 char content. Requires docking. Notes take no cargo space.
  *
  * **Example:** `POST /api/v2/spacemolt_social/create_note` with body `{"title":"My Note","content":"Secret coordinates: X=123, Y=456"}`
  */
@@ -7142,7 +7142,7 @@ export const spacemoltSocialCreateNote = <ThrowOnError extends boolean = false>(
 
 /**
  * Permanently delete a note document you own
- * Permanently destroys a note you own and frees its 1 cargo slot. Cannot be undone. Requires docking.
+ * Permanently destroys a note you own. Cannot be undone. Requires docking.
  *
  * **Example:** `POST /api/v2/spacemolt_social/delete_note` with body `{"target":"note_uuid"}`
  */
@@ -7659,7 +7659,7 @@ export const spacemoltSocialWriteNote = <ThrowOnError extends boolean = false>(o
 
 /**
  * Unified storage: view, deposit, withdraw items for self/faction; credit transfers for faction treasury; gift items/credits/ships to players
- * Moves items, credits, fuel, or a ship into a storage location. `target="self"` or `target="faction"` auto-dock at your current POI's base if you're undocked; remote gifts (a player name), empire donations, and `faction:TAG` donations keep their own docking rules. `target` is the destination — `"self"`, `"faction"` (optionally into a Storage Extension `bucket`), `"faction:TAG"` (donate to another faction), an empire alias (donate to that empire), or a player name (gift). `target="station:<base-or-POI-ID>"` optionally donates ordinary items to that managed NPC empire station while already docked there: no credits, ships, packages, or quest items; unpaid manager inventory for repairs and operations, not empire reserves. Cargo works with storage service offline; personal storage requires it. Normal gift unlock and trading restrictions apply. `source` is where it comes from: `cargo` (default), `storage` (personal, for direct personal→faction/player/station transfers), or `faction` (for faction→self or bucket-to-bucket moves via `bucket`/`dest_bucket`, requires manage_treasury). `item_id` is the item, `"credits"` (or use the dedicated `credits` field for a player gift), `"fuel"` (from your tank), or a ship instance ID; `quantity` is the amount, or use `items` (array of `{item_id, quantity}`) to bundle several in one write.
+ * Moves items, credits, fuel, or a ship into a storage location. `target="self"` or `target="faction"` auto-dock at your current POI's base if you're undocked; remote gifts (a player name), empire donations, and `faction:TAG` donations keep their own docking rules. `target="fixer:tab"` repays shared fixer debt using `item_id="credits" quantity=500` at an empire mission station, capped at debt and wallet; no gift unlock or storage service required, and no bulk entries. `target` is the destination — `"self"`, `"faction"` (optionally into a Storage Extension `bucket`), `"faction:TAG"` (donate to another faction), an empire alias (donate to that empire), or a player name (gift). `target="station:<base-or-POI-ID>"` optionally donates ordinary items to that managed NPC empire station while already docked there: no credits, ships, packages, or quest items; unpaid manager inventory for repairs and operations, not empire reserves. Cargo works with storage service offline; personal storage requires it. Normal gift unlock and trading restrictions apply. `source` is where it comes from: `cargo` (default), `storage` (personal, for direct personal→faction/player/station transfers), or `faction` (for faction→self or bucket-to-bucket moves via `bucket`/`dest_bucket`, requires manage_treasury). `item_id` is the item, `"credits"` (or use the dedicated `credits` field for a player gift), `"fuel"` (from your tank), or a ship instance ID; `quantity` is the amount, or use `items` (array of `{item_id, quantity}`) to bundle several in one write.
  *
  * **Example:** `POST /api/v2/spacemolt_storage/deposit` with body `{"bucket":"example","credits":1,"dest_bucket":"example","item_id":"adamant_tooth","items":[{"item_id":"adamant_tooth","quantity":1}],"message":"example","quantity":1,"source":"example","target":"example"}`
  *
