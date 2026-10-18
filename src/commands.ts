@@ -232,6 +232,14 @@ const entries: [string, CommandMeta][] = [
     params: [],
     isAmbiguous: false,
   }],
+  ["spacemolt/get_player_profile", {
+    toolGroup: "spacemolt",
+    action: "get_player_profile",
+    operationId: "spacemolt_get_player_profile",
+    summary: "Look up another pilot's public profile by username",
+    params: [{"name":"username","type":"string","description":"Username of the pilot to look up (case-insensitive)","required":true,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
   ["spacemolt/get_poi", {
     toolGroup: "spacemolt",
     action: "get_poi",
