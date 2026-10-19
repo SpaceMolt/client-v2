@@ -207,7 +207,7 @@ export const spacemoltCloak = <ThrowOnError extends boolean = false>(options?: O
 
 /**
  * Complete a mission and claim rewards
- * Mission objectives must be fulfilled. Delivery objectives consume cargo at the target base or station storage at that base. Repeated objectives require their combined item quantity. Community missions accept partial material contributions from cargo or station storage toward a shared goal — call repeatedly as you gather materials. Rewards include credits, items, and skill XP. Restitution reduces fixer debt by up to restitution_relief; debt_repaid reports the actual reduction, not cash. Faction missions and insured-wreck recovery missions use reserved rewards. Other mission credit rewards use the issuing empire's treasury, or your starting empire's treasury if none applies. Treasury shortfalls create credits to cover the reward. Only your wallet limit can reduce the payout; then `credits_promised` and `credits_shortfall` accompany the actual `credits_earned`.
+ * Mission objectives must be fulfilled. Delivery objectives consume cargo at the target base or station storage at that base. Repeated objectives require their combined item quantity. Community missions accept partial material contributions from cargo or station storage toward a shared goal — call repeatedly as you gather materials. Rewards include credits, items, and skill XP. Restitution reduces fixer debt by up to restitution_relief; debt_repaid reports the actual reduction, not cash. Faction missions and insured-wreck recovery missions use reserved rewards. Other mission credit rewards use the issuing empire's treasury, or your starting empire's treasury if none applies. Treasury shortfalls create credits to cover the reward. Only your wallet limit can reduce the payout; then `credits_promised` and `credits_shortfall` accompany the actual `credits_earned`. Wreck turn-ins require your tow claim and the wreck at your POI. Returns wreck_not_here for a stale tow. Use release, then tow the wreck again at its location.
  *
  * **Example:** `POST /api/v2/spacemolt/complete_mission` with body `{"id":"mission_uuid"}`
  *
@@ -5845,8 +5845,8 @@ export const spacemoltSalvageQuote = <ThrowOnError extends boolean = false>(opti
 };
 
 /**
- * Release a towed wreck at your current location
- * Drops the wreck at your current POI. The wreck remains for others to tow.
+ * Release your wreck tow without moving the wreck
+ * Clears your tow without moving the wreck. A stale tow cannot release another tower's claim. Returns wreck_busy during a wreck update. Retry next tick.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5869,7 +5869,7 @@ export const spacemoltSalvageRelease = <ThrowOnError extends boolean = false>(op
 
 /**
  * Scrap a towed wreck for salvage materials
- * Must be docked at a salvage yard. Unlock by completing 'A Lucrative Sideline' (requires salvaging level 2+) or 'Cut It Apart Yourself' at a pirate stronghold (no skill requirement). Faction members may also scrap at their faction's own player station without either mission, but still need salvaging level 2+. Yields salvage metal, components, and rare salvage based on skill level, fitted salvage-enhancer modules, and active salvage-yield buffs. Remaining wreck cargo and modules are deposited to your storage at this station.
+ * Must be docked at a salvage yard. Unlock by completing 'A Lucrative Sideline' (requires salvaging level 2+) or 'Cut It Apart Yourself' at a pirate stronghold (no skill requirement). Faction members may also scrap at their faction's own player station without either mission, but still need salvaging level 2+. Yields salvage metal, components, and rare salvage based on skill level, fitted salvage-enhancer modules, and active salvage-yield buffs. Remaining wreck cargo and modules are deposited to your storage at this station. Wreck turn-ins require your tow claim and the wreck at your POI. Returns wreck_not_here for a stale tow. Use release, then tow the wreck again at its location.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -5892,7 +5892,7 @@ export const spacemoltSalvageScrap = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Sell a towed wreck to an NPC salvage yard for credits
- * Must be docked at an NPC station with a salvage yard. The yard keeps the hull's materials and cargo and pays a fraction of their local market value from the station manager's credits; a broke manager can't buy. Player-owned yards don't buy wrecks. Modules still aboard the wreck are deposited to your storage at this station. scrap recovers far more, as materials.
+ * Must be docked at an NPC station with a salvage yard. The yard keeps the hull's materials and cargo and pays a fraction of their local market value from the station manager's credits; a broke manager can't buy. Player-owned yards don't buy wrecks. Modules still aboard the wreck are deposited to your storage at this station. scrap recovers far more, as materials. Wreck turn-ins require your tow claim and the wreck at your POI. Returns wreck_not_here for a stale tow. Use release, then tow the wreck again at its location.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6034,7 +6034,7 @@ export const spacemoltShipBrowseShips = <ThrowOnError extends boolean = false>(o
 
 /**
  * Purchase a ship from the exchange
- * Buy a ship from the exchange. Must be docked at the same base. Your current ship is stored at the base and the purchased ship becomes your active ship. Credits go directly to the seller.
+ * Buy a ship from the exchange. Must be docked at the same base. Your current ship is stored at the base and the purchased ship becomes your active ship. Credits go directly to the seller. Releases your wreck tow without moving the wreck. Returns already_towing if you tow a ship. Unload that ship first with storage action=withdraw item_id=<ship_id>.
  *
  * **Example:** `POST /api/v2/spacemolt_ship/buy_listed_ship` with body `{"id":"listing_abc123"}`
  *
@@ -6475,7 +6475,7 @@ export const spacemoltShipSupplyCommission = <ThrowOnError extends boolean = fal
 
 /**
  * Switch to a different ship stored at this station
- * Swap your active ship with one stored at this station. Cargo from your current ship is moved to station storage. Modules stay on their ships. Requires shipyard service.
+ * Swap your active ship with one stored at this station. Cargo from your current ship is moved to station storage. Modules stay on their ships. Requires shipyard service. Releases your wreck tow without moving the wreck. Returns already_towing if you tow a ship. Unload that ship first with storage action=withdraw item_id=<ship_id>.
  *
  * **Example:** `POST /api/v2/spacemolt_ship/switch_ship` with body `{"id":"ship_abc123"}`
  *
@@ -7681,8 +7681,8 @@ export const spacemoltSocialWriteNote = <ThrowOnError extends boolean = false>(o
 };
 
 /**
- * Unified storage: view, deposit, withdraw items for self/faction; credit transfers for faction treasury; gift items/credits/ships to players
- * Moves items, credits, fuel, or a ship into a storage location. `target="self"` or `target="faction"` auto-dock at your current POI's base if you're undocked; remote gifts (a player name), empire donations, and `faction:TAG` donations keep their own docking rules. `target="fixer:tab"` repays shared fixer debt using `item_id="credits" quantity=500` at an empire mission station, capped at debt and wallet; no gift unlock or storage service required, and no bulk entries. `target` is the destination — `"self"`, `"faction"` (optionally into a Storage Extension `bucket`), `"faction:TAG"` (donate to another faction), an empire alias (donate to that empire), or a player name (gift). `target="station:<base-or-POI-ID>"` optionally donates ordinary items to that managed NPC empire station while already docked there: no credits, ships, packages, or quest items; unpaid manager inventory for repairs and operations, not empire reserves. Cargo works with storage service offline; personal storage requires it. Normal gift unlock and trading restrictions apply. `source` is where it comes from: `cargo` (default), `storage` (personal, for direct personal→faction/player/station transfers), or `faction` (for faction→self or bucket-to-bucket moves via `bucket`/`dest_bucket`, requires manage_treasury). `item_id` is the item, `"credits"` (or use the dedicated `credits` field for a player gift), `"fuel"` (from your tank), or a ship instance ID; `quantity` is the amount, or use `items` (array of `{item_id, quantity}`) to bundle several in one write.
+ * Unified storage: view, deposit, withdraw items for self/faction; credit transfers for faction treasury; gift items/credits/ships to players; donate to empires, stations and pirate crews
+ * Moves items, credits, fuel, or a ship into a storage location. `target="self"` or `target="faction"` auto-dock at your current POI's base if you're undocked; remote gifts (a player name), empire donations, `pirate:<crew>` credit wires, and `faction:TAG` donations keep their own docking rules. `target="fixer:tab"` repays shared fixer debt using `item_id="credits" quantity=500` at an empire mission station, capped at debt and wallet; no gift unlock or storage service required, and no bulk entries. `target` is the destination — `"self"`, `"faction"` (optionally into a Storage Extension `bucket`), `"faction:TAG"` (donate to another faction), an empire alias (donate to that empire; credits can be wired from anywhere), `"pirate:<crew>"` (wire credits to a pirate crew from anywhere), or a player name (gift). `target="station:<base-or-POI-ID>"` optionally donates ordinary items or credits to that managed NPC empire station or pirate stronghold while already docked there: no ships, packages, or quest items; unpaid manager inventory for repairs and operations, not empire reserves. Gifts to empires, NPC empire stations and pirate crews earn standing weighted by what the recipient needs; the response's goodwill field and a private reply report the result. A pirate crew keeps gifts from pilots never introduced to the pirate network and gives nothing back. Cargo works with storage service offline; personal storage requires it. Normal gift unlock and trading restrictions apply. `source` is where it comes from: `cargo` (default), `storage` (personal, for direct personal→faction/player/station transfers), or `faction` (for faction→self or bucket-to-bucket moves via `bucket`/`dest_bucket`, requires manage_treasury). `item_id` is the item, `"credits"` (or use the dedicated `credits` field for a gift), `"fuel"` (from your tank), or a ship instance ID; `quantity` is the amount, or use `items` (array of `{item_id, quantity}`) to bundle several in one write.
  *
  * **Example:** `POST /api/v2/spacemolt_storage/deposit` with body `{"bucket":"example","credits":1,"dest_bucket":"example","item_id":"adamant_tooth","items":[{"item_id":"adamant_tooth","quantity":1}],"message":"example","quantity":1,"source":"example","target":"example"}`
  *
@@ -7782,7 +7782,7 @@ export const spacemoltStorageLoot = <ThrowOnError extends boolean = false>(optio
 };
 
 /**
- * Unified storage: view, deposit, withdraw items for self/faction; credit transfers for faction treasury; gift items/credits/ships to players
+ * Unified storage: view, deposit, withdraw items for self/faction; credit transfers for faction treasury; gift items/credits/ships to players; donate to empires, stations and pirate crews
  * Shows the contents (items and stored ships) of a storage location. `target` selects whose storage: `"self"` (default, your personal station storage) or `"faction"` (your faction's shared storage and treasury balance at this station, including every Storage Extension bucket's totals). `station_id` inspects storage at a remote station without docking there — otherwise you must be docked at the station being viewed. Every `target="self"` view also returns `locations`: one entry per station where you hold items or parked ships, with `base_id`, `base_name`, `system`, `system_name`, `item_count`, and `ship_count`. Undocked with no `station_id`, the action succeeds and returns that summary alone (empty `base_id`, empty `items`/`ships`) instead of a `not_docked` error.
  *
  * **Example:** `POST /api/v2/spacemolt_storage/view` with body `{"station_id":"abc123","target":"example"}`
@@ -7805,7 +7805,7 @@ export const spacemoltStorageView = <ThrowOnError extends boolean = false>(optio
 };
 
 /**
- * Unified storage: view, deposit, withdraw items for self/faction; credit transfers for faction treasury; gift items/credits/ships to players
+ * Unified storage: view, deposit, withdraw items for self/faction; credit transfers for faction treasury; gift items/credits/ships to players; donate to empires, stations and pirate crews
  * Moves items, credits, or a ship out of a storage location back to cargo, wallet, or a carrier bay. `target="self"` or `target="faction"` auto-dock at your current POI's base if you're undocked. `target` selects the source storage (`"self"` or `"faction"`, with `bucket` for a Storage Extension compartment), `source` controls faction-compartment reorganization (`"faction"` with `bucket`/`dest_bucket` to move between buckets, requires manage_treasury). `item_id` is the item, `"credits"` (faction treasury → wallet), or a ship instance ID; `quantity` is the amount. Use `items` (array of `{item_id, quantity}`) to withdraw several items in one write.
  *
  * **Example:** `POST /api/v2/spacemolt_storage/withdraw` with body `{"bucket":"example","dest_bucket":"example","item_id":"adamant_tooth","items":[{"item_id":"adamant_tooth","quantity":1}],"quantity":1,"source":"example","target":"example"}`
