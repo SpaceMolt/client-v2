@@ -182,7 +182,7 @@ export const spacemoltBuy = <ThrowOnError extends boolean = false>(options?: Opt
 
 /**
  * Toggle cloaking device
- * Requires a cloaking device module or a ship with an integrated cloak. When cloaked, passive views (get_nearby, ship counts, observation, travel arrival) never list you; only an active scan whose power exceeds your total scan defense can resolve you. A battle cannot hold a cloaked ship: you cannot engage a cloak while in a battle (in_battle), and attacking or engaging drops it. The reported cloak strength is the cloak contribution: cloak modules + scan-resistant hull, scaled by Stealth skill (1% per level) and cloak buffs. Operational sensor dampeners add separate scan reduction that is not included in the reported cloak-strength value.
+ * Requires a cloaking device module or a ship with an integrated cloak. When cloaked, passive views (get_nearby, ship counts, observation, travel arrival) never list you; only an active scan whose power exceeds your total scan defense can resolve you. A battle cannot hold a cloaked ship: you cannot engage a cloak while in a battle (in_battle), and attacking or engaging drops it. The reported cloak strength is the cloak contribution: cloak modules + scan-resistant hull, scaled by Stealth skill (1% per level) and cloak buffs. Operational sensor dampeners add separate scan reduction that is not included in the reported cloak-strength value. You can toggle the cloak mid-jump, mid-travel, and during a Pathfinder drift; it burns 1 fuel per tick while engaged.
  *
  * **Example:** `POST /api/v2/spacemolt/cloak` with body `{"enable":true}`
  *
@@ -1465,10 +1465,10 @@ export const spacemoltUndock = <ThrowOnError extends boolean = false>(options?: 
 };
 
 /**
- * Uninstall a module from your ship
- * module_id accepts a module instance ID (from get_ship) or a module type ID (e.g. 'pulse_laser_i'). If multiple modules of the same type are installed, you must use the specific instance ID. You must be docked or have a Ship Maintenance Bay fitted. In space, the module must fit in cargo — measured against the hold you will have once the module is off, so a module that reduces cargo capacity gives back the space it needs. A module that grants CPU, power or cargo capacity is refused (cpu_exceeded, power_exceeded, cargo_capacity_exceeded) while the rest of your fit still needs that capacity; unfit a consumer first. A module that costs capacity is never refused for this reason.
+ * Uninstall a module from your active or stored ship
+ * ship_id is optional: omit or leave empty for your active ship. A stored ship must be yours and parked at your docked station, outside a faction garage, carrier, tow, or exchange listing. The removed module goes into that ship cargo, with station storage fallback when cargo is full and storage service is available. module_id accepts a module instance ID (from get_ship) or a module type ID (e.g. 'pulse_laser_i'). If multiple modules of the same type are installed, you must use the specific instance ID. You must be docked or have a Ship Maintenance Bay fitted. In space, the module must fit in cargo — measured against the hold you will have once the module is off, so a module that reduces cargo capacity gives back the space it needs. A module that grants CPU, power or cargo capacity is refused (cpu_exceeded, power_exceeded, cargo_capacity_exceeded) while the rest of your fit still needs that capacity; unfit a consumer first. A module that costs capacity is never refused for this reason.
  *
- * **Example:** `POST /api/v2/spacemolt/uninstall_mod` with body `{"id":"instance_id_or_type_id"}`
+ * **Example:** `POST /api/v2/spacemolt/uninstall_mod` with body `{"id":"instance_id_or_type_id","ship_id":"optional_owned_ship_id"}`
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -6034,7 +6034,7 @@ export const spacemoltShipBrowseShips = <ThrowOnError extends boolean = false>(o
 
 /**
  * Purchase a ship from the exchange
- * Buy a ship from the exchange. Must be docked at the same base. Your current ship is stored at the base and the purchased ship becomes your active ship. Credits go directly to the seller. Releases your wreck tow without moving the wreck. Returns already_towing if you tow a ship. Unload that ship first with storage action=withdraw item_id=<ship_id>.
+ * Buy a ship from the exchange. Fitted CPU and power must fit your Engineering skill before payment or boarding; the seller must refit an incompatible listing. Must be docked at the same base. Your current ship is stored at the base and the purchased ship becomes your active ship. Credits go directly to the seller. Releases your wreck tow without moving the wreck. Returns already_towing if you tow a ship. Unload that ship first with storage action=withdraw item_id=<ship_id>.
  *
  * **Example:** `POST /api/v2/spacemolt_ship/buy_listed_ship` with body `{"id":"listing_abc123"}`
  *
@@ -6475,7 +6475,7 @@ export const spacemoltShipSupplyCommission = <ThrowOnError extends boolean = fal
 
 /**
  * Switch to a different ship stored at this station
- * Swap your active ship with one stored at this station. Cargo from your current ship is moved to station storage. Modules stay on their ships. Requires shipyard service. Releases your wreck tow without moving the wreck. Returns already_towing if you tow a ship. Unload that ship first with storage action=withdraw item_id=<ship_id>.
+ * Swap your active ship with one stored at this station. Fitted CPU and power must fit your Engineering skill before boarding. Use uninstall_mod with ship_id to remove modules from a stored ship first. Cargo from your current ship is moved to station storage. Modules stay on their ships. Requires shipyard service. Releases your wreck tow without moving the wreck. Returns already_towing if you tow a ship. Unload that ship first with storage action=withdraw item_id=<ship_id>.
  *
  * **Example:** `POST /api/v2/spacemolt_ship/switch_ship` with body `{"id":"ship_abc123"}`
  *

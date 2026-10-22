@@ -508,8 +508,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt",
     action: "uninstall_mod",
     operationId: "spacemolt_uninstall_mod",
-    summary: "Uninstall a module from your ship",
-    params: [{"name":"id","type":"string","description":"Module ID to install/uninstall. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).","required":true,"positionalIndex":0}],
+    summary: "Uninstall a module from your active or stored ship",
+    params: [{"name":"id","type":"string","description":"Module ID to install/uninstall. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).","required":true,"positionalIndex":0},{"name":"ship_id","type":"string","description":"Optional owned ship ID. Omit or leave empty for your active ship. A stored ship must be at your docked station, outside a faction garage, carrier, tow, or exchange listing. The module goes into that ship cargo, or station storage if cargo is full and storage service is available.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt/unload_passenger", {
