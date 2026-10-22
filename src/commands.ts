@@ -357,7 +357,7 @@ const entries: [string, CommandMeta][] = [
     action: "jettison",
     operationId: "spacemolt_jettison",
     summary: "Jettison items from cargo into space",
-    params: [{"name":"id","type":"string","description":"ID of the item to jettison (e.g., iron_ore, steel_plate). Required for single mode.","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity to jettison. Required for single mode.","required":false,"positionalIndex":1},{"name":"items","type":"array","description":"Bulk mode: array of cargo items to dump in one action (max 100), all into one container. Each entry needs item_id and quantity. When provided, the top-level item_id/quantity are ignored.","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the item to jettison (e.g., iron_ore, steel_plate). Required for single mode.","required":false,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity to jettison. Required for single mode.","required":false,"positionalIndex":1},{"name":"items","type":"array","description":"Bulk mode: array of cargo items to dump in one action (max 100). Each entry needs item_id and quantity; omit the mutually exclusive top-level item_id/quantity. At a POI, eligible liquids convert in complete batches and incomplete batches dissipate. Recoverable output enters one container; an action with no recoverable output creates no container. Mid-flight cargo is lost.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt/jump", {
@@ -2566,7 +2566,7 @@ const entries: [string, CommandMeta][] = [
     action: "jettison",
     operationId: "spacemolt_storage_jettison",
     summary: "Jettison items from cargo into space",
-    params: [{"name":"item_id","type":"string","description":"ID of the item to jettison (e.g., iron_ore, steel_plate). Required for single mode.","required":false,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Quantity to jettison. Required for single mode.","required":false,"positionalIndex":2},{"name":"items","type":"array","description":"Bulk mode: array of cargo items to dump in one action (max 100), all into one container. Each entry needs item_id and quantity. When provided, the top-level item_id/quantity are ignored.","required":false,"positionalIndex":-1}],
+    params: [{"name":"item_id","type":"string","description":"ID of the item to jettison (e.g., iron_ore, steel_plate). Required for single mode.","required":false,"positionalIndex":1},{"name":"quantity","type":"integer","description":"Quantity to jettison. Required for single mode.","required":false,"positionalIndex":2},{"name":"items","type":"array","description":"Bulk mode: array of cargo items to dump in one action (max 100). Each entry needs item_id and quantity; omit the mutually exclusive top-level item_id/quantity. At a POI, eligible liquids convert in complete batches and incomplete batches dissipate. Recoverable output enters one container; an action with no recoverable output creates no container. Mid-flight cargo is lost.","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt_storage/loot", {
