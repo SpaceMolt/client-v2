@@ -708,8 +708,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt_battle",
     action: "reload",
     operationId: "spacemolt_battle_reload",
-    summary: "Reload a weapon's magazine from ammo in cargo",
-    params: [{"name":"id","type":"string","description":"Instance ID of the fitted weapon to reload (use get_ship to see weapon instance IDs)","required":false,"positionalIndex":0},{"name":"target","type":"string","description":"Item ID of ammo to load from cargo (must match the weapon's ammo type). For weapons with the ammo_from_cargo special: omit to auto-select random low-value junk, or specify any cargo item to load that exact item.","required":false,"positionalIndex":1},{"name":"weapons","type":"array","description":"Bulk reload: array of {weapon_instance_id, ammo_item_id?} entries loaded in a single action for one tick, however many weapons. Omit weapon_instance_id/ammo_item_id when using this. Entries are independent — the response reports per-weapon success/failure. Maximum 50 entries.","required":false,"positionalIndex":-1}],
+    summary: "Reload a weapon or mining gun magazine from ammo in cargo",
+    params: [{"name":"id","type":"string","description":"Instance ID of the fitted weapon or mining gun to reload (use get_ship to see module instance IDs)","required":false,"positionalIndex":0},{"name":"target","type":"string","description":"Item ID of ammo to load from cargo (must match the module's ammo type). For weapons with the ammo_from_cargo special: omit to auto-select random low-value junk, or specify any cargo item to load that exact item.","required":false,"positionalIndex":1},{"name":"weapons","type":"array","description":"Bulk reload: array of {weapon_instance_id, ammo_item_id?} entries loaded in a single action for one tick, however many weapons. Omit weapon_instance_id/ammo_item_id when using this. Entries are independent — the response reports per-weapon success/failure. Maximum 50 entries.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_battle/retreat", {
@@ -2637,8 +2637,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt_transfer",
     action: "trade_offer",
     operationId: "spacemolt_transfer_trade_offer",
-    summary: "Offer a trade to another player",
-    params: [{"name":"target","type":"string","description":"Player ID or username to trade with","required":true,"positionalIndex":0},{"name":"offer_credits","type":"integer","description":"Credits you GIVE (optional)","required":false,"positionalIndex":-1},{"name":"offer_items","type":"array","description":"Items you GIVE: [{\"item_id\": \"iron_ore\", \"quantity\": 50}]","required":false,"positionalIndex":-1},{"name":"request_credits","type":"integer","description":"Credits you WANT in return (optional)","required":false,"positionalIndex":-1},{"name":"request_items","type":"array","description":"Items you WANT in return: [{\"item_id\": \"fuel_cell\", \"quantity\": 5}]","required":false,"positionalIndex":-1}],
+    summary: "Offer a trade or faction station sale to another player",
+    params: [{"name":"target","type":"string","description":"Player ID or username to trade with","required":true,"positionalIndex":0},{"name":"offer_credits","type":"integer","description":"Credits you GIVE (optional)","required":false,"positionalIndex":-1},{"name":"offer_items","type":"array","description":"Items you GIVE: [{\"item_id\": \"iron_ore\", \"quantity\": 50}]","required":false,"positionalIndex":-1},{"name":"request_credits","type":"integer","description":"Credits you WANT in return (optional). Station sales charge the buyer faction treasury.","required":false,"positionalIndex":-1},{"name":"request_items","type":"array","description":"Items you WANT in return: [{\"item_id\": \"fuel_cell\", \"quantity\": 5}]","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Optional exact Base ID of an assembled stationary faction station or outpost. Leaders only. Includes seller-faction facilities and storage at acceptance. request_credits is paid between faction treasuries. No items or offer_credits. Seller must already hold 4000000 credits for 1000000 labor plus 3000000 tax.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
 ];

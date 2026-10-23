@@ -5955,14 +5955,58 @@ export type GetSystemTransitResponse = {
 };
 
 export type GetTradeEntry = {
+    /**
+     * Faction that receives the station and pays request_credits to the seller faction. Present only for faction station sales.
+     */
+    buyer_faction_id?: string;
+    /**
+     * UTC time when the pending offer expires.
+     */
     expires_at: string;
+    /**
+     * Seller faction labor fee in credits paid to local station citizens on acceptance; outposts use the nearest reachable station pool. Currently 1000000. Omitted for ordinary trades.
+     */
+    labor_cost?: number;
+    /**
+     * Personal credits offered. Zero or omitted for station sales.
+     */
     offer_credits?: number;
+    /**
+     * Items offered by the seller. Empty for station sales.
+     */
     offer_items: Array<PendingTradeItemView>;
+    /**
+     * Seller player name. Present for incoming offers only.
+     */
     offerer_name?: string;
+    /**
+     * Requested payment in credits. For station sales the buyer faction treasury pays the seller faction treasury. Zero or omission means no price.
+     */
     request_credits?: number;
+    /**
+     * Items requested from the buyer. Empty for station sales.
+     */
     request_items: Array<PendingTradeItemView>;
+    /**
+     * Faction that sells the station and pays the labor cost and transfer tax. Present only for faction station sales.
+     */
+    seller_faction_id?: string;
+    /**
+     * Exact Base ID of the assembled station or outpost. Includes seller-faction facilities and storage contents at acceptance. Present only for faction station sales.
+     */
+    station_id?: string;
+    /**
+     * Buyer player name. Present for outgoing offers only.
+     */
     target_name?: string;
+    /**
+     * Trade offer ID used by accept and cancel commands.
+     */
     trade_id: string;
+    /**
+     * Seller faction transfer tax in credits paid to its primary taxable empire on acceptance. Currently 3000000. Omitted for ordinary trades.
+     */
+    transfer_tax?: number;
 };
 
 export type GetTradesResponse = {
@@ -8827,12 +8871,40 @@ export type NotificationTradeCancelled = {
  * Pushed to the offerer when the trade recipient accepts.
  */
 export type NotificationTradeComplete = {
+    /**
+     * Buyer faction ID. Present only for station sales.
+     */
+    buyer_faction_id?: string;
+    /**
+     * Station sale price in credits paid by the buyer faction treasury to the seller faction treasury. Present including zero only for station sales.
+     */
+    credits?: number;
+    /**
+     * Seller faction fee in credits paid to the nearest eligible station citizen pool. Currently 1000000. Present only for station sales.
+     */
+    labor_cost?: number;
     message: string;
+    /**
+     * Seller faction ID. Present only for station sales.
+     */
+    seller_faction_id?: string;
+    /**
+     * Station or outpost sold with its facilities and faction storage. Present only for station sales.
+     */
+    station_id?: string;
     trade_id: string;
+    /**
+     * Seller faction tax in credits paid to its primary taxable empire. Currently 3000000. Present only for station sales.
+     */
+    transfer_tax?: number;
     /**
      * Offerer's credit balance after the trade settled.
      */
     your_credits?: number;
+    /**
+     * Seller faction treasury balance in credits after the price and seller fees settle. Present including zero only for station sales.
+     */
+    your_faction_credits?: number;
 };
 
 /**
@@ -8847,7 +8919,15 @@ export type NotificationTradeDeclined = {
  * Direct player-to-player trade offer received.
  */
 export type NotificationTradeOfferReceived = {
+    /**
+     * Buyer faction ID. Present only for station sales.
+     */
+    buyer_faction_id?: string;
     expires_at?: string;
+    /**
+     * Seller faction fee in credits paid to the nearest eligible station citizen pool. Currently 1000000. Present only for station sales.
+     */
+    labor_cost?: number;
     offer_credits?: number;
     /**
      * Items the offerer is giving.
@@ -8864,7 +8944,19 @@ export type NotificationTradeOfferReceived = {
     request_items?: Array<{
         [key: string]: unknown;
     }>;
+    /**
+     * Seller faction ID. Present only for station sales.
+     */
+    seller_faction_id?: string;
+    /**
+     * Station or outpost sold with its facilities and faction storage. Present only for station sales.
+     */
+    station_id?: string;
     trade_id: string;
+    /**
+     * Seller faction tax in credits paid to its primary taxable empire. Currently 3000000. Present only for station sales.
+     */
+    transfer_tax?: number;
 };
 
 export type ObjectiveInfo = {
@@ -12416,6 +12508,7 @@ export type TowWreckResponse = {
 };
 
 export type Trade = {
+    buyer_faction_id?: string;
     created_at: string;
     expires_at: string;
     id: string;
@@ -12425,14 +12518,49 @@ export type Trade = {
     poi_id: string;
     request_credits: number;
     request_items: Array<TradeItem>;
+    seller_faction_id?: string;
+    station_id?: string;
     status: string;
     target_id: string;
 };
 
 export type TradeAcceptResponse = {
+    /**
+     * Faction that receives the station and pays request_credits to the seller faction. Present only for faction station sales.
+     */
+    buyer_faction_id?: string;
+    /**
+     * Seller faction labor fee in credits paid to local station citizens on acceptance; outposts use the nearest reachable station pool. Currently 1000000. Omitted for ordinary trades.
+     */
+    labor_cost?: number;
+    /**
+     * Human-readable trade result.
+     */
     message: string;
+    /**
+     * Faction that sells the station and pays the labor cost and transfer tax. Present only for faction station sales.
+     */
+    seller_faction_id?: string;
+    /**
+     * Exact Base ID of the assembled station or outpost. Includes seller-faction facilities and storage contents at acceptance. Present only for faction station sales.
+     */
+    station_id?: string;
+    /**
+     * Trade offer ID used by accept and cancel commands.
+     */
     trade_id: string;
+    /**
+     * Seller faction transfer tax in credits paid to its primary taxable empire on acceptance. Currently 3000000. Omitted for ordinary trades.
+     */
+    transfer_tax?: number;
+    /**
+     * Accepting player wallet balance in credits after an ordinary trade. Omitted when zero or for faction station sales.
+     */
     your_credits?: number;
+    /**
+     * Accepting buyer faction treasury balance in credits after payment. Present including zero only for faction station sales.
+     */
+    your_faction_credits?: number;
 };
 
 export type TradeFillNotification = {
@@ -12471,8 +12599,34 @@ export type TradeItem = {
 };
 
 export type TradeOfferResponse = {
+    /**
+     * Faction that receives the station and pays request_credits to the seller faction. Present only for faction station sales.
+     */
+    buyer_faction_id?: string;
+    /**
+     * Seller faction labor fee in credits paid to local station citizens on acceptance; outposts use the nearest reachable station pool. Currently 1000000. Omitted for ordinary trades.
+     */
+    labor_cost?: number;
+    /**
+     * Human-readable trade result.
+     */
     message: string;
+    /**
+     * Faction that sells the station and pays the labor cost and transfer tax. Present only for faction station sales.
+     */
+    seller_faction_id?: string;
+    /**
+     * Exact Base ID of the assembled station or outpost. Includes seller-faction facilities and storage contents at acceptance. Present only for faction station sales.
+     */
+    station_id?: string;
+    /**
+     * Trade offer ID used by accept and cancel commands.
+     */
     trade_id: string;
+    /**
+     * Seller faction transfer tax in credits paid to its primary taxable empire on acceptance. Currently 3000000. Omitted for ordinary trades.
+     */
+    transfer_tax?: number;
 };
 
 export type TransferCreditsResponse = {
@@ -13064,7 +13218,7 @@ export type V2Missions = {
 
 export type V2Module = {
     /**
-     * Present only on weapons that consume ammo
+     * Compatible ammunition family for a weapon or mining gun. Present when the module has a magazine and ammunition family.
      */
     ammo_type?: string;
     /**
@@ -13072,7 +13226,7 @@ export type V2Module = {
      */
     cpu_usage: number;
     /**
-     * Present only on weapons that consume ammo
+     * Remaining magazine charges for a weapon or mining gun. Zero means empty. Present when the module has a magazine.
      */
     current_ammo?: number;
     /**
@@ -13084,7 +13238,7 @@ export type V2Module = {
      */
     loaded_ammo_name?: string;
     /**
-     * Present only on weapons that consume ammo
+     * Magazine capacity in charges for a weapon or mining gun. Present when the module has a magazine.
      */
     magazine_size?: number;
     module_id: string;
@@ -15631,7 +15785,7 @@ export type SpacemoltMineErrors = {
 
 export type SpacemoltMineResponses = {
     /**
-     * Result. structuredContent: V2GameState post-mutation delta (changed ship/cargo/location/missions/queue/skills sections); the command result is under `details` (MineResponse)
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/modules/cargo/location/missions/queue/skills sections); the command result is under `details` (MineResponse)
      */
     200: V2Response & {
         structuredContent?: V2GameState & {
@@ -17209,11 +17363,11 @@ export type SpacemoltBattleLogResponse = SpacemoltBattleLogResponses[keyof Space
 export type SpacemoltBattleReloadData = {
     body?: {
         /**
-         * Instance ID of the fitted weapon to reload (use get_ship to see weapon instance IDs)
+         * Instance ID of the fitted weapon or mining gun to reload (use get_ship to see module instance IDs)
          */
         id?: string;
         /**
-         * Item ID of ammo to load from cargo (must match the weapon's ammo type). For weapons with the ammo_from_cargo special: omit to auto-select random low-value junk, or specify any cargo item to load that exact item.
+         * Item ID of ammo to load from cargo (must match the module's ammo type). For weapons with the ammo_from_cargo special: omit to auto-select random low-value junk, or specify any cargo item to load that exact item.
          */
         target?: string;
         /**
@@ -27690,7 +27844,7 @@ export type SpacemoltTransferTradeOfferData = {
             quantity?: number;
         }>;
         /**
-         * Credits you WANT in return (optional)
+         * Credits you WANT in return (optional). Station sales charge the buyer faction treasury.
          */
         request_credits?: number;
         /**
@@ -27700,6 +27854,10 @@ export type SpacemoltTransferTradeOfferData = {
             item_id?: string;
             quantity?: number;
         }>;
+        /**
+         * Optional exact Base ID of an assembled stationary faction station or outpost. Leaders only. Includes seller-faction facilities and storage at acceptance. request_credits is paid between faction treasuries. No items or offer_credits. Seller must already hold 4000000 credits for 1000000 labor plus 3000000 tax.
+         */
+        station_id?: string;
         /**
          * Player ID or username to trade with
          */

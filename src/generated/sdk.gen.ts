@@ -1128,7 +1128,7 @@ export const spacemoltLoadPassenger = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Mine resources from asteroids, ice fields, or gas clouds
- * Requires appropriate equipment: mining laser for asteroids, ice harvester for ice fields, gas harvester for gas clouds — keyed on the resource, not the POI type, so a gas cloud can hold ore a mining laser works. Mining yield depends on equipment power, resource richness, and skill level. get_poi and survey_system report supported_power, lock_minimum_stock and too_sparse per deposit, all computed for the hull you are flying: beam power above supported_power is capped rather than wasted, and a deposit below both a quarter of capacity and lock_minimum_stock cannot be worked at all (deposit_too_sparse). Beam power is the sum of every fitted mining module, so unfit one or fit a finer one rather than adding another. Deep core POIs are exempt from that cutoff and always work down to zero. Which deposit a cycle hits is a random draw weighted by each deposit's richness and, as your mining skill grows, by its rarity. A fitted extraction filter (filter_* modules) removes its ore from that draw entirely, so every cycle targets one of the remaining deposits instead — that raises your yield of what you do want rather than wasting the cycle. If a filter rejects every deposit you could work at that POI, the cycle returns the filtered no-yield shape and mines nothing.
+ * Requires appropriate equipment: mining laser or loaded mining gun for ore, ice harvester for ice fields, gas harvester for gas clouds — keyed on the resource, not the POI type, so a gas cloud can hold ore a mining laser works. Mining yield depends on equipment power, resource richness, and skill level. get_poi and survey_system report supported_power, lock_minimum_stock and too_sparse per deposit, all computed for the hull you are flying: beam power above supported_power is capped rather than wasted, and a deposit below both a quarter of capacity and lock_minimum_stock cannot be worked at all (deposit_too_sparse). Mining power combines fitted lasers and loaded fitted mining guns, so unfit one or fit a finer one rather than adding another. Deep core POIs are exempt from that cutoff and always work down to zero. Which deposit a cycle hits is a random draw weighted by each deposit's richness and, as your mining skill grows, by its rarity. A fitted extraction filter (filter_* modules) removes its ore from that draw entirely, so every cycle targets one of the remaining deposits instead — that raises your yield of what you do want rather than wasting the cycle. If a filter rejects every deposit you could work at that POI, the cycle returns the filtered no-yield shape and mines nothing. Mining guns occupy utility slots. Each successful ore extraction consumes one charge from each loaded fitted mining gun. Empty mining guns contribute no power. Mining guns cannot harvest gas, ice, or radioactive ore. Compatible ammunition variants give identical mining performance. Combat ammunition effects do not apply. Use reload to refill magazines and get_ship to inspect ammunition.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -2047,8 +2047,8 @@ export const spacemoltBattleLog = <ThrowOnError extends boolean = false>(options
 };
 
 /**
- * Reload a weapon's magazine from ammo in cargo
- * Loads compatible ammunition from cargo into a weapon magazine. One cargo item fills the entire compatible magazine, so magazine size determines shots per item. Swapping ammo discards remaining rounds. Works during battle or flight and costs one tick. Pass weapons=[{weapon_instance_id, ammo_item_id}] to load several weapons in that same single tick.
+ * Reload a weapon or mining gun magazine from ammo in cargo
+ * Loads compatible ammunition from cargo into a weapon or mining gun magazine. Mining guns ignore combat ammunition modifiers. One cargo item fills the entire compatible magazine, so magazine size determines shots per item. Swapping ammo discards remaining rounds. Works during battle or flight and costs one tick. Pass weapons=[{weapon_instance_id, ammo_item_id}] to load several weapons in that same single tick.
  *
  * **Example:** `POST /api/v2/spacemolt_battle/reload` with body `{"id":"abc123","target":"example","weapons":[null]}`
  *
@@ -7878,7 +7878,7 @@ export const spacemoltTransferHelpPost = <ThrowOnError extends boolean = false>(
 
 /**
  * Accept a trade offer
- * Completes the trade atomically. Both players exchange items and credits.
+ * Completes the trade atomically. Ordinary trades exchange personal items and credits. Station sales transfer faction ownership and storage after leader permissions and buyer limits pass again. Faction treasuries pay the price and seller fees.
  *
  * **Example:** `POST /api/v2/spacemolt_transfer/trade_accept` with body `{"trade_id":"trade_uuid"}`
  *
@@ -7948,8 +7948,8 @@ export const spacemoltTransferTradeDecline = <ThrowOnError extends boolean = fal
 };
 
 /**
- * Offer a trade to another player
- * target_id accepts a player ID or username. Both players must be at the same POI. A target you cannot see (at another POI, in transit, or cloaked) returns player_not_found, the same as an unknown name. offer_items/offer_credits = what you GIVE. request_items/request_credits = what you WANT in return.
+ * Offer a trade or faction station sale to another player
+ * target_id accepts a player ID or username. Both players must be at the same POI. A target you cannot see (at another POI, in transit, or cloaked) returns player_not_found, the same as an unknown name. offer_items/offer_credits = what you GIVE. request_items/request_credits = what you WANT in return. Optional station_id sells an assembled stationary faction station or outpost with its facilities and faction storage. Both players must lead different factions. request_credits sets the price between faction treasuries. Items and offer_credits are forbidden. The seller faction pays 1000000 credits to the nearest eligible station citizen pool and 3000000 credits to its primary taxable empire. The seller needs all 4000000 fee credits before receiving the price. Use the exact Base ID, not a name or POI ID. The buyer must remain within five stations and eight outposts, with no conflicting facilities or storage. Buyer leader skills apply. Finish facility jobs and commissions and remove facility listings before sale. Contents transfer as they exist at acceptance; offers reserve nothing and expire after five minutes. Acceptance rechecks these rules. See api.md#faction-station-sales for the complete sale contract.
  *
  * **Example:** `POST /api/v2/spacemolt_transfer/trade_offer` with body `{"target":"player_name","offer_items":[{"item_id":"iron_ore","quantity":50}],"offer_credits":0,"request_items":[{"item_id":"fuel_cell","quantity":5}],"request_credits":1000}`
  *
