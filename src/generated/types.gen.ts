@@ -4672,8 +4672,17 @@ export type FactionInfoResponse = {
     leader_username: string;
     member_count: number;
     members?: Array<FactionMember>;
+    /**
+     * Member-list pagination: page size used for this response (the limit you passed if 1-100, else 50). This is NOT the faction member cap. Joining a full faction fails with a faction_full error that states the cap.
+     */
     members_limit?: number;
+    /**
+     * Member-list pagination: index of the first member on this page (the offset you passed). Omitted on the first page.
+     */
     members_offset?: number;
+    /**
+     * Member-list pagination: true when more members exist after this page. Request the next page with offset = members_offset + members_limit.
+     */
     members_truncated?: boolean;
     /**
      * Current mobile-base location and movement state. Present only for faction members with a completed mobile base; omitted during construction or after decommissioning.

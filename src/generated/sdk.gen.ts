@@ -4276,7 +4276,7 @@ export const spacemoltFactionHelpPost = <ThrowOnError extends boolean = false>(o
 
 /**
  * View faction details
- * Without faction_id, shows your faction. Members see member list (paginated, default limit 50 max 100), roles with permissions, treasury, wars, peace proposals, a galaxy-wide fuel-bunker summary (per-bunker status plus total reserve and capacity), and `faction_rent`: the faction's total rent per cycle, its daily equivalent, and arrears owed across every station; facilities at the faction's own station or outpost count at 0 rent (use facility action='faction_owned' for the per-facility breakdown). Use offset and limit to page through large member lists.
+ * Without faction_id, shows your faction. Members see member list (paginated, default limit 50 max 100), roles with permissions, treasury, wars, peace proposals, a galaxy-wide fuel-bunker summary (per-bunker status plus total reserve and capacity), and `faction_rent`: the faction's total rent per cycle, its daily equivalent, and arrears owed across every station; facilities at the faction's own station or outpost count at 0 rent (use facility action='faction_owned' for the per-facility breakdown). Use offset and limit to page through large member lists. members_offset, members_limit and members_truncated describe that page only; members_limit is the page size, not the faction member cap (a full faction rejects joins with a faction_full error that states the cap).
  *
  * **Example:** `POST /api/v2/spacemolt_faction/info` with body `{"id":"...","offset":0,"limit":50}`
  */
