@@ -1780,7 +1780,7 @@ export type BulkSellOrderResult = {
 };
 
 /**
- * The single-item storage response for this entry (deposit, withdraw, gift, or faction/empire variant). Successful station gifts use action=send_gift and canonical recipient=station:<base ID>; remaining source inventory reflects the completed bulk batch, including zero.
+ * The single-item storage response for this entry (deposit, withdraw, gift, or faction/empire variant). Successful station gifts use action=send_gift and canonical recipient=station:<base ID>; remaining source inventory reflects the completed bulk batch, including zero. An entry never carries goodwill: a bulk station gift reports it once on the parent response.
  */
 export type BulkStorageItemData = {
     [key: string]: unknown;
@@ -1811,7 +1811,7 @@ export type BulkStorageResponse = {
     dest_bucket_id?: string;
     failed: number;
     /**
-     * How the empire or pirate crew received this gift: value to them, bounty paid, reputation change and their reply. Present on gifts to empires, NPC empire stations and pirate strongholds; omitted for gifts to players, factions and the fixer.
+     * How the empire or pirate crew received a bulk station:<base ID> gift: one result for all items delivered in the batch. Omitted when no item was delivered and for every other bulk target. Per-item results never carry goodwill.
      */
     goodwill?: GiftGoodwill;
     requested: number;
@@ -3261,6 +3261,9 @@ export type DroneInfo = {
 };
 
 export type EmpireGiftResponse = {
+    /**
+     * Donation to an empire named by an empire alias target: empire_gift_credits (credits wired to the treasury from anywhere), empire_gift_items (cargo given to the quartermaster at one of its stations with storage service) or empire_gift_ship (a ship parked at the empire station where you are docked, seated in the empire's Reserve fleet, or scrapped if it is a starter ship). A station:<base ID> donation returns SendGiftResponse instead, even at an empire station.
+     */
     action: 'empire_gift_credits' | 'empire_gift_items' | 'empire_gift_ship';
     /**
      * True when the engine docked you automatically before running this command, because the command requires being docked. Omitted when no automatic dock happened.
@@ -3278,26 +3281,77 @@ export type EmpireGiftResponse = {
      * Name of base_id. Omitted with it for a remote credit wire.
      */
     base_name?: string;
+    /**
+     * Units of item_id left in your cargo after the donation. Set on empire_gift_items only; omitted when zero.
+     */
     cargo_remaining?: number;
+    /**
+     * Ship class of the donated ship. Set on empire_gift_ship only.
+     */
     class_id?: string;
+    /**
+     * Display name of class_id. Set on empire_gift_ship only.
+     */
     class_name?: string;
+    /**
+     * Credits moved from your wallet to the empire treasury. Set on empire_gift_credits only.
+     */
     credits_sent?: number;
+    /**
+     * Empire that received the donation (e.g. solarian).
+     */
     empire_id: string;
+    /**
+     * Display name of empire_id.
+     */
     empire_name: string;
+    /**
+     * The empire's shared Reserve fleet that the ship joined. Every ship donated to one empire reports the same fleet_id. Omitted when a starter ship is scrapped instead.
+     */
     fleet_id?: string;
+    /**
+     * Display name of fleet_id. Omitted with it.
+     */
     fleet_name?: string;
     /**
-     * How the empire or pirate crew received this gift: value to them, bounty paid, reputation change and their reply. Present on gifts to empires, NPC empire stations and pirate strongholds; omitted for gifts to players, factions and the fixer.
+     * How the empire received this donation: value to them, bounty paid, reputation change and their reply. Present on every empire donation except a starter ship, which is scrapped and earns nothing.
      */
     goodwill?: GiftGoodwill;
+    /**
+     * Designation the empire gave the hull in its Reserve roster. Omitted when a starter ship is scrapped instead.
+     */
     hull_designator?: string;
+    /**
+     * Donated item ID. Set on empire_gift_items only.
+     */
     item_id?: string;
+    /**
+     * Your donation note; omitted when empty. When a donated starter ship is scrapped it is the empire's reply instead.
+     */
     message?: string;
+    /**
+     * Empire NPC pilot seated on the donated ship, unique to this donation. Omitted when a starter ship is scrapped instead.
+     */
     npc_id?: string;
+    /**
+     * ID of the automated donation notice filed with the empire's leadership. Omitted when a starter ship is scrapped.
+     */
     petition_id?: string;
+    /**
+     * Full text of that donation notice. Omitted with petition_id.
+     */
     petition_notice?: string;
+    /**
+     * Units of item_id donated. Set on empire_gift_items only.
+     */
     quantity?: number;
+    /**
+     * ID of the donated ship. Set on empire_gift_ship only.
+     */
     ship_id?: string;
+    /**
+     * Your wallet after the credit donation. Set on empire_gift_credits only; omitted when zero.
+     */
     wallet_remaining?: number;
 };
 
@@ -5675,6 +5729,10 @@ export type GetBaseResponse = {
     fuel_price_all_in?: number;
     fuel_tax_per_unit?: number;
     life_support?: StationLifeSupportStatus;
+    /**
+     * Public material request or build status for the next pirate replacement hull at the docked stronghold. Omitted outside pirate strongholds or when no replacement is needed and no replacement build exists.
+     */
+    pirate_recovery?: PirateRecoveryNeeds;
     power?: StationPowerStatus;
     repairs?: StationRepairResponse;
     services: Array<string>;
@@ -6072,7 +6130,7 @@ export type GiftGoodwill = {
     /**
      * Outcome class that picked the reply: stranger (a pirate crew kept the gift but owes nothing to a pilot never introduced to the pirate network), bounty_partial, bounty_cleared, hostile, cooling, unwanted_items, unwanted_ship, or token/appreciated/generous/lavish/devoted followed by _credits, _items or _ship. A ship given to a pirate crew instead reports what the crew did with it: ship_scrap (no pirate design for that hull), ship_refit (rebuilt to a pirate design) or ship_pirate (a pirate-built hull) followed by _cheap, _mid or _expensive by its fitted value; or, when the boss gets involved, boss_upgrade (the boss switches to your ship because it out-fights the boss's current one), boss_hunt (the boss's flagship is in a player's hands and the boss takes your stronger ship to hunt them), boss_flagship_returned, boss_rival_flown (the boss flies another boss's flagship until the stolen one comes back), boss_rival_scrapped, boss_flagship_copy (your hull was rebuilt into a copy of the boss's stolen flagship and the boss flies it) or boss_flagship_spare (rebuilt into a spare copy of the boss's flagship), each with _cold appended when the crew does not like you. stranger, hostile and cooling still apply to ordinary pirate ship gifts.
      */
-    situation: string;
+    situation: 'stranger' | 'bounty_partial' | 'bounty_cleared' | 'hostile' | 'cooling' | 'unwanted_items' | 'unwanted_ship' | 'token_credits' | 'token_items' | 'token_ship' | 'appreciated_credits' | 'appreciated_items' | 'appreciated_ship' | 'generous_credits' | 'generous_items' | 'generous_ship' | 'lavish_credits' | 'lavish_items' | 'lavish_ship' | 'devoted_credits' | 'devoted_items' | 'devoted_ship' | 'ship_scrap_cheap' | 'ship_scrap_mid' | 'ship_scrap_expensive' | 'ship_refit_cheap' | 'ship_refit_mid' | 'ship_refit_expensive' | 'ship_pirate_cheap' | 'ship_pirate_mid' | 'ship_pirate_expensive' | 'boss_upgrade' | 'boss_upgrade_cold' | 'boss_hunt' | 'boss_hunt_cold' | 'boss_flagship_returned' | 'boss_flagship_returned_cold' | 'boss_rival_flown' | 'boss_rival_flown_cold' | 'boss_rival_scrapped' | 'boss_rival_scrapped_cold' | 'boss_flagship_copy' | 'boss_flagship_copy_cold' | 'boss_flagship_spare' | 'boss_flagship_spare_cold';
 };
 
 export type GiftShipResponse = {
@@ -9397,6 +9455,64 @@ export type PirateInfo = {
     tier: string;
 };
 
+export type PirateRecoveryMaterial = {
+    /**
+     * Best current public station bid in credits per unit. Zero means no bid.
+     */
+    bid_price: number;
+    /**
+     * Remaining public station bid quantity at bid_price. This can differ from the construction shortage.
+     */
+    bid_quantity: number;
+    /**
+     * Material item identifier.
+     */
+    item_id: string;
+    /**
+     * Material display name.
+     */
+    name: string;
+    /**
+     * Physical manager warehouse stock in item units. Zero means none on hand.
+     */
+    quantity_in_storage: number;
+    /**
+     * Supply already committed through station freight in item units. Zero means none inbound.
+     */
+    quantity_incoming: number;
+    /**
+     * max(quantity_required - quantity_in_storage, 0) in item units. Zero means physically stocked.
+     */
+    quantity_missing: number;
+    /**
+     * One hull recipe plus the next station upkeep cycle.
+     */
+    quantity_required: number;
+    /**
+     * max(quantity_missing - quantity_incoming, 0) in item units. Zero means no additional delivery is needed.
+     */
+    quantity_to_supply: number;
+};
+
+export type PirateRecoveryNeeds = {
+    /**
+     * Material bill for one hull plus its protected next upkeep cycle. Omitted after a build is commissioned. Bids are current public orders rather than promised payment.
+     */
+    materials?: Array<PirateRecoveryMaterial>;
+    /**
+     * Replacement hull class requested by this station.
+     */
+    ship_class_id: string;
+    /**
+     * Display name of the requested hull.
+     */
+    ship_name: string;
+    /**
+     * awaiting_materials or awaiting_delivery or materials_ready or queued or building or ready. materials_ready confirms physical inputs only; shipyard scheduling can still delay construction.
+     */
+    status: string;
+};
+
 export type PlaceShipBuyOrderResponse = {
     /**
      * True when the engine docked you automatically before running this command, because the command requires being docked. Omitted when no automatic dock happened.
@@ -10769,7 +10885,7 @@ export type SellWreckResponse = {
 
 export type SendGiftResponse = {
     /**
-     * Completed gift operation including station material donations or fixer debt repayment.
+     * Completed gift of items or credits: to a player, a station:<base ID> donation (NPC empire station or pirate stronghold), a pirate:<crew> credit wire, or fixer:tab debt repayment. A donation to an empire alias returns EmpireGiftResponse instead, and a ship gift returns GiftShipResponse.
      */
     action: 'send_gift';
     /**
@@ -10797,7 +10913,7 @@ export type SendGiftResponse = {
      */
     fixer?: FixerAccountInfo;
     /**
-     * How the empire or pirate crew received this gift: value to them, bounty paid, reputation change and their reply. Present on gifts to empires, NPC empire stations and pirate strongholds; omitted for gifts to players, factions and the fixer.
+     * How the empire or pirate crew received this gift: value to them, bounty paid, reputation change and their reply. Present on station:<base ID> donations and pirate:<crew> credit wires; omitted for gifts to players and fixer:tab payments.
      */
     goodwill?: GiftGoodwill;
     /**
@@ -27319,7 +27435,7 @@ export type SpacemoltStorageDepositData = {
          */
         dest_bucket?: string;
         /**
-         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), and target=<player_name> on a deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
+         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), target=<player_name> on a deposit gifts the ship (triggers gift_ship action), target=station:<base ID> on a deposit gives it to that pirate stronghold while you and the ship are docked there (also gift_ship; a stronghold's own stolen flagship can be sent home from any station), and an empire alias on a deposit donates it to that empire (empire_gift_ship). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
         /**
@@ -27581,7 +27697,7 @@ export type SpacemoltStorageWithdrawData = {
          */
         dest_bucket?: string;
         /**
-         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), and target=<player_name> on a deposit gifts the ship (triggers gift_ship action). Use list_ships to find ship instance IDs.
+         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), target=<player_name> on a deposit gifts the ship (triggers gift_ship action), target=station:<base ID> on a deposit gives it to that pirate stronghold while you and the ship are docked there (also gift_ship; a stronghold's own stolen flagship can be sent home from any station), and an empire alias on a deposit donates it to that empire (empire_gift_ship). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
         /**
