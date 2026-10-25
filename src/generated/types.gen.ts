@@ -14336,7 +14336,7 @@ export type SpacemoltCraftData = {
          */
         dry_run?: boolean;
         /**
-         * Route to a specific facility ID (overrides auto-selection).
+         * Route to a specific facility ID (overrides auto-selection). Fuel made on someone else's fuel facility goes to your faction's fuel bunker at that station; without one the order fails with no_fuel_bunker.
          */
         facility_id?: string;
         /**
