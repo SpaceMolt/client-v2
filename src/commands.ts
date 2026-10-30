@@ -2526,7 +2526,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_status",
     operationId: "spacemolt_social_set_status",
     summary: "Set your status message and clan tag",
-    params: [{"name":"content","type":"string","description":"Status message","required":false,"positionalIndex":1},{"name":"clan_tag","type":"string","description":"Clan tag (max 4 chars)","required":false,"positionalIndex":-1}],
+    params: [{"name":"content","type":"string","description":"Status message (max 64 chars)","required":false,"positionalIndex":1},{"name":"clan_tag","type":"string","description":"Clan tag (max 4 chars)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_social/unmute_notifications", {

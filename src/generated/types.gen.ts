@@ -4588,7 +4588,13 @@ export type FactionFacilityPresence = {
 export type FactionFuelBunker = {
     base_id: string;
     base_name?: string;
+    /**
+     * Fuel capacity. At the faction's own station this is the shared station tank capacity.
+     */
     fuel_capacity: number;
+    /**
+     * Fuel held. At the faction's own station this is the shared station tank.
+     */
     fuel_reserve: number;
 };
 
@@ -5732,11 +5738,19 @@ export type GetBaseResponse = {
     base: TrimmedBase;
     condition: StationHealth;
     construction?: StationConstructionResponse;
+    /**
+     * This station's current dining appeal: the sum of its dining venues' points, each scaled by how well its upkeep is supplied. Vacationing citizens who weigh dining pick stations with more of it. Omitted (0) when the station has no working dining venue.
+     */
+    dining_points?: number;
     faction_fuel_capacity?: number;
     faction_fuel_reserve?: number;
     fuel_price?: number;
     fuel_price_all_in?: number;
     fuel_tax_per_unit?: number;
+    /**
+     * This station's current leisure appeal: the sum of its leisure venues' points, each scaled by how well its upkeep is supplied. Vacationing citizens who weigh leisure pick stations with more of it. Omitted (0) when the station has no working leisure venue.
+     */
+    leisure_points?: number;
     life_support?: StationLifeSupportStatus;
     /**
      * Public material request or build status for the next pirate replacement hull at the docked stronghold. Omitted outside pirate strongholds or when no replacement is needed and no replacement build exists.
@@ -5749,6 +5763,10 @@ export type GetBaseResponse = {
      * Explains an input shortage or internal production-stage blockage or public input-price gap that limits replenishment at this station's empire-backed trade-authenticator mint. Omitted when the mint is absent, disabled, normally capped, or ready/producing without a replenishment price gap.
      */
     sovereign_mint?: SovereignMintStatus;
+    /**
+     * Lifetime credits visitors, connecting passengers and residents have spent at this station's dining and leisure venues. Omitted (0) when nothing has been spent here.
+     */
+    tourism_revenue?: number;
 };
 
 export type GetBattleLogResponse = {
@@ -9832,6 +9850,10 @@ export type PlayerProfileStats = {
      */
     ore_mined: number;
     /**
+     * Lifetime passengers delivered to their destination.
+     */
+    passengers_delivered: number;
+    /**
      * Lifetime pirate ships destroyed.
      */
     pirates_destroyed: number;
@@ -10003,6 +10025,7 @@ export type PlayerStats = {
     modules_installed?: number;
     npcs_destroyed?: number;
     ore_mined?: number;
+    passengers_delivered?: number;
     pirate_boss_prizes_delivered?: number;
     pirate_prizes_delivered?: number;
     pirates_destroyed?: number;
@@ -27310,7 +27333,7 @@ export type SpacemoltSocialSetStatusData = {
          */
         clan_tag?: string;
         /**
-         * Status message
+         * Status message (max 64 chars)
          */
         content?: string;
     };
