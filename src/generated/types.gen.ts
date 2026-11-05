@@ -4566,6 +4566,7 @@ export type FactionEditRoleUpdates = {
 };
 
 export type FactionEditUpdates = {
+    ally_battle_opt_out?: boolean;
     ally_facility_access?: boolean;
     ally_fuel_access?: boolean;
     ally_intel_opt_out?: boolean;
@@ -4655,6 +4656,7 @@ export type FactionGiftResponse = {
 export type FactionInfoResponse = {
     alliance_proposals?: Array<FactionAllianceProposal>;
     allies?: Array<FactionListItem>;
+    ally_battle_opt_out?: boolean;
     ally_facility_access?: boolean;
     ally_fuel_access?: boolean;
     ally_intel_opt_out?: boolean;
@@ -22190,6 +22192,10 @@ export type SpacemoltFactionAdminCreateRoleResponse = SpacemoltFactionAdminCreat
 
 export type SpacemoltFactionAdminEditData = {
     body?: {
+        /**
+         * True to keep your members out of battles they would auto-join on an ally's behalf. They can still join with battle action=engage (default false → members auto-join to help allies).
+         */
+        ally_battle_opt_out?: boolean;
         /**
          * True to let allied faction members use your faction's facilities for free. Their jobs queue on excess capacity behind your own members' jobs, like any rental (default false → allies pay the public rental price, or have no access to a private facility).
          */
