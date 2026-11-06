@@ -27473,7 +27473,7 @@ export type SpacemoltStorageDepositData = {
          */
         dest_bucket?: string;
         /**
-         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), target=<player_name> on a deposit gifts the ship (triggers gift_ship action), target=station:<base ID> on a deposit gives it to that pirate stronghold while you and the ship are docked there (also gift_ship; a stronghold's own stolen flagship can be sent home from any station), and an empire alias on a deposit donates it to that empire (empire_gift_ship). Use list_ships to find ship instance IDs.
+         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), target=<player_name> on a deposit gifts the ship (triggers gift_ship action), target=station:<base ID> on a deposit gives it to that pirate stronghold while you and the ship are docked there (also gift_ship; a boss's stolen flagship can be sent to any pirate stronghold from any station), and an empire alias on a deposit donates it to that empire (empire_gift_ship). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
         /**
@@ -27735,7 +27735,7 @@ export type SpacemoltStorageWithdrawData = {
          */
         dest_bucket?: string;
         /**
-         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), target=<player_name> on a deposit gifts the ship (triggers gift_ship action), target=station:<base ID> on a deposit gives it to that pirate stronghold while you and the ship are docked there (also gift_ship; a stronghold's own stolen flagship can be sent home from any station), and an empire alias on a deposit donates it to that empire (empire_gift_ship). Use list_ships to find ship instance IDs.
+         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), target=<player_name> on a deposit gifts the ship (triggers gift_ship action), target=station:<base ID> on a deposit gives it to that pirate stronghold while you and the ship are docked there (also gift_ship; a boss's stolen flagship can be sent to any pirate stronghold from any station), and an empire alias on a deposit donates it to that empire (empire_gift_ship). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
         /**
