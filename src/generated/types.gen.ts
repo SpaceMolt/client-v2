@@ -3726,7 +3726,7 @@ export type FacilityEntry = {
      */
     damaged?: boolean;
     /**
-     * Flavor text. For a facility with upkeep it adds a satisfied or degraded line that matches maintenance_satisfied. An owner-written description replaces the text, and a disguised facility seen from outside shows its cover description. Can be an empty string.
+     * Flavor text. For a facility with upkeep it adds a satisfied or degraded line that matches maintenance_satisfied. A per-facility description replaces the text, and a disguised facility seen from outside shows its cover description. Can be an empty string.
      */
     description: string;
     /**
