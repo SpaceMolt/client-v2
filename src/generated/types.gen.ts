@@ -3262,7 +3262,7 @@ export type DroneInfo = {
 
 export type EmpireGiftResponse = {
     /**
-     * Donation to an empire named by an empire alias target: empire_gift_credits (credits wired to the treasury from anywhere), empire_gift_items (cargo given to the quartermaster at one of its stations with storage service) or empire_gift_ship (a ship parked at the empire station where you are docked, seated in the empire's Reserve fleet, or scrapped if it is a starter ship). A station:<base ID> donation returns SendGiftResponse instead, even at an empire station.
+     * Donation to an empire named by an empire alias target: empire_gift_credits (credits wired to the treasury from anywhere), empire_gift_items (cargo given to the quartermaster at one of its stations with storage service) or empire_gift_ship (a ship parked at the empire station where you are docked, seated in the empire's Reserve fleet, scrapped if it is a starter ship, or destroyed for flagship_bounty if it is a pirate boss's flagship). A station:<base ID> donation returns SendGiftResponse instead, even at an empire station.
      */
     action: 'empire_gift_credits' | 'empire_gift_items' | 'empire_gift_ship';
     /**
@@ -3306,7 +3306,11 @@ export type EmpireGiftResponse = {
      */
     empire_name: string;
     /**
-     * The empire's shared Reserve fleet that the ship joined. Every ship donated to one empire reports the same fleet_id. Omitted when a starter ship is scrapped instead.
+     * Credits the empire paid you for a pirate boss's stolen flagship (a flat 1000000), added to your wallet on top of the normal donation goodwill and counted as taxable ship_sale income. The empire destroys the hull. Set on empire_gift_ship only when the donated ship was a boss flagship; omitted otherwise. Less than the flat amount only if your wallet hit the credit cap.
+     */
+    flagship_bounty?: number;
+    /**
+     * The empire's shared Reserve fleet that the ship joined. Every ship donated to one empire reports the same fleet_id. Omitted when a starter ship is scrapped or a boss flagship is destroyed instead.
      */
     fleet_id?: string;
     /**
@@ -3318,7 +3322,7 @@ export type EmpireGiftResponse = {
      */
     goodwill?: GiftGoodwill;
     /**
-     * Designation the empire gave the hull in its Reserve roster. Omitted when a starter ship is scrapped instead.
+     * Designation the empire gave the hull in its Reserve roster. Omitted when a starter ship is scrapped or a boss flagship is destroyed instead.
      */
     hull_designator?: string;
     /**
@@ -3326,15 +3330,15 @@ export type EmpireGiftResponse = {
      */
     item_id?: string;
     /**
-     * Your donation note; omitted when empty. When a donated starter ship is scrapped it is the empire's reply instead.
+     * Your donation note; omitted when empty. When a donated starter ship is scrapped or a boss flagship is destroyed it is the empire's reply instead.
      */
     message?: string;
     /**
-     * Empire NPC pilot seated on the donated ship, unique to this donation. Omitted when a starter ship is scrapped instead.
+     * Empire NPC pilot seated on the donated ship, unique to this donation. Omitted when a starter ship is scrapped or a boss flagship is destroyed instead.
      */
     npc_id?: string;
     /**
-     * ID of the automated donation notice filed with the empire's leadership. Omitted when a starter ship is scrapped.
+     * ID of the automated donation notice filed with the empire's leadership. Omitted when a starter ship is scrapped or a boss flagship is destroyed.
      */
     petition_id?: string;
     /**
@@ -3585,6 +3589,9 @@ export type FacilityDefSummary = {
     faction_service?: string;
     labor_cost: number;
     level: number;
+    /**
+     * Item stock this facility type must hold each facility cycle (100 ticks) to count as fully supplied, plus fuel drawn from the station tank as a fuel line. Omitted when the type has no upkeep. For a market that uses trade_authenticator (such as trade_concourse), the trade_authenticator quantity adds a charge that grows with the docked station's recent market trade volume and burns in full each cycle.
+     */
     maintenance_per_cycle?: Array<ItemQuantity>;
     name: string;
     recipe_id?: string;
@@ -3783,7 +3790,7 @@ export type FacilityEntry = {
      */
     maintenance_level?: number;
     /**
-     * Item stock this station-run facility must hold each facility cycle (100 ticks) to count as fully supplied. Present only for fleet depots and dining/leisure venues (tourism_upkeep); omitted otherwise. A tourism venue's figure scales with recent paying footfall and never drops below 15 percent of its declared menu (at least one of each item); it burns its paying guests' share of its declared menu — about the whole listed stock in a busy cycle and nothing in a cycle no guest paid for.
+     * Item stock this facility must hold each facility cycle (100 ticks) to count as fully supplied. Present only for fleet depots, dining/leisure venues (tourism_upkeep) and markets that use trade_authenticator (such as trade_concourse); omitted otherwise. A market's trade_authenticator quantity is its declared stock plus a charge that grows with this station's recent market trade volume; the market burns that charge in full each cycle, and on a player station it goes offline when faction storage cannot cover the whole quantity. A tourism venue's figure scales with recent paying footfall and never drops below 15 percent of its declared menu (at least one of each item); it burns its paying guests' share of its declared menu — about the whole listed stock in a busy cycle and nothing in a cycle no guest paid for.
      */
     maintenance_per_cycle?: Array<ItemQuantity>;
     /**
@@ -4244,6 +4251,9 @@ export type FacilityTypeDetailResponse = {
     labor_cost: number;
     level: number;
     lore?: string;
+    /**
+     * Item stock this facility type must hold each facility cycle (100 ticks) to count as fully supplied, plus fuel drawn from the station tank as a fuel line. Omitted when the type has no upkeep. For a market that uses trade_authenticator (such as trade_concourse), the trade_authenticator quantity adds a charge that grows with the docked station's recent market trade volume and burns in full each cycle.
+     */
     maintenance_per_cycle?: Array<ItemQuantity>;
     name: string;
     personal_service?: string;
@@ -8672,10 +8682,6 @@ export type NotificationPirateRadio = {
      * Backward-compatible alias of editorial_class. Both fields always carry the same bounded editorial class.
      */
     category: 'ambient' | 'tactical' | 'strategic' | 'outcome';
-    /**
-     * Bounded editorial delivery policy for the public pirate-radio Discord feed; it does not affect in-game delivery.
-     */
-    discord_policy: 'never' | 'batched' | 'immediate';
     /**
      * Canonical cross-channel editorial class and alias of category. Both fields always carry the same value.
      */
