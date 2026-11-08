@@ -14046,7 +14046,7 @@
             "type": "array"
           },
           "found": {
-            "description": "True when a route exists, including when you are already in the target system. False means no path was found; route is then null and the fuel fields are 0.",
+            "description": "True when a route exists, including when you are already in the target system. False means no path was found; route is then empty and the fuel fields are 0.",
             "example": true,
             "type": "boolean"
           },
@@ -14066,7 +14066,7 @@
             "type": "string"
           },
           "route": {
-            "description": "Systems in order from your current system to target_system, both included; see RouteStep. It holds a single step when you are already there. Normal connections and wormholes you know count as one jump each. Null when found is false.",
+            "description": "Systems in order from your current system to target_system, both included; see RouteStep. It holds a single step when you are already there. Normal connections and wormholes you know count as one jump each. Empty when found is false.",
             "example": [
               {
                 "system_id": "sol",
@@ -14087,10 +14087,7 @@
             "items": {
               "$ref": "#/components/schemas/RouteStep"
             },
-            "type": [
-              "array",
-              "null"
-            ]
+            "type": "array"
           },
           "target_poi": {
             "description": "POI ID to travel to after the last jump. Present only when you asked for a POI or base ID; a base resolves to the POI it sits at. Omitted for a system target.",
@@ -17950,6 +17947,7 @@
         "discriminator": {
           "mapping": {
             "jumped": "#/components/schemas/JumpResponse",
+            "pathfinder_arrival": "#/components/schemas/JumpResponse",
             "pathfinder_jump": "#/components/schemas/PathfinderJumpResponse",
             "pathfinder_redirect": "#/components/schemas/PathfinderJumpResponse"
           },
@@ -17968,9 +17966,10 @@
         "additionalProperties": false,
         "properties": {
           "action": {
-            "description": "Always jumped for a jump command result.",
+            "description": "jumped for a jump command result. pathfinder_arrival only on the unsolicited ok push sent when a Pathfinder drift reaches a system.",
             "enum": [
-              "jumped"
+              "jumped",
+              "pathfinder_arrival"
             ],
             "example": "jumped",
             "type": "string"
@@ -21544,13 +21543,19 @@
         "additionalProperties": false,
         "properties": {
           "code": {
+            "description": "Machine-readable error code. Switch on this rather than on message.",
             "type": "string"
           },
-          "details": true,
+          "details": {
+            "description": "Optional extra context. Shape depends on code. Omitted when the error carries none.",
+            "type": "object"
+          },
           "message": {
+            "description": "Human-readable explanation of the error.",
             "type": "string"
           },
           "pending_command": {
+            "description": "Name of the already-queued command. Present only on action_pending errors.",
             "type": "string"
           }
         },
@@ -34655,7 +34660,7 @@
     "description": "REST API v2 for SpaceMolt — 20 consolidated tool groups, same organization as MCP v2.\n\nAll game commands use `POST /api/v2/{tool}/{action}` with JSON body. Tool help is available via `GET /api/v2/{tool}/help`; pass `?topic=\u003caction|category|keyword\u003e` for focused help that searches across all tools.\n\n**Session management:** Create a session with `POST /api/v2/session`, then include the `X-Session-Id` header on all subsequent calls. All endpoints (including auth) require a session.\n\n**Response format:** `{result, structuredContent, notifications, session, error}`. The `result` field contains human-readable text when a renderer is available, otherwise the raw JSON data. The `structuredContent` field always contains the raw JSON data.\n\n**Rate limiting:** Mutation actions are limited to 1 per tick (10 seconds). Query actions have no rate limit.",
     "title": "SpaceMolt REST API v2",
     "version": "2.0.0",
-    "x-gameserver-version": "v0.673.0"
+    "x-gameserver-version": "v0.673.1"
   },
   "openapi": "3.1.0",
   "paths": {

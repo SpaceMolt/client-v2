@@ -5346,7 +5346,7 @@ export type FindRouteResponse = {
      */
     fleet_fuel?: Array<FleetMemberFuel>;
     /**
-     * True when a route exists, including when you are already in the target system. False means no path was found; route is then null and the fuel fields are 0.
+     * True when a route exists, including when you are already in the target system. False means no path was found; route is then empty and the fuel fields are 0.
      */
     found: boolean;
     /**
@@ -5362,9 +5362,9 @@ export type FindRouteResponse = {
      */
     message: string;
     /**
-     * Systems in order from your current system to target_system, both included; see RouteStep. It holds a single step when you are already there. Normal connections and wormholes you know count as one jump each. Null when found is false.
+     * Systems in order from your current system to target_system, both included; see RouteStep. It holds a single step when you are already there. Normal connections and wormholes you know count as one jump each. Empty when found is false.
      */
-    route: Array<RouteStep> | null;
+    route: Array<RouteStep>;
     /**
      * POI ID to travel to after the last jump. Present only when you asked for a POI or base ID; a base resolves to the POI it sits at. Omitted for a system target.
      */
@@ -6790,16 +6790,16 @@ export type JoinLogEntry = {
 };
 
 export type JumpCommandResponse = ({
-    action: 'jumped';
+    action: 'jumped' | 'pathfinder_arrival';
 } & JumpResponse) | ({
     action: 'pathfinder_jump' | 'pathfinder_redirect';
 } & PathfinderJumpResponse);
 
 export type JumpResponse = {
     /**
-     * Always jumped for a jump command result.
+     * jumped for a jump command result. pathfinder_arrival only on the unsolicited ok push sent when a Pathfinder drift reaches a system.
      */
-    action: 'jumped';
+    action: 'jumped' | 'pathfinder_arrival';
     /**
      * True when the engine docked you automatically before running this command, because the command requires being docked. Omitted when no automatic dock happened.
      */
@@ -8290,8 +8290,23 @@ export type NotificationDroneUpdate = {
 };
 
 export type NotificationError = {
+    /**
+     * Machine-readable error code. Switch on this rather than on message.
+     */
     code: string;
+    /**
+     * Optional extra context. Shape depends on code. Omitted when the error carries none.
+     */
+    details?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Human-readable explanation of the error.
+     */
     message: string;
+    /**
+     * Name of the already-queued command. Present only on action_pending errors.
+     */
     pending_command?: string;
 };
 
