@@ -1451,7 +1451,7 @@ export type BoardingStateLogEntry = {
      */
     phase: 'latching' | 'assault' | 'withdrawing' | 'resolved' | 'self_destruct';
     /**
-     * Why the event fired, when the event alone is ambiguous. boarding_rejected carries either a validation reason or contested_same_tick when deterministic boarding initiative selected another eligible request sharing either hull. self_destruct_canceled may carry battle_ended when combat ending cleared the countdown. Omitted otherwise.
+     * Why the event fired, when the event alone is ambiguous. boarding_rejected carries either a validation reason or contested_same_tick when deterministic boarding initiative selected another eligible request sharing either hull. self_destruct_canceled may carry battle_ended when combat ending cleared the countdown. plundered carries surrendered when the target's crew gave up because no fit marine was left aboard, at latch or when its last marine fell; that ship keeps its surviving crew. Captures never surrender. Omitted otherwise.
      */
     reason?: string;
     /**
@@ -3378,7 +3378,9 @@ export type EmpireNpcInfo = {
 
 export type EmpirePolicySnapshot = {
     bounty_attack: number;
+    bounty_hold: number;
     bounty_kill: number;
+    bounty_plunder: number;
     bounty_rep_restoration_bps: number;
     bounty_rep_restoration_cap: number;
     citizenship_auto_approve: boolean;
@@ -3409,7 +3411,9 @@ export type EmpirePolicySnapshot = {
     rep_baseline_outsider: number;
     rep_decay_amount: number;
     rep_penalty_attack: number;
+    rep_penalty_hold: number;
     rep_penalty_kill: number;
+    rep_penalty_plunder: number;
     rep_trade_fill_cap: number;
     rep_trade_fill_divisor: number;
     repair_cost_per_hull: number;
@@ -4580,6 +4584,7 @@ export type FactionEditUpdates = {
     ally_facility_access?: boolean;
     ally_fuel_access?: boolean;
     ally_intel_opt_out?: boolean;
+    ally_shipyard_access?: boolean;
     charter?: string;
     description?: string;
     primary_color?: string;
@@ -4670,6 +4675,7 @@ export type FactionInfoResponse = {
     ally_facility_access?: boolean;
     ally_fuel_access?: boolean;
     ally_intel_opt_out?: boolean;
+    ally_shipyard_access?: boolean;
     at_war: boolean;
     charter: string;
     created_at: string;
@@ -6104,9 +6110,17 @@ export type GetTradeEntry = {
      */
     buyer_faction_id?: string;
     /**
-     * UTC time when the pending offer expires.
+     * UTC time when the pending offer expires. Tolls expire by expires_tick instead.
      */
     expires_at: string;
+    /**
+     * Tick at which the toll offer expires unpaid. Present only for tolls.
+     */
+    expires_tick?: number;
+    /**
+     * True while the offerer holds the target with a warp scrambler for this toll. Omitted when no hold stands.
+     */
+    hold?: boolean;
     /**
      * Seller faction labor fee in credits paid to local station citizens on acceptance; outposts use the nearest reachable station pool. Currently 1000000. Omitted for ordinary trades.
      */
@@ -6123,6 +6137,10 @@ export type GetTradeEntry = {
      * Items offered by the seller. Empty for station sales.
      */
     offer_items: Array<PendingTradeItemView>;
+    /**
+     * True when the offer is a toll: request_credits buys the target a grant of safe passage from the offerer's faction (or the offerer alone if factionless) for 2160 ticks. Accepting pays what the target has, up to request_credits. Omitted for ordinary trades.
+     */
+    offer_safe_passage?: boolean;
     /**
      * Seller player name. Present for incoming offers only.
      */
@@ -7042,7 +7060,7 @@ export type McpNotification = {
     data: NotificationPayload;
     id: string;
     /**
-     * Specific frame subtype. Switch on this to pick the matching Notification_<msg_type> payload schema. Routing to the coarse type field: chat_message -> chat. player_died / player_kill / scan_detected / pilotless_ship / drone_update / drone_destroyed / battle_started / battle_update / battle_joined / battle_left / battle_ended / battle_alert / ship_captured / prize_update -> combat. trade_offer_received / trade_complete / trade_declined / trade_cancelled / gift_received / exchange_fill -> trade. market_update -> market. crafting_update -> crafting. observation_update -> observation. personnel_update -> system. Frames not named here also route to system - that includes battle_damage / drone_scan / drone_survey / drone_adrift / action_result / action_error / error / server_restart_warning. A types=combat filter does not carry them.
+     * Specific frame subtype. Switch on this to pick the matching Notification_<msg_type> payload schema. Routing to the coarse type field: chat_message -> chat. player_died / player_kill / scan_detected / hold_update / pilotless_ship / drone_update / drone_destroyed / battle_started / battle_update / battle_joined / battle_left / battle_ended / battle_alert / ship_captured / prize_update -> combat. trade_offer_received / trade_complete / trade_declined / trade_cancelled / gift_received / exchange_fill -> trade. market_update -> market. crafting_update -> crafting. observation_update -> observation. personnel_update -> system. Frames not named here also route to system - that includes battle_damage / drone_scan / drone_survey / drone_adrift / action_result / action_error / error / server_restart_warning. A types=combat filter does not carry them.
      */
     msg_type: string;
     timestamp: string;
@@ -7834,7 +7852,7 @@ export type NotificationChannelInfo = {
 /**
  * Frame payload shared by polling and inline notifications. Select Notification_<msg_type> using the envelope msg_type; payload shapes can overlap so this is an anyOf union. Null means the frame supplied no payload.
  */
-export type NotificationPayload = NotificationAchievementUnlocked | NotificationActionError | NotificationActionResult | NotificationArenaChallenge | NotificationArenaObjective | NotificationBaseDestroyed | NotificationBaseRaidUpdate | NotificationBattleAlert | NotificationBattleDamage | NotificationBattleEnded | NotificationBattleJoined | NotificationBattleLeft | NotificationBattleStarted | NotificationBattleUpdate | NotificationChatMessage | NotificationCloak | NotificationCompleteMission | NotificationCraftingUpdate | NotificationDroneAdrift | NotificationDroneDestroyed | NotificationDroneScan | NotificationDroneSurvey | NotificationDroneUpdate | NotificationError | NotificationExchangeFill | NotificationFacilityReclaimed | NotificationFacilityRentWarning | NotificationFactionAllianceBroken | NotificationFactionAllianceFormed | NotificationFactionAllianceProposal | NotificationFactionMobileBaseUpdate | NotificationFactionPeaceAccepted | NotificationFactionPeaceProposal | NotificationFactionWarDeclared | NotificationFleet | NotificationGiftReceived | NotificationMarketUpdate | NotificationMiningYield | NotificationObservationUpdate | NotificationOk | NotificationPersonnelUpdate | NotificationPilotlessShip | NotificationPirateDestroyed | NotificationPirateRadio | NotificationPlayerDied | NotificationPlayerKill | NotificationPrizeUpdate | NotificationRanchPoached | NotificationReconnected | NotificationRefueledBy | NotificationRepairedBy | NotificationScanDetected | NotificationServerRestartWarning | NotificationShipCaptured | NotificationShipCommissionComplete | NotificationSkillLevelUp | NotificationStationRepaired | NotificationTradeCancelled | NotificationTradeComplete | NotificationTradeDeclined | NotificationTradeOfferReceived | null;
+export type NotificationPayload = NotificationAchievementUnlocked | NotificationActionError | NotificationActionResult | NotificationArenaChallenge | NotificationArenaObjective | NotificationBaseDestroyed | NotificationBaseRaidUpdate | NotificationBattleAlert | NotificationBattleDamage | NotificationBattleEnded | NotificationBattleJoined | NotificationBattleLeft | NotificationBattleStarted | NotificationBattleUpdate | NotificationChatMessage | NotificationCloak | NotificationCompleteMission | NotificationCraftingUpdate | NotificationDroneAdrift | NotificationDroneDestroyed | NotificationDroneScan | NotificationDroneSurvey | NotificationDroneUpdate | NotificationError | NotificationExchangeFill | NotificationFacilityReclaimed | NotificationFacilityRentWarning | NotificationFactionAllianceBroken | NotificationFactionAllianceFormed | NotificationFactionAllianceProposal | NotificationFactionMobileBaseUpdate | NotificationFactionPeaceAccepted | NotificationFactionPeaceProposal | NotificationFactionWarDeclared | NotificationFleet | NotificationGiftReceived | NotificationHoldUpdate | NotificationMarketUpdate | NotificationMiningYield | NotificationObservationUpdate | NotificationOk | NotificationPersonnelUpdate | NotificationPilotlessShip | NotificationPirateDestroyed | NotificationPirateRadio | NotificationPlayerDied | NotificationPlayerKill | NotificationPrizeUpdate | NotificationRanchPoached | NotificationReconnected | NotificationRefueledBy | NotificationRepairedBy | NotificationScanDetected | NotificationServerRestartWarning | NotificationShipCaptured | NotificationShipCommissionComplete | NotificationSkillLevelUp | NotificationStationRepaired | NotificationTradeCancelled | NotificationTradeComplete | NotificationTradeDeclined | NotificationTradeOfferReceived | null;
 
 export type NotificationSettingsResponse = {
     action: string;
@@ -8488,6 +8506,52 @@ export type NotificationGiftReceived = {
     timestamp: string;
 };
 
+/**
+ * Pushed to both the holder and the held pilot when a hold starts or ends. A hold is a crime in empire space and a hostile act everywhere.
+ */
+export type NotificationHoldUpdate = {
+    /**
+     * started when the hold begins; ended when it ends.
+     */
+    event: 'started' | 'ended';
+    /**
+     * Player whose warp scrambler holds the target.
+     */
+    holder_id: string;
+    /**
+     * Holder username.
+     */
+    holder_name: string;
+    /**
+     * Human-readable summary.
+     */
+    message: string;
+    /**
+     * Why the hold ended. Present only on ended. paid: the target accepted the toll. offer_closed: the toll was declined, cancelled or expired and the 2-tick grace ran out. holder_acted: the holder queued a command other than scan, trade_offer, attack or reload. holder_left: the holder or target left the POI, docked, jumped or died. battle: the two pilots are now in the same battle, and combat tackle applies. scan_over: a scan hold ran its 5 ticks with no toll offer.
+     */
+    reason?: 'paid' | 'offer_closed' | 'holder_acted' | 'holder_left' | 'battle' | 'scan_over';
+    /**
+     * What holds the target: toll is a trade_offer with hold=true; scan is a cargo scan from a ship with a warp scrambler. A toll offer sent during a scan hold turns it into a toll hold.
+     */
+    source: 'toll' | 'scan';
+    /**
+     * Tick the hold started.
+     */
+    start_tick: number;
+    /**
+     * Held player.
+     */
+    target_id: string;
+    /**
+     * Held player username.
+     */
+    target_name: string;
+    /**
+     * The toll offer that keeps the hold. Present for toll holds.
+     */
+    trade_id?: string;
+};
+
 export type NotificationMarketUpdate = {
     base_id: string;
     base_name?: string;
@@ -9033,6 +9097,14 @@ export type NotificationTradeComplete = {
     labor_cost?: number;
     message: string;
     /**
+     * Credits the target paid for your toll: request_credits, or their whole wallet when they had less. Present including zero only for tolls.
+     */
+    paid_credits?: number;
+    /**
+     * Tick at which the grant of safe passage the target bought ends. Present only for tolls.
+     */
+    pass_until_tick?: number;
+    /**
      * Seller faction ID. Present only for station sales.
      */
     seller_faction_id?: string;
@@ -9071,7 +9143,18 @@ export type NotificationTradeOfferReceived = {
      * Buyer faction ID. Present only for station sales.
      */
     buyer_faction_id?: string;
+    /**
+     * Wall-clock expiry of an ordinary offer. Tolls expire by expires_tick instead.
+     */
     expires_at?: string;
+    /**
+     * Tick at which the toll offer expires unpaid. Present only for tolls.
+     */
+    expires_tick?: number;
+    /**
+     * True when the offerer's warp scrambler holds you while the toll stands: your jump and travel wait, and dock, emergency warps, self-destruct, fleet moves and other fights are refused. Attacking the offerer is lawful defense. False otherwise.
+     */
+    hold?: boolean;
     /**
      * Seller faction fee in credits paid to the nearest eligible station citizen pool. Currently 1000000. Present only for station sales.
      */
@@ -9087,8 +9170,16 @@ export type NotificationTradeOfferReceived = {
     offer_items?: Array<{
         [key: string]: unknown;
     }>;
+    /**
+     * True when the offer is a toll: request_credits buys you a grant of safe passage from the offerer's faction (or the offerer alone if factionless). Accepting pays what you have, up to request_credits. False for ordinary trades.
+     */
+    offer_safe_passage?: boolean;
     offerer_id: string;
     offerer_name?: string;
+    /**
+     * Length in ticks of the grant of safe passage the toll buys, counted from acceptance. Currently 2160. Present only for tolls.
+     */
+    pass_until_ticks?: number;
     request_credits?: number;
     /**
      * Items the offerer wants in return.
@@ -9752,6 +9843,36 @@ export type Player = {
      * Ship ID the player is riding aboard as a passenger (empty if piloting their own ship)
      */
     riding_ship_id?: string;
+    /**
+     * Grants of safe passage you hold, longest-running first, at most 16. Until until_tick, members of grantor_faction_id (or grantor_player_id alone when the grantor has no faction) cannot attack, target or board you; attacking a bound pilot yourself ends the grant. Expired grants may remain until the list next changes. Omitted when you hold none.
+     */
+    safe_passages?: Array<{
+        granted_tick?: number;
+        /**
+         * Faction bound by the grant. Omitted when the grantor had no faction.
+         */
+        grantor_faction_id?: string;
+        /**
+         * Player who granted the pass.
+         */
+        grantor_player_id?: string;
+        /**
+         * The toll's trade ID, when the grant came from a toll.
+         */
+        ref_id?: string;
+        /**
+         * toll: bought with a trade_offer toll. robbery: left by a robbery.
+         */
+        source?: 'toll' | 'robbery';
+        /**
+         * System where the grant was made.
+         */
+        system_id?: string;
+        /**
+         * First tick at which the grant no longer binds.
+         */
+        until_tick?: number;
+    }>;
     /**
      * Hex color
      */
@@ -10760,6 +10881,16 @@ export type RouteStep = {
     via_wormhole?: boolean;
 };
 
+export type SafePassage = {
+    granted_tick: number;
+    grantor_faction_id?: string;
+    grantor_player_id: string;
+    ref_id?: string;
+    source: string;
+    system_id: string;
+    until_tick: number;
+};
+
 export type SalvageMaterial = {
     item: string;
     name: string;
@@ -10794,7 +10925,18 @@ export type ScanResponse = {
      * True when the scanned creature is branded livestock of a player faction's wildlife ranch. Killing it is legal. It draws down the owners' herd, the owners are told who killed it, and it gives no hunt mission credit. Omitted for wild animals and for scans of anything else.
      */
     branded?: boolean;
-    cargo_types?: Array<string>;
+    /**
+     * The target's ship cargo in the get_cargo item shape (item_id, name, quantity, size). Present when a cargo scan succeeds and the hold is not empty. A successful cargo scan without cargo means an empty hold. A cargo scan never reveals credits.
+     */
+    cargo?: Array<ShipCargoItem>;
+    /**
+     * The target ship's cargo capacity. Present when a cargo scan succeeds.
+     */
+    cargo_capacity?: number;
+    /**
+     * Cargo space the target uses. Present when a cargo scan succeeds and the hold is not empty.
+     */
+    cargo_used?: number;
     cloaked?: boolean;
     /**
      * Players the scan resolved, each with the tiered reveal its contest margin allows (10 username, 20 ship class, 30 hull and shield, 40 cloaked flag, 50 faction). A cloaked player is listed only from margin 10. Omitted when none.
@@ -10802,12 +10944,24 @@ export type ScanResponse = {
     contacts?: Array<ScanContact>;
     description?: string;
     faction_id?: string;
+    /**
+     * True when your warp scrambler held the target for the cargo scan: 5 ticks from the scan start. Omitted when false.
+     */
+    hold?: boolean;
+    /**
+     * True when you carry a warp scrambler but the target's warp stabilizer cancelled the hold. The scan still ran. Omitted when false.
+     */
+    hold_cancelled?: boolean;
     hull?: number;
     /**
      * Leviathans at the POI. Omitted when none are there.
      */
     leviathans?: Array<LeviathanContact>;
     message?: string;
+    /**
+     * cargo when this result is a cargo scan (scan with mode=cargo). success is true when the scan read the cargo. Omitted for other scans.
+     */
+    mode?: 'cargo';
     /**
      * Empire NPC ships that passed the contest (listed from margin 10, ship class from 20). Omitted when none. Area sweeps never fill it.
      */
@@ -10820,9 +10974,13 @@ export type ScanResponse = {
      * The POI a remote POI scan read. Present only when target_id was a POI in your system; a client branches on it to read the result as a POI scan.
      */
     poi_id?: string;
+    /**
+     * Why a cargo scan failed. evaded: scan power was 0 against the target's stealth and scan evasion. target_left: the target left your POI, docked or boarded a carrier. target_lost: the target cloaked beyond your sensors. scanner_left: you left the POI, docked or boarded a carrier. Omitted when the scan succeeded and for other scans.
+     */
+    reason?: 'evaded' | 'target_left' | 'target_lost' | 'scanner_left';
     revealed_info: Array<string>;
     /**
-     * Scan power of a remote POI scan: your sensor rating at your own POI, or your sensor rating minus 10 at another POI in your system. Each ship there is contested at this power minus its stealth rating. Omitted for other scans and when the power is 0.
+     * Scan power of a remote POI scan: your sensor rating at your own POI, or your sensor rating minus 10 at another POI in your system. Each ship there is contested at this power minus its stealth rating. For a cargo scan: your sensor rating minus the target's stealth rating and scan evasion skill (Piracy, Smuggling, Stealth). Omitted for other scans and when the power is 0.
      */
     scan_power?: number;
     shield?: number;
@@ -10861,6 +11019,10 @@ export type ScrapWreckResponse = {
      * True when the engine undocked you automatically before running this command, because the command requires being undocked. Omitted when no automatic undock happened.
      */
     auto_undocked?: boolean;
+    /**
+     * scrap_wreck mode=field only: recovered items that did not fit in your cargo hold and were destroyed with the wreck. Omitted when everything fit. Materials lists what went into the hold; total_value covers only that.
+     */
+    lost?: Array<SalvageMaterial>;
     materials: Array<SalvageMaterial>;
     message: string;
     ship_class?: string;
@@ -10996,7 +11158,7 @@ export type SendGiftResponse = {
      */
     auto_undocked?: boolean;
     /**
-     * Canonical Base ID where gifted items were deposited. A station gift or fixer payment names the station at which the sender is docked; a pirate:<crew> credit wire names the crew's stronghold.
+     * Canonical Base ID where gifted items were deposited. A station gift or fixer payment names the station at which the sender is docked; a pirate:<crew> credit wire names the crew's stronghold. Empty for a credit-only gift to a player sent away from a storage station.
      */
     base_id: string;
     /**
@@ -12730,11 +12892,14 @@ export type Trade = {
     buyer_faction_id?: string;
     created_at: string;
     expires_at: string;
+    expires_tick?: number;
     id: string;
     note?: string;
     offer_credits: number;
     offer_items: Array<TradeItem>;
+    offer_safe_passage?: boolean;
     offerer_id: string;
+    paid_credits?: number;
     poi_id: string;
     request_credits: number;
     request_items: Array<TradeItem>;
@@ -12757,6 +12922,14 @@ export type TradeAcceptResponse = {
      * Human-readable trade result.
      */
     message: string;
+    /**
+     * Credits you paid for a toll: request_credits, or your whole wallet when you had less. Present including zero only for tolls.
+     */
+    paid_credits?: number;
+    /**
+     * Tick at which the grant of safe passage you bought ends (acceptance tick + 2160). Present only for tolls.
+     */
+    pass_until_tick?: number;
     /**
      * Faction that sells the station and pays the labor cost and transfer tax. Present only for faction station sales.
      */
@@ -12824,6 +12997,18 @@ export type TradeOfferResponse = {
      */
     buyer_faction_id?: string;
     /**
+     * Tick at which a toll offer expires unpaid (30 ticks after it was sent). Omitted for ordinary trades, which expire by wall-clock time.
+     */
+    expires_tick?: number;
+    /**
+     * True when your warp scrambler now holds the target while the toll stands. Omitted when no hold started.
+     */
+    hold?: boolean;
+    /**
+     * True when you sent hold=true but the target's warp stabilization was at least your scramble power: the toll offer went out with no hold. Omitted otherwise.
+     */
+    hold_cancelled?: boolean;
+    /**
      * Seller faction labor fee in credits paid to local station citizens on acceptance; outposts use the nearest reachable station pool. Currently 1000000. Omitted for ordinary trades.
      */
     labor_cost?: number;
@@ -12831,6 +13016,10 @@ export type TradeOfferResponse = {
      * Human-readable trade result.
      */
     message: string;
+    /**
+     * True when the offer is a toll: request_credits buys the target a grant of safe passage from you (your faction, or you alone if factionless) for 2160 ticks. Omitted for ordinary trades.
+     */
+    offer_safe_passage?: boolean;
     /**
      * Faction that sells the station and pays the labor cost and transfer tax. Present only for faction station sales.
      */
@@ -13220,6 +13409,10 @@ export type V2CarriedShip = {
     class_id: string;
     class_name: string;
     name: string;
+    /**
+     * Username of the pilot who owns this ship, or their player ID if that player is not loaded. A faction-mate's ship in your bay stays theirs.
+     */
+    owner: string;
     scale: number;
     ship_id: string;
     slots_used: number;
@@ -16280,6 +16473,10 @@ export type SpacemoltScanData = {
          * Player ID/username, NPC ID/name, wildlife creature ID, or intact-prize actor ID to scan. Prize actor IDs come from get_nearby. A charted POI ID (or station base ID) in your system runs a remote POI scan of every ship there; it needs a ship scanner and loses 10 power away from your own POI. Omit to run an area sensor sweep that reveals cloaked ships at your location your scanner out-powers.
          */
         id?: string;
+        /**
+         * Optional. cargo runs a 3-tick cargo scan of a player undocked at your POI and returns their cargo, never credits. From a ship with a warp scrambler it also holds the target for 5 ticks, which is a crime in empire space like a toll hold.
+         */
+        mode?: 'cargo';
     };
     path?: never;
     query?: never;
@@ -17704,6 +17901,10 @@ export type SpacemoltBattleStanceData = {
          * Battle stance: fire (100% dmg dealt/taken), evade (0%/50%, costs fuel), brace (0%/25%, shields regen 2x), flee (0%/100%, auto-retreats to escape), or board (0%/100%, automatically closes for repeated latch attempts; requires target_id and marines). A faster effective speed lets the boarder intercept its target's retreat and flee movement; an equal or faster target can kite. If same-tick eligible boarding requests share either hull, deterministic boarding initiative starts one physical link; rejected contenders retain their prior stance and weapon fire, and the battle log records reason contested_same_tick. Changing away from board begins non-instant withdrawal.
          */
         id: 'fire' | 'evade' | 'brace' | 'flee' | 'board';
+        /**
+         * Boarding goal for stance=board: capture (default) takes the intact hull; plunder robs another player's ship of its cargo and leaves the hull with its pilot. Plunder targets only players, never NPCs, prizes or arena opponents.
+         */
+        intent?: 'capture' | 'plunder';
         /**
          * Positive fit-marine commitment required when setting stance=board. The battle tick caps it to the fit marines actually available.
          */
@@ -22279,6 +22480,10 @@ export type SpacemoltFactionAdminEditData = {
          */
         ally_intel_opt_out?: boolean;
         /**
+         * True to let allied faction members commission ships at your faction's station shipyards under your ship licenses. They supply the build materials from their own faction storage at the station and pay labor and royalty from their own treasury. Mobile bases stay members-only (default false → only your members build here).
+         */
+        ally_shipyard_access?: boolean;
+        /**
          * Faction's founding document (max 4000 chars)
          */
         charter?: string;
@@ -24412,7 +24617,14 @@ export type SpacemoltSalvageReleaseResponse = SpacemoltSalvageReleaseResponses[k
 
 export type SpacemoltSalvageScrapData = {
     body?: {
-        [key: string]: unknown;
+        /**
+         * mode=field only: ID of a wreck at your POI (use get_wrecks). Omit to scrap the wreck you are towing.
+         */
+        id?: string;
+        /**
+         * Omit (or "yard") to scrap your towed wreck at a salvage yard. "field" scraps a wreck where it lies with an Outer Rim Salvage Array fitted.
+         */
+        mode?: 'yard' | 'field';
     };
     path?: never;
     query?: never;
@@ -24436,7 +24648,7 @@ export type SpacemoltSalvageScrapErrors = {
 
 export type SpacemoltSalvageScrapResponses = {
     /**
-     * Result. structuredContent: V2GameState post-mutation delta (changed player/location/missions/skills sections); the command result is under `details` (ScrapWreckResponse)
+     * Result. structuredContent: V2GameState post-mutation delta (changed player/ship/cargo/location/missions/skills sections); the command result is under `details` (ScrapWreckResponse)
      */
     200: V2Response & {
         structuredContent?: V2GameState & {
@@ -24914,7 +25126,7 @@ export type SpacemoltShipCommissionShipData = {
          */
         bare_hull?: boolean;
         /**
-         * At your own faction's station: build from faction storage and treasury (requires ManageTreasury). Required there; credits-only and provide_materials are rejected.
+         * At your own faction's station, or an allied station that shares its shipyard (ally_shipyard_access): build from your faction's storage and treasury (requires ManageTreasury). Required there; credits-only and provide_materials are rejected.
          */
         fund_from_faction?: boolean;
         /**
@@ -25506,7 +25718,7 @@ export type SpacemoltShipSupplyCommissionResponse = SpacemoltShipSupplyCommissio
 export type SpacemoltShipSwitchShipData = {
     body?: {
         /**
-         * ID of the ship to switch to (must be stored at current station, use list_ships to see your fleet)
+         * ID of the ship to switch to (use list_ships to see your fleet): a ship stored at your station, or, while undocked at the same POI as a faction-mate flying a carrier, your ship in their bay, which swaps in one step with no shipyard
          */
         id: string;
     };
@@ -27583,7 +27795,7 @@ export type SpacemoltStorageDepositData = {
          */
         dest_bucket?: string;
         /**
-         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), target=<player_name> on a deposit gifts the ship (triggers gift_ship action), target=station:<base ID> on a deposit gives it to that pirate stronghold while you and the ship are docked there (also gift_ship; a boss's stolen flagship can be sent to any pirate stronghold from any station), and an empire alias on a deposit donates it to that empire (empire_gift_ship). Use list_ships to find ship instance IDs.
+         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), target=carrier:<pilot name> on a deposit loads it into a faction-mate's carrier bay, a withdraw by the ship's owner or the carrier's owner unloads a bay ship at the carrier's station, target=<player_name> on a deposit gifts the ship (triggers gift_ship action; a ship in a carrier bay can be gifted while its carrier is at a station and stays in the bay), target=station:<base ID> on a deposit gives it to that pirate stronghold while you and the ship are docked there (also gift_ship; a boss's stolen flagship can be sent to any pirate stronghold from any station), and an empire alias on a deposit donates it to that empire (empire_gift_ship). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
         /**
@@ -27606,7 +27818,7 @@ export type SpacemoltStorageDepositData = {
          */
         source?: string;
         /**
-         * Target: self, faction, faction:TAG, empire alias, pirate:<crew>, player name/ID, or station:<base-or-POI-ID>. Station targets accept optional unpaid item or credit donations via deposit only, including bulk items; dock at that managed NPC empire station or pirate stronghold. No packages or quest items, and ships only to a pirate stronghold. Credits to an empire or pirate:<crew> can be wired from anywhere. Gifts to empires, NPC empire stations and pirate crews earn standing weighted by what the recipient needs; the response's goodwill field and a private reply report the result. Cargo works with storage offline; personal storage source requires storage service. Normal gift unlock and trading restrictions apply. Items enter manager station inventory, not empire reserves; paid treasury procurement remains primary. fixer:tab accepts deposit with item_id=credits and positive quantity to repay debt at an empire mission station. Wallet only; capped at debt and wallet. No gift unlock or storage service required.
+         * Target: self, faction, faction:TAG, empire alias, pirate:<crew>, carrier:<pilot name>, player name/ID, or station:<base-or-POI-ID>. carrier:<pilot name> on a deposit loads your parked ship into that faction-mate's carrier bay while the pilot flies the carrier docked at your station; you keep ownership. Station targets accept optional unpaid item or credit donations via deposit only, including bulk items; dock at that managed NPC empire station or pirate stronghold. No packages or quest items, and ships only to a pirate stronghold. Credits to an empire or pirate:<crew> can be wired from anywhere. Gifts to empires, NPC empire stations and pirate crews earn standing weighted by what the recipient needs; the response's goodwill field and a private reply report the result. Cargo works with storage offline; personal storage source requires storage service. Normal gift unlock and trading restrictions apply. Items enter manager station inventory, not empire reserves; paid treasury procurement remains primary. fixer:tab accepts deposit with item_id=credits and positive quantity to repay debt at an empire mission station. Wallet only; capped at debt and wallet. No gift unlock or storage service required.
          */
         target?: string;
     };
@@ -27795,7 +28007,7 @@ export type SpacemoltStorageViewData = {
          */
         station_id?: string;
         /**
-         * Target: self, faction, faction:TAG, empire alias, pirate:<crew>, player name/ID, or station:<base-or-POI-ID>. Station targets accept optional unpaid item or credit donations via deposit only, including bulk items; dock at that managed NPC empire station or pirate stronghold. No packages or quest items, and ships only to a pirate stronghold. Credits to an empire or pirate:<crew> can be wired from anywhere. Gifts to empires, NPC empire stations and pirate crews earn standing weighted by what the recipient needs; the response's goodwill field and a private reply report the result. Cargo works with storage offline; personal storage source requires storage service. Normal gift unlock and trading restrictions apply. Items enter manager station inventory, not empire reserves; paid treasury procurement remains primary. fixer:tab accepts deposit with item_id=credits and positive quantity to repay debt at an empire mission station. Wallet only; capped at debt and wallet. No gift unlock or storage service required.
+         * Target: self, faction, faction:TAG, empire alias, pirate:<crew>, carrier:<pilot name>, player name/ID, or station:<base-or-POI-ID>. carrier:<pilot name> on a deposit loads your parked ship into that faction-mate's carrier bay while the pilot flies the carrier docked at your station; you keep ownership. Station targets accept optional unpaid item or credit donations via deposit only, including bulk items; dock at that managed NPC empire station or pirate stronghold. No packages or quest items, and ships only to a pirate stronghold. Credits to an empire or pirate:<crew> can be wired from anywhere. Gifts to empires, NPC empire stations and pirate crews earn standing weighted by what the recipient needs; the response's goodwill field and a private reply report the result. Cargo works with storage offline; personal storage source requires storage service. Normal gift unlock and trading restrictions apply. Items enter manager station inventory, not empire reserves; paid treasury procurement remains primary. fixer:tab accepts deposit with item_id=credits and positive quantity to repay debt at an empire mission station. Wallet only; capped at debt and wallet. No gift unlock or storage service required.
          */
         target?: string;
     };
@@ -27845,7 +28057,7 @@ export type SpacemoltStorageWithdrawData = {
          */
         dest_bucket?: string;
         /**
-         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), target=<player_name> on a deposit gifts the ship (triggers gift_ship action), target=station:<base ID> on a deposit gives it to that pirate stronghold while you and the ship are docked there (also gift_ship; a boss's stolen flagship can be sent to any pirate stronghold from any station), and an empire alias on a deposit donates it to that empire (empire_gift_ship). Use list_ships to find ship instance IDs.
+         * Item ID for normal item transfers, 'credits' for credit operations (faction or fixer:tab target), or a stored ship instance UUID for ship operations: target=self loads/unloads the ship into your active carrier's bay, or — if your active ship is a non-carrier with a tow rig fitted — attaches/releases it as a tow (its class scale must be no larger than your active ship's), target=carrier:<pilot name> on a deposit loads it into a faction-mate's carrier bay, a withdraw by the ship's owner or the carrier's owner unloads a bay ship at the carrier's station, target=<player_name> on a deposit gifts the ship (triggers gift_ship action; a ship in a carrier bay can be gifted while its carrier is at a station and stays in the bay), target=station:<base ID> on a deposit gives it to that pirate stronghold while you and the ship are docked there (also gift_ship; a boss's stolen flagship can be sent to any pirate stronghold from any station), and an empire alias on a deposit donates it to that empire (empire_gift_ship). Use list_ships to find ship instance IDs.
          */
         item_id?: string;
         /**
@@ -27864,7 +28076,7 @@ export type SpacemoltStorageWithdrawData = {
          */
         source?: string;
         /**
-         * Target: self, faction, faction:TAG, empire alias, pirate:<crew>, player name/ID, or station:<base-or-POI-ID>. Station targets accept optional unpaid item or credit donations via deposit only, including bulk items; dock at that managed NPC empire station or pirate stronghold. No packages or quest items, and ships only to a pirate stronghold. Credits to an empire or pirate:<crew> can be wired from anywhere. Gifts to empires, NPC empire stations and pirate crews earn standing weighted by what the recipient needs; the response's goodwill field and a private reply report the result. Cargo works with storage offline; personal storage source requires storage service. Normal gift unlock and trading restrictions apply. Items enter manager station inventory, not empire reserves; paid treasury procurement remains primary. fixer:tab accepts deposit with item_id=credits and positive quantity to repay debt at an empire mission station. Wallet only; capped at debt and wallet. No gift unlock or storage service required.
+         * Target: self, faction, faction:TAG, empire alias, pirate:<crew>, carrier:<pilot name>, player name/ID, or station:<base-or-POI-ID>. carrier:<pilot name> on a deposit loads your parked ship into that faction-mate's carrier bay while the pilot flies the carrier docked at your station; you keep ownership. Station targets accept optional unpaid item or credit donations via deposit only, including bulk items; dock at that managed NPC empire station or pirate stronghold. No packages or quest items, and ships only to a pirate stronghold. Credits to an empire or pirate:<crew> can be wired from anywhere. Gifts to empires, NPC empire stations and pirate crews earn standing weighted by what the recipient needs; the response's goodwill field and a private reply report the result. Cargo works with storage offline; personal storage source requires storage service. Normal gift unlock and trading restrictions apply. Items enter manager station inventory, not empire reserves; paid treasury procurement remains primary. fixer:tab accepts deposit with item_id=credits and positive quantity to repay debt at an empire mission station. Wallet only; capped at debt and wallet. No gift unlock or storage service required.
          */
         target?: string;
     };
@@ -28097,6 +28309,10 @@ export type SpacemoltTransferTradeDeclineResponse = SpacemoltTransferTradeDeclin
 export type SpacemoltTransferTradeOfferData = {
     body?: {
         /**
+         * Optional; needs offer_safe_passage. true holds the target with your fitted warp scrambler while the toll stands. Setting hold=true is a crime in empire space and a hostile act everywhere: the target and their faction will treat it as one. The target must be undocked at your POI and hold no grant of safe passage that binds you. You can hold the same pilot once per 360 ticks. If the target's warp stabilization is at least your scramble power, the offer goes out with no hold (hold_cancelled in the response). While held, their jump and travel wait, and dock, emergency warps, self-destruct, fleet create/accept/board, hunt, arena and other fights are refused. They can still trade, chat, cloak and attack you lawfully. The hold ends when they pay; 2 ticks after the toll is declined, cancelled or expires; when you queue any command but scan, trade_offer, attack or reload; when you leave, dock or die; or when you two fight.
+         */
+        hold?: boolean;
+        /**
          * Optional note shown to the target with the offer and in get_trades, e.g. your terms. Up to 500 characters; blank means no note.
          */
         note?: string;
@@ -28111,6 +28327,10 @@ export type SpacemoltTransferTradeOfferData = {
             item_id?: string;
             quantity?: number;
         }>;
+        /**
+         * Optional. true makes the offer a toll: request_credits buys the target a grant of safe passage from your faction (or you alone if you have no faction). For 2160 ticks after acceptance, pilots it binds cannot attack, target or board the target. Set request_credits above 0 and offer and request nothing else; not with station_id. Accepting pays what the target has, up to request_credits. The offer expires 30 ticks after you send it. Any player can sell one. A toll without hold is an ordinary trade and no crime.
+         */
+        offer_safe_passage?: boolean;
         /**
          * Credits you WANT in return (optional). Station sales charge the buyer faction treasury.
          */
