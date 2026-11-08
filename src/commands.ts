@@ -2105,6 +2105,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"fit_crew","type":"integer","description":"","required":false,"positionalIndex":-1},{"name":"fit_marines","type":"integer","description":"","required":false,"positionalIndex":-1},{"name":"injured_crew","type":"integer","description":"","required":false,"positionalIndex":-1},{"name":"injured_marines","type":"integer","description":"","required":false,"positionalIndex":-1},{"name":"personnel_action","type":"string","description":"Reserve operation; defaults to status. On v2 transports this field is named personnel_action.","required":false,"positionalIndex":-1,"enumValues":["status","recruit","deposit","withdraw"]}],
     isAmbiguous: false,
   }],
+  ["spacemolt_ship/generator", {
+    toolGroup: "spacemolt_ship",
+    action: "generator",
+    operationId: "spacemolt_ship_generator",
+    summary: "Connect your docked ship's field generator to the station grid, or disconnect it",
+    params: [{"name":"disconnect","type":"boolean","description":"True to end the link. Omit or false to connect, or to restart the link timer.","required":false,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_ship/help", {
     toolGroup: "spacemolt_ship",
     action: "help",
@@ -2638,7 +2646,7 @@ const entries: [string, CommandMeta][] = [
     action: "trade_offer",
     operationId: "spacemolt_transfer_trade_offer",
     summary: "Offer a trade or faction station sale to another player",
-    params: [{"name":"target","type":"string","description":"Player ID or username to trade with","required":true,"positionalIndex":0},{"name":"offer_credits","type":"integer","description":"Credits you GIVE (optional)","required":false,"positionalIndex":-1},{"name":"offer_items","type":"array","description":"Items you GIVE: [{\"item_id\": \"iron_ore\", \"quantity\": 50}]","required":false,"positionalIndex":-1},{"name":"request_credits","type":"integer","description":"Credits you WANT in return (optional). Station sales charge the buyer faction treasury.","required":false,"positionalIndex":-1},{"name":"request_items","type":"array","description":"Items you WANT in return: [{\"item_id\": \"fuel_cell\", \"quantity\": 5}]","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Optional exact Base ID of an assembled stationary faction station or outpost. Leaders only. Includes seller-faction facilities and storage at acceptance. request_credits is paid between faction treasuries. No items or offer_credits. Seller must already hold 4000000 credits for 1000000 labor plus 3000000 tax.","required":false,"positionalIndex":-1}],
+    params: [{"name":"target","type":"string","description":"Player ID or username to trade with","required":true,"positionalIndex":0},{"name":"note","type":"string","description":"Optional note shown to the target with the offer and in get_trades, e.g. your terms. Up to 500 characters; blank means no note.","required":false,"positionalIndex":-1},{"name":"offer_credits","type":"integer","description":"Credits you GIVE (optional)","required":false,"positionalIndex":-1},{"name":"offer_items","type":"array","description":"Items you GIVE: [{\"item_id\": \"iron_ore\", \"quantity\": 50}]","required":false,"positionalIndex":-1},{"name":"request_credits","type":"integer","description":"Credits you WANT in return (optional). Station sales charge the buyer faction treasury.","required":false,"positionalIndex":-1},{"name":"request_items","type":"array","description":"Items you WANT in return: [{\"item_id\": \"fuel_cell\", \"quantity\": 5}]","required":false,"positionalIndex":-1},{"name":"station_id","type":"string","description":"Optional exact Base ID of an assembled stationary faction station or outpost. Leaders only. Includes seller-faction facilities and storage at acceptance. request_credits is paid between faction treasuries. No items or offer_credits. Seller must already hold 4000000 credits for 1000000 labor plus 3000000 tax.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
 ];

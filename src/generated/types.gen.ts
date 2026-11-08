@@ -5718,6 +5718,53 @@ export type GaragedShipEntry = {
     ship_id: string;
 };
 
+export type GeneratorResponse = {
+    /**
+     * True when the engine docked you automatically before running this command, because the command requires being docked. Omitted when no automatic dock happened.
+     */
+    auto_docked?: boolean;
+    /**
+     * True when the engine undocked you automatically before running this command, because the command requires being undocked. Omitted when no automatic undock happened.
+     */
+    auto_undocked?: boolean;
+    /**
+     * Station the generator feeds. After disconnect: the station it fed.
+     */
+    base_id: string;
+    /**
+     * True when the link is active after this command. False after disconnect.
+     */
+    connected: boolean;
+    /**
+     * Tick when the link times out. Present only while connected. Connect again to restart the timer.
+     */
+    end_tick?: number;
+    /**
+     * Fuel burned over the whole link so far. After disconnect: the total for the link.
+     */
+    fuel_burned: number;
+    /**
+     * Ship fuel burned per tick while connected: 1 per operational field generator. 0 after disconnect.
+     */
+    fuel_per_tick: number;
+    /**
+     * Fuel the generator never burns (10% of max fuel). The link ends when the next tick would take the tank below it.
+     */
+    fuel_reserve: number;
+    /**
+     * Human-readable summary.
+     */
+    message: string;
+    /**
+     * Power the generator supplies per tick after the hull bonus and Engineering and crew staffing scale it. The station counts generator power only up to the larger of its installed plant capacity and 20.
+     */
+    output: number;
+    /**
+     * Sum of the per-tick output over the ticks the link ran.
+     */
+    power_delivered: number;
+};
+
 /**
  * Command-specific result object. See individual command documentation for field details.
  */
@@ -6064,6 +6111,10 @@ export type GetTradeEntry = {
      * Seller faction labor fee in credits paid to local station citizens on acceptance; outposts use the nearest reachable station pool. Currently 1000000. Omitted for ordinary trades.
      */
     labor_cost?: number;
+    /**
+     * Optional note the offerer attached to the trade_offer (sanitized, up to 500 characters). Empty string when the offerer sent no note.
+     */
+    note: string;
     /**
      * Personal credits offered. Zero or omitted for station sales.
      */
@@ -7622,6 +7673,10 @@ export type Module = {
     drone_capacity?: number;
     fleet_triage_pct?: number;
     fuel_efficiency?: number;
+    /**
+     * Station power this module adds to the station it is docked at while connected with the generator command. Each connected generator burns 1 ship fuel per tick. Hull bonuses, Engineering and crew staffing scale the delivered output.
+     */
+    generator_output?: number;
     hidden?: boolean;
     hull_bonus?: number;
     hull_penalty?: number;
@@ -9021,6 +9076,10 @@ export type NotificationTradeOfferReceived = {
      * Seller faction fee in credits paid to the nearest eligible station citizen pool. Currently 1000000. Present only for station sales.
      */
     labor_cost?: number;
+    /**
+     * Optional note the offerer attached to the offer (sanitized, up to 500 characters). Empty string when the offerer sent no note.
+     */
+    note?: string;
     offer_credits?: number;
     /**
      * Items the offerer is giving.
@@ -11965,6 +12024,10 @@ export type StationPowerStatus = {
     current_draw: number;
     efficiency: number;
     fuel_inputs?: Array<StationPowerInput>;
+    /**
+     * Part of supply that docked ships add with the generator command. Omitted when no generator is connected.
+     */
+    generator_supply?: number;
     remediation?: string;
     supply: number;
 };
@@ -12668,6 +12731,7 @@ export type Trade = {
     created_at: string;
     expires_at: string;
     id: string;
+    note?: string;
     offer_credits: number;
     offer_items: Array<TradeItem>;
     offerer_id: string;
@@ -24981,6 +25045,46 @@ export type SpacemoltShipFactionPersonnelResponses = {
 
 export type SpacemoltShipFactionPersonnelResponse = SpacemoltShipFactionPersonnelResponses[keyof SpacemoltShipFactionPersonnelResponses];
 
+export type SpacemoltShipGeneratorData = {
+    body?: {
+        /**
+         * True to end the link. Omit or false to connect, or to restart the link timer.
+         */
+        disconnect?: boolean;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_ship/generator';
+};
+
+export type SpacemoltShipGeneratorErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltShipGeneratorResponses = {
+    /**
+     * Result. structuredContent: V2GameState post-mutation delta (changed ship/location sections); the command result is under `details` (GeneratorResponse)
+     */
+    200: V2Response & {
+        structuredContent?: V2GameState & {
+            details?: GeneratorResponse;
+        };
+    };
+};
+
+export type SpacemoltShipGeneratorResponse = SpacemoltShipGeneratorResponses[keyof SpacemoltShipGeneratorResponses];
+
 export type SpacemoltShipHelpData = {
     body?: never;
     path?: never;
@@ -27992,6 +28096,10 @@ export type SpacemoltTransferTradeDeclineResponse = SpacemoltTransferTradeDeclin
 
 export type SpacemoltTransferTradeOfferData = {
     body?: {
+        /**
+         * Optional note shown to the target with the offer and in get_trades, e.g. your terms. Up to 500 characters; blank means no note.
+         */
+        note?: string;
         /**
          * Credits you GIVE (optional)
          */
