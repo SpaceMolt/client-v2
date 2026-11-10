@@ -196,7 +196,7 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt",
     action: "get_map",
     operationId: "spacemolt_get_map",
-    summary: "View all star systems in the galaxy",
+    summary: "View known space and your charted frontier systems",
     params: [{"name":"system_id","type":"string","description":"Optional system ID to get details for a single system. Omit to get all systems.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
@@ -350,6 +350,14 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_install_mod",
     summary: "Install a module on your ship",
     params: [{"name":"id","type":"string","description":"Module ID to install/uninstall. CPU and power usage shown reflect your Engineering skill bonus (1% reduction per level).","required":true,"positionalIndex":0}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt/interact_poi", {
+    toolGroup: "spacemolt",
+    action: "interact_poi",
+    operationId: "spacemolt_interact_poi",
+    summary: "Interact with an archive at your current POI",
+    params: [],
     isAmbiguous: false,
   }],
   ["spacemolt/jettison", {
@@ -1033,6 +1041,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"facility_type","type":"string","description":"Facility type ID. For 'types' action: get full details for this specific type. For 'build'/'upgrade': the type to build/upgrade to.","required":true,"positionalIndex":0},{"name":"facility_id","type":"string","description":"Facility instance ID (required for 'upgrade', 'dismantle', 'faction_dismantle', 'job_add', 'job_list', 'set_output_price', 'set_access', 'set_name', 'set_description' actions). Use action 'list' to see facility IDs.","required":true,"positionalIndex":1},{"name":"bucket","type":"string","description":"For 'faction_build'/'faction_upgrade': a Storage Extension bucket (name or id) to source build/upgrade MATERIALS from, instead of the faction main store. Ship cargo backfills either way.","required":false,"positionalIndex":-1},{"name":"package_ids","type":"array","description":"For 'build'/'upgrade'/'faction_build'/'faction_upgrade': source materials directly from these packages instead of unpacking them into storage first. Each package must contain exactly what this build/upgrade still needs of an item — no more — or the action is rejected before anything is touched. Storage and cargo still backfill any shortfall.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
+  ["spacemolt_facility/found_gate_site", {
+    toolGroup: "spacemolt_facility",
+    action: "found_gate_site",
+    operationId: "spacemolt_facility_found_gate_site",
+    summary: "Found one end of a jump gate at your current point of interest in lawless space",
+    params: [{"name":"far_system","type":"string","description":"System the other end of the gate will stand in (id or name)","required":true,"positionalIndex":-1},{"name":"name","type":"string","description":"Name for this end of the gate","required":true,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_facility/found_station", {
     toolGroup: "spacemolt_facility",
     action: "found_station",
@@ -1217,6 +1233,14 @@ const entries: [string, CommandMeta][] = [
     params: [{"name":"description","type":"string","description":"New station description (set_description)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
+  ["spacemolt_facility/set_gate_access", {
+    toolGroup: "spacemolt_facility",
+    action: "set_gate_access",
+    operationId: "spacemolt_facility_set_gate_access",
+    summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
+    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public or faction for set_gate_access","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]}],
+    isAmbiguous: false,
+  }],
   ["spacemolt_facility/set_market_fee", {
     toolGroup: "spacemolt_facility",
     action: "set_market_fee",
@@ -1254,7 +1278,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_refuel_price",
     operationId: "spacemolt_facility_set_refuel_price",
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
-    params: [{"name":"price","type":"integer","description":"Price for set_refuel_price (per unit) or set_repair_price (per hull point)","required":false,"positionalIndex":-1}],
+    params: [{"name":"price","type":"integer","description":"Price for set_refuel_price (per unit), set_repair_price (per hull point) or set_toll (credits per ship for pilots outside your faction)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_repair_price", {
@@ -1262,7 +1286,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_repair_price",
     operationId: "spacemolt_facility_set_repair_price",
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
-    params: [{"name":"price","type":"integer","description":"Price for set_refuel_price (per unit) or set_repair_price (per hull point)","required":false,"positionalIndex":-1}],
+    params: [{"name":"price","type":"integer","description":"Price for set_refuel_price (per unit), set_repair_price (per hull point) or set_toll (credits per ship for pilots outside your faction)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_service_access", {
@@ -1270,7 +1294,15 @@ const entries: [string, CommandMeta][] = [
     action: "set_service_access",
     operationId: "spacemolt_facility_set_service_access",
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
-    params: [{"name":"access","type":"string","description":"Access level for set_service_access","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]},{"name":"service","type":"string","description":"Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard, missions)","required":true,"positionalIndex":-1}],
+    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public or faction for set_gate_access","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]},{"name":"service","type":"string","description":"Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard, missions)","required":true,"positionalIndex":-1}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_facility/set_toll", {
+    toolGroup: "spacemolt_facility",
+    action: "set_toll",
+    operationId: "spacemolt_facility_set_toll",
+    summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
+    params: [{"name":"price","type":"integer","description":"Price for set_refuel_price (per unit), set_repair_price (per hull point) or set_toll (credits per ship for pilots outside your faction)","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/station_info", {
