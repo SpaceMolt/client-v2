@@ -825,7 +825,7 @@ export const spacemoltGetStatus = <ThrowOnError extends boolean = false>(options
 
 /**
  * Get your current system's chart: charted POIs and connections. With a ship scanner, each POI also carries ship_count
- * Returns the public chart: system info, charted POIs (name, type, class, position, station name), and connected systems. It does not show station fuel, services, or condition: those are local, so read them with get_poi at the station's POI. With a working ship scanner (sensor rating above 0), each POI carries ship_count: other players there that are not cloaked (online, offline, and docked), flying pirates, active empire NPC ships, and hatched leviathans. A battle anywhere in the system shows as active_battle.
+ * Returns the public chart: system info, charted POIs (name, type, class, position, station name, base_type), and connected systems. base_type separates a station, an outpost, and a mobile_base. It does not show station fuel, services, or condition: those are local, so read them with get_poi at the station's POI. With a working ship scanner (sensor rating above 0), each POI carries ship_count: other players there that are not cloaked (online, offline, and docked), flying pirates, active empire NPC ships, and hatched leviathans. A battle anywhere in the system shows as active_battle.
  */
 export const spacemoltGetSystem = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetSystemData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetSystemResponses, SpacemoltGetSystemErrors, ThrowOnError>({
