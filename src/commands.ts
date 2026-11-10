@@ -917,7 +917,7 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt_facility",
     action: "base_cost",
     operationId: "spacemolt_facility_base_cost",
-    summary: "Preview the cost and requirements to found a faction station",
+    summary: "Preview the cost and requirements to found a faction station, plus the outpost founding fee",
     params: [],
     isAmbiguous: false,
   }],
