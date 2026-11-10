@@ -2086,7 +2086,7 @@ const entries: [string, CommandMeta][] = [
     action: "commission_ship",
     operationId: "spacemolt_ship_commission_ship",
     summary: "Commission a ship to be built at this shipyard",
-    params: [{"name":"id","type":"string","description":"Ship class ID to commission (use catalog type=ships to see options)","required":true,"positionalIndex":0},{"name":"bare_hull","type":"boolean","description":"If true, commission only the hull without its default module loadout. Defaults to false so ships arrive fitted.","required":false,"positionalIndex":-1},{"name":"fund_from_faction","type":"boolean","description":"At your own faction's station, or an allied station that shares its shipyard (ally_shipyard_access): build from your faction's storage and treasury (requires ManageTreasury). Required there; credits-only and provide_materials are rejected.","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"At an empire/NPC shipyard: if true, supply build materials from cargo/storage (cheaper); if false, pay credits for everything (default).","required":false,"positionalIndex":-1},{"name":"source_missing_materials","type":"boolean","description":"At an empire/NPC shipyard: take available requirements from cargo then station storage and charge only to source the deficit. Do not combine with provide_materials.","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"Ship class ID to commission (use catalog type=ships to see options). Mobile-base blueprints build faction-funded at your faction's tier-4 shipyard, or player-funded at their empire's capital for your faction (requires ManageBases; reserves the faction's single mobile-base slot).","required":true,"positionalIndex":0},{"name":"bare_hull","type":"boolean","description":"If true, commission only the hull without its default module loadout. Defaults to false so ships arrive fitted.","required":false,"positionalIndex":-1},{"name":"fund_from_faction","type":"boolean","description":"At your own faction's station, or an allied station that shares its shipyard (ally_shipyard_access): build from your faction's storage and treasury (requires ManageTreasury). Required there; credits-only and provide_materials are rejected.","required":false,"positionalIndex":-1},{"name":"provide_materials","type":"boolean","description":"At an empire/NPC shipyard: if true, supply build materials from cargo/storage (cheaper); if false, pay credits for everything (default).","required":false,"positionalIndex":-1},{"name":"source_missing_materials","type":"boolean","description":"At an empire/NPC shipyard: take available requirements from cargo then station storage and charge only to source the deficit. Do not combine with provide_materials.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/commission_status", {
@@ -2103,6 +2103,14 @@ const entries: [string, CommandMeta][] = [
     operationId: "spacemolt_ship_faction_personnel",
     summary: "View, recruit, or transfer personnel held in your faction's local reserve",
     params: [{"name":"fit_crew","type":"integer","description":"","required":false,"positionalIndex":-1},{"name":"fit_marines","type":"integer","description":"","required":false,"positionalIndex":-1},{"name":"injured_crew","type":"integer","description":"","required":false,"positionalIndex":-1},{"name":"injured_marines","type":"integer","description":"","required":false,"positionalIndex":-1},{"name":"personnel_action","type":"string","description":"Reserve operation; defaults to status. On v2 transports this field is named personnel_action.","required":false,"positionalIndex":-1,"enumValues":["status","recruit","deposit","withdraw"]}],
+    isAmbiguous: false,
+  }],
+  ["spacemolt_ship/fit_preview", {
+    toolGroup: "spacemolt_ship",
+    action: "fit_preview",
+    operationId: "spacemolt_ship_fit_preview",
+    summary: "Preview a planned module fit: stats, fit errors, and a safe install order",
+    params: [{"name":"modules","type":"array","description":"The complete planned fit for your active ship: one module type ID per fitted module, repeated to fit more than one. [] previews an empty ship.","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/generator", {
