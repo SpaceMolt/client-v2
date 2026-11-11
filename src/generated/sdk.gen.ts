@@ -542,7 +542,7 @@ export const spacemoltGetLocation = <ThrowOnError extends boolean = false>(optio
 
 /**
  * View known space and your charted frontier systems
- * Returns known space and frontier systems you have entered or received through charted faction intel. Uncharted frontier IDs are not found. Pass system_id to get details for a single system. Frontier entries include frontier_tier (1 near or 2 deep); known-space entries omit it. Connections on remote charts exclude uncharted frontier destinations. Local connections appear on entry. The map shows no player counts.
+ * Returns known space and frontier systems you have entered or received through charted faction intel. Uncharted frontier IDs are not found. Pass system_id to get details for a single system. Frontier entries include frontier_tier; known-space entries omit it. Connections on remote charts exclude uncharted frontier destinations. Local connections appear on entry. The map shows no player counts.
  *
  * **Example:** `POST /api/v2/spacemolt/get_map` with body `{"system_id":"36_ophiuchi"}`
  */
@@ -802,7 +802,7 @@ export const spacemoltGetStatus = <ThrowOnError extends boolean = false>(options
 
 /**
  * Get your current system's chart: charted POIs and connections. With a ship scanner, each POI also carries ship_count
- * Returns the public chart: system info, charted POIs (name, type, class, position, station name, base_type), and connected systems. base_type separates a station, an outpost, and a mobile_base. In a frontier system you have entered the chart is private: it carries frontier_tier (1 near or 2 deep), the system is not published, and the rest of its cluster stays hidden. Resource POIs require scanning. Known space omits frontier_tier. It does not show station fuel, services, or condition: those are local, so read them with get_poi at the station's POI. With a working ship scanner (sensor rating above 0), each POI carries ship_count: other players there that are not cloaked (online, offline, and docked), flying pirates, active empire NPC ships, and hatched leviathans. A battle anywhere in the system shows as active_battle.
+ * Returns the public chart: system info, charted POIs (name, type, class, position, station name, base_type), and connected systems. base_type separates a station, an outpost, and a mobile_base. In a frontier system you have entered the chart is private: it carries frontier_tier, the system is not published, and the rest of its cluster stays hidden. Resource POIs require scanning. Known space omits frontier_tier. It does not show station fuel, services, or condition: those are local, so read them with get_poi at the station's POI. With a working ship scanner (sensor rating above 0), each POI carries ship_count: other players there that are not cloaked (online, offline, and docked), flying pirates, active empire NPC ships, and hatched leviathans. A battle anywhere in the system shows as active_battle.
  */
 export const spacemoltGetSystem = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltGetSystemData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltGetSystemResponses, SpacemoltGetSystemErrors, ThrowOnError>({
@@ -988,7 +988,7 @@ export const spacemoltInstallMod = <ThrowOnError extends boolean = false>(option
 
 /**
  * Interact with an archive at your current POI
- * Use get_poi or inspect at your current POI to read a private interaction prompt. This action requires local presence at a charted archive; it cannot target a remote POI. Copying an archive retains its data for your pilot through ship loss, logout, and mission abandonment. Accept an offered mission separately with accept_mission. Return to its original archive and interact again to complete the comparison once. view_completed_mission retains the earned navigation record. Surveying reveals an archive but does not copy its data.
+ * Read the prompt with get_poi at your current POI. Requires presence at the POI. Copied data survives ship loss, logout and mission abandonment. Accept an offered mission with accept_mission. Fails with no_berths when a mission seats more passengers than you have free berths.
  *
  * **Rate limited:** This is a mutation command (1 per tick / 10 seconds).
  */
@@ -3024,7 +3024,7 @@ export const spacemoltFacilityFactionUpgrade = <ThrowOnError extends boolean = f
 
 /**
  * Found one end of a jump gate at your current point of interest in lawless space
- * Founds a gate site: a members-only faction outpost that builds one end of a jump gate toward far_system. Requires: the gate method, membership in a faction with the ManageBases permission, an undocked ship at a POI that can host a station and has no base, lawless systems (no empire, zero police) at both ends, a far_system you have charted, no lane already joining the two, at most 1235 GU between them, and the founding fee of 2,500,000 credits per end (faction treasury first, then your wallet). Found the far end the same way from far_system, naming this system; the two ends pair up. Your faction may have only one unfinished pair at a time. Each end builds through four phases over about 600 facility cycles (a cycle is 100 ticks), taking an even share of each phase's materials from its faction storage and paying labor from the faction treasury every cycle; a cycle with anything missing stalls. Once both ends are built, each end pays upkeep from its own storage every cycle, and the gate is open only while both can. An open gate joins the two systems like a lane for jump. Manage it with 'station': set_toll (price, credits per ship for pilots outside your faction), set_gate_access (access public or faction), ban/unban. Gates cannot be dismantled.
+ * Founds one end of a jump gate toward far_system as a members-only faction outpost. Requires the gate method (taught by a mission), the ManageBases faction permission, an undocked ship at a POI that can host a station and has no base, lawless systems (no empire, zero police) at both ends, a far_system you have charted, no lane already joining the two, at most 1235 GU between them, and the founding fee of 2,500,000 credits per end (faction treasury first, then your wallet). Found the far end the same way from far_system, naming this system. Your faction may have only one unfinished pair at a time. Each end builds in phases from faction storage and treasury; station info shows progress. Manage it with 'station': set_toll, set_gate_access, ban/unban. Gates cannot be dismantled.
  *
  * **Example:** `POST /api/v2/spacemolt_facility/found_gate_site` with body `{"name":"Long Reach","far_system":"<system id>"}`
  *
@@ -6211,7 +6211,7 @@ export const spacemoltShipCancelShipListing = <ThrowOnError extends boolean = fa
 
 /**
  * Get a cost estimate for commissioning a ship
- * Returns detailed pricing and requirements. Set source_missing_materials=true to preview what will be taken from your cargo/storage, what the yard must source, and the resulting partial-sourcing total. Set bare_hull=true to exclude the default module loadout. At an empire capital, a mobile-base quote also checks that you can reserve your faction's mobile-base slot. Does not place an order.
+ * Returns detailed pricing and requirements. Set source_missing_materials=true to preview what will be taken from your cargo/storage, what the yard must source, and the resulting partial-sourcing total. Set bare_hull=true to exclude the default module loadout. At an empire capital, a mobile-base quote also checks that you can reserve your faction's mobile-base slot. Quotes ships you lack the Piloting skill for: can_commission is false and blockers names the Piloting level you need. Does not place an order.
  *
  * **Example:** `POST /api/v2/spacemolt_ship/commission_quote` with body `{"id":"viper","source_missing_materials":true,"bare_hull":false}`
  */
