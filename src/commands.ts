@@ -100,8 +100,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt",
     action: "distress_signal",
     operationId: "spacemolt_distress_signal",
-    summary: "Broadcast a distress signal to nearby players for emergency rescue",
-    params: [{"name":"distress_type","type":"string","description":"Type of distress: fuel (out of fuel), repair (hull critically damaged), combat (under attack)","required":false,"positionalIndex":-1,"enumValues":["fuel","repair","combat"]}],
+    summary: "Broadcast a distress signal to nearby players for emergency rescue, or call a Salvage Authority tow",
+    params: [{"name":"distress_type","type":"string","description":"Type of distress: fuel (out of fuel), repair (hull critically damaged), combat (under attack), tow (Salvage Authority tug docks you at the nearest public station after 5 minutes, for a fee)","required":false,"positionalIndex":-1,"enumValues":["fuel","repair","combat","tow"]}],
     isAmbiguous: false,
   }],
   ["spacemolt/dock", {
@@ -2070,7 +2070,7 @@ const entries: [string, CommandMeta][] = [
     action: "browse_ships",
     operationId: "spacemolt_ship_browse_ships",
     summary: "Browse ships listed for sale at a base",
-    params: [{"name":"base_id","type":"string","description":"Station to browse listings at, given by either its Base ID or station POI ID (defaults to current station)","required":false,"positionalIndex":-1},{"name":"class_id","type":"string","description":"Filter by ship class ID","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"Maximum price filter","required":false,"positionalIndex":-1}],
+    params: [{"name":"all_stations","type":"boolean","description":"Search every station you have charted instead of one; cheapest first and paged. Cannot be combined with base_id","required":false,"positionalIndex":-1},{"name":"base_id","type":"string","description":"Station to browse listings at, given by either its Base ID or station POI ID (defaults to current station)","required":false,"positionalIndex":-1},{"name":"can_fly","type":"boolean","description":"Only ships you could buy and fly now (Piloting, reputation, prestige, and the listed fit at your Engineering level)","required":false,"positionalIndex":-1},{"name":"class_id","type":"string","description":"Filter by ship class ID","required":false,"positionalIndex":-1},{"name":"max_price","type":"integer","description":"Maximum price filter","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"Page number with all_stations (default 1)","required":false,"positionalIndex":-1},{"name":"page_size","type":"integer","description":"Listings per page with all_stations (default 50, max 100)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_ship/buy_listed_ship", {

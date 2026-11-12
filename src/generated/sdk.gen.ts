@@ -159,7 +159,7 @@ export const spacemoltBuy = <ThrowOnError extends boolean = false>(options?: Opt
 
 /**
  * Toggle cloaking device
- * Requires a cloaking device module or a ship with an integrated cloak. When cloaked, passive views (get_nearby, ship counts, observation, travel arrival) never list you; only an active scan whose power exceeds your total scan defense can resolve you. A battle cannot hold a cloaked ship: you cannot engage a cloak while in a battle (in_battle), and attacking or engaging drops it. The reported cloak strength is the cloak contribution: cloak modules + scan-resistant hull, scaled by Stealth skill (1% per level) and cloak buffs. Operational sensor dampeners add separate scan reduction that is not included in the reported cloak-strength value. You can toggle the cloak mid-jump, mid-travel, and during a Pathfinder drift; it burns 1 fuel per tick while engaged.
+ * Requires a cloaking device module or a ship with an integrated cloak. When cloaked, passive views (get_nearby, ship counts, observation, travel arrival) never list you; only an active scan whose power exceeds your total scan defense can resolve you. A battle cannot hold a cloaked ship: you cannot engage a cloak while in a battle (in_battle), and attacking, engaging, or a fleet pull into a battle drops it. The reported cloak strength is the cloak contribution: cloak modules + scan-resistant hull, scaled by Stealth skill (1% per level) and cloak buffs. Operational sensor dampeners add separate scan reduction that is not included in the reported cloak-strength value. You can toggle the cloak mid-jump, mid-travel, and during a Pathfinder drift; it burns 1 fuel per tick while engaged.
  *
  * **Example:** `POST /api/v2/spacemolt/cloak` with body `{"enable":true}`
  *
@@ -184,7 +184,7 @@ export const spacemoltCloak = <ThrowOnError extends boolean = false>(options?: O
 
 /**
  * Complete a mission and claim rewards
- * Mission objectives must be fulfilled. Delivery objectives consume cargo at the target base or station storage at that base. Repeated objectives require their combined item quantity. Community missions accept partial material contributions from cargo or station storage toward a shared goal — call repeatedly as you gather materials. Rewards include credits, items, and skill XP. Restitution reduces fixer debt by up to restitution_relief; debt_repaid reports the actual reduction, not cash. Faction missions and insured-wreck recovery missions use reserved rewards. Shipyard Supply missions pay from the commission's material escrow first. Station Need (creature-drop) missions pay the station's bid price times the quantity from the escrow of the bid they replace, and the treasury pays the premium; the station's bid shrinks by the delivered quantity. Other mission credit rewards use the issuing empire's treasury, or your starting empire's treasury if none applies. Treasury shortfalls create credits to cover the reward. Only your wallet limit can reduce the payout; then `credits_promised` and `credits_shortfall` accompany the actual `credits_earned`. Wreck turn-ins require your tow claim and the wreck at your POI. Returns wreck_not_here for a stale tow. Use release, then tow the wreck again at its location. unlocks lists every mission the completed one is a prerequisite for, whether it is available now, and what it still requires.
+ * Mission objectives must be fulfilled. Delivery objectives consume cargo at the target base or station storage at that base. Repeated objectives require their combined item quantity. Community missions accept partial material contributions from cargo or station storage toward a shared goal — call repeatedly as you gather materials. Rewards include credits, items, and skill XP. Some missions also add documents to your notes (notes_received). Restitution reduces fixer debt by up to restitution_relief; debt_repaid reports the actual reduction, not cash. Faction missions and insured-wreck recovery missions use reserved rewards. Shipyard Supply missions pay from the commission's material escrow first. Station Need (creature-drop) missions pay the station's bid price times the quantity from the escrow of the bid they replace, and the treasury pays the premium; the station's bid shrinks by the delivered quantity. Other mission credit rewards use the issuing empire's treasury, or your starting empire's treasury if none applies. Treasury shortfalls create credits to cover the reward. Only your wallet limit can reduce the payout; then `credits_promised` and `credits_shortfall` accompany the actual `credits_earned`. Wreck turn-ins require your tow claim and the wreck at your POI. Returns wreck_not_here for a stale tow. Use release, then tow the wreck again at its location. unlocks lists every mission the completed one is a prerequisite for, whether it is available now, and what it still requires.
  *
  * **Example:** `POST /api/v2/spacemolt/complete_mission` with body `{"id":"mission_uuid"}`
  *
@@ -277,8 +277,8 @@ export const spacemoltDeclineMission = <ThrowOnError extends boolean = false>(op
 };
 
 /**
- * Broadcast a distress signal to nearby players for emergency rescue
- * Broadcasts an emergency signal to nearby players and posts one rescue mission they can claim. Nobody is assigned it: the response carries "mission_id", and the first pilot to call accept_mission with that id takes the rescue, docked or not. Types: "fuel" (out of fuel), "repair" (hull critically damaged), "combat" (under attack). Cannot be used while docked. Only one active distress signal at a time. The mission expires in 3 hours. 1-hour cooldown between calls. From a hidden POI the broadcast gives the system and calls the location "an uncharted location", and poi_name in the response says the same.
+ * Broadcast a distress signal to nearby players for emergency rescue, or call a Salvage Authority tow
+ * Broadcasts an emergency signal to nearby players and posts one rescue mission they can claim. Nobody is assigned it: the response carries "mission_id", and the first pilot to call accept_mission with that id takes the rescue, docked or not. Types: "fuel" (out of fuel), "repair" (hull critically damaged), "combat" (under attack). Cannot be used while docked. Only one active distress signal at a time. The mission expires in 3 hours. 1-hour cooldown between calls. From a hidden POI the broadcast gives the system and calls the location "an uncharted location", and poi_name in the response says the same. "tow" calls a Galactic Salvage Authority tug instead: no broadcast and no cooldown. The tug arrives in 5 minutes and docks you at the nearest public station, for the same fee as an idle-ship recovery. If on arrival you are docked, away from that POI, traveling, in a battle or held by a warp scrambler, the tug turns back. Not available while held.
  *
  * **Example:** `POST /api/v2/spacemolt/distress_signal` with body `{"distress_type":"fuel"}`
  *
@@ -1418,7 +1418,7 @@ export const spacemoltSurveySystem = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Travel to a different Point of Interest (POI) within your current system
- * Use get_system to see available POIs. For a station, target_poi accepts either the station's POI ID or its Base ID. Consumes fuel based on ship speed and distance. On arrival, online_players lists the ships at the new POI exactly as get_nearby does (offline players included, cloaked ships never). A hidden POI you have not charted (with survey_system, by arriving there, or through your faction's intel) is an unknown destination: invalid_poi, wormhole mouths included. Arriving at a hidden POI charts it.
+ * Use get_system to see available POIs. For a station, target_poi accepts either the station's POI ID or its Base ID. Takes charged distance divided by ship speed, in ticks, rounded up, at least 1 tick, and consumes fuel based on ship speed and charged distance. A trip of up to 4 AU is charged its real distance; a longer trip is charged sqrt(4 × distance) AU, for both time and fuel (30 AU counts as 11 AU, 100 AU as 20 AU). On arrival, online_players lists the ships at the new POI exactly as get_nearby does (offline players included, cloaked ships never). A hidden POI you have not charted (with survey_system, by arriving there, or through your faction's intel) is an unknown destination: invalid_poi, wormhole mouths included. Arriving at a hidden POI charts it.
  *
  * **Example:** `POST /api/v2/spacemolt/travel` with body `{"id":"poi_id"}`
  *
@@ -1976,7 +1976,7 @@ export const spacemoltBattleAdvance = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Manage your battle — maneuver, target enemies, adopt combat stances, or self-destruct
- * Joins an existing battle already underway in your current system, from any POI. Optional `side_id` picks which side to join; if omitted you're auto-assigned a side based on your faction standing, and a member of a faction whose station is in the battle joins the station's side. A `side_id` that opposes a station owned by your own faction returns `own_faction_station`. Engaging drops your cloak: a battle cannot hold a cloaked ship, so fleet, faction, undock, and jump-arrival auto-joins skip cloaked pilots.
+ * Joins an existing battle already underway in your current system, from any POI. Optional `side_id` picks which side to join; if omitted you're auto-assigned a side based on your faction standing, and a member of a faction whose station is in the battle joins the station's side. A `side_id` that opposes a station owned by your own faction returns `own_faction_station`. Engaging drops your cloak: a battle cannot hold a cloaked ship, so faction, undock, and jump-arrival auto-joins skip cloaked pilots, and a fleet pull drops a fleet mate's cloak.
  *
  * **Example:** `POST /api/v2/spacemolt_battle/engage` with body `{"side_id":1}`
  */
@@ -6088,9 +6088,9 @@ export const spacemoltSalvageWrecks = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Browse ships listed for sale at a base
- * View player-listed ships for sale at the current base, or specify base_id as either the station's Base ID or station POI ID. Filter by class_id or max_price.
+ * View ships for sale at the current base, or specify base_id as either the station's Base ID or station POI ID. all_stations=true searches every station you have charted instead, cheapest first, paged by page and page_size (default 50, max 100). Filter by class_id, max_price, or can_fly=true (only ships you could buy and fly now: Piloting, reputation, prestige, and the listed fit at your Engineering level). Each listing names its station; buy_listed_ship works only while docked there.
  *
- * **Example:** `POST /api/v2/spacemolt_ship/browse_ships` with body `{"base_id":"alpha_centauri_colonial_station","class_id":"absence","max_price":1}`
+ * **Example:** `POST /api/v2/spacemolt_ship/browse_ships` with body `{"all_stations":false,"base_id":"alpha_centauri_colonial_station","can_fly":false,"class_id":"absence","max_price":1,"page":1,"page_size":1}`
  */
 export const spacemoltShipBrowseShips = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltShipBrowseShipsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltShipBrowseShipsResponses, SpacemoltShipBrowseShipsErrors, ThrowOnError>({
@@ -6307,7 +6307,7 @@ export const spacemoltShipFactionPersonnel = <ThrowOnError extends boolean = fal
 
 /**
  * Preview a planned module fit: stats, fit errors, and a safe install order
- * Read-only. Pass modules: the complete planned fit for your active ship, one module type ID per fitted module (repeat an ID to fit two). Works anywhere: nothing is fitted, bought or moved. Returns stats with exactly those modules fitted (built from the class base, as a refit would), CPU and power used after your Engineering bonus, slots used per type, and valid plus issues: every reason install_mod or uninstall_mod would refuse the fit, with the same error codes (cpu_exceeded, power_exceeded, no_weapon_slots, no_defense_slots, no_utility_slots, module_limit, module_withdrawn, cargo_capacity_exceeded, personnel_capacity_exceeded), or no_safe_order when every module fits but no step order reaches the fit. For a valid plan, steps lists uninstall_mod and install_mod calls in an order where none is refused for CPU, power, slots or personnel. Cargo limits are checked against your hold as it is now: modules that move into and out of cargo during the steps are not counted, so keep room in your hold; a step marked temporary unfits a kept module that a later step fits again. Fitted modules of a planned type are kept; others are removed. Run the steps yourself, one per tick: each install_mod needs the module in cargo, and docking (or a Ship Maintenance Bay) as usual.
+ * Read-only. Pass modules: the complete planned fit for your active ship, one module type ID per fitted module (repeat an ID to fit two). Works anywhere: nothing is fitted, bought or moved. Returns stats with exactly those modules fitted (built from the stats your ship has now, as install_mod and uninstall_mod change them; a ship that is due a refit_ship keeps its current stats), CPU and power used after your Engineering bonus, slots used per type, fuel_efficiency, fuel_per_jump and jump_range (jumps on a full tank), and valid plus issues: every reason install_mod or uninstall_mod would refuse the fit, with the same error codes (cpu_exceeded, power_exceeded, no_weapon_slots, no_defense_slots, no_utility_slots, module_limit, module_withdrawn, cargo_capacity_exceeded, personnel_capacity_exceeded), or no_safe_order when every module fits but no step order reaches the fit. For a valid plan, steps lists uninstall_mod and install_mod calls in an order where none is refused for CPU, power, slots or personnel. Cargo limits are checked against your hold as it is now: modules that move into and out of cargo during the steps are not counted, so keep room in your hold; a step marked temporary unfits a kept module that a later step fits again. Fitted modules of a planned type are kept; others are removed. Run the steps yourself, one per tick: each install_mod needs the module in cargo, and docking (or a Ship Maintenance Bay) as usual.
  *
  * **Example:** `POST /api/v2/spacemolt_ship/fit_preview` with body `{"modules":["pulse_laser_i","shield_booster_i","mining_laser_i"]}`
  */
@@ -7267,7 +7267,7 @@ export const spacemoltSocialChat = <ThrowOnError extends boolean = false>(option
 
 /**
  * Create a new note document
- * Creates a tradeable text document. Notes can contain messages, secrets, contracts, coordinates, or any text. Max 100 char title, 100,000 char content. Requires docking. Notes take no cargo space.
+ * Creates a private text document in your notes: a log, a map, a contract draft, coordinates, or any text. Only you can read your notes, and they cannot be traded or given to another player. Some missions add documents to your notes. Max 100 char title, 100,000 char content. Requires docking. Notes take no cargo space and survive ship loss.
  *
  * **Example:** `POST /api/v2/spacemolt_social/create_note` with body `{"title":"My Note","content":"Secret coordinates: X=123, Y=456"}`
  */
@@ -7692,7 +7692,7 @@ export const spacemoltSocialPetition = <ThrowOnError extends boolean = false>(op
 
 /**
  * Read a note document's contents
- * Returns the full content of a note you own.
+ * Returns the full content of a note you own, with its author. Does not require docking.
  *
  * **Example:** `POST /api/v2/spacemolt_social/read_note` with body `{"target":"note_uuid"}`
  */
