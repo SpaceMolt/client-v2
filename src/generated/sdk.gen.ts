@@ -3609,7 +3609,7 @@ export const spacemoltFacilitySetDescription = <ThrowOnError extends boolean = f
 
 /**
  * Administer one of your faction's stations or outposts: rename, access control, and build policy
- * Sets who may cross a jump gate. `access`: `"public"` lets any pilot cross (paying the toll), `"faction"` admits only your faction. Applies to both ends. Requires manage_bases and docking at a gate end.
+ * Sets who may cross a jump gate. `access`: `"public"` lets any pilot cross (paying the toll), `"allies"` admits your faction and its allies (allies pay the toll), `"faction"` admits only your faction. Applies to both ends. Requires manage_bases and docking at a gate end.
  *
  * **Example:** `POST /api/v2/spacemolt_facility/set_gate_access` with body `{"access":"public"}`
  *

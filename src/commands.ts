@@ -1238,7 +1238,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_gate_access",
     operationId: "spacemolt_facility_set_gate_access",
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
-    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public or faction for set_gate_access","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]}],
+    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public, allies or faction for set_gate_access","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_market_fee", {
@@ -1294,7 +1294,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_service_access",
     operationId: "spacemolt_facility_set_service_access",
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
-    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public or faction for set_gate_access","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]},{"name":"service","type":"string","description":"Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard, missions)","required":true,"positionalIndex":-1}],
+    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public, allies or faction for set_gate_access","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]},{"name":"service","type":"string","description":"Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard, missions)","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_toll", {
