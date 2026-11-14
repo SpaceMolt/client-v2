@@ -1510,7 +1510,7 @@ const entries: [string, CommandMeta][] = [
     action: "jump_mobile_base",
     operationId: "spacemolt_faction_jump_mobile_base",
     summary: "Prepare an inter-system jump for your faction mobile base",
-    params: [{"name":"id","type":"string","description":"Adjacent destination system personally known by the commander","required":true,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"Adjacent destination system charted by the commander or the faction","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt_faction/kick", {

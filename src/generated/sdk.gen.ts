@@ -3198,7 +3198,7 @@ export const spacemoltFacilityJobReorder = <ThrowOnError extends boolean = false
 
 /**
  * Manage facilities at stations (production, faction, personal, sales, and more)
- * Lists all facilities at your current station, including others' rentable ones. Also returns the station's power block (supply vs. crafting draw, battery charge/capacity, and the efficiency multiplier that stretches crafting time when the battery drains), life-support block (slots used vs. installed, upkeep cost/cadence), and a construction block (in-progress builds with ticks-until-complete). Must be docked.
+ * Lists all facilities at your current station, including others' rentable ones. Also returns the station's power block (supply vs. crafting draw, battery charge/capacity, and the efficiency multiplier that stretches crafting time when the battery drains), life-support block (slots used vs. installed, upkeep: listed amount and average draw per cycle), and a construction block (in-progress builds with ticks-until-complete). Must be docked.
  */
 export const spacemoltFacilityList = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFacilityListData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFacilityListResponses, SpacemoltFacilityListErrors, ThrowOnError>({
@@ -4262,7 +4262,7 @@ export const spacemoltFactionDeleteRoom = <ThrowOnError extends boolean = false>
 
 /**
  * View your faction's full ship-garage roster across all stations
- * Lists every ship parked in your faction's ship garages, grouped by station, with per-station used/capacity counts plus galaxy-wide totals. Shows the whole shared fleet pool regardless of where you are docked. Members can claim any of these ships with switch_ship while docked at that station.
+ * Lists every ship parked in your faction's ship garages, grouped by station, with per-station used/capacity counts plus galaxy-wide totals. Shows the whole shared fleet pool regardless of where you are docked. Members can claim these ships with switch_ship while docked at that station. A prestige hull can be claimed only by a member who qualifies: the member holds its personal achievement, the faction holds its faction achievement, or, for a leader-only hull, the member leads the faction. Others get not_qualified.
  */
 export const spacemoltFactionGarages = <ThrowOnError extends boolean = false>(options?: Options<SpacemoltFactionGaragesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<SpacemoltFactionGaragesResponses, SpacemoltFactionGaragesErrors, ThrowOnError>({
@@ -4424,7 +4424,7 @@ export const spacemoltFactionJoin = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Prepare an inter-system jump for your faction mobile base
- * Requires ManageBases. The fully repaired, stationary base may jump only to an adjacent system personally known by the commander. Its archetype-specific jump resource is escrowed for a 90-tick preparation window, then consumed when the base enters a 540-tick isolated jump. Combat during preparation cancels the jump and refunds escrow. During isolation, docking, undocking, and navigation to or from the base are blocked; docked ships ride aboard while undocked and inbound ships are returned to the nearest static origin POI.
+ * Requires ManageBases. The fully repaired, stationary base may jump only to an adjacent system charted by the commander or the faction. Its archetype-specific jump resource is escrowed for a 90-tick preparation window, then consumed when the base enters a 540-tick isolated jump. Combat during preparation cancels the jump and refunds escrow. During isolation, docking, undocking, and navigation to or from the base are blocked; docked ships ride aboard while undocked and inbound ships are returned to the nearest static origin POI.
  *
  * **Example:** `POST /api/v2/spacemolt_faction/jump_mobile_base` with body `{"id":"neighbor_system"}`
  *
