@@ -989,7 +989,7 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt_facility",
     action: "dismantle_outpost",
     operationId: "spacemolt_facility_dismantle_outpost",
-    summary: "Dismantle a faction outpost you're docked at, packing it back into an Outpost Kit",
+    summary: "Dismantle a faction outpost you're docked at, packing it back into an Outpost Kit, or tear down a jump gate",
     params: [],
     isAmbiguous: false,
   }],
