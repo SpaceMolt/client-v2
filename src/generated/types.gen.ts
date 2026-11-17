@@ -1190,7 +1190,7 @@ export type BattleCombatState = {
 };
 
 export type BattleCommandResponse = ({
-    action: 'advance' | 'engage' | 'retreat' | 'self_destruct' | 'stance' | 'target';
+    action: 'advance' | 'default_stance' | 'engage' | 'retreat' | 'self_destruct' | 'stance' | 'target';
 } & BattleResponse) | ({
     action: 'help';
 } & CommandHelpResponse);
@@ -1340,7 +1340,7 @@ export type BattleResponse = {
     /**
      * The battle action the request asked for. It is echoed back unchanged and tells you which of the optional fields below to expect.
      */
-    action: 'advance' | 'retreat' | 'stance' | 'target' | 'engage' | 'self_destruct';
+    action: 'advance' | 'retreat' | 'stance' | 'target' | 'engage' | 'self_destruct' | 'default_stance';
     /**
      * Battle the command applied to. Omitted when the command did not resolve against a specific battle.
      */
@@ -1361,9 +1361,9 @@ export type BattleResponse = {
      */
     self_destruct_countdown?: number;
     /**
-     * Combat stance requested by action=stance. Ordinary stance changes apply on the next battle tick. A queued board request becomes exclusive and suppresses your weapons only if it wins any same-tick hull conflict; deterministic boarding initiative selects one physical link and the battle log records rejected contenders. Switching away from an active board stance begins a multi-tick withdrawal that costs marines — the requested replacement stance applies once disengagement finishes.
+     * Combat stance requested by action=stance, or the default stance set by action=default_stance (auto included). Ordinary stance changes apply on the next battle tick. A queued board request becomes exclusive and suppresses your weapons only if it wins any same-tick hull conflict; deterministic boarding initiative selects one physical link and the battle log records rejected contenders. Switching away from an active board stance begins a multi-tick withdrawal that costs marines — the requested replacement stance applies once disengagement finishes.
      */
-    stance?: 'fire' | 'evade' | 'brace' | 'flee' | 'board';
+    stance?: 'fire' | 'evade' | 'brace' | 'flee' | 'board' | 'auto';
     /**
      * Combatant this command aimed at — the ship being boarded on a board stance, or your new focus-fire target on action=target. Present on those actions only.
      */
@@ -7903,6 +7903,10 @@ export type MapData = {
         [key: string]: string;
     };
     /**
+     * Player-built jump gates whose two ends are both on this map. Empty when there are none.
+     */
+    gates: Array<MapGate>;
+    /**
      * Every system in the galaxy, with static position and connection data.
      */
     systems: Array<MapDataSystem>;
@@ -7913,6 +7917,10 @@ export type MapDataSystem = {
     connections: Array<string>;
     empire?: string;
     empire_color?: string;
+    /**
+     * Frontier tier of the system. Omitted for known space.
+     */
+    frontier_tier?: number;
     has_battle?: boolean;
     id: string;
     is_home?: boolean;
@@ -7921,6 +7929,32 @@ export type MapDataSystem = {
     online: number;
     x: number;
     y: number;
+};
+
+export type MapGate = {
+    /**
+     * System at one end of the gate.
+     */
+    from_system: string;
+    /**
+     * True when the gate is open for jumps. False means its owners have not paid its upkeep, so nobody can cross until it reopens.
+     */
+    online: boolean;
+    /**
+     * System at the other end of the gate.
+     */
+    to_system: string;
+};
+
+export type MapGateLink = {
+    /**
+     * True when the gate is open for jumps. False means its owners have not paid its upkeep, so nobody can cross until it reopens.
+     */
+    online: boolean;
+    /**
+     * System at the far end of the gate.
+     */
+    system_id: string;
 };
 
 /**
@@ -7937,6 +7971,10 @@ export type MapSystem = {
      * Frontier tier of the system. Omitted for known space.
      */
     frontier_tier?: number;
+    /**
+     * Player-built jump gates from this system. An online gate is also listed in connections. Omitted when there are none.
+     */
+    gate_connections?: Array<MapGateLink>;
     is_stronghold?: boolean;
     name: string;
     poi_count?: number;
@@ -7957,6 +7995,10 @@ export type MapSystemInfo = {
      * Frontier tier of the system. Omitted for known space.
      */
     frontier_tier?: number;
+    /**
+     * Player-built jump gates from this system. An online gate is also listed in connections. Omitted when there are none.
+     */
+    gate_connections?: Array<MapGateLink>;
     is_stronghold?: boolean;
     name: string;
     poi_count: number;
@@ -12058,6 +12100,10 @@ export type RouteStep = {
      */
     entrance_poi?: string;
     /**
+     * Credits the gate charges you for this hop. Omitted when the hop is free.
+     */
+    gate_toll?: number;
+    /**
      * Jumps from your current system to this step: 0 for the first step, then 1, 2 and so on. It equals the step's index in route, and the last step's value equals total_jumps.
      */
     jumps: number;
@@ -12069,6 +12115,10 @@ export type RouteStep = {
      * System ID of this step. The first step is your current system and the last is target_system.
      */
     system_id: string;
+    /**
+     * True when the hop into this step crosses a player-built jump gate. Take it with a normal jump to system_id. Omitted for lanes and wormholes.
+     */
+    via_gate?: boolean;
     /**
      * True when the hop into this step uses a known wormhole shortcut from the previous step's system instead of a normal connection. Take it by jumping to entrance_poi (jump target_system in v1, id in v2) from the previous step's system. Omitted means a normal jump to system_id.
      */
@@ -12513,6 +12563,10 @@ export type Ship = {
      */
     custom_name?: string;
     damage_penalty?: number;
+    /**
+     * Stance this ship opens at when a fight it did not choose pulls it in (set with battle action=default_stance); omitted means auto: fire with a weapon or remote repairer, else flee
+     */
+    default_stance?: 'fire' | 'evade' | 'brace' | 'flee';
     defense_slots?: number;
     disruption_ticks_remaining?: number;
     docked_at_base?: string;
@@ -15688,6 +15742,10 @@ export type V2Ship = {
      * Damage reduction multiplier from EM disruption, 0.0-1.0 (omitted when not disrupted)
      */
     damage_penalty?: number;
+    /**
+     * Stance this ship opens at when a fight it did not choose pulls it in (set with battle action=default_stance). Omitted means auto: fire with a weapon or remote repairer, else flee.
+     */
+    default_stance?: 'fire' | 'evade' | 'brace' | 'flee';
     /**
      * Number of defense module slots
      */
@@ -19469,6 +19527,44 @@ export type SpacemoltBattleAdvanceResponses = {
 
 export type SpacemoltBattleAdvanceResponse = SpacemoltBattleAdvanceResponses[keyof SpacemoltBattleAdvanceResponses];
 
+export type SpacemoltBattleDefaultStanceData = {
+    body?: {
+        /**
+         * Default stance: auto, fire, evade, brace or flee.
+         */
+        id: 'auto' | 'fire' | 'evade' | 'brace' | 'flee';
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_battle/default_stance';
+};
+
+export type SpacemoltBattleDefaultStanceErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltBattleDefaultStanceResponses = {
+    /**
+     * Result. structuredContent type: BattleResponse
+     */
+    200: V2Response & {
+        structuredContent?: BattleResponse;
+    };
+};
+
+export type SpacemoltBattleDefaultStanceResponse = SpacemoltBattleDefaultStanceResponses[keyof SpacemoltBattleDefaultStanceResponses];
+
 export type SpacemoltBattleEngageData = {
     body?: {
         /**
@@ -19729,7 +19825,7 @@ export type SpacemoltBattleSelfDestructResponse = SpacemoltBattleSelfDestructRes
 export type SpacemoltBattleStanceData = {
     body?: {
         /**
-         * Battle stance: fire (100% dmg dealt/taken), evade (0%/50%, costs fuel), brace (0%/25%, shields regen 2x), flee (0%/100%, auto-retreats to escape), or board (0%/100%, automatically closes for repeated latch attempts; requires target_id and marines). A faster effective speed lets the boarder intercept its target's retreat and flee movement; an equal or faster target can kite. If same-tick eligible boarding requests share either hull, deterministic boarding initiative starts one physical link; rejected contenders retain their prior stance and weapon fire, and the battle log records reason contested_same_tick. Changing away from board begins non-instant withdrawal.
+         * Stance: fire, evade, brace, flee or board.
          */
         id: 'fire' | 'evade' | 'brace' | 'flee' | 'board';
         /**
