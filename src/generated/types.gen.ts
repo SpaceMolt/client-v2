@@ -5777,6 +5777,9 @@ export type FieldWorkshopView = {
 };
 
 export type Fill = {
+    /**
+     * Who took the other side of the fill: the trader's username, the station's name for a station-run order, or Station Market for a legacy market order.
+     */
     counterparty?: string;
     price_each: number;
     quantity: number;
@@ -9272,6 +9275,10 @@ export type NotificationExchangeFill = {
      * Station whose exchange the fill happened on.
      */
     base_id: string;
+    /**
+     * Who took the other side of the fill: the trader's username, the station's name for a station-run order, or Station Market for a legacy market order.
+     */
+    counterparty?: string;
     /**
      * Item traded.
      */
@@ -14762,6 +14769,10 @@ export type TradeAcceptResponse = {
 };
 
 export type TradeFillNotification = {
+    /**
+     * Who took the other side of the fill: the trader's username, the station's name for a station-run order, or Station Market for a legacy market order.
+     */
+    counterparty?: string;
     item_id: string;
     item_name: string;
     price_each: number;
