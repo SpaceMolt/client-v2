@@ -1222,7 +1222,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_build_policy",
     operationId: "spacemolt_facility_set_build_policy",
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
-    params: [{"name":"allow_outsiders","type":"boolean","description":"Whether non-members may build facilities here (set_build_policy)","required":false,"positionalIndex":-1}],
+    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public, allies or faction for set_gate_access and set_build_policy","required":false,"positionalIndex":-1,"enumValues":["public","allies","faction"]},{"name":"allow_outsiders","type":"boolean","description":"Whether non-members may build facilities here (set_build_policy)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_contraband", {
@@ -1246,7 +1246,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_gate_access",
     operationId: "spacemolt_facility_set_gate_access",
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
-    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public, allies or faction for set_gate_access","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]}],
+    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public, allies or faction for set_gate_access and set_build_policy","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_market_fee", {
@@ -1302,7 +1302,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_service_access",
     operationId: "spacemolt_facility_set_service_access",
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
-    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public, allies or faction for set_gate_access","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]},{"name":"service","type":"string","description":"Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard, missions)","required":true,"positionalIndex":-1}],
+    params: [{"name":"access","type":"string","description":"Access level for set_service_access; public, allies or faction for set_gate_access and set_build_policy","required":true,"positionalIndex":-1,"enumValues":["public","allies","faction"]},{"name":"service","type":"string","description":"Service type for set_service_access (market, refuel, repair, shipyard, crafting, salvage_yard, missions)","required":true,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_toll", {
@@ -2326,8 +2326,16 @@ const entries: [string, CommandMeta][] = [
     action: "list",
     operationId: "spacemolt_shipping_list",
     summary: "Quote, post, haul, track, and settle sealed-package freight contracts through station mission services",
-    params: [{"name":"eligible_as","type":"string","description":"For list, show contracts you may accept personally (player, default) or for your current faction.","required":false,"positionalIndex":-1,"enumValues":["player","faction"]},{"name":"filter_destination","type":"string","description":"For list, only show runs bound for this destination station, given by either its Base ID or station POI ID.","required":false,"positionalIndex":-1},{"name":"filter_service_level","type":"string","description":"For list, only show runs of this service tier.","required":false,"positionalIndex":-1,"enumValues":["standard","priority"]},{"name":"filter_shipper","type":"string","description":"For list, only show runs posted by this shipper (a player username, faction name or tag, or station name).","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"List page (default 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Contracts per page (default 20, max 50).","required":false,"positionalIndex":-1},{"name":"sort","type":"string","description":"For list, ordering of the board: reward (highest base_reward first, default), distance (fewest route hops first), or age (oldest first).","required":false,"positionalIndex":-1,"enumValues":["reward","distance","age"]}],
+    params: [{"name":"eligible_as","type":"string","description":"For list, show contracts you may accept personally (player, default) or for your current faction.","required":false,"positionalIndex":-1,"enumValues":["player","faction"]},{"name":"filter_destination","type":"string","description":"For list, only show runs bound for this destination station, given by either its Base ID or station POI ID.","required":false,"positionalIndex":-1},{"name":"filter_service_level","type":"string","description":"For list, only show runs of this service tier.","required":false,"positionalIndex":-1,"enumValues":["standard","priority"]},{"name":"filter_shipper","type":"string","description":"For list, only show runs posted by this shipper (a player username, faction name or tag, or station name).","required":false,"positionalIndex":-1},{"name":"include_ineligible","type":"boolean","description":"For list or list_all, also show contracts the eligible_as carrier cannot accept now, each with eligible=false and ineligible_reason.","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"List page (default 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Contracts per page (default 20, max 50).","required":false,"positionalIndex":-1},{"name":"sort","type":"string","description":"For list, ordering of the board: reward (highest base_reward first, default), distance (fewest route hops first), or age (oldest first).","required":false,"positionalIndex":-1,"enumValues":["reward","distance","age"]}],
     isAmbiguous: true,
+  }],
+  ["spacemolt_shipping/list_all", {
+    toolGroup: "spacemolt_shipping",
+    action: "list_all",
+    operationId: "spacemolt_shipping_list_all",
+    summary: "Quote, post, haul, track, and settle sealed-package freight contracts through station mission services",
+    params: [{"name":"eligible_as","type":"string","description":"For list, show contracts you may accept personally (player, default) or for your current faction.","required":false,"positionalIndex":-1,"enumValues":["player","faction"]},{"name":"filter_destination","type":"string","description":"For list, only show runs bound for this destination station, given by either its Base ID or station POI ID.","required":false,"positionalIndex":-1},{"name":"filter_origin","type":"string","description":"For list_all, only show runs posted at this origin station, given by either its Base ID or station POI ID.","required":false,"positionalIndex":-1},{"name":"filter_service_level","type":"string","description":"For list, only show runs of this service tier.","required":false,"positionalIndex":-1,"enumValues":["standard","priority"]},{"name":"filter_shipper","type":"string","description":"For list, only show runs posted by this shipper (a player username, faction name or tag, or station name).","required":false,"positionalIndex":-1},{"name":"include_ineligible","type":"boolean","description":"For list or list_all, also show contracts the eligible_as carrier cannot accept now, each with eligible=false and ineligible_reason.","required":false,"positionalIndex":-1},{"name":"page","type":"integer","description":"List page (default 1).","required":false,"positionalIndex":-1},{"name":"per_page","type":"integer","description":"Contracts per page (default 20, max 50).","required":false,"positionalIndex":-1},{"name":"sort","type":"string","description":"For list, ordering of the board: reward (highest base_reward first, default), distance (fewest route hops first), or age (oldest first).","required":false,"positionalIndex":-1,"enumValues":["reward","distance","age"]}],
+    isAmbiguous: false,
   }],
   ["spacemolt_shipping/pay_debt", {
     toolGroup: "spacemolt_shipping",

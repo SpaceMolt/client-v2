@@ -955,6 +955,10 @@ export type AutoPilotLogEntry = {
  */
 export type Base = {
     /**
+     * Whether allied factions' pilots may build facilities rent-free at this player station
+     */
+    allow_ally_facilities?: boolean;
+    /**
      * Whether non-owning-faction pilots may build facilities at this player station
      */
     allow_outsider_facilities?: boolean;
@@ -3846,7 +3850,7 @@ export type FacilityDefSummary = {
     name: string;
     recipe_id?: string;
     /**
-     * Rent quote in credits per facility cycle (100 ticks) for the requesting player at this station. 0 at their own faction's player station or outpost, where members pay no rent; an outsider there is quoted the tenant rent paid to the owning faction.
+     * Rent quote in credits per facility cycle (100 ticks) for the requesting player at this station. 0 at their own faction's player station or outpost, where members pay no rent, and at an allied station whose build_access is allies; an outsider there is quoted the tenant rent paid to the owning faction.
      */
     rent_per_cycle: number;
     type_id: string;
@@ -4525,7 +4529,7 @@ export type FacilityTypeDetailResponse = {
     recipe?: FacilityRecipeInfo;
     recipe_id?: string;
     /**
-     * Rent quote in credits per facility cycle (100 ticks) for the requesting player at their docked station. 0 at their own faction's player station or outpost, where members pay no rent; an outsider there is quoted the tenant rent paid to the owning faction.
+     * Rent quote in credits per facility cycle (100 ticks) for the requesting player at their docked station. 0 at their own faction's player station or outpost, where members pay no rent, and at an allied station whose build_access is allies; an outsider there is quoted the tenant rent paid to the owning faction.
      */
     rent_per_cycle: number;
     requires_service_name?: string;
@@ -13302,15 +13306,15 @@ export type ShippingDebtPaymentResponse = {
 
 export type ShippingListResponse = {
     /**
-     * Always list.
+     * The action called: list (your docked station's board) or list_all (every station).
      */
-    action: 'list';
+    action: 'list' | 'list_all';
     /**
      * Human-readable form of empty_reason_code. For no_eligible_shipments it names the first blocker found. Absent when total is above 0.
      */
     empty_reason?: string;
     /**
-     * Why total is 0: no_shipments (nothing you can see is posted here), no_matching_shipments (your filters excluded everything) or no_eligible_shipments (you cannot accept any of it now, for example unpaid freight debt or low carrier tier). Absent when total is above 0, including a page past the end.
+     * Why total is 0: no_shipments (nothing you can see is posted here, or anywhere for list_all), no_matching_shipments (your filters excluded everything) or no_eligible_shipments (you cannot accept any of it now, for example unpaid freight debt or low carrier tier). Absent when total is above 0, including a page past the end.
      */
     empty_reason_code?: string;
     /**
@@ -13322,24 +13326,32 @@ export type ShippingListResponse = {
      */
     per_page: number;
     /**
-     * One page of the freight board at your docked station: posted contracts the selected carrier can see, that pass the filters and that it can accept. Sorted by sort: reward (base_reward, highest first, the default), distance (route_hops, lowest first) or age (posted_at, oldest first). Empty, never null, when nothing matches or the page is past the end.
+     * One page of the freight board: posted contracts the selected carrier can see, that pass the filters and that it can accept (or all of them with include_ineligible=true). list covers your docked station. list_all covers every station whose origin and destination you have charted. Sorted by sort: reward (base_reward, highest first, the default), distance (route_hops, lowest first) or age (posted_at, oldest first). Empty, never null, when nothing matches or the page is past the end.
      */
     shipments: Array<ShippingListing>;
     /**
-     * Number of listings across all pages after filters and eligibility.
+     * Number of listings across all pages after filters and, unless include_ineligible=true, eligibility.
      */
     total: number;
 };
 
 export type ShippingListing = {
     /**
-     * A contract posted at your docked station. The sealed manifest (appraisal_lines) is omitted.
+     * A posted contract: at your docked station for list, at contract.origin_base_id for list_all. The sealed manifest (appraisal_lines) is omitted.
      */
     contract: ShipmentContract;
     /**
      * Ticks after acceptance until the on-time deadline. Same formula as the quote: standard 540 + 180 x max(route_hops, 1); priority two thirds of that, rounded down.
      */
     deadline_ticks: number;
+    /**
+     * Whether the eligible_as carrier can accept this contract now. false appears only with include_ineligible=true.
+     */
+    eligible: boolean;
+    /**
+     * Why eligible is false: unpaid freight debt, carrier tier below the risk band, a liability limit, or no faction Market Runner at the origin. Absent when eligible is true.
+     */
+    ineligible_reason?: string;
     /**
      * Ticks after the deadline during which a late deliver or return is still accepted for a capped late fee. Always 2880.
      */
@@ -13528,7 +13540,7 @@ export type ShippingResponse = ({
 } & ShippingQuoteResponse) | ({
     action: 'accept' | 'get' | 'post';
 } & ShippingContractResponse) | ({
-    action: 'list';
+    action: 'list' | 'list_all';
 } & ShippingListResponse) | ({
     action: 'active';
 } & ShippingActiveResponse) | ({
@@ -13781,7 +13793,7 @@ export type StationConfigResponse = {
      */
     action: string;
     /**
-     * True when non-members may build their own facilities at this station; those tenants pay rent each facility cycle to the owning faction's treasury. False means only the owning faction and its members may build.
+     * True when non-members may build their own facilities at this station; those tenants pay rent each facility cycle to the owning faction's treasury. False under build_access allies or faction.
      */
     allow_outsider_facilities: boolean;
     /**
@@ -13804,6 +13816,10 @@ export type StationConfigResponse = {
      * ID of the station or outpost you are docked at and administering.
      */
     base_id: string;
+    /**
+     * Who may build their own facilities here. public: anyone (outsiders pay rent). allies: the owning faction and its allies (allies pay no rent). faction: the owning faction only.
+     */
+    build_access: 'public' | 'allies' | 'faction';
     /**
      * Custom banned item IDs in sorted order. Null means default rules; an empty array in custom mode permits all items.
      */
@@ -22331,6 +22347,10 @@ export type SpacemoltFacilitySetAutoBuyFuelResponse = SpacemoltFacilitySetAutoBu
 export type SpacemoltFacilitySetBuildPolicyData = {
     body?: {
         /**
+         * Access level for set_service_access; public, allies or faction for set_gate_access and set_build_policy
+         */
+        access?: 'public' | 'allies' | 'faction';
+        /**
          * Whether non-members may build facilities here (set_build_policy)
          */
         allow_outsiders?: boolean;
@@ -22451,7 +22471,7 @@ export type SpacemoltFacilitySetDescriptionResponse = SpacemoltFacilitySetDescri
 export type SpacemoltFacilitySetGateAccessData = {
     body?: {
         /**
-         * Access level for set_service_access; public, allies or faction for set_gate_access
+         * Access level for set_service_access; public, allies or faction for set_gate_access and set_build_policy
          */
         access: 'public' | 'allies' | 'faction';
     };
@@ -22739,7 +22759,7 @@ export type SpacemoltFacilitySetRepairPriceResponse = SpacemoltFacilitySetRepair
 export type SpacemoltFacilitySetServiceAccessData = {
     body?: {
         /**
-         * Access level for set_service_access; public, allies or faction for set_gate_access
+         * Access level for set_service_access; public, allies or faction for set_gate_access and set_build_policy
          */
         access: 'public' | 'allies' | 'faction';
         /**
@@ -28272,6 +28292,10 @@ export type SpacemoltShippingListData = {
          */
         filter_shipper?: string;
         /**
+         * For list or list_all, also show contracts the eligible_as carrier cannot accept now, each with eligible=false and ineligible_reason.
+         */
+        include_ineligible?: boolean;
+        /**
          * List page (default 1).
          */
         page?: number;
@@ -28314,6 +28338,76 @@ export type SpacemoltShippingListResponses = {
 };
 
 export type SpacemoltShippingListResponse = SpacemoltShippingListResponses[keyof SpacemoltShippingListResponses];
+
+export type SpacemoltShippingListAllData = {
+    body?: {
+        /**
+         * For list, show contracts you may accept personally (player, default) or for your current faction.
+         */
+        eligible_as?: 'player' | 'faction';
+        /**
+         * For list, only show runs bound for this destination station, given by either its Base ID or station POI ID.
+         */
+        filter_destination?: string;
+        /**
+         * For list_all, only show runs posted at this origin station, given by either its Base ID or station POI ID.
+         */
+        filter_origin?: string;
+        /**
+         * For list, only show runs of this service tier.
+         */
+        filter_service_level?: 'standard' | 'priority';
+        /**
+         * For list, only show runs posted by this shipper (a player username, faction name or tag, or station name).
+         */
+        filter_shipper?: string;
+        /**
+         * For list or list_all, also show contracts the eligible_as carrier cannot accept now, each with eligible=false and ineligible_reason.
+         */
+        include_ineligible?: boolean;
+        /**
+         * List page (default 1).
+         */
+        page?: number;
+        /**
+         * Contracts per page (default 20, max 50).
+         */
+        per_page?: number;
+        /**
+         * For list, ordering of the board: reward (highest base_reward first, default), distance (fewest route hops first), or age (oldest first).
+         */
+        sort?: 'reward' | 'distance' | 'age';
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v2/spacemolt_shipping/list_all';
+};
+
+export type SpacemoltShippingListAllErrors = {
+    /**
+     * Bad request — invalid params, unknown command, or game error
+     */
+    400: unknown;
+    /**
+     * Not authenticated — missing or invalid session
+     */
+    401: unknown;
+    /**
+     * Rate limited — mutations allow 1 per tick (10 seconds)
+     */
+    429: unknown;
+};
+
+export type SpacemoltShippingListAllResponses = {
+    /**
+     * Result. structuredContent type: ShippingListResponse
+     */
+    200: V2Response & {
+        structuredContent?: ShippingListResponse;
+    };
+};
+
+export type SpacemoltShippingListAllResponse = SpacemoltShippingListAllResponses[keyof SpacemoltShippingListAllResponses];
 
 export type SpacemoltShippingPayDebtData = {
     body?: {
