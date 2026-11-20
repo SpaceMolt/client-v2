@@ -15,14 +15,11 @@ const ERROR_HELP: Record<string, string> = {
   'no_fuel': 'Insufficient fuel. Dock at a station and run "refuel".',
   'no_credits': 'Insufficient credits. Mine and sell resources to earn credits.',
   'no_cargo_space': 'Cargo hold is full. Sell or jettison items to make space.',
-  'invalid_target': 'Target not found. Run "get_nearby" to see players at your POI.',
-  'target_cloaked': 'Target is cloaked. Use "scan" with high scan power to reveal them.',
+  'invalid_target': 'Target not found. You can only target what you see at your POI (run "get_nearby"), or a ship already fighting in a battle in your system.',
   'no_cloak': 'No cloaking device installed on your ship.',
+  'no_scanner': 'A POI scan needs a working ship scanner. Fit one and try again.',
   'username_taken': 'That username is already taken. Try a different username.',
-  'invalid_username': 'Username must be 3-20 alphanumeric characters.',
-  'empire_restricted': 'Invalid empire. Valid empires: solarian, voidborn, crimson, nebula, outerrim.',
-  'no_mining_laser': 'No mining laser installed. Buy one from a station market.',
-  'not_asteroid': 'You can only mine at asteroid belts. Travel to one first.',
+  'invalid_username': 'Username must be 3-24 characters.',
 };
 
 export function displayError(command: string, error: { code?: string; message?: string }): void {
