@@ -4298,6 +4298,10 @@ export type FacilityListResponse = {
      * Facilities the station itself owns at this base: its services, infrastructure, defenses and generic production on-ramps. They bill you no rent; rent fields are omitted on them. Empty when the station owns none.
      */
     station_facilities: Array<FacilityEntry>;
+    /**
+     * Every facility at your faction's player station or outpost owned by a player or faction outside your faction, with its owner and the rent it pays your faction. Present only to members of the owning faction with the ManageBases permission; omitted for everyone else and when there are none.
+     */
+    tenant_facilities?: Array<TenantFacilityEntry>;
 };
 
 export type FacilityListingEntry = {
@@ -14696,6 +14700,57 @@ export type TaxableIncomeByCategoryEntry = {
     category: string;
 };
 
+export type TenantFacilityEntry = {
+    /**
+     * Name the owner gave this facility. Omitted when none is set or the facility is disguised.
+     */
+    custom_name?: string;
+    /**
+     * ID of this facility instance.
+     */
+    facility_id: string;
+    /**
+     * ID of the owning faction. Omitted for a player-owned or disguised facility.
+     */
+    faction_id?: string;
+    /**
+     * Name of the owning faction. Omitted when faction_id is omitted or the faction no longer exists.
+     */
+    faction_name?: string;
+    /**
+     * Tag of the owning faction. Omitted when faction_name is omitted.
+     */
+    faction_tag?: string;
+    /**
+     * Consecutive rent cycles the owner has not paid. Omitted when zero.
+     */
+    missed_rent_cycles?: number;
+    /**
+     * Display name of the facility type, or its cover name when disguised.
+     */
+    name: string;
+    /**
+     * True when the facility is built, undamaged, not dismantling and not switched off for unpaid rent.
+     */
+    operational: boolean;
+    /**
+     * Player ID of the owner. Omitted for a faction-owned facility.
+     */
+    owner_id?: string;
+    /**
+     * Username of the owning player. Omitted for a faction-owned facility or when the player no longer exists.
+     */
+    owner_name?: string;
+    /**
+     * Rent in credits per facility cycle (100 ticks) this facility pays your faction treasury. Zero means rent-free.
+     */
+    rent_per_cycle: number;
+    /**
+     * Facility definition ID. Empty for a disguised facility.
+     */
+    type: string;
+};
+
 export type TowWreckResponse = {
     action: string;
     /**
@@ -18006,7 +18061,10 @@ export type SpacemoltListPassengersResponse = SpacemoltListPassengersResponses[k
 
 export type SpacemoltListStationPassengersData = {
     body?: {
-        [key: string]: unknown;
+        /**
+         * Optional: Base ID or station POI ID of another charted station to view while docked anywhere. Omit for your current station.
+         */
+        id?: string;
     };
     path?: never;
     query?: never;
@@ -26297,6 +26355,10 @@ export type SpacemoltMarketUnsubscribeMarketResponse = SpacemoltMarketUnsubscrib
 
 export type SpacemoltMarketViewMarketData = {
     body?: {
+        /**
+         * Optional: Base ID or station POI ID of another charted station to view while docked anywhere. Omit for your current station.
+         */
+        base_id?: string;
         /**
          * Optional: filter summary by category (e.g., ore, commodity, weapon, module). Use without item_id.
          */

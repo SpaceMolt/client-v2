@@ -388,8 +388,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt",
     action: "list_station_passengers",
     operationId: "spacemolt_list_station_passengers",
-    summary: "List citizens waiting for transport at your current station",
-    params: [],
+    summary: "List citizens waiting for transport at your current station or another charted station",
+    params: [{"name":"id","type":"string","description":"Optional: Base ID or station POI ID of another charted station to view while docked anywhere. Omit for your current station.","required":false,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/load_passenger", {
@@ -1957,8 +1957,8 @@ const entries: [string, CommandMeta][] = [
     toolGroup: "spacemolt_market",
     action: "view_market",
     operationId: "spacemolt_market_view_market",
-    summary: "View the market at the current station",
-    params: [{"name":"item_id","type":"string","description":"Optional: filter to a specific item for full order book depth (e.g., iron_ore)","required":false,"positionalIndex":0},{"name":"category","type":"string","description":"Optional: filter summary by category (e.g., ore, commodity, weapon, module). Use without item_id.","required":false,"positionalIndex":-1},{"name":"company_store","type":"boolean","description":"Optional: narrow the response to ONLY your faction's private Company Store listings. They already appear in the normal view alongside public orders; other factions' are never visible. Requires faction membership.","required":false,"positionalIndex":-1},{"name":"since","type":"integer","description":"Optional: a prior current_tick. Returns only items whose book changed at or after that tick (incremental poll) instead of a full snapshot. Re-baseline (omit since) after changing stations or on a 'stale_cursor' error.","required":false,"positionalIndex":-1}],
+    summary: "View the market at the current station or another charted station",
+    params: [{"name":"item_id","type":"string","description":"Optional: filter to a specific item for full order book depth (e.g., iron_ore)","required":false,"positionalIndex":0},{"name":"base_id","type":"string","description":"Optional: Base ID or station POI ID of another charted station to view while docked anywhere. Omit for your current station.","required":false,"positionalIndex":-1},{"name":"category","type":"string","description":"Optional: filter summary by category (e.g., ore, commodity, weapon, module). Use without item_id.","required":false,"positionalIndex":-1},{"name":"company_store","type":"boolean","description":"Optional: narrow the response to ONLY your faction's private Company Store listings. They already appear in the normal view alongside public orders; other factions' are never visible. Requires faction membership.","required":false,"positionalIndex":-1},{"name":"since","type":"integer","description":"Optional: a prior current_tick. Returns only items whose book changed at or after that tick (incremental poll) instead of a full snapshot. Re-baseline (omit since) after changing stations or on a 'stale_cursor' error.","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_market/view_orders", {
