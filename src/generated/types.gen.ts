@@ -2309,7 +2309,7 @@ export type CatalogDump = {
 
 export type CatalogRecipe = {
     /**
-     * Grouping label used by the catalog type=recipes category filter. Two values are load-bearing rather than cosmetic: 'Facility Only' and 'Ship Passive' each make the recipe impossible to hand-craft. Prefer hand_craftable, which folds both of those strings together, over comparing this field yourself.
+     * Grouping label for the kind of work the recipe is, used by the catalog type=recipes category filter. One value is load-bearing rather than cosmetic: 'Ship Passive' marks a recipe that runs itself aboard a ship built for it and can never be queued. A recipe can be hand-crafted at the Station Workshop when facility_only is false and the category is not 'Ship Passive'.
      */
     category: string;
     /**
@@ -2321,17 +2321,13 @@ export type CatalogRecipe = {
      */
     description: string;
     /**
-     * True when the recipe runs only inside a production facility and can never be hand-crafted at the Station Workshop. It is one of the two inputs to hand_craftable; category is the other. Do not test it alone — a 'Facility Only' or 'Ship Passive' category recipe is equally un-hand-craftable with this field absent.
+     * True when the recipe runs only inside a production facility and can never be hand-crafted at the Station Workshop. A 'Ship Passive' category recipe cannot be hand-crafted either, with this field absent.
      */
     facility_only?: boolean;
     /**
      * Units of fuel added straight to the processing ship's tank (not to cargo) per run, when this recipe runs as a Ship Passive recipe aboard a fuel-synthesis module. Absent or zero on every recipe that delivers cargo instead.
      */
     fuel_output?: number;
-    /**
-     * Whether a docked pilot can run this recipe by hand at their Station Workshop, with no facility of any kind. Derived exactly as: facility_only is false AND category is not 'Facility Only' AND category is not 'Ship Passive'. Always present. False means the recipe needs a venue — a 'Ship Passive' recipe runs itself aboard a ship built for it and can never be queued at all, while any other false value must be queued at one of produced_by_facility_ids. True is a venue answer only: inputs, credits and workshop queue space are still checked when you actually craft.
-     */
-    hand_craftable: boolean;
     /**
      * True when the recipe is withheld from the catalog and cannot be crafted. Catalog surfaces omit hidden recipes entirely, so this is absent (false) on every recipe you can actually see.
      */
@@ -2361,7 +2357,7 @@ export type CatalogRecipe = {
      */
     package_operation?: string;
     /**
-     * Ids of the facility definitions that can run this recipe forward, each matching an entry in this dump's facilities list. Sorted by facility level then name. Always present, never omitted: an empty list means no facility definition runs it, which for a hand_craftable recipe is normal (the Station Workshop is then the only venue) and for a recipe with hand_craftable false means it has no player-reachable venue at all. Owning or renting one of these facilities is what craft auto-routes to.
+     * Ids of the facility definitions that can run this recipe forward, each matching an entry in the catalog's facilities list. Sorted by facility level then name. Always present, never omitted. An empty list means no facility definition runs it: the Station Workshop is then the only venue, unless the recipe is facility_only (no player-reachable venue) or in the 'Ship Passive' category (it runs itself aboard a ship built for it). Owning or renting one of these facilities is what craft auto-routes to.
      */
     produced_by_facility_ids: Array<string>;
     /**
@@ -2374,9 +2370,9 @@ export type CatalogResponse = {
     analysis?: RecipeAnalysis;
     estimated_material_cost?: number;
     /**
-     * Catalog entries. Shape depends on the requested type: ships → ShipClass or MobileBaseShipClass, skills → Skill, recipes → Recipe, items → Item or Module, facilities → FacilityDefinition.
+     * Catalog entries. Shape depends on the requested type: ships → ShipClass or MobileBaseShipClass, skills → Skill, recipes → CatalogRecipe, items → Item or Module, facilities → FacilityDefinition.
      */
-    items: Array<Item | Module | ShipClass | Skill | Recipe | FacilityDefinition | MobileBaseShipClass>;
+    items: Array<Item | Module | ShipClass | Skill | CatalogRecipe | FacilityDefinition | MobileBaseShipClass>;
     message: string;
     page: number;
     page_size: number;
@@ -7159,9 +7155,9 @@ export type InspectResponse = {
         analysis?: RecipeAnalysis;
         estimated_material_cost?: number;
         /**
-         * Catalog entries. Shape depends on the requested type: ships → ShipClass or MobileBaseShipClass, skills → Skill, recipes → Recipe, items → Item or Module, facilities → FacilityDefinition.
+         * Catalog entries. Shape depends on the requested type: ships → ShipClass or MobileBaseShipClass, skills → Skill, recipes → CatalogRecipe, items → Item or Module, facilities → FacilityDefinition.
          */
-        items: Array<Item | Module | ShipClass | Skill | Recipe | FacilityDefinition | MobileBaseShipClass>;
+        items: Array<Item | Module | ShipClass | Skill | CatalogRecipe | FacilityDefinition | MobileBaseShipClass>;
         message: string;
         page: number;
         page_size: number;
@@ -11740,7 +11736,7 @@ export type RecallDroneResponse = {
 
 export type Recipe = {
     /**
-     * Grouping label used by the catalog type=recipes category filter. Two values are load-bearing rather than cosmetic: 'Facility Only' and 'Ship Passive' each make the recipe impossible to hand-craft. Prefer hand_craftable, which folds both of those strings together, over comparing this field yourself.
+     * Grouping label for the kind of work the recipe is, used by the catalog type=recipes category filter. One value is load-bearing rather than cosmetic: 'Ship Passive' marks a recipe that runs itself aboard a ship built for it and can never be queued. A recipe can be hand-crafted at the Station Workshop when facility_only is false and the category is not 'Ship Passive'.
      */
     category: string;
     /**
@@ -11752,7 +11748,7 @@ export type Recipe = {
      */
     description: string;
     /**
-     * True when the recipe runs only inside a production facility and can never be hand-crafted at the Station Workshop. It is one of the two inputs to hand_craftable; category is the other. Do not test it alone — a 'Facility Only' or 'Ship Passive' category recipe is equally un-hand-craftable with this field absent.
+     * True when the recipe runs only inside a production facility and can never be hand-crafted at the Station Workshop. A 'Ship Passive' category recipe cannot be hand-crafted either, with this field absent.
      */
     facility_only?: boolean;
     /**
@@ -12932,6 +12928,10 @@ export type ShipmentActor = {
      * Actor type. player and faction can ship, receive and carry freight. station can ship and receive freight but never carry it.
      */
     kind: 'player' | 'faction' | 'station';
+    /**
+     * Display name for the actor: the player's username, the faction's name or the station's name. Omitted when the actor no longer exists.
+     */
+    name?: string;
 };
 
 export type ShipmentContract = {
