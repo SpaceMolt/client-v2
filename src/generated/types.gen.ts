@@ -1050,7 +1050,7 @@ export type Base = {
     };
     id: string;
     /**
-     * Owner-set market listing fee in basis points (player station); 0 = default
+     * Owner-set market fee outside buyers pay on top of the price, in basis points (player station); 0 = default (1%)
      */
     market_fee_bps?: number;
     /**
@@ -3840,7 +3840,7 @@ export type FacilityDefSummary = {
         [key: string]: number;
     };
     /**
-     * Listed upkeep of this facility type, plus fuel drawn from the station tank as a fuel line. Omitted when the type has no upkeep. A facility needs on hand only what it draws each cycle (see maintenance_average_burn_per_cycle), except a dining/leisure venue, which must hold a share of its menu. For a market that uses trade_authenticator (such as trade_concourse), the trade_authenticator quantity adds a charge that grows with the docked station's recent market trade volume and is drawn in full each cycle.
+     * Listed upkeep of this facility type, plus fuel drawn from the station tank as a fuel line. Omitted when the type has no upkeep. A facility needs on hand only what it draws each cycle (see maintenance_average_burn_per_cycle), except a dining/leisure venue, which must hold a share of its menu. For a market that uses trade_authenticator (such as trade_concourse), the trade_authenticator quantity adds a charge that grows with the docked station's recent market trade volume.
      */
     maintenance_per_cycle?: Array<ItemQuantity>;
     name: string;
@@ -3956,7 +3956,7 @@ export type FacilityEntry = {
      */
     bonus_type?: string;
     /**
-     * Size of bonus_type: workshop_speed is a percent added to Station Workshop crafting speed, drone_bandwidth is extra drone bandwidth units and market_fee_discount is a percent taken off market listing fees. Only one facility per bonus type counts per station. Omitted when bonus_type is omitted.
+     * Size of bonus_type: workshop_speed is a percent added to Station Workshop crafting speed, drone_bandwidth is extra drone bandwidth units and market_fee_discount is a percent taken off ship and facility listing fees. Only one facility per bonus type counts per station. Omitted when bonus_type is omitted.
      */
     bonus_value?: number;
     /**
@@ -4046,7 +4046,7 @@ export type FacilityEntry = {
      */
     maintenance_level?: number;
     /**
-     * Listed upkeep of this facility. Present only for fleet depots, dining/leisure venues (tourism_upkeep) and markets that use trade_authenticator (such as trade_concourse); omitted otherwise. A dining/leisure venue must hold this stock to count as fully supplied: it scales with recent paying footfall, never drops below 15 percent of its declared menu (at least one of each item), and the venue burns its paying guests' share of it (nothing in a cycle no guest paid for). Any other facility needs on hand only what it draws each facility cycle (100 ticks): see maintenance_average_burn_per_cycle. A market's trade_authenticator quantity includes a charge that grows with this station's recent market trade volume and is drawn in full each cycle.
+     * Listed upkeep of this facility. Present only for fleet depots, dining/leisure venues (tourism_upkeep) and markets that use trade_authenticator (such as trade_concourse); omitted otherwise. A dining/leisure venue must hold this stock to count as fully supplied: it scales with recent paying footfall, never drops below 15 percent of its declared menu (at least one of each item), and the venue burns its paying guests' share of it (nothing in a cycle no guest paid for). Any other facility needs on hand only what it draws each facility cycle (100 ticks): see maintenance_average_burn_per_cycle. A market's trade_authenticator quantity includes a charge that grows with this station's recent market trade volume.
      */
     maintenance_per_cycle?: Array<ItemQuantity>;
     /**
@@ -4521,7 +4521,7 @@ export type FacilityTypeDetailResponse = {
         [key: string]: number;
     };
     /**
-     * Listed upkeep of this facility type, plus fuel drawn from the station tank as a fuel line. Omitted when the type has no upkeep. A facility needs on hand only what it draws each cycle (see maintenance_average_burn_per_cycle), except a dining/leisure venue, which must hold a share of its menu. For a market that uses trade_authenticator (such as trade_concourse), the trade_authenticator quantity adds a charge that grows with the docked station's recent market trade volume and is drawn in full each cycle.
+     * Listed upkeep of this facility type, plus fuel drawn from the station tank as a fuel line. Omitted when the type has no upkeep. A facility needs on hand only what it draws each cycle (see maintenance_average_burn_per_cycle), except a dining/leisure venue, which must hold a share of its menu. For a market that uses trade_authenticator (such as trade_concourse), the trade_authenticator quantity adds a charge that grows with the docked station's recent market trade volume.
      */
     maintenance_per_cycle?: Array<ItemQuantity>;
     name: string;
@@ -9691,7 +9691,7 @@ export type NotificationObservationUpdate = {
 };
 
 /**
- * Fleet movement ok notifications identify their event in action. Other ok payloads may omit action. Fleet followers receive fleet_dock (base name and base_id), fleet_undock, fleet_travel (destination POI ID, destination_name and arrival_tick), or fleet_jump (destination system ID, destination_name and arrival_tick) without request_id. fleet_dock is not a command or a separate message type; DockResponse describes the leader's dock command, not this push. Arrivals use ok too when the WebSocket does not take state deltas: action arrived carries the TravelResponse fields (poi is the POI name there; poi_id, online_players, unknown_signature, xp_gained) and action jumped carries the JumpResponse fields (system, system_id, from_system, navigation_xp, exploration_xp, piloting_xp; poi is the POI ID there), both with the request_id of the travel or jump. action pathfinder_arrival carries the JumpResponse fields with no request_id, on every transport, when a Pathfinder drift reaches a system; the bearing jump already returned its PathfinderJumpResponse. Other actions and command-specific fields may occur. Inspect action and tolerate unknown actions. Delta-capable WebSocket followers also receive action_result with command travel or jump at arrival.
+ * Fleet movement ok notifications identify their event in action. Other ok payloads may omit action. Fleet followers receive fleet_dock (base name and base_id), fleet_undock, fleet_travel (destination POI ID, destination_name and arrival_tick), or fleet_jump (destination system ID, destination_name and arrival_tick; a Pathfinder fleet_jump carries bearing instead of arrival_tick), and fleet_pathfinder_redirect (bearing) when the leader re-plots a Pathfinder drift, without request_id. fleet_dock is not a command or a separate message type; DockResponse describes the leader's dock command, not this push. Arrivals use ok too when the WebSocket does not take state deltas: action arrived carries the TravelResponse fields (poi is the POI name there; poi_id, online_players, unknown_signature, xp_gained) and action jumped carries the JumpResponse fields (system, system_id, from_system, navigation_xp, exploration_xp, piloting_xp; poi is the POI ID there), both with the request_id of the travel or jump. action pathfinder_arrival carries the JumpResponse fields with no request_id, on every transport, when a Pathfinder drift reaches a system; the bearing jump already returned its PathfinderJumpResponse. Other actions and command-specific fields may occur. Inspect action and tolerate unknown actions. Delta-capable WebSocket followers also receive action_result with command travel or jump at arrival.
  */
 export type NotificationOk = {
     /**
@@ -9699,7 +9699,7 @@ export type NotificationOk = {
      */
     action?: string;
     /**
-     * Scheduled arrival game tick for fleet_travel or fleet_jump; omitted for fleet_dock and fleet_undock.
+     * Scheduled arrival game tick for fleet_travel or fleet_jump; omitted for fleet_dock, fleet_undock and a Pathfinder fleet_jump.
      */
     arrival_tick?: number;
     /**
@@ -9714,6 +9714,10 @@ export type NotificationOk = {
      * Station Base ID, always present for fleet_dock; distinct from its POI ID. Omitted for fleet_undock, fleet_travel and fleet_jump.
      */
     base_id?: string;
+    /**
+     * Compass bearing in degrees the fleet drifts on; only present on a Pathfinder fleet_jump and on fleet_pathfinder_redirect.
+     */
+    bearing?: number;
     /**
      * Destination POI ID for fleet_travel or system ID for fleet_jump; omitted for fleet_dock and fleet_undock.
      */
@@ -13841,7 +13845,7 @@ export type StationConfigResponse = {
      */
     gate?: GateStatus;
     /**
-     * Market listing fee at this station in basis points (100 = 1%, max 1000). Omitted (0) when the station uses the default rate.
+     * Market fee outside buyers pay on top of the price at this station in basis points (100 = 1%, max 1000). Omitted (0) when the station uses the default rate (1%).
      */
     market_fee_bps?: number;
     /**
@@ -16366,7 +16370,7 @@ export type SpacemoltAttackResponse = SpacemoltAttackResponses[keyof SpacemoltAt
 export type SpacemoltBuyData = {
     body?: {
         /**
-         * If true, automatically place a buy order for any quantity not filled immediately (1% listing fee applies).
+         * If true, automatically place a buy order for any quantity not filled immediately (sales tax or station market fee is escrowed with it).
          */
         auto_list?: boolean;
         /**
@@ -17987,7 +17991,7 @@ export type SpacemoltJettisonResponse = SpacemoltJettisonResponses[keyof Spacemo
 export type SpacemoltJumpData = {
     body?: {
         /**
-         * ID of the adjacent system to jump to (use get_system to see connected systems), or a numeric compass bearing in degrees for an off-network Pathfinder Drive jump. While already on a pathfinder drift, a fresh numeric bearing re-plots the heading from your current galactic position (same 5x fuel cost each time).
+         * ID of the adjacent system to jump to (use get_system to see connected systems), or a numeric compass bearing in degrees for an off-network Pathfinder Drive jump. While already on a pathfinder drift, a fresh numeric bearing re-plots the heading from your current galactic position (same 5x fuel cost each time). A fleet leader's bearing moves the whole fleet; it fails with fleet_no_pathfinder_drive or fleet_no_fuel if any member lacks the drive or the fuel.
          */
         id: string;
     };
@@ -18554,7 +18558,7 @@ export type SpacemoltSelfDestructResponse = SpacemoltSelfDestructResponses[keyof
 export type SpacemoltSellData = {
     body?: {
         /**
-         * If true, automatically create a sell order for unsold items at the average fill price (1% listing fee applies).
+         * If true, automatically create a sell order for unsold items at the average fill price (no listing fee).
          */
         auto_list?: boolean;
         /**
@@ -22569,7 +22573,7 @@ export type SpacemoltFacilitySetGateAccessResponse = SpacemoltFacilitySetGateAcc
 export type SpacemoltFacilitySetMarketFeeData = {
     body?: {
         /**
-         * Market listing fee percent 0-10 (set_market_fee)
+         * Market fee percent 0-10 that outside buyers pay on top of the price (set_market_fee; 0 = default 1%)
          */
         fee_percent?: number;
     };

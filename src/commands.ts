@@ -53,7 +53,7 @@ const entries: [string, CommandMeta][] = [
     action: "buy",
     operationId: "spacemolt_buy",
     summary: "Buy items at market price from the station exchange",
-    params: [{"name":"id","type":"string","description":"ID of the item to buy (e.g., iron_ore, steel_plate)","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity to buy","required":true,"positionalIndex":1},{"name":"auto_list","type":"boolean","description":"If true, automatically place a buy order for any quantity not filled immediately (1% listing fee applies).","required":false,"positionalIndex":-1},{"name":"deliver_to","type":"string","description":"Where to deliver purchased items: 'cargo' (default) or 'storage' (station storage, useful when cargo is full).","required":false,"positionalIndex":-1,"enumValues":["cargo","storage"]}],
+    params: [{"name":"id","type":"string","description":"ID of the item to buy (e.g., iron_ore, steel_plate)","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity to buy","required":true,"positionalIndex":1},{"name":"auto_list","type":"boolean","description":"If true, automatically place a buy order for any quantity not filled immediately (sales tax or station market fee is escrowed with it).","required":false,"positionalIndex":-1},{"name":"deliver_to","type":"string","description":"Where to deliver purchased items: 'cargo' (default) or 'storage' (station storage, useful when cargo is full).","required":false,"positionalIndex":-1,"enumValues":["cargo","storage"]}],
     isAmbiguous: false,
   }],
   ["spacemolt/cloak", {
@@ -373,7 +373,7 @@ const entries: [string, CommandMeta][] = [
     action: "jump",
     operationId: "spacemolt_jump",
     summary: "Jump to an adjacent star system, or plot a numeric bearing with a Pathfinder Drive",
-    params: [{"name":"id","type":"string","description":"ID of the adjacent system to jump to (use get_system to see connected systems), or a numeric compass bearing in degrees for an off-network Pathfinder Drive jump. While already on a pathfinder drift, a fresh numeric bearing re-plots the heading from your current galactic position (same 5x fuel cost each time).","required":true,"positionalIndex":0}],
+    params: [{"name":"id","type":"string","description":"ID of the adjacent system to jump to (use get_system to see connected systems), or a numeric compass bearing in degrees for an off-network Pathfinder Drive jump. While already on a pathfinder drift, a fresh numeric bearing re-plots the heading from your current galactic position (same 5x fuel cost each time). A fleet leader's bearing moves the whole fleet; it fails with fleet_no_pathfinder_drive or fleet_no_fuel if any member lacks the drive or the fuel.","required":true,"positionalIndex":0}],
     isAmbiguous: false,
   }],
   ["spacemolt/list_passengers", {
@@ -477,7 +477,7 @@ const entries: [string, CommandMeta][] = [
     action: "sell",
     operationId: "spacemolt_sell",
     summary: "Sell items at market price on the station exchange",
-    params: [{"name":"id","type":"string","description":"ID of the item to sell (e.g., iron_ore, steel_plate)","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity to sell","required":true,"positionalIndex":1},{"name":"auto_list","type":"boolean","description":"If true, automatically create a sell order for unsold items at the average fill price (1% listing fee applies).","required":false,"positionalIndex":-1}],
+    params: [{"name":"id","type":"string","description":"ID of the item to sell (e.g., iron_ore, steel_plate)","required":true,"positionalIndex":0},{"name":"quantity","type":"integer","description":"Quantity to sell","required":true,"positionalIndex":1},{"name":"auto_list","type":"boolean","description":"If true, automatically create a sell order for unsold items at the average fill price (no listing fee).","required":false,"positionalIndex":-1}],
     isAmbiguous: true,
   }],
   ["spacemolt/subscribe_observation", {
@@ -1254,7 +1254,7 @@ const entries: [string, CommandMeta][] = [
     action: "set_market_fee",
     operationId: "spacemolt_facility_set_market_fee",
     summary: "Administer one of your faction's stations or outposts: rename, access control, and build policy",
-    params: [{"name":"fee_percent","type":"integer","description":"Market listing fee percent 0-10 (set_market_fee)","required":false,"positionalIndex":-1}],
+    params: [{"name":"fee_percent","type":"integer","description":"Market fee percent 0-10 that outside buyers pay on top of the price (set_market_fee; 0 = default 1%)","required":false,"positionalIndex":-1}],
     isAmbiguous: false,
   }],
   ["spacemolt_facility/set_name", {
